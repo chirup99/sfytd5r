@@ -118,3 +118,10 @@
     - AWS DynamoDB tables ready
     - NeoFeed routes registered
     - Application serving on port 5000
+[x] 60. FIXED: Swiping cards content not reading - Missing /api/daily-news endpoint (December 18, 2025, 2:18 PM)
+    - Root cause: Frontend called `/api/daily-news` but endpoint was missing in podcast-routes.ts
+    - Solution: Added missing POST /api/daily-news endpoint that generates sector-specific news content
+    - Imported getNewsForSector and NEWS_SECTORS from news-service.ts
+    - Endpoint properly returns { summary, headlines, title, subtitle, icon }
+    - All Gemini API services intact and functional
+    - Application running successfully with all services initialized
