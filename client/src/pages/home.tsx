@@ -14075,7 +14075,7 @@ ${
                             />
                           )}
 
-                          {/* Mobile Quick Suggestion Buttons - Horizontal scroll when search is active */}
+                          {/* Mobile Quick Suggestion Buttons - Same as desktop, horizontal scroll when search is active */}
                           {isSearchActive && (
                             <div
                               className="mt-2 flex gap-2 overflow-x-auto scrollbar-hide pb-2 relative z-50"
@@ -14086,29 +14086,45 @@ ${
                             >
                               <Button
                                 variant="secondary"
-                                className="bg-blue-600 hover:bg-blue-700 text-white border-0 h-7 px-3 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
-                                onClick={() =>
-                                  handleSuggestionClick(
-                                    "Show me live stock prices for ICICI Bank and TCS",
-                                  )
-                                }
+                                className="bg-cyan-600 hover:bg-cyan-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
+                                onClick={() => {
+                                  setIsSearchActive(true);
+                                  setSearchResults("[CHART:WATCHLIST]");
+                                  setIsWatchlistOpen(true);
+                                }}
+                                data-testid="button-watchlist-mobile"
                               >
-                                <div className="flex items-center gap-1.5">
-                                  <TrendingUp className="h-3 w-3" />
-                                  <span>Stock Prices</span>
+                                <div className="flex items-center justify-center gap-1">
+                                  <Eye className="h-3 w-3" />
+                                  <span>Watchlist</span>
                                 </div>
                               </Button>
 
                               <Button
                                 variant="secondary"
-                                className="bg-pink-600 hover:bg-pink-700 text-white border-0 h-7 px-3 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
+                                className="bg-green-600 hover:bg-green-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
+                                onClick={() =>
+                                  handleSuggestionClick(
+                                    "What are today's top financial news and market updates?",
+                                  )
+                                }
+                              >
+                                <div className="flex items-center gap-1">
+                                  <Newspaper className="h-3 w-3" />
+                                  <span>Market News</span>
+                                </div>
+                              </Button>
+
+                              <Button
+                                variant="secondary"
+                                className="bg-pink-600 hover:bg-pink-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
                                 onClick={() =>
                                   handleSuggestionClick(
                                     "Social feed community discussions and trending topics",
                                   )
                                 }
                               >
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1">
                                   <User className="h-3 w-3" />
                                   <span>Social Feed</span>
                                 </div>
@@ -14116,29 +14132,28 @@ ${
 
                               <Button
                                 variant="secondary"
-                                className="bg-green-600 hover:bg-green-700 text-white border-0 h-7 px-3 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
-                                onClick={() =>
-                                  handleSuggestionClick(
-                                    "What are today's top financial news and market updates?",
-                                  )
-                                }
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
+                                onClick={generateJournalAIReport}
+                                data-testid="button-trading-journal-mobile"
                               >
-                                <div className="flex items-center gap-1.5">
-                                  <Newspaper className="h-3 w-3" />
-                                  <span>Market News</span>
+                                <div className="flex items-center gap-1">
+                                  <FileText className="h-3 w-3" />
+                                  <span>Trading Journal</span>
                                 </div>
                               </Button>
 
-
                               <Button
                                 variant="secondary"
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white border-0 h-7 px-3 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
-                                onClick={() => checkAuthAndNavigate("journal")}
-                                data-testid="button-quick-journal"
+                                className="bg-orange-600 hover:bg-orange-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
+                                onClick={() => {
+                                  setIsSearchActive(true);
+                                  setSearchResults("[CHART:TRADE]");
+                                }}
+                                data-testid="button-trade-challenge-mobile"
                               >
-                                <div className="flex items-center gap-1.5">
-                                  <BookOpen className="h-3 w-3" />
-                                  <span>Journal</span>
+                                <div className="flex items-center gap-1">
+                                  <Trophy className="h-3 w-3" />
+                                  <span>Trade Challenge</span>
                                 </div>
                               </Button>
                             </div>
