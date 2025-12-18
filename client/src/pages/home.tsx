@@ -13868,7 +13868,10 @@ ${
                         <Button
                           variant="secondary"
                           className="bg-red-600 hover:bg-red-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
-                          onClick={() => checkAuthAndNavigate("trade")}
+                          onClick={() => {
+                            setIsSearchActive(true);
+                            setSearchResults("[CHART:TRADE]");
+                          }}
                           data-testid="button-trade"
                         >
                           <div className="flex items-center justify-center gap-1">
@@ -14123,6 +14126,13 @@ ${
                                           Watchlist
                                         </h3>
                                       </>
+                                    ) : searchResults.includes("[CHART:TRADE]") ? (
+                                      <>
+                                        <TrendingUp className="h-4 w-4 text-red-400" />
+                                        <h3 className="text-xs font-medium text-gray-100">
+                                          Trade
+                                        </h3>
+                                      </>
                                     ) : (
                                       <>
                                         <Bot className="h-4 w-4 text-blue-400" />
@@ -14306,8 +14316,21 @@ ${
                                           </div>
                                         </div>
                                       </div>
-                                    ) : (
-                                      searchResults
+                                    ) : searchResults.includes("[CHART:TRADE]") ? (
+                                      // Mobile Trade View - Empty Search Bar
+                                      <div className="space-y-3">
+                                        <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+                                          <Input
+                                            placeholder="Search stocks to trade..."
+                                            value=""
+                                            onChange={() => {}}
+                                            className="h-10 text-xs bg-gray-900 border-gray-600 text-gray-200 placeholder:text-gray-500"
+                                            data-testid="input-trade-search"
+                                          />
+                                          <p className="text-gray-500 text-xs mt-3 text-center">Enter a stock symbol to begin trading</p>
+                                        </div>
+                                      </div>
+                                      ) : (searchResults
                                     )}
                                   </div>
                                 </div>
