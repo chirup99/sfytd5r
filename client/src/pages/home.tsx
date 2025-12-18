@@ -12867,6 +12867,66 @@ ${
                                                 })()}
                                               </div>
                                             )}
+                                            {/* Related News for Search Results */}
+                                            <div className="flex-1 bg-gray-900/50 rounded-lg p-4 border border-gray-600">
+                                              <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center gap-2">
+                                                  <Clock className="h-4 w-4 text-gray-400" />
+                                                  <h3 className="text-sm font-medium text-gray-200">
+                                                    Related News
+                                                  </h3>
+                                                </div>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  className="h-7 text-xs text-gray-400 hover:text-gray-200"
+                                                  onClick={() => {
+                                                    setIsWatchlistNewsLoading(true);
+                                                    const symbol = (window as any).companyInsightsData?.symbol || searchResultsNewsSymbol;
+                                                    if (symbol) {
+                                                      const cleanSymbol = symbol.replace('-EQ', '').replace('-BE', '');
+                                                      fetch(`/api/stock-news/${cleanSymbol}?refresh=${Date.now()}`)
+                                                        .then(res => res.json())
+                                                        .then(data => {
+                                                          const newsItems = Array.isArray(data) ? data : (data.news || []);
+                                                          setWatchlistNews(newsItems.slice(0, 20));
+                                                        })
+                                                        .finally(() => setIsWatchlistNewsLoading(false));
+                                                    }
+                                                  }}
+                                                  data-testid="button-refresh-search-news"
+                                                >
+                                                  <RefreshCw className={`h-3 w-3 mr-1 ${isWatchlistNewsLoading ? 'animate-spin' : ''}`} />
+                                                  Refresh
+                                                </Button>
+                                              </div>
+                                              
+                                              <div className="space-y-3 max-h-[450px] overflow-y-auto mb-4">
+                                                {isWatchlistNewsLoading ? (
+                                                  <div className="flex items-center justify-center py-8">
+                                                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                                                  </div>
+                                                ) : watchlistNews.length > 0 ? (
+                                                  watchlistNews.map((item, index) => (
+                                                    <div 
+                                                      key={index} 
+                                                      className="p-3 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer border border-gray-700"
+                                                      onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
+                                                      data-testid={`search-news-item-${index}`}
+                                                    >
+                                                      <h4 className="text-gray-200 font-medium text-sm mb-2 hover:text-gray-100 transition-colors line-clamp-2">
+                                                        {item.title} <ExternalLink className="h-3 w-3 inline ml-1" />
+                                                      </h4>
+                                                      <p className="text-gray-400 text-xs line-clamp-3">{item.summary}</p>
+                                                    </div>
+                                                  ))
+                                                ) : (
+                                                  <div className="text-center py-8">
+                                                    <p className="text-gray-400 text-sm">No news available</p>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
                                           </div>
                                         );
                                       }

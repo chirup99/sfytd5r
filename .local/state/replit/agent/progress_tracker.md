@@ -253,3 +253,17 @@
     - Gemini AI routes configured
     - Application serving on port 5000
     - Project fully operational
+[x] 76. COMPLETED: Added Related News section to search results chart (December 18, 2025, 7:34 PM)
+    - Added Related News window beside the line chart in search results dialog
+    - Reused same related news component/styling from watchlist tab for consistency
+    - News window includes:
+      * Header with Clock icon and "Related News" title
+      * Refresh button to manually fetch latest news
+      * News items displayed in scrollable container (max-h-[450px])
+      * Each news item shows title, summary, and opens URL in new tab on click
+      * Loading spinner while fetching news
+      * "No news available" message when empty
+    - Used existing watchlistNews state and isWatchlistNewsLoading state for data management
+    - Fetches from /api/stock-news endpoint with symbol from search results
+    - Layout: `flex gap-4` container with price chart on left (flex-1) and news on right (flex-1)
+    - Workflow restarted and running successfully with all services initialized
