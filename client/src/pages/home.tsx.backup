@@ -14291,55 +14291,20 @@ ${
                                         </div>
                                       </div>
                                     ) : searchResults.includes("[CHART:TRADE]") ? (
-                                      // Trading Challenge Coming Soon
-                                      <div className="w-full max-w-2xl mx-auto py-12">
-                                        {/* Header with Trophy Icon */}
-                                        <div className="flex flex-col items-center mb-8">
-                                          <div className="w-24 h-24 bg-orange-500 rounded-full flex items-center justify-center mb-6 shadow-lg">
-                                            <Trophy className="h-12 w-12 text-white" />
-                                          </div>
-                                          <h2 className="text-3xl font-bold text-white text-center mb-2">Trading Challenge</h2>
-                                          <p className="text-gray-400 text-lg">Coming Soon</p>
-                                        </div>
-
-                                        {/* Feature Cards */}
-                                        <div className="space-y-3">
-                                          {/* Compete with Traders Card */}
-                                          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex items-start gap-4">
-                                            <div className="flex-shrink-0">
-                                              <Users className="h-6 w-6 text-blue-400" />
-                                            </div>
-                                            <div className="flex-1">
-                                              <h3 className="text-white font-semibold mb-1">Compete with Traders</h3>
-                                              <p className="text-gray-400 text-sm">Join 7-day trading challenges</p>
-                                            </div>
-                                          </div>
-
-                                          {/* Live P&L Tracking Card */}
-                                          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex items-start gap-4">
-                                            <div className="flex-shrink-0">
-                                              <BarChart3 className="h-6 w-6 text-green-400" />
-                                            </div>
-                                            <div className="flex-1">
-                                              <h3 className="text-white font-semibold mb-1">Live P&L Tracking</h3>
-                                              <p className="text-gray-400 text-sm">Real-time ranking based on your trades</p>
-                                            </div>
-                                          </div>
-
-                                          {/* Leaderboard Rankings Card */}
-                                          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex items-start gap-4">
-                                            <div className="flex-shrink-0">
-                                              <Trophy className="h-6 w-6 text-yellow-500" />
-                                            </div>
-                                            <div className="flex-1">
-                                              <h3 className="text-white font-semibold mb-1">Leaderboard Rankings</h3>
-                                              <p className="text-gray-400 text-sm">See your position among all participants</p>
-                                            </div>
-                                          </div>
+                                      // Mobile Trade View - Empty Search Bar
+                                      <div className="space-y-3">
+                                        <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+                                          <Input
+                                            placeholder="Search stocks to trade..."
+                                            value=""
+                                            onChange={() => {}}
+                                            className="h-10 text-xs bg-gray-900 border-gray-600 text-gray-200 placeholder:text-gray-500"
+                                            data-testid="input-trade-search"
+                                          />
+                                          <p className="text-gray-500 text-xs mt-3 text-center">Enter a stock symbol to begin trading</p>
                                         </div>
                                       </div>
                                       ) : (searchResults
-
                                     )}
                                   </div>
                                 </div>
