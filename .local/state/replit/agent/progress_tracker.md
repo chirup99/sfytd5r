@@ -215,3 +215,13 @@
     - Applied to both desktop and mobile quick action buttons
     - Both buttons display Eye icon normally, loader icon during loading state
     - Workflow restarted and running successfully
+[x] 72. FIXED CRITICAL BUG: Quarterly Performance Trend not displaying (December 18, 2025, 6:06 PM)
+    - ROOT CAUSE: 3 overlapping useEffect hooks were fetching quarterly data, causing race conditions and data conflicts
+    - FIXED: Removed all 3 overlapping useEffects (lines 6050-6144)
+    - SOLUTION: Replaced with 1 clean, simple useEffect that fetches quarterly data only when searchResultsNewsSymbol changes
+    - NEW FLOW: When watchlist stock selected → searchResultsNewsSymbol updates → single fetch triggers → data displays
+    - RESULT: Clean state management, no race conditions, quarterly data now displays immediately
+    - Data structure: allWatchlistQuarterlyData[searchResultsNewsSymbol] now properly stores/retrieves data
+    - Removed complex window variable logic and conflicting fetch calls
+    - Backend API working correctly - frontend now properly displays all quarterly results
+    - Workflow restarted with simplified code

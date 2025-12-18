@@ -6047,104 +6047,33 @@ ${
     localStorage.setItem('watchlistSymbols', JSON.stringify(watchlistSymbols));
   }, [watchlistSymbols]);
 
-  // Fetch quarterly results for ALL watchlist stocks
+  // Fetch quarterly data when watchlist stock is selected
   useEffect(() => {
-    const fetchAllQuarterlyData = async () => {
-      if (watchlistSymbols.length === 0) {
-        setAllWatchlistQuarterlyData({});
-        return;
-      }
-      
-      setIsWatchlistQuarterlyLoading(true);
-      try {
-        const results: {[symbol: string]: Array<any>} = {};
-        
-        await Promise.all(
-          watchlistSymbols.map(async (stock) => {
-            try {
-              const cleanSymbol = stock.symbol.replace('-EQ', '').replace('-BE', '');
-              const response = await fetch(`/api/quarterly-results/${cleanSymbol}`);
-              if (response.ok) {
-                const data = await response.json();
-                results[stock.symbol] = data.results || [];
-              }
-            } catch (error) {
-              console.error(`Error fetching quarterly data for ${stock.symbol}:`, error);
-              results[stock.symbol] = [];
-            }
-          })
-        );
-        
-        setAllWatchlistQuarterlyData(results);
-      } finally {
-        setIsWatchlistQuarterlyLoading(false);
-      }
-    };
+    if (!searchResultsNewsSymbol) {
+      setAllWatchlistQuarterlyData({});
+      return;
+    }
     
-    fetchAllQuarterlyData();
-  }, [watchlistSymbols]);
-
-  // Fetch quarterly data for SEARCHED stocks (not in watchlist)
-  useEffect(() => {
-    const symbol = (window as any).companyInsightsData?.symbol || searchResultsNewsSymbol;
-    if (!symbol) return;
-    
-    (async () => {
-      try {
-        const response = await fetch(`/api/quarterly-results/${symbol}`);
-        if (response.ok) {
-          const data = await response.json();
-          setAllWatchlistQuarterlyData(prev => ({
-            ...prev,
-            [symbol]: data.results || []
-          }));
-        }
-      } catch (error) {
-        console.error(`Error fetching quarterly data for ${symbol}:`, error);
-      }
-    })();
-  }, [searchResultsNewsSymbol]);
-
-
-  // Fetch quarterly data for the currently searched stock (searchResultsNewsSymbol)
-  useEffect(() => {
-    const fetchSelectedStockQuarterlyData = async () => {
-      if (!searchResultsNewsSymbol) return;
-      
-      // Check if we already have data for this stock
-      if (allWatchlistQuarterlyData[searchResultsNewsSymbol]?.length > 0) return;
-      
+    const fetchQuarterlyData = async () => {
       setIsWatchlistQuarterlyLoading(true);
       try {
         const cleanSymbol = searchResultsNewsSymbol.replace('-EQ', '').replace('-BE', '');
-        console.log(`📊 Fetching quarterly data for searched stock: ${cleanSymbol}`);
         const response = await fetch(`/api/quarterly-results/${cleanSymbol}`);
         if (response.ok) {
           const data = await response.json();
-          if (data.results && data.results.length > 0) {
-            // Set window variable for Performance Trend chart
-            (window as any).performanceTrendChartData = data.results.map((q: any) => ({
-              day: q.quarter || `Q${Math.random()}`,
-              value: q.value || 0
-            }));
-            console.log(`📊 Performance Trend chart data set:`, (window as any).performanceTrendChartData);
-            setAllWatchlistQuarterlyData(prev => ({
-              ...prev,
-              [searchResultsNewsSymbol]: data.results
-            }));
-            console.log(`✅ Quarterly data loaded for ${cleanSymbol}:`, data.results.length, 'quarters');
-          } else {
-            console.log(`⚠️ No quarterly data found for ${cleanSymbol}`);
-          }
+          setAllWatchlistQuarterlyData({
+            [searchResultsNewsSymbol]: data.results || []
+          });
         }
       } catch (error) {
-        console.error(`Error fetching quarterly data for ${searchResultsNewsSymbol}:`, error);
+        console.error(`Error fetching quarterly data:`, error);
+        setAllWatchlistQuarterlyData({ [searchResultsNewsSymbol]: [] });
       } finally {
         setIsWatchlistQuarterlyLoading(false);
       }
     };
     
-    fetchSelectedStockQuarterlyData();
+    fetchQuarterlyData();
   }, [searchResultsNewsSymbol]);
 
   
