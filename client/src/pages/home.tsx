@@ -13952,20 +13952,22 @@ ${
                         </div>
                       </Button> */}
 
+
                         <Button
                           variant="secondary"
-                          className="bg-orange-600 hover:bg-orange-700  text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
-                          onClick={() =>
-                            handleSuggestionClick(
-                              "Analyze fundamentals for top stocks - P/E ratio, market cap, growth metrics",
-                            )
-                          }
+                          className="bg-red-600 hover:bg-red-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
+                          onClick={() => {
+                            setIsSearchActive(true);
+                            setSearchResults("[CHART:TRADE]");
+                          }}
+                          data-testid="button-trade"
                         >
-                          <div className="flex items-center gap-2">
-                            <BarChart3 className="h-3 w-3" />
-                            <span>Fundamentals</span>
+                          <div className="flex items-center justify-center gap-1">
+                            <TrendingUp className="h-3 w-3" />
+                            <span>Trade</span>
                           </div>
                         </Button>
+                      </div>
                       </div>
 
                       {/* Trading Tools Section - White container with centered cards */}
@@ -14084,20 +14086,6 @@ ${
                                 </div>
                               </Button>
 
-                              <Button
-                                variant="secondary"
-                                className="bg-orange-600 hover:bg-orange-700 text-white border-0 h-7 px-3 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
-                                onClick={() =>
-                                  handleSuggestionClick(
-                                    "Analyze fundamentals for top stocks - P/E ratio, market cap, growth metrics",
-                                  )
-                                }
-                              >
-                                <div className="flex items-center gap-1.5">
-                                  <BarChart3 className="h-3 w-3" />
-                                  <span>Fundamentals</span>
-                                </div>
-                              </Button>
 
                               <Button
                                 variant="secondary"
