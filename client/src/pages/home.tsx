@@ -13450,15 +13450,36 @@ ${
                                                           <div className="mt-3 pt-3 border-t border-gray-700">
                                                             <div className="flex items-center justify-between mb-2">
                                                               <span className="text-xs font-medium text-gray-400">Quarterly Results PDFs</span>
-                                                              <a 
-                                                                href={`https://www.screener.in/company/${searchResultsNewsSymbol}/consolidated/`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="text-xs text-blue-400 hover:text-blue-300"
-                                                                data-testid="link-screener-full-report"
+                                                              <button
+                                                                onClick={async () => {
+                                                                  const symbol = searchResultsNewsSymbol;
+                                                                  if (!symbol) return;
+                                                                  
+                                                                  // Trigger AI search for the symbol
+                                                                  setIsAILoading(true);
+                                                                  setSearchResults('');
+                                                                  setSearchResultsNewsSymbol(symbol);
+                                                                  
+                                                                  try {
+                                                                    const response = await fetch('/api/trading-agent', {
+                                                                      method: 'POST',
+                                                                      headers: { 'Content-Type': 'application/json' },
+                                                                      body: JSON.stringify({ query: symbol })
+                                                                    });
+                                                                    const data = await response.json();
+                                                                    setSearchResults(data.response || 'No data available');
+                                                                  } catch (error) {
+                                                                    console.error('Error fetching AI report:', error);
+                                                                    setSearchResults('Error loading report. Please try again.');
+                                                                  } finally {
+                                                                    setIsAILoading(false);
+                                                                  }
+                                                                }}
+                                                                className="text-xs text-blue-400 hover:text-blue-300 cursor-pointer"
+                                                                data-testid="button-ai-full-report"
                                                               >
                                                                 View Full Report
-                                                              </a>
+                                                              </button>
                                                             </div>
                                                             <div className="flex flex-wrap gap-2">
                                                               {quarterlyData.slice(-4).map((q: any, idx: number) => 
