@@ -12670,7 +12670,7 @@ ${
                                     <>
                                       <Bot className="h-4 w-4 text-blue-400" />
                                       <h3 className="text-lg font-medium text-gray-100">
-                                        AI Assistant
+                                        Trading Challenge
                                       </h3>
                                     </>
                                   )}
@@ -14161,7 +14161,7 @@ ${
                                       <>
                                         <Bot className="h-4 w-4 text-blue-400" />
                                         <h3 className="text-xs font-medium text-gray-100">
-                                          AI Assistant
+                                          Trading Challenge
                                         </h3>
                                       </>
                                     )}
