@@ -45,15 +45,15 @@ const getRegionColor = (
     regionName = "USA";
   }
   // India (approximate x: 520-600, y: 200-280)
-  else if (x >= 550 && x <= 600 && y >= 210 && y <= 280) {
+  else if (x >= 520 && x <= 600 && y >= 200 && y <= 280) {
     regionName = "INDIA";
   }
   // Hong Kong / Southern China (approximate x: 600-680, y: 180-240)
-  else if (x >= 550 && x <= 680 && y >= 145 && y <= 230) {
+  else if (x >= 600 && x <= 680 && y >= 180 && y <= 240) {
     regionName = "HONG KONG";
   }
   // Japan / Tokyo (approximate x: 680-740, y: 140-200)
-  else if (x >= 680 && x <= 740 && y >= 140 && y <= 230) {
+  else if (x >= 680 && x <= 740 && y >= 140 && y <= 200) {
     regionName = "TOKYO";
   }
 
