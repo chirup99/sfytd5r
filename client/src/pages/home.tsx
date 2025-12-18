@@ -13277,25 +13277,23 @@ ${
                                                   <div className="flex items-center gap-2">
                                                     <TrendingUp className="h-4 w-4 text-gray-400" />
                                                     <h3 className="text-sm font-medium text-gray-200">
+                                                {/* Quarterly Performance Trend */}
+                                                <div className="space-y-4">
+                                                  <div className="flex items-center justify-between">
+                                                    <h3 className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                                                      <TrendingUp className="h-4 w-4" />
                                                       Quarterly Performance Trend
                                                     </h3>
-                                                  </div>
-                                                  <div className="flex items-center gap-2">
-                                                    {searchResultsNewsSymbol && (
+                                                    {selectedWatchlistSymbol && (
                                                       <Button
-                                                        variant="ghost"
-                                                        size="sm"
                                                         onClick={async () => {
                                                           setIsWatchlistQuarterlyLoading(true);
                                                           try {
-                                                            const cleanSymbol = searchResultsNewsSymbol.replace("-EQ", "").replace("-BE", "");
-                                                            const response = await fetch(`/api/quarterly-results/${cleanSymbol}`);
+                                                            const cleanSymbol = selectedWatchlistSymbol.replace("-EQ", "").replace("-BE", "");
+                                                            const response = await fetch(`/api/company-insights/${cleanSymbol}?refresh=${Date.now()}`);
                                                             if (response.ok) {
                                                               const data = await response.json();
-                                                              setAllWatchlistQuarterlyData(prev => ({
-                                                                ...prev,
-                                                                [searchResultsNewsSymbol]: data.results || []
-                                                              }));
+                                                              (window as any).companyInsightsData = data.companyInsights;
                                                             }
                                                           } catch (error) {
                                                             console.error("Error refreshing quarterly data:", error);
@@ -13309,11 +13307,12 @@ ${
                                                         <RefreshCw className={`h-3 w-3 ${isWatchlistQuarterlyLoading ? "animate-spin" : ""}`} />
                                                       </Button>
                                                     )}
-                                                    {(() => {
-                                                      if (!searchResultsNewsSymbol) return null;
-                                                      const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
+                                                    {selectedWatchlistSymbol && (() => {
+                                                      const companyInsights = (window as any).companyInsightsData;
+                                                      if (!companyInsights || !companyInsights.quarterlyPerformance || companyInsights.quarterlyPerformance.length === 0) return null;
+                                                      const quarterlyData = companyInsights.quarterlyPerformance;
                                                       const hasTrendingUp = quarterlyData.length > 1 && 
-                                                        parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
+                                                        parseFloat(quarterlyData[quarterlyData.length - 1]?.changePercent || '0') >= 0;
                                                       return (
                                                         <span className={`text-xs px-2 py-1 rounded ${hasTrendingUp ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                                                           {hasTrendingUp ? '↑ Uptrend' : '↓ Downtrend'}
@@ -13321,126 +13320,84 @@ ${
                                                       );
                                                     })()}
                                                   </div>
-                                                </div>
 
-                                                <div className="space-y-1.5">
-                                                  {isWatchlistQuarterlyLoading ? (
-                                                    <div className="flex items-center justify-center py-8">
-                                                      <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-                                                    </div>
-                                                  ) : searchResultsNewsSymbol ? (() => {
-                                                    const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
-                                                    // Don't show loading state if we have data
-                                                    // The isWatchlistQuarterlyLoading at the top already handles the loading indicator
-                                                    if (!quarterlyData || quarterlyData.length === 0) {
-                                                      // Check if still loading, otherwise show no data message
-                                                      if (isWatchlistQuarterlyLoading) {
+                                                  <div className="space-y-1.5">
+                                                    {isWatchlistQuarterlyLoading ? (
+                                                      <div className="flex items-center justify-center py-8">
+                                                        <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                                                      </div>
+                                                    ) : selectedWatchlistSymbol ? (() => {
+                                                      const companyInsights = (window as any).companyInsightsData;
+                                                      if (!companyInsights || !companyInsights.quarterlyPerformance || companyInsights.quarterlyPerformance.length === 0) {
                                                         return (
-                                                          <div className="text-center py-8 text-gray-500">
-                                                            <Loader2 className="h-5 w-5 animate-spin text-gray-400 mx-auto mb-2" />
-                                                            <p className="text-xs">Loading quarterly results...</p>
+                                                          <div className="text-center py-4 text-gray-500 text-xs">
+                                                            No quarterly data available
                                                           </div>
                                                         );
                                                       }
-                                                      return (
+                                                      const quarterlyData = companyInsights.quarterlyPerformance;
+                                                      const hasTrendingUp = quarterlyData.length > 1 && 
+                                                        parseFloat(quarterlyData[quarterlyData.length - 1]?.changePercent || '0') >= 0;
+                                                      
+                                                      const chartData = quarterlyData.map((q: any) => ({
+                                                        quarter: q.quarter,
+                                                        value: q.value || q.revenue || 0,
+                                                        changePercent: parseFloat(q.changePercent) || 0
+                                                      }));
+                                                      
+                                                      const trendColor = hasTrendingUp ? '#22c55e' : '#ef4444';
+                                                      
+                                                      return quarterlyData.length > 0 ? (
+                                                        <>
+                                                          <div className="h-40 w-full mb-3">
+                                                            <ResponsiveContainer width="100%" height="100%">
+                                                              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+                                                                <defs>
+                                                                  <linearGradient id={`grad-watchlist-${selectedWatchlistSymbol}`} x1="0" y1="0" x2="0" y2="1">
+                                                                    <stop offset="0%" stopColor={trendColor} stopOpacity={0.4} />
+                                                                    <stop offset="100%" stopColor={trendColor} stopOpacity={0.05} />
+                                                                  </linearGradient>
+                                                                </defs>
+                                                                <XAxis dataKey="quarter" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                                                                <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K Cr`} axisLine={false} tickLine={false} />
+                                                                <Tooltip 
+                                                                  contentStyle={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '6px', fontSize: '11px' }}
+                                                                  formatter={(value: any) => [`₹${Number(value).toLocaleString()} Cr`, 'Revenue']}
+                                                                />
+                                                                <Area 
+                                                                  type="monotone" 
+                                                                  dataKey="value" 
+                                                                  stroke={trendColor} 
+                                                                  strokeWidth={2} 
+                                                                  fill={`url(#grad-watchlist-${selectedWatchlistSymbol})`}
+                                                                  dot={{ r: 5, stroke: trendColor, strokeWidth: 2, fill: '#1f2937' }}
+                                                                  activeDot={{ r: 7, stroke: trendColor, strokeWidth: 2, fill: '#ffffff' }}
+                                                                />
+                                                              </AreaChart>
+                                                            </ResponsiveContainer>
+                                                          </div>
+                                                          <div className="flex justify-center gap-4 text-xs text-gray-400">
+                                                            <span className="flex items-center gap-1">
+                                                              <span className="w-2 h-2 rounded-full bg-green-500"></span> Positive Quarter
+                                                            </span>
+                                                            <span className="flex items-center gap-1">
+                                                              <span className="w-2 h-2 rounded-full bg-red-500"></span> Negative Quarter
+                                                            </span>
+                                                          </div>
+                                                        </>
+                                                      ) : (
                                                         <div className="text-center py-4 text-gray-500 text-xs">
                                                           No quarterly data available
                                                         </div>
                                                       );
-                                                    }
-                                                    const hasTrendingUp = quarterlyData.length > 1 && 
-                                                      parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
-                                                    
-                                                    const chartData = quarterlyData.map((q: any) => ({
-                                                      quarter: q.quarter,
-                                                      value: parseFloat(q.revenue.replace(/,/g, '')) || 0,
-                                                      changePercent: parseFloat(q.change_percent) || 0
-                                                    }));
-                                                    
-                                                    const trendColor = hasTrendingUp ? '#22c55e' : '#ef4444';
-                                                    
-                                                    return quarterlyData.length > 0 ? (
-                                                      <>
-                                                        <div className="h-40 w-full mb-3">
-                                                          <ResponsiveContainer width="100%" height="100%">
-                                                            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
-                                                              <defs>
-                                                                <linearGradient id={`grad-${searchResultsNewsSymbol}`} x1="0" y1="0" x2="0" y2="1">
-                                                                  <stop offset="0%" stopColor={trendColor} stopOpacity={0.4} />
-                                                                  <stop offset="100%" stopColor={trendColor} stopOpacity={0.05} />
-                                                                </linearGradient>
-                                                              </defs>
-                                                              <XAxis dataKey="quarter" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-                                                              <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K Cr`} axisLine={false} tickLine={false} />
-                                                              <Tooltip 
-                                                                contentStyle={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '6px', fontSize: '11px' }}
-                                                                formatter={(value: any, name: any, props: any) => [`₹${Number(value).toLocaleString()} Cr`, 'Revenue']}
-                                                              />
-                                                              <Area 
-                                                                type="monotone" 
-                                                                dataKey="value" 
-                                                                stroke={trendColor} 
-                                                                strokeWidth={2} 
-                                                                fill={`url(#grad-${searchResultsNewsSymbol})`}
-                                                                dot={{ r: 5, stroke: trendColor, strokeWidth: 2, fill: '#1f2937' }}
-                                                                activeDot={{ r: 7, stroke: trendColor, strokeWidth: 2, fill: '#ffffff' }}
-                                                              />
-                                                            </AreaChart>
-                                                          </ResponsiveContainer>
-                                                        </div>
-                                                        <div className="flex justify-center gap-4 text-xs text-gray-400">
-                                                          <span className="flex items-center gap-1">
-                                                            <span className="w-2 h-2 rounded-full bg-green-500"></span> Positive Quarter
-                                                          </span>
-                                                          <span className="flex items-center gap-1">
-                                                            <span className="w-2 h-2 rounded-full bg-red-500"></span> Negative Quarter
-                                                          </span>
-                                                        </div>
-                                                        {/* PDF Links for Deep Analysis */}
-                                                        {quarterlyData.some((q: any) => q.pdf_url) && (
-                                                          <div className="mt-3 pt-3 border-t border-gray-700">
-                                                            <div className="flex items-center justify-between mb-2">
-                                                              <span className="text-xs font-medium text-gray-400">Quarterly Results PDFs</span>
-                                                              <a 
-                                                                href={`https://www.screener.in/company/${searchResultsNewsSymbol}/consolidated/`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="text-xs text-blue-400 hover:text-blue-300"
-                                                                data-testid="link-screener-full-report"
-                                                              >
-                                                                View Full Report
-                                                              </a>
-                                                            </div>
-                                                            <div className="flex flex-wrap gap-2">
-                                                              {quarterlyData.slice(0, 4).map((q: any, idx: number) => 
-                                                                q.pdf_url && (
-                                                                  <a
-                                                                    key={idx}
-                                                                    href={q.pdf_url}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded text-xs text-gray-300"
-                                                                    data-testid={`link-pdf-${idx}`}
-                                                                  >
-                                                                    <FileText className="h-3 w-3" />
-                                                                    {q.quarter}
-                                                                  </a>
-                                                                )
-                                                              )}
-                                                            </div>
-                                                          </div>
-                                                        )}
-                                                      </>
-                                                    ) : (
-                                                      <div className="text-center py-4 text-gray-500 text-xs">
-                                                        No quarterly data available
+                                                    })() : (
+                                                      <div className="text-center py-8 text-gray-500">
+                                                        <TrendingUp className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                                                        <p className="text-xs">Select a stock to see quarterly results</p>
                                                       </div>
-                                                    );
-                                                  })() : (
-                                                    <div className="text-center py-8 text-gray-500">
-                                                      <TrendingUp className="h-6 w-6 mx-auto mb-2 opacity-50" />
-                                                      <p className="text-xs">Search for a stock to see quarterly results</p>
-                                                    </div>
+                                                    )}
+                                                  </div>
+                                                </div>
                                                   )}
                                                 </div>
                                               </div>
