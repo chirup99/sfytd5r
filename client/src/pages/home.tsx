@@ -13994,6 +13994,12 @@ ${
                             setIsSearchActive(true);
                             setSearchResults("[CHART:WATCHLIST]");
                             setIsWatchlistOpen(true);
+                            // Auto-select first stock in watchlist and fetch its quarterly data
+                            if (watchlistSymbols.length > 0 && !selectedWatchlistSymbol) {
+                              const firstStock = watchlistSymbols[0];
+                              setSelectedWatchlistSymbol(firstStock.symbol);
+                              setSearchResultsNewsSymbol(firstStock.symbol);
+                            }
                           }}
                           data-testid="button-watchlist"
                         >
@@ -14172,6 +14178,12 @@ ${
                                   setIsSearchActive(true);
                                   setSearchResults("[CHART:WATCHLIST]");
                                   setIsWatchlistOpen(true);
+                                  // Auto-select first stock in watchlist and fetch its quarterly data
+                                  if (watchlistSymbols.length > 0 && !selectedWatchlistSymbol) {
+                                    const firstStock = watchlistSymbols[0];
+                                    setSelectedWatchlistSymbol(firstStock.symbol);
+                                    setSearchResultsNewsSymbol(firstStock.symbol);
+                                  }
                                 }}
                                 data-testid="button-watchlist-mobile"
                               >
