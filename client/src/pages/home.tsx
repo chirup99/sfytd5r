@@ -13966,8 +13966,7 @@ ${
                             <TrendingUp className="h-3 w-3" />
                             <span>Trade</span>
                           </div>
-                        </Button>
-                      </div>
+                      </Button>
                       </div>
 
                       {/* Trading Tools Section - White container with centered cards */}
