@@ -13344,6 +13344,34 @@ ${
                                                     </h3>
                                                   </div>
                                                   {(() => {
+                                                    {searchResultsNewsSymbol && (
+                                                      <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={async () => {
+                                                          setIsWatchlistQuarterlyLoading(true);
+                                                          try {
+                                                            const cleanSymbol = searchResultsNewsSymbol.replace("-EQ", "").replace("-BE", "");
+                                                            const response = await fetch(`/api/quarterly-results/${cleanSymbol}`);
+                                                            if (response.ok) {
+                                                              const data = await response.json();
+                                                              setAllWatchlistQuarterlyData(prev => ({
+                                                                ...prev,
+                                                                [searchResultsNewsSymbol]: data.results || []
+                                                              }));
+                                                            }
+                                                          } catch (error) {
+                                                            console.error("Error refreshing quarterly data:", error);
+                                                          } finally {
+                                                            setIsWatchlistQuarterlyLoading(false);
+                                                          }
+                                                        }}
+                                                        data-testid="button-refresh-quarterly"
+                                                        className="h-7 px-2"
+                                                      >
+                                                        <RefreshCw className={`h-3 w-3 ${isWatchlistQuarterlyLoading ? "animate-spin" : ""}`} />
+                                                      </Button>
+                                                    )}
                                                     if (!searchResultsNewsSymbol) return null;
                                                     const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
                                                     const hasTrendingUp = quarterlyData.length > 1 && 
@@ -13363,11 +13391,21 @@ ${
                                                     </div>
                                                   ) : searchResultsNewsSymbol ? (() => {
                                                     const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
+                                                    // Don't show loading state if we have data
+                                                    // The isWatchlistQuarterlyLoading at the top already handles the loading indicator
                                                     if (!quarterlyData || quarterlyData.length === 0) {
+                                                      // Check if still loading, otherwise show no data message
+                                                      if (isWatchlistQuarterlyLoading) {
+                                                        return (
+                                                          <div className="text-center py-8 text-gray-500">
+                                                            <Loader2 className="h-5 w-5 animate-spin text-gray-400 mx-auto mb-2" />
+                                                            <p className="text-xs">Loading quarterly results...</p>
+                                                          </div>
+                                                        );
+                                                      }
                                                       return (
-                                                        <div className="text-center py-8 text-gray-500">
-                                                          <Loader2 className="h-5 w-5 animate-spin text-gray-400 mx-auto mb-2" />
-                                                          <p className="text-xs">Loading quarterly results...</p>
+                                                        <div className="text-center py-4 text-gray-500 text-xs">
+                                                          No quarterly data available
                                                         </div>
                                                       );
                                                     }
