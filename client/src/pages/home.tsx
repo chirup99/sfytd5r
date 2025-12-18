@@ -13917,8 +13917,8 @@ ${
                           data-testid="button-trade"
                         >
                           <div className="flex items-center justify-center gap-1">
-                            <TrendingUp className="h-3 w-3" />
-                            <span>Trade</span>
+                            <Trophy className="h-3 w-3" />
+                            <span>Trade Challenge</span>
                           </div>
                         </Button>
 
@@ -14102,9 +14102,9 @@ ${
                                       </>
                                     ) : searchResults.includes("[CHART:TRADE]") ? (
                                       <>
-                                        <TrendingUp className="h-4 w-4 text-red-400" />
+                                        <Trophy className="h-4 w-4 text-red-400" />
                                         <h3 className="text-xs font-medium text-gray-100">
-                                          Trade
+                                          Trade Challenge
                                         </h3>
                                       </>
                                     ) : (
