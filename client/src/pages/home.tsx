@@ -13942,22 +13942,6 @@ ${
                           </div>
                         </Button>
 
-                        <Button
-                          variant="secondary"
-                          className="bg-green-600 hover:bg-green-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
-                          onClick={() =>
-                            handleSuggestionClick(
-                              "What are today's top financial news and market updates?",
-                            )
-                          }
-                        >
-                          <div className="flex items-center gap-2">
-                            <Newspaper className="h-3 w-3" />
-                            <span>Market News</span>
-                          </div>
-                        </Button>
-
-                        <Button
                           variant="secondary"
                           className="bg-pink-600 hover:bg-pink-700  text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
                           onClick={() =>
@@ -14117,23 +14101,6 @@ ${
                                 <div className="flex items-center justify-center gap-1">
                                   <Eye className="h-3 w-3" />
                                   <span>Watchlist</span>
-                                </div>
-                              </Button>
-
-                              <Button
-                                variant="secondary"
-                                className="bg-green-600 hover:bg-green-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
-                                onClick={() =>
-                                  handleSuggestionClick(
-                                    "What are today's top financial news and market updates?",
-                                  )
-                                }
-                              >
-                                <div className="flex items-center gap-1">
-                                  <Newspaper className="h-3 w-3" />
-                                  <span>Market News</span>
-                                </div>
-                              </Button>
 
                               <Button
                                 variant="secondary"
