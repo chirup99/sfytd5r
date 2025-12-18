@@ -13412,7 +13412,7 @@ ${
                                                               </a>
                                                             </div>
                                                             <div className="flex flex-wrap gap-2">
-                                                              {quarterlyData.slice(0, 4).map((q: any, idx: number) => 
+                                                              {quarterlyData.slice(-4).map((q: any, idx: number) => 
                                                                 q.pdf_url && (
                                                                   <a
                                                                     key={idx}
