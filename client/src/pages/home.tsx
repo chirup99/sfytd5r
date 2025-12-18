@@ -13343,7 +13343,7 @@ ${
                                                       Quarterly Performance Trend
                                                     </h3>
                                                   </div>
-                                                  {(() => {
+                                                  <div className="flex items-center gap-2">
                                                     {searchResultsNewsSymbol && (
                                                       <Button
                                                         variant="ghost"
@@ -13372,16 +13372,18 @@ ${
                                                         <RefreshCw className={`h-3 w-3 ${isWatchlistQuarterlyLoading ? "animate-spin" : ""}`} />
                                                       </Button>
                                                     )}
-                                                    if (!searchResultsNewsSymbol) return null;
-                                                    const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
-                                                    const hasTrendingUp = quarterlyData.length > 1 && 
-                                                      parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
-                                                    return (
-                                                      <span className={`text-xs px-2 py-1 rounded ${hasTrendingUp ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                                        {hasTrendingUp ? '↑ Uptrend' : '↓ Downtrend'}
-                                                      </span>
-                                                    );
-                                                  })()}
+                                                    {(() => {
+                                                      if (!searchResultsNewsSymbol) return null;
+                                                      const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
+                                                      const hasTrendingUp = quarterlyData.length > 1 && 
+                                                        parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
+                                                      return (
+                                                        <span className={`text-xs px-2 py-1 rounded ${hasTrendingUp ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                                          {hasTrendingUp ? '↑ Uptrend' : '↓ Downtrend'}
+                                                        </span>
+                                                      );
+                                                    })()}
+                                                  </div>
                                                 </div>
 
                                                 <div className="space-y-1.5">
