@@ -12867,40 +12867,6 @@ ${
                                                 })()}
                                               </div>
                                             )}
-                                            {priceChartData.length > 0 && (
-                                              <div className="w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-xl backdrop-blur-sm">
-                                                <div className="flex items-center gap-2 mb-4">
-                                                  <Clock className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                                                  <h3 className="text-gray-900 dark:text-white font-semibold">Related News</h3>
-                                                </div>
-
-                                                <div className="space-y-3 max-h-80 overflow-y-auto bg-gray-50 dark:bg-gray-700/60 rounded-xl p-4 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-200 dark:scrollbar-track-gray-800 ">
-                                                  {searchResultsNews && searchResultsNews.length > 0 ? (
-                                                    searchResultsNews.map((item: any, index: number) => (
-                                                      <div 
-                                                        key={index} 
-                                                        className="p-3 bg-gray-100 dark:bg-gray-600/60 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600/70 transition-colors backdrop-blur-sm shadow-sm cursor-pointer"
-                                                        onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
-                                                      >
-                                                        <h4 className="text-gray-700 dark:text-gray-300 font-medium text-sm mb-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                                                          {item.title} ↗
-                                                        </h4>
-                                                        <div className="flex items-center justify-between">
-                                                          <span className="text-gray-500 dark:text-gray-400 text-xs ">{item.source}</span>
-                                                          <span className="text-gray-500 dark:text-gray-500 text-xs ">{item.time}</span>
-                                                        </div>
-                                                      </div>
-                                                    ))
-                                                  ) : (
-                                                    <div className="text-center py-6 text-gray-500 dark:text-gray-400 ">
-                                                      <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                                      <p className="text-sm">No recent news available for this stock</p>
-                                                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 ">Check back later for updates</p>
-                                                    </div>
-                                                  )}
-                                                </div>
-                                              </div>
-                                            )}
                                           </div>
                                         );
                                       }
