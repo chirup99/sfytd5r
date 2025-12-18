@@ -5,7 +5,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { useLocation, useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { AuthButtonAngelOne, AngelOneStatus, AngelOneApiStatistics, AngelOneSystemStatus, AngelOneLiveMarketPrices } from "@/components/auth-button-angelone";
 // REMOVED: All Fyers-related imports
@@ -2505,6 +2505,26 @@ export default function Home() {
             }
 
             setSearchResults(result);
+            
+            // Fetch news if query is about financial/market topics
+            const isNewsQuery = query.toLowerCase().includes("news") || query.toLowerCase().includes("market") || query.toLowerCase().includes("update") || query.toLowerCase().includes("financial");
+            if (isNewsQuery) {
+              try {
+                const newsPromises = ["IT", "FINANCE", "COMMODITY", "GLOBAL", "BANKS", "AUTOMOBILE"].map(sector =>
+                  fetch("/api/daily-news", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ sector })
+                  })
+                    .then(res => res.json())
+                    .then(data => ({...data, url: "#", source: sector, time: new Date().toLocaleTimeString()}))
+                    .catch(err => null)
+                );
+                const results = await Promise.all(newsPromises);
+                const validResults = results.filter(r => r !== null);
+                if (validResults.length > 0) setSearchResultsNews(validResults);
+              } catch (err) {console.warn("Error fetching news:", err);}
+            }
             console.log("✅ [TRADING-AGENT] Query processing complete!");
             setIsSearchLoading(false);
             return;

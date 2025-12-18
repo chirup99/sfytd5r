@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "wouter";
+import { useRouter } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
@@ -15,7 +15,7 @@ interface NewsData {
 }
 
 export default function MarketNews() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [newsData, setNewsData] = useState<NewsData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +77,7 @@ export default function MarketNews() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/")}
+            onClick={() => router.push("/")}
             className="text-white hover:bg-white/10"
             data-testid="button-back-market-news"
           >

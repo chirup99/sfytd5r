@@ -137,5 +137,11 @@
     - Displays news cards in grid layout with sector-specific colors and icons
     - Added /market-news route to App.tsx
     - Updated Market News quick action button to navigate to /market-news instead of AI search
-    - Added useNavigate import to home.tsx for navigation support
     - Feature fully integrated: Click Market News button → displays latest news from all sectors
+[x] 63. FIXED: White screen issue - Wouter import error (December 18, 2025, 2:31 PM)
+    - Root cause: Attempted to use `useNavigate` from wouter, but this export doesn't exist in wouter
+    - Solution: Fixed home.tsx - removed useNavigate import, kept only useLocation
+    - Solution: Fixed market-news.tsx - changed to use `useRouter` from wouter for navigation
+    - Result: App preview loads successfully with all features visible
+    - Status: All backend services running, frontend fully functional
+    - Swiping cards generating news from /api/daily-news endpoint working perfectly
