@@ -13867,6 +13867,18 @@ ${
 
                         <Button
                           variant="secondary"
+                          className="bg-red-600 hover:bg-red-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
+                          onClick={() => checkAuthAndNavigate("trade")}
+                          data-testid="button-trade"
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            <TrendingUp className="h-3 w-3" />
+                            <span>Trade</span>
+                          </div>
+                        </Button>
+
+                        <Button
+                          variant="secondary"
                           className="bg-pink-600 hover:bg-pink-700  text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
                           onClick={() =>
                             handleSuggestionClick(
