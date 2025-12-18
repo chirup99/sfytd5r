@@ -6075,6 +6075,13 @@ ${
     
     fetchQuarterlyData();
   }, [searchResultsNewsSymbol]);
+  // Sync watchlist stock selection with search results symbol to trigger quarterly fetch
+  useEffect(() => {
+    if (selectedWatchlistSymbol && searchResults.includes("[CHART:WATCHLIST]")) {
+      setSearchResultsNewsSymbol(selectedWatchlistSymbol);
+    }
+  }, [selectedWatchlistSymbol, searchResults]);
+
 
   
   // Fetch news for selected watchlist symbol

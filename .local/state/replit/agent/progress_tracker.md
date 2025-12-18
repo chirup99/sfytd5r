@@ -225,3 +225,16 @@
     - Removed complex window variable logic and conflicting fetch calls
     - Backend API working correctly - frontend now properly displays all quarterly results
     - Workflow restarted with simplified code
+[x] 73. FIXED: Quarterly Performance Trend now displays on Watchlist button click (December 18, 2025, 6:08 PM)
+    - ROOT CAUSE ANALYSIS: searchResultsNewsSymbol wasn't syncing when watchlist stock was selected
+    - Quarterly data worked on search bar but NOT on watchlist button
+    - Reason: Watchlist selection wasn't triggering the quarterly data fetch
+    - SOLUTION: Added sync useEffect that ensures:
+      * When a watchlist stock is selected (selectedWatchlistSymbol changes)
+      * AND watchlist view is active (searchResults includes "[CHART:WATCHLIST]")
+      * THEN sync searchResultsNewsSymbol with selectedWatchlistSymbol
+      * This triggers the quarterly fetch via existing useEffect
+    - RESULT: Watchlist quarterly data now fetches and displays immediately when stock is selected
+    - Clean solution: No code duplication, reuses existing quarterly fetch logic
+    - Both search and watchlist now work identically for quarterly performance trends
+    - Workflow running successfully
