@@ -131,3 +131,11 @@
     - Result: Frontend now renders properly with all features visible
     - App fully functional: world map, hero section, search, buttons, feature cards all loading
     - All backend services operational: Angel One API, DynamoDB, Cognito, Gemini AI services
+[x] 62. CREATED: Dedicated Market News page displaying news from all sectors (December 18, 2025, 2:23 PM)
+    - Created new market-news.tsx component in /client/src/pages/market-news.tsx
+    - Fetches news from /api/daily-news endpoint for all 6 sectors (IT, FINANCE, COMMODITY, GLOBAL, BANKS, AUTOMOBILE)
+    - Displays news cards in grid layout with sector-specific colors and icons
+    - Added /market-news route to App.tsx
+    - Updated Market News quick action button to navigate to /market-news instead of AI search
+    - Added useNavigate import to home.tsx for navigation support
+    - Feature fully integrated: Click Market News button → displays latest news from all sectors
