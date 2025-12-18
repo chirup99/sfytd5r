@@ -13361,7 +13361,7 @@ ${
                                                     
                                                     return quarterlyData.length > 0 ? (
                                                       <>
-                                                        <div className="h-40 w-full mb-3">
+                                                        <div className="h-40 w-full mb-3 relative">
                                                           <ResponsiveContainer width="100%" height="100%">
                                                             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
                                                               <defs>
@@ -13388,6 +13388,7 @@ ${
                                                             </AreaChart>
                                                           </ResponsiveContainer>
                                                         </div>
+                                                          <div className="absolute bottom-1 right-2 text-xs text-gray-500">(Net profit)</div>
                                                         <div className="flex justify-center gap-4 text-xs text-gray-400">
                                                           <span className="flex items-center gap-1">
                                                             <span className="w-2 h-2 rounded-full bg-green-500"></span> Positive Quarter
