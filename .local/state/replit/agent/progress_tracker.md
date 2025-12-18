@@ -125,3 +125,9 @@
     - Endpoint properly returns { summary, headlines, title, subtitle, icon }
     - All Gemini API services intact and functional
     - Application running successfully with all services initialized
+[x] 61. FIXED: Preview not loading - Vite HMR websocket configuration issue (December 18, 2025, 2:21 PM)
+    - Root cause: HMR (Hot Module Replacement) was trying to connect to localhost:5173 instead of proper Replit domain
+    - Solution: Disabled HMR by setting `hmr: false` and `strictPort: false` in vite.config.ts
+    - Result: Frontend now renders properly with all features visible
+    - App fully functional: world map, hero section, search, buttons, feature cards all loading
+    - All backend services operational: Angel One API, DynamoDB, Cognito, Gemini AI services
