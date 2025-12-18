@@ -1988,13 +1988,32 @@ async function scrapeQuarterlyResults(symbol: string) {
       });
     }
     
-    // Clean up salesValue from results
-    const cleanResults = results.map(r => ({
+    // Extract PDF links from the "Raw PDF" row
+    const pdfLinks: string[] = [];
+    const rawPdfRows = $('tr').filter((i, el) => {
+      const firstCell = $(el).find('td').first().text().trim().toLowerCase();
+      return firstCell === 'raw pdf' || firstCell.includes('raw pdf');
+    });
+    
+    if (rawPdfRows.length > 0) {
+      rawPdfRows.first().find('td a[href]').each((i, el) => {
+        const href = $(el).attr('href');
+        if (href) {
+          const fullUrl = href.startsWith('http') ? href : `https://www.screener.in${href}`;
+          pdfLinks.push(fullUrl);
+        }
+      });
+      console.log(`📄 Found ${pdfLinks.length} PDF links for ${symbol}`);
+    }
+    
+    // Clean up salesValue from results and add PDF links
+    const cleanResults = results.map((r, idx) => ({
       quarter: r.quarter,
       revenue: r.revenue,
       net_profit: r.net_profit,
       eps: r.eps,
-      change_percent: r.change_percent
+      change_percent: r.change_percent,
+      pdf_url: pdfLinks[idx] || null
     }));
     
     console.log(`✅ Found ${cleanResults.length} quarters of data for ${symbol} from ${fetchedUrl}`);

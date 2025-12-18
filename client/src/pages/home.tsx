@@ -13344,9 +13344,8 @@ ${
                                                     </h3>
                                                   </div>
                                                   {(() => {
-                                                    const selectedStock = watchlistSymbols.find(s => s.symbol === searchResultsNewsSymbol);
-                                                    if (!selectedStock) return null;
-                                                    const quarterlyData = allWatchlistQuarterlyData[selectedStock.symbol] || [];
+                                                    if (!searchResultsNewsSymbol) return null;
+                                                    const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
                                                     const hasTrendingUp = quarterlyData.length > 1 && 
                                                       parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
                                                     return (
@@ -13389,7 +13388,7 @@ ${
                                                           <ResponsiveContainer width="100%" height="100%">
                                                             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
                                                               <defs>
-                                                                <linearGradient id={`grad-${selectedStock.symbol}`} x1="0" y1="0" x2="0" y2="1">
+                                                                <linearGradient id={`grad-${searchResultsNewsSymbol}`} x1="0" y1="0" x2="0" y2="1">
                                                                   <stop offset="0%" stopColor={trendColor} stopOpacity={0.4} />
                                                                   <stop offset="100%" stopColor={trendColor} stopOpacity={0.05} />
                                                                 </linearGradient>
@@ -13405,7 +13404,7 @@ ${
                                                                 dataKey="value" 
                                                                 stroke={trendColor} 
                                                                 strokeWidth={2} 
-                                                                fill={`url(#grad-${selectedStock.symbol})`}
+                                                                fill={`url(#grad-${searchResultsNewsSymbol})`}
                                                                 dot={{ r: 5, stroke: trendColor, strokeWidth: 2, fill: '#1f2937' }}
                                                                 activeDot={{ r: 7, stroke: trendColor, strokeWidth: 2, fill: '#ffffff' }}
                                                               />
@@ -13420,6 +13419,40 @@ ${
                                                             <span className="w-2 h-2 rounded-full bg-red-500"></span> Negative Quarter
                                                           </span>
                                                         </div>
+                                                        {/* PDF Links for Deep Analysis */}
+                                                        {quarterlyData.some((q: any) => q.pdf_url) && (
+                                                          <div className="mt-3 pt-3 border-t border-gray-700">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                              <span className="text-xs font-medium text-gray-400">Quarterly Results PDFs</span>
+                                                              <a 
+                                                                href={`https://www.screener.in/company/${searchResultsNewsSymbol}/consolidated/`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-xs text-blue-400 hover:text-blue-300"
+                                                                data-testid="link-screener-full-report"
+                                                              >
+                                                                View Full Report
+                                                              </a>
+                                                            </div>
+                                                            <div className="flex flex-wrap gap-2">
+                                                              {quarterlyData.slice(0, 4).map((q: any, idx: number) => 
+                                                                q.pdf_url && (
+                                                                  <a
+                                                                    key={idx}
+                                                                    href={q.pdf_url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded text-xs text-gray-300"
+                                                                    data-testid={`link-pdf-${idx}`}
+                                                                  >
+                                                                    <FileText className="h-3 w-3" />
+                                                                    {q.quarter}
+                                                                  </a>
+                                                                )
+                                                              )}
+                                                            </div>
+                                                          </div>
+                                                        )}
                                                       </>
                                                     ) : (
                                                       <div className="text-center py-4 text-gray-500 text-xs">
