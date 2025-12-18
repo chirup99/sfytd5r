@@ -6083,6 +6083,28 @@ ${
     fetchAllQuarterlyData();
   }, [watchlistSymbols]);
 
+  // Fetch quarterly data for SEARCHED stocks (not in watchlist)
+  useEffect(() => {
+    const symbol = (window as any).companyInsightsData?.symbol || searchResultsNewsSymbol;
+    if (!symbol) return;
+    
+    (async () => {
+      try {
+        const response = await fetch(`/api/quarterly-results/${symbol}`);
+        if (response.ok) {
+          const data = await response.json();
+          setAllWatchlistQuarterlyData(prev => ({
+            ...prev,
+            [symbol]: data.results || []
+          }));
+        }
+      } catch (error) {
+        console.error(`Error fetching quarterly data for ${symbol}:`, error);
+      }
+    })();
+  }, [searchResultsNewsSymbol]);
+
+
   // Fetch quarterly data for the currently searched stock (searchResultsNewsSymbol)
   useEffect(() => {
     const fetchSelectedStockQuarterlyData = async () => {
@@ -13341,15 +13363,15 @@ ${
                                                       <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
                                                     </div>
                                                   ) : searchResultsNewsSymbol ? (() => {
-                                                    const selectedStock = watchlistSymbols.find(s => s.symbol === searchResultsNewsSymbol);
-                                                    if (!selectedStock) {
+                                                    const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
+                                                    if (!quarterlyData || quarterlyData.length === 0) {
                                                       return (
                                                         <div className="text-center py-8 text-gray-500">
-                                                          <p className="text-xs">Search for a stock to see quarterly results</p>
+                                                          <Loader2 className="h-5 w-5 animate-spin text-gray-400 mx-auto mb-2" />
+                                                          <p className="text-xs">Loading quarterly results...</p>
                                                         </div>
                                                       );
                                                     }
-                                                    const quarterlyData = allWatchlistQuarterlyData[selectedStock.symbol] || [];
                                                     const hasTrendingUp = quarterlyData.length > 1 && 
                                                       parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
                                                     
