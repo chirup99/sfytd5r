@@ -13455,7 +13455,7 @@ ${
                                                                   const symbol = searchResultsNewsSymbol || selectedWatchlistSymbol;
                                                                   if (symbol) {
                                                                     // Simply set the query which triggers the existing search handler
-                                                                    setUserQuery(symbol);
+                                                                    handleSearch(symbol);
                                                                   }
                                                                 }}
                                                                 className="text-xs text-blue-400 hover:text-blue-300 cursor-pointer"
@@ -13940,7 +13940,7 @@ ${
                                   {/* Disclaimer */}
                                   <div className="mt-4 pt-3 border-t border-gray-700">
                                     <p className="text-xs text-gray-500 italic">
-                                      Disclaimer: Financial data is sourced from screener.in and other public sources. 
+                                      Disclaimer: Financial data is sourced from NSE/BSE and other public sources. 
                                       This information is for educational purposes only and should not be considered 
                                       financial advice. Please verify data independently before making investment decisions.
                                     </p>
