@@ -40,7 +40,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAngelOneAutoconnect } from "@/hooks/useAngelOneAutoconnect";
 import { cognitoSignOut, getCognitoToken, sendEmailVerificationCode, confirmEmailVerification, checkEmailVerified } from "@/cognito";
 import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickSeries, LineSeries, HistogramSeries, IPriceLine, createSeriesMarkers } from 'lightweight-charts';
-import { ArrowLeft, Banknote, Clock, ExternalLink, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp } from "lucide-react";
+import { ArrowLeft, Banknote, Clock, ExternalLink, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award } from "lucide-react";
 import { parseBrokerTrades, ParseError } from "@/utils/trade-parser";
 
 // Global window type declaration for audio control
@@ -13765,9 +13765,59 @@ ${
                                           <>{renderedContent}{companyInsightsContent}</> : 
                                           companyInsightsContent;
                                       }
+                      // Handle Trading Challenge Coming Soon
+                      if (searchResults.includes("[CHART:TRADE]")) {
+                        renderedContent = (
+                          <div className="w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-xl p-8 border border-gray-700">
+                            <div className="flex flex-col items-center justify-center mb-8">
+                              <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+                                <Trophy className="w-12 h-12 text-white" />
+                              </div>
+                              <h2 className="text-4xl font-bold text-white mb-2">Trading Challenge</h2>
+                              <p className="text-xl text-gray-400">Coming Soon</p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                              <div className="bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-lg p-6 hover:border-blue-600/70 transition-all">
+                                <div className="flex items-center gap-3 mb-3">
+                                  <div className="w-10 h-10 rounded-lg bg-blue-600/30 flex items-center justify-center">
+                                    <Users className="w-5 h-5 text-blue-400" />
+                                  </div>
+                                  <h3 className="text-lg font-semibold text-white">Compete with Traders</h3>
+                                </div>
+                                <p className="text-gray-300 text-sm">Join 7-day trading challenges and test your skills against other traders</p>
+                              </div>
+                              <div className="bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-lg p-6 hover:border-green-600/70 transition-all">
+                                <div className="flex items-center gap-3 mb-3">
+                                  <div className="w-10 h-10 rounded-lg bg-green-600/30 flex items-center justify-center">
+                                    <BarChart3 className="w-5 h-5 text-green-400" />
+                                  </div>
+                                  <h3 className="text-lg font-semibold text-white">Live P&L Tracking</h3>
+                                </div>
+                                <p className="text-gray-300 text-sm">Real-time ranking based on your trades with live profit and loss updates</p>
+                              </div>
+                              <div className="bg-gradient-to-br from-yellow-900/30 to-yellow-800/20 border border-yellow-700/50 rounded-lg p-6 hover:border-yellow-600/70 transition-all">
+                                <div className="flex items-center gap-3 mb-3">
+                                  <div className="w-10 h-10 rounded-lg bg-yellow-600/30 flex items-center justify-center">
+                                    <Award className="w-5 h-5 text-yellow-400" />
+                                  </div>
+                                  <h3 className="text-lg font-semibold text-white">Leaderboard Rankings</h3>
+                                </div>
+                                <p className="text-gray-300 text-sm">See your position among all participants and track your progress</p>
+                              </div>
+                            </div>
+                            <div className="mt-8 text-center">
+                              <p className="text-gray-400 text-sm">More features coming soon. Stay tuned!</p>
+                            </div>
+                          </div>
+                        );
+                      }
+
+
                                       
                                       return renderedContent || processedResults || searchResults;
                                     })()}
+                      
+
                                   </div>
                                   {/* Disclaimer */}
                                   <div className="mt-4 pt-3 border-t border-gray-700">
