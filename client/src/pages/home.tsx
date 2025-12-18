@@ -6106,6 +6106,29 @@ ${
       fetchWatchlistNews();
     }
   }, [selectedWatchlistSymbol, isWatchlistOpen, searchResults]);
+
+  // Auto-fetch news for search results
+  useEffect(() => {
+    if (searchResultsNewsSymbol && searchResults.includes("[CHART:SEARCH_RESULTS]")) {
+      const fetchSearchResultsNews = async () => {
+        setIsWatchlistNewsLoading(true);
+        try {
+          const cleanSymbol = searchResultsNewsSymbol.replace('-EQ', '').replace('-BE', '');
+          const response = await fetch(`/api/stock-news/${cleanSymbol}?refresh=${Date.now()}`);
+          if (response.ok) {
+            const data = await response.json();
+            const newsItems = Array.isArray(data) ? data : (data.news || []);
+            setWatchlistNews(newsItems.slice(0, 20));
+          }
+        } catch (error) {
+          console.error('Error fetching search results news:', error);
+        } finally {
+          setIsWatchlistNewsLoading(false);
+        }
+      };
+      fetchSearchResultsNews();
+    }
+  }, [searchResultsNewsSymbol, searchResults]);
   
   // Search stocks for watchlist
   const searchWatchlistStocks = async (query: string) => {
@@ -12901,7 +12924,7 @@ ${
                                                 </Button>
                                               </div>
                                               
-                                              <div className="space-y-3 max-h-[450px] overflow-y-auto mb-4">
+                                              <div className="space-y-3 max-h-[320px] overflow-y-auto mb-4">
                                                 {isWatchlistNewsLoading ? (
                                                   <div className="flex items-center justify-center py-8">
                                                     <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
@@ -13263,7 +13286,7 @@ ${
                                                 </Button>
                                               </div>
                                               
-                                              <div className="space-y-3 max-h-[450px] overflow-y-auto mb-4">
+                                              <div className="space-y-3 max-h-[320px] overflow-y-auto mb-4">
                                                 {isWatchlistNewsLoading ? (
                                                   <div className="flex items-center justify-center py-8">
                                                     <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
