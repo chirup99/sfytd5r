@@ -6081,7 +6081,7 @@ ${
           if (data.results && data.results.length > 0) {
             setAllWatchlistQuarterlyData(prev => ({
               ...prev,
-              [searchResultsNewsSymbol]: data.results
+              [cleanSymbol]: data.results
             }));
             console.log(`✅ Quarterly data loaded for ${cleanSymbol}:`, data.results.length, 'quarters');
           } else {
@@ -13298,7 +13298,8 @@ ${
                                                   {(() => {
                                                     const selectedStock = watchlistSymbols.find(s => s.symbol === searchResultsNewsSymbol);
                                                     if (!selectedStock) return null;
-                                                    const quarterlyData = allWatchlistQuarterlyData[selectedStock.symbol] || [];
+                                                    const cleanSymbol = selectedStock.symbol.replace('-EQ', '').replace('-BE', '');
+                                                    const quarterlyData = allWatchlistQuarterlyData[cleanSymbol] || [];
                                                     const hasTrendingUp = quarterlyData.length > 1 && 
                                                       parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
                                                     return (
@@ -13323,7 +13324,8 @@ ${
                                                         </div>
                                                       );
                                                     }
-                                                    const quarterlyData = allWatchlistQuarterlyData[selectedStock.symbol] || [];
+                                                    const cleanSymbol = selectedStock.symbol.replace('-EQ', '').replace('-BE', '');
+                                                    const quarterlyData = allWatchlistQuarterlyData[cleanSymbol] || [];
                                                     const hasTrendingUp = quarterlyData.length > 1 && 
                                                       parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
                                                     

@@ -1872,132 +1872,81 @@ async function scrapeQuarterlyResults(symbol: string) {
     
     const cleanSymbol = symbol.replace('-EQ', '').replace('-BE', '').toUpperCase();
     
-    // Try consolidated page first, then standalone
-    const urls = [
-      `https://www.screener.in/company/${cleanSymbol}/consolidated/`,
-      `https://www.screener.in/company/${cleanSymbol}/`
-    ];
+    const url = `https://www.screener.in/company/${cleanSymbol}/consolidated/`;
     
-    let html = '';
-    let fetchedUrl = '';
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Referer': 'https://www.screener.in/',
+      },
+      timeout: 10000
+    });
     
-    for (const url of urls) {
-      try {
-        const response = await axios.get(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-          },
-          timeout: 15000
-        });
-        
-        if (response.status === 200 && response.data) {
-          html = response.data;
-          fetchedUrl = url;
-          console.log(`✅ Successfully fetched ${url}`);
-          break;
-        }
-      } catch (urlError: any) {
-        console.log(`⚠️ Failed to fetch ${url}: ${urlError.response?.status || urlError.message}`);
-        continue;
-      }
-    }
-    
-    if (!html) {
-      console.log(`❌ Could not fetch any screener page for ${cleanSymbol}`);
-      return [];
-    }
-
-    const $ = cheerio.load(html);
+    const $ = cheerio.load(response.data);
     const results: any[] = [];
     
-    // Find the quarterly results section - look for the table with quarters heading
-    const quartersSections = $('section#quarters, section:contains("Quarterly Results"), [data-section="quarters"]');
+    // Find all tables and look for the one with quarterly data
+    const tables = $('table');
+    let found = false;
     
-    // Try different table selectors for quarterly data
-    const tableSelectors = [
-      '#quarters table',
-      'section#quarters table',
-      '[data-section="quarters"] table',
-      'table:has(th:contains("Quarter"))',
-      '.responsive-holder table'
-    ];
-    
-    let quarterTable: any = null;
-    for (const selector of tableSelectors) {
-      const table = $(selector).first();
-      if (table.length > 0) {
-        // Check if this table has quarter-related data
-        const headerText = table.find('thead, tr:first-child').text().toLowerCase();
-        if (headerText.includes('sales') || headerText.includes('revenue') || headerText.includes('net profit')) {
-          quarterTable = table;
-          break;
-        }
+    tables.each((_, table) => {
+      if (found) return;
+      
+      const rows = $(table).find('tbody tr');
+      if (rows.length < 2) return;
+      
+      const headerRow = $(table).find('thead tr, tr').first();
+      const headerText = headerRow.text().toLowerCase();
+      
+      // Check if this is a quarterly table
+      if (!headerText.includes('sales') && !headerText.includes('revenue') && !headerText.includes('quarter')) {
+        return;
       }
-    }
-    
-    if (!quarterTable) {
-      // Fallback: look for any table in the quarters section
-      quarterTable = $('#quarters').find('table').first();
-    }
-    
-    if (quarterTable && quarterTable.length > 0) {
-      // Get the header row to understand column positions
-      const headers: string[] = [];
-      quarterTable.find('thead th, thead td, tr:first-child th, tr:first-child td').each((i: number, el: any) => {
-        headers.push($(el).text().trim().toLowerCase());
+      
+      let quarterCount = 0;
+      rows.slice(0, 8).each((idx, row) => {
+        const cols = $(row).find('td');
+        if (cols.length < 3) return;
+        
+        const quarter = $(cols[0]).text().trim();
+        const revenue = parseCrores($(cols[1]).text());
+        const profit = parseCrores($(cols[cols.length - 2]).text());
+        
+        if (!quarter || quarter.toLowerCase().includes('sales')) return;
+        
+        const prevRevenue = quarterCount > 0 && results.length > 0 ? results[results.length - 1].revenueValue : revenue;
+        const change = prevRevenue > 0 ? ((revenue - prevRevenue) / prevRevenue * 100) : 0;
+        
+        results.push({
+          quarter: quarter,
+          revenue: revenue > 0 ? revenue.toLocaleString() : 'N/A',
+          net_profit: profit > 0 ? profit.toLocaleString() : 'N/A',
+          change_percent: change.toFixed(2),
+          revenueValue: revenue
+        });
+        
+        quarterCount++;
       });
       
-      // Find column indices
-      const salesIdx = headers.findIndex(h => h.includes('sales') || h.includes('revenue'));
-      const expenseIdx = headers.findIndex(h => h.includes('expense'));
-      const profitIdx = headers.findIndex(h => h.includes('operating profit'));
-      const netProfitIdx = headers.findIndex(h => h.includes('net profit') || h.includes('profit'));
-      const epsIdx = headers.findIndex(h => h.includes('eps'));
-      
-      // Parse each data row
-      quarterTable.find('tbody tr, tr').slice(1, 9).each((i: number, el: any) => {
-        const cols = $(el).find('td, th');
-        if (cols.length >= 3) {
-          const quarterName = $(cols[0]).text().trim();
-          
-          // Skip header rows or empty rows
-          if (!quarterName || quarterName.toLowerCase().includes('sales') || quarterName.toLowerCase().includes('quarter')) {
-            return;
-          }
-          
-          const sales = salesIdx >= 0 ? parseCrores($(cols[salesIdx]).text()) : parseCrores($(cols[1]).text());
-          const netProfit = netProfitIdx >= 0 ? parseCrores($(cols[netProfitIdx]).text()) : parseCrores($(cols[cols.length - 2]).text());
-          const eps = epsIdx >= 0 ? parseNumber($(cols[epsIdx]).text()) : parseNumber($(cols[cols.length - 1]).text());
-          
-          // Calculate YoY change if we have previous year's data
-          const changePercent = i > 0 && results.length > 0 ? 
-            ((sales - results[results.length - 1].salesValue) / results[results.length - 1].salesValue * 100).toFixed(2) + '%' : 
-            'N/A';
-          
-          results.push({
-            quarter: quarterName,
-            revenue: sales > 0 ? sales.toFixed(0) : 'N/A',
-            net_profit: netProfit !== 0 ? netProfit.toFixed(0) : 'N/A',
-            eps: eps !== 0 ? eps.toFixed(2) : 'N/A',
-            change_percent: changePercent,
-            salesValue: sales // Keep for calculation, will filter out later
-          });
-        }
-      });
-    }
+      if (quarterCount > 0) found = true;
+    });
     
-    // Clean up salesValue from results
+    // Clean up helper fields
     const cleanResults = results.map(r => ({
       quarter: r.quarter,
       revenue: r.revenue,
       net_profit: r.net_profit,
-      eps: r.eps,
       change_percent: r.change_percent
     }));
     
-    console.log(`✅ Found ${cleanResults.length} quarters of data for ${symbol} from ${fetchedUrl}`);
+    if (cleanResults.length > 0) {
+      console.log(`✅ Found ${cleanResults.length} quarters for ${symbol}`);
+    } else {
+      console.log(`⚠️ No quarterly data found for ${symbol}`);
+    }
+    
     return cleanResults;
     
   } catch (error) {
@@ -2005,6 +1954,8 @@ async function scrapeQuarterlyResults(symbol: string) {
     return [];
   }
 }
+
+
 
 async function getStockNews(symbol: string) {
   console.log(`📰 Fetching real financial news for ${symbol}...`);
