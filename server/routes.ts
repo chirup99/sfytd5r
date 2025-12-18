@@ -1943,49 +1943,61 @@ async function scrapeQuarterlyResults(symbol: string) {
     }
     
     if (quarterTable && quarterTable.length > 0) {
-      // Get the header row to understand column positions
-      const headers: string[] = [];
-      quarterTable.find('thead th, thead td, tr:first-child th, tr:first-child td').each((i: number, el: any) => {
-        headers.push($(el).text().trim().toLowerCase());
-      });
+      const rows = quarterTable.find('tbody tr, tr').toArray();
       
-      // Find column indices
-      const salesIdx = headers.findIndex(h => h.includes('sales') || h.includes('revenue'));
-      const expenseIdx = headers.findIndex(h => h.includes('expense'));
-      const profitIdx = headers.findIndex(h => h.includes('operating profit'));
-      const netProfitIdx = headers.findIndex(h => h.includes('net profit') || h.includes('profit'));
-      const epsIdx = headers.findIndex(h => h.includes('eps'));
-      
-      // Parse each data row
-      quarterTable.find('tbody tr, tr').slice(1, 9).each((i: number, el: any) => {
-        const cols = $(el).find('td, th');
-        if (cols.length >= 3) {
-          const quarterName = $(cols[0]).text().trim();
-          
-          // Skip header rows or empty rows
-          if (!quarterName || quarterName.toLowerCase().includes('sales') || quarterName.toLowerCase().includes('quarter')) {
-            return;
+      if (rows.length > 0) {
+        // FIRST ROW contains quarter period headers (Q3 FY25, Q4 FY25, etc.) - NOT metric names
+        const firstRow = rows[0];
+        const firstRowCells = $(firstRow).find('td, th');
+        const quarterPeriods: string[] = [];
+        
+        // Extract quarter periods from first row (skip first cell which is usually "Particulars" or empty)
+        for (let i = 1; i < firstRowCells.length; i++) {
+          const text = $(firstRowCells[i]).text().trim();
+          if (text && !text.toLowerCase().includes('particulars')) {
+            quarterPeriods.push(text);
           }
-          
-          const sales = salesIdx >= 0 ? parseCrores($(cols[salesIdx]).text()) : parseCrores($(cols[1]).text());
-          const netProfit = netProfitIdx >= 0 ? parseCrores($(cols[netProfitIdx]).text()) : parseCrores($(cols[cols.length - 2]).text());
-          const eps = epsIdx >= 0 ? parseNumber($(cols[epsIdx]).text()) : parseNumber($(cols[cols.length - 1]).text());
-          
-          // Calculate YoY change if we have previous year's data
-          const changePercent = i > 0 && results.length > 0 ? 
-            ((sales - results[results.length - 1].salesValue) / results[results.length - 1].salesValue * 100).toFixed(2) + '%' : 
-            'N/A';
-          
-          results.push({
-            quarter: quarterName,
-            revenue: sales > 0 ? sales.toFixed(0) : 'N/A',
-            net_profit: netProfit !== 0 ? netProfit.toFixed(0) : 'N/A',
-            eps: eps !== 0 ? eps.toFixed(2) : 'N/A',
-            change_percent: changePercent,
-            salesValue: sales // Keep for calculation, will filter out later
-          });
         }
-      });
+        
+        // Find NET PROFIT row among subsequent rows
+        let netProfitRowIdx = -1;
+        for (let i = 1; i < rows.length; i++) {
+          const firstCell = $(rows[i]).find('td, th').first().text().trim().toLowerCase();
+          if (firstCell.includes('net profit')) {
+            netProfitRowIdx = i;
+            break;
+          }
+        }
+        
+        // If we found quarter periods and net profit row, extract the data
+        if (quarterPeriods.length > 0 && netProfitRowIdx >= 0) {
+          const netProfitRow = $(rows[netProfitRowIdx]).find('td, th');
+          
+          for (let i = 0; i < quarterPeriods.length; i++) {
+            const netProfitCell = netProfitRow.eq(i + 1); // +1 to skip the metric name column
+            const netProfit = parseCrores(netProfitCell.text());
+            
+            // Calculate change percent if we have multiple quarters
+            let changePercent = 'N/A';
+            if (i > 0 && results.length > 0) {
+              const prevProfit = results[results.length - 1].profitValue;
+              if (prevProfit > 0) {
+                const change = ((netProfit - prevProfit) / prevProfit * 100);
+                changePercent = change.toFixed(2) + '%';
+              }
+            }
+            
+            results.push({
+              quarter: quarterPeriods[i],
+              revenue: netProfit > 0 ? netProfit.toFixed(0) : 'N/A',
+              net_profit: netProfit > 0 ? netProfit.toFixed(0) : 'N/A',
+              eps: 'N/A',
+              change_percent: changePercent,
+              profitValue: netProfit // Keep for calculation
+            });
+          }
+        }
+      }
     }
     
     // Extract PDF links from the "Raw PDF" row
@@ -2006,7 +2018,7 @@ async function scrapeQuarterlyResults(symbol: string) {
       console.log(`📄 Found ${pdfLinks.length} PDF links for ${symbol}`);
     }
     
-    // Clean up salesValue from results and add PDF links
+    // Clean up internal fields from results and add PDF links
     const cleanResults = results.map((r, idx) => ({
       quarter: r.quarter,
       revenue: r.revenue,
@@ -2014,6 +2026,7 @@ async function scrapeQuarterlyResults(symbol: string) {
       eps: r.eps,
       change_percent: r.change_percent,
       pdf_url: pdfLinks[idx] || null
+      // Remove profitValue and salesValue - internal calculation fields
     }));
     
     console.log(`✅ Found ${cleanResults.length} quarters of data for ${symbol} from ${fetchedUrl}`);
