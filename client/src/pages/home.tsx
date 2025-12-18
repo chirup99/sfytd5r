@@ -12660,20 +12660,27 @@ ${
                               <div className="space-y-1.5">
                                 <div className="flex items-center gap-2 pb-3 border-b border-transparent">
                                   {searchResults.includes("[CHART:WATCHLIST]") ? (
-                                    <>
-                                      <Eye className="h-4 w-4 text-gray-700 dark:text-blue-400" />
-                                      <h3 className="text-lg font-medium text-gray-100">
-                                        Watchlist
+                                      <>
+                      <Eye className="h-4 w-4 text-gray-700 dark:text-blue-400" />
+                      <h3 className="text-lg font-medium text-gray-100">
+                        Watchlist
                                       </h3>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Bot className="h-4 w-4 text-blue-400" />
-                                      <h3 className="text-lg font-medium text-gray-100">
-                                        Trading Challenge
+                                      </>
+                                    ) : searchResults.includes("[CHART:TRADE]") ? (
+                                      <>
+                      <Trophy className="h-4 w-4 text-orange-400" />
+                      <h3 className="text-lg font-medium text-gray-100">
+                        Trading Challenge
                                       </h3>
-                                    </>
-                                  )}
+                                      </>
+                                    ) : (
+                                      <>
+                      <Bot className="h-4 w-4 text-blue-400" />
+                      <h3 className="text-lg font-medium text-gray-100">
+                        AI Assistant
+                                      </h3>
+                                      </>
+                                    )}
                                 </div>
                                 <div className="prose prose-invert max-w-none">
                                   <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
