@@ -1964,6 +1964,7 @@ export default function Home() {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchResults, setSearchResults] = useState("");
   const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
   const [searchResultsNews, setSearchResultsNews] = useState<any[]>([]);
   const [searchResultsNewsSymbol, setSearchResultsNewsSymbol] = useState("");
   const [aiChartSelectedTimeframe, setAiChartSelectedTimeframe] = useState('1Y');
@@ -14031,6 +14032,7 @@ ${
                           variant="secondary"
                           className="bg-cyan-600 hover:bg-cyan-700  text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
                           onClick={() => {
+                            setIsWatchlistLoading(true);
                             setIsSearchActive(true);
                             setSearchResults("[CHART:WATCHLIST]");
                             setIsWatchlistOpen(true);
@@ -14040,11 +14042,16 @@ ${
                               setSelectedWatchlistSymbol(firstStock.symbol);
                               setSearchResultsNewsSymbol(firstStock.symbol);
                             }
+                            setTimeout(() => setIsWatchlistLoading(false), 300);
                           }}
                           data-testid="button-watchlist"
                         >
                           <div className="flex items-center justify-center gap-1">
-                            <Eye className="h-3 w-3" />
+                            {isWatchlistLoading ? (
+                              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Eye className="h-3 w-3" />
+                            )}
                             <span>Watchlist</span>
                           </div>
                         </Button>
@@ -14215,6 +14222,7 @@ ${
                                 variant="secondary"
                                 className="bg-cyan-600 hover:bg-cyan-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
                                 onClick={() => {
+                                  setIsWatchlistLoading(true);
                                   setIsSearchActive(true);
                                   setSearchResults("[CHART:WATCHLIST]");
                                   setIsWatchlistOpen(true);
@@ -14224,11 +14232,16 @@ ${
                                     setSelectedWatchlistSymbol(firstStock.symbol);
                                     setSearchResultsNewsSymbol(firstStock.symbol);
                                   }
+                                  setTimeout(() => setIsWatchlistLoading(false), 300);
                                 }}
                                 data-testid="button-watchlist-mobile"
                               >
                                 <div className="flex items-center justify-center gap-1">
-                                  <Eye className="h-3 w-3" />
+                                  {isWatchlistLoading ? (
+                                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  ) : (
+                                    <Eye className="h-3 w-3" />
+                                  )}
                                   <span>Watchlist</span>
                                 </div>
                               </Button>

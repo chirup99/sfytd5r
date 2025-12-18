@@ -206,3 +206,12 @@
     - Gemini AI routes configured
     - Application serving on port 5000
     - Project import migration verified and completed
+[x] 71. COMPLETED: Added loading animation to Watchlist button (December 18, 2025, 6:04 PM)
+    - Added `isWatchlistLoading` state to track loading status
+    - Desktop Watchlist button now shows spinning loader icon while loading
+    - Mobile Watchlist button now shows spinning loader icon while loading
+    - Loading animation automatically clears after 300ms
+    - Spinner uses same style as search bar: `border-2 border-white border-t-transparent rounded-full animate-spin`
+    - Applied to both desktop and mobile quick action buttons
+    - Both buttons display Eye icon normally, loader icon during loading state
+    - Workflow restarted and running successfully
