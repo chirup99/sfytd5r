@@ -1966,7 +1966,6 @@ export default function Home() {
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [searchResultsNews, setSearchResultsNews] = useState<any[]>([]);
   const [searchResultsNewsSymbol, setSearchResultsNewsSymbol] = useState("");
-  const [performanceTrendChartData, setPerformanceTrendChartData] = useState<Array<{day: string; value: number}>>([]);
   const [aiChartSelectedTimeframe, setAiChartSelectedTimeframe] = useState('1Y');
 
   // Listen for timeframe change events to trigger re-render
@@ -6101,12 +6100,7 @@ ${
           const data = await response.json();
           if (data.results && data.results.length > 0) {
             // Set window variable for Performance Trend chart
-            const chartDataArray = data.results.map((q: any) => ({
-              day: q.quarter || `Q${Math.random()}`,
-              value: q.value || 0
-            }));
-            setPerformanceTrendChartData(chartDataArray);
-            (window as any).performanceTrendChartData = chartDataArray;
+            (window as any).performanceTrendChartData = data.results.map((q: any) => ({
               day: q.quarter || `Q${Math.random()}`,
               value: q.value || 0
             }));
