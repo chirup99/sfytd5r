@@ -13451,28 +13451,11 @@ ${
                                                             <div className="flex items-center justify-between mb-2">
                                                               <span className="text-xs font-medium text-gray-400">Quarterly Results PDFs</span>
                                                               <button
-                                                                onClick={async () => {
-                                                                  const symbol = searchResultsNewsSymbol;
-                                                                  if (!symbol) return;
-                                                                  
-                                                                  // Trigger AI search for the symbol
-                                                                  setIsAILoading(true);
-                                                                  setSearchResults('');
-                                                                  setSearchResultsNewsSymbol(symbol);
-                                                                  
-                                                                  try {
-                                                                    const response = await fetch('/api/trading-agent', {
-                                                                      method: 'POST',
-                                                                      headers: { 'Content-Type': 'application/json' },
-                                                                      body: JSON.stringify({ query: symbol })
-                                                                    });
-                                                                    const data = await response.json();
-                                                                    setSearchResults(data.response || 'No data available');
-                                                                  } catch (error) {
-                                                                    console.error('Error fetching AI report:', error);
-                                                                    setSearchResults('Error loading report. Please try again.');
-                                                                  } finally {
-                                                                    setIsAILoading(false);
+                                                                onClick={() => {
+                                                                  const symbol = searchResultsNewsSymbol || selectedWatchlistSymbol;
+                                                                  if (symbol) {
+                                                                    // Simply set the query which triggers the existing search handler
+                                                                    setUserQuery(symbol);
                                                                   }
                                                                 }}
                                                                 className="text-xs text-blue-400 hover:text-blue-300 cursor-pointer"
