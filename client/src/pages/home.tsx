@@ -12867,549 +12867,554 @@ ${
                                                 })()}
                                               </div>
                                             )}
-                                          </div>
-                                        );
-                                      }
 
-                                      // Handle Watchlist view
-                                      if (searchResults.includes("[CHART:WATCHLIST]")) {
-                                        const selectedStock = watchlistSymbols.find(s => s.symbol === selectedWatchlistSymbol);
-                                        const cleanSymbolForNews = selectedWatchlistSymbol.replace('-EQ', '').replace('-BE', '');
-                                        
-                                        renderedContent = (
-                                          <div className="flex gap-4 w-full">
-                                            {/* Left Column - Index Charts + Watchlist */}
-                                            <div className="flex-1 space-y-4">
-                                              {/* NIFTY 50 Chart */}
-                                              <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-600">
-                                                <div className="space-y-2">
-                                                  <div className="flex items-center justify-between mb-1">
-                                                    <div className="flex items-center gap-1">
-                                                      <h4 className="text-sm font-semibold text-gray-200">NIFTY 50</h4>
-                                                      <span className="text-xs text-green-400 flex items-center gap-1">
-                                                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                                                        Live
-                                                      </span>
+                                            {/* Related News Panel */}
+                                            {priceChartData.length > 0 && (() => {
+                                              const searchSymbol = stockData.symbol ? stockData.symbol.replace('-EQ', '').replace('-BE', '') : 'Stock';
+                                              return (
+                                                <div className="flex-1 bg-gray-900/50 rounded-lg p-4 border border-gray-600">
+                                                  <div className="flex items-center justify-between mb-4">
+                                                    <div className="flex items-center gap-2">
+                                                      <Clock className="h-4 w-4 text-gray-400" />
+                                                      <h3 className="text-sm font-medium text-gray-200">Related News for {searchSymbol}</h3>
                                                     </div>
-                                                    <div className="text-right">
-                                                      <div className="text-sm font-mono text-gray-100">₹{getNifty50CurrentPrice().toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
-                                                      <div className={`text-xs flex items-center justify-end gap-0.5 ${getNifty50Change() >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                                        {getNifty50Change() >= 0 ? '▲' : '▼'} ₹{Math.abs(getNifty50Change()).toFixed(2)} ({((getNifty50Change() / (getNifty50CurrentPrice() - getNifty50Change())) * 100).toFixed(2)}%)
-                                                      </div>
-                                                    </div>
+                                                    <Button variant="ghost" size="sm" className="h-7 text-xs text-gray-400 hover:text-gray-200" onClick={() => { setIsWatchlistNewsLoading(true); fetch(`/api/stock-news/${searchSymbol}?refresh=${Date.now()}`).then(res => res.json()).then(data => { const newsItems = Array.isArray(data) ? data : (data.news || []); setWatchlistNews(newsItems.slice(0, 20)); }).finally(() => setIsWatchlistNewsLoading(false)); }} data-testid="button-refresh-search-news"><RefreshCw className={`h-3 w-3 mr-1 ${isWatchlistNewsLoading ? 'animate-spin' : ''}`} /> Refresh</Button>
                                                   </div>
+                                                  <div className="space-y-3 max-h-[450px] overflow-y-auto">{isWatchlistNewsLoading ? (<div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-gray-400" /></div>) : watchlistNews.length > 0 ? (watchlistNews.map((item, index) => (<div key={index} className="p-3 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer border border-gray-700" onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')} data-testid={`search-news-item-${index}`}><h4 className="text-gray-200 font-medium text-sm mb-2 hover:text-gray-100 transition-colors line-clamp-2">{item.title} <ExternalLink className="h-3 w-3 inline ml-1" /></h4>{item.description && (<p className="text-gray-400 text-xs mb-2 line-clamp-2">{item.description}</p>)}<div className="flex items-center justify-between"><span className="text-gray-500 text-xs">{item.source}</span><span className="text-gray-500 text-xs">{getWatchlistNewsRelativeTime(item.publishedAt)}</span></div></div>))) : (<div className="text-center py-8 text-gray-400"><Clock className="h-8 w-8 mx-auto mb-2 opacity-50" /><p className="text-sm">No recent news available</p></div>)}</div>
+                                                </div>
+                                              );
+                                            })()}
+                                          </div>
+                                            {/* NIFTY 50 Chart */}
+                                            <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-600">
+                                              <div className="space-y-2">
+                                                <div className="flex items-center justify-between mb-1">
                                                   <div className="flex items-center gap-1">
-                                                    {['1D', '5D', '1M', '6M', '1Y'].map((tf) => (
-                                                      <Button
-                                                        key={tf}
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => setNifty50Timeframe(tf)}
-                                                        className={`px-1.5 py-0.5 text-xs h-6 ${nifty50Timeframe === tf ? 'bg-blue-600/20 text-blue-400' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'}`}
-                                                      >
-                                                        {tf}
-                                                      </Button>
-                                                    ))}
+                                                    <h4 className="text-sm font-semibold text-gray-200">NIFTY 50</h4>
+                                                    <span className="text-xs text-green-400 flex items-center gap-1">
+                                                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                                      Live
+                                                    </span>
                                                   </div>
-                                                  
-                                                  <div className="h-48 w-full bg-gray-800/30 rounded-lg p-2">
-                                                    <ResponsiveContainer width="100%" height="100%">
-                                                      <LineChart data={isNifty50Loading ? [] : nifty50FormattedData} margin={{ top: 5, right: 15, left: 50, bottom: 5 }}>
-                                                        <XAxis 
-                                                          dataKey="time" 
-                                                          axisLine={false}
-                                                          tickLine={false}
-                                                          tick={{ fontSize: 9, fill: '#64748b' }}
-                                                          tickCount={5}
-                                                        />
-                                                        <YAxis 
-                                                          domain={['dataMin - 50', 'dataMax + 50']}
-                                                          type="number"
-                                                          axisLine={false}
-                                                          tickLine={false}
-                                                          tick={{ fontSize: 9, fill: '#64748b' }}
-                                                          width={10}
-                                                        />
-                                                        <Tooltip 
-                                                          content={({ active, payload, label }) => {
-                                                            if (!active || !payload || !payload.length) return null;
-                                                            const value = payload[0].value;
-                                                            return (
-                                                              <div style={{
-                                                                backgroundColor: '#1e293b',
-                                                                border: '1px solid #334155',
-                                                                borderRadius: '6px',
-                                                                color: '#e2e8f0',
-                                                                padding: '8px 16px',
-                                                                fontSize: '13px',
-                                                                minWidth: '140px',
-                                                                boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: '12px'
-                                                              }}>
-                                                                <span style={{ fontSize: '13px', fontWeight: '500' }}>
-                                                                  ₹{Number(value).toFixed(2)}
-                                                                </span>
-                                                                <div style={{
-                                                                  width: '1px',
-                                                                  height: '20px',
-                                                                  backgroundColor: '#475569'
-                                                                }}></div>
-                                                                <span style={{ fontSize: '12px', color: '#94a3b8' }}>
-                                                                  {label}
-                                                                </span>
-                                                              </div>
-                                                            );
-                                                          }}
-                                                        />
-                                                        <Line 
-                                                          type="linear" 
-                                                          dataKey="price" 
-                                                          stroke="#ef4444"
-                                                          strokeWidth={2}
-                                                          dot={false}
-                                                          activeDot={{ r: 4, fill: '#ef4444' }}
-                                                        />
-                                                        <ReferenceLine 
-                                                          y={getNifty50Baseline()} 
-                                                          stroke="#64748b" 
-                                                          strokeDasharray="2 2" 
-                                                          strokeWidth={1}
-                                                        />
-                                                      </LineChart>
-                                                    </ResponsiveContainer>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                              
-                                              {/* Dynamic Watchlist Chart */}
-                                              <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-600">
-                                                <div className="space-y-2">
-                                                  <div className="flex items-center justify-between mb-1">
-                                                    <div className="flex items-center gap-1">
-                                                      <h4 className="text-sm font-semibold text-gray-200">
-                                                        {watchlistSymbols.find(s => s.symbol === selectedWatchlistSymbol)?.displayName || selectedWatchlistSymbol.replace('-EQ', '').replace('-BE', '')}
-                                                      </h4>
-                                                      <span className="text-xs text-green-400 flex items-center gap-1">
-                                                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                                                        Live
-                                                      </span>
-                                                    </div>
-                                                    <div className="text-right">
-                                                      <div className="text-sm font-mono text-gray-100">₹{getNiftyBankCurrentPrice().toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
-                                                      <div className={`text-xs flex items-center justify-end gap-0.5 ${getNiftyBankChange() >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                                        {getNiftyBankChange() >= 0 ? '▲' : '▼'} ₹{Math.abs(getNiftyBankChange()).toFixed(2)} ({((getNiftyBankChange() / (getNiftyBankCurrentPrice() - getNiftyBankChange())) * 100).toFixed(2)}%)
-                                                      </div>
+                                                  <div className="text-right">
+                                                    <div className="text-sm font-mono text-gray-100">₹{getNifty50CurrentPrice().toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
+                                                    <div className={`text-xs flex items-center justify-end gap-0.5 ${getNifty50Change() >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                                      {getNifty50Change() >= 0 ? '▲' : '▼'} ₹{Math.abs(getNifty50Change()).toFixed(2)} ({((getNifty50Change() / (getNifty50CurrentPrice() - getNifty50Change())) * 100).toFixed(2)}%)
                                                     </div>
                                                   </div>
-                                                  <div className="flex items-center gap-1">
-                                                    {['1D', '5D', '1M', '6M', '1Y'].map((tf) => (
-                                                      <Button
-                                                        key={tf}
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => setNiftyBankTimeframe(tf)}
-                                                        className={`px-1.5 py-0.5 text-xs h-6 ${niftyBankTimeframe === tf ? 'bg-blue-600/20 text-blue-400' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'}`}
-                                                      >
-                                                        {tf}
-                                                      </Button>
-                                                    ))}
-                                                  </div>
-                                                  
-                                                  <div className="h-48 w-full bg-gray-800/30 rounded-lg p-2">
-                                                    <ResponsiveContainer width="100%" height="100%">
-                                                      <LineChart data={isNiftyBankLoading ? [] : niftyBankFormattedData} margin={{ top: 5, right: 15, left: 50, bottom: 5 }}>
-                                                        <XAxis 
-                                                          dataKey="time" 
-                                                          axisLine={false}
-                                                          tickLine={false}
-                                                          tick={{ fontSize: 9, fill: '#64748b' }}
-                                                          tickCount={5}
-                                                        />
-                                                        <YAxis 
-                                                          domain={['dataMin - 50', 'dataMax + 50']}
-                                                          type="number"
-                                                          axisLine={false}
-                                                          tickLine={false}
-                                                          tick={{ fontSize: 9, fill: '#64748b' }}
-                                                          width={10}
-                                                        />
-                                                        <Tooltip 
-                                                          content={({ active, payload, label }) => {
-                                                            if (!active || !payload || !payload.length) return null;
-                                                            const value = payload[0].value;
-                                                            return (
-                                                              <div style={{
-                                                                backgroundColor: '#1e293b',
-                                                                border: '1px solid #334155',
-                                                                borderRadius: '6px',
-                                                                color: '#e2e8f0',
-                                                                padding: '8px 16px',
-                                                                fontSize: '13px',
-                                                                minWidth: '140px',
-                                                                boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: '12px'
-                                                              }}>
-                                                                <span style={{ fontSize: '13px', fontWeight: '500' }}>
-                                                                  ₹{Number(value).toFixed(2)}
-                                                                </span>
-                                                                <div style={{
-                                                                  width: '1px',
-                                                                  height: '20px',
-                                                                  backgroundColor: '#475569'
-                                                                }}></div>
-                                                                <span style={{ fontSize: '12px', color: '#94a3b8' }}>
-                                                                  {label}
-                                                                </span>
-                                                              </div>
-                                                            );
-                                                          }}
-                                                        />
-                                                        <Line 
-                                                          type="linear" 
-                                                          dataKey="price" 
-                                                          stroke="#10b981"
-                                                          strokeWidth={2}
-                                                          dot={false}
-                                                          activeDot={{ r: 4, fill: '#10b981' }}
-                                                        />
-                                                        <ReferenceLine 
-                                                          y={getNiftyBankBaseline()} 
-                                                          stroke="#64748b" 
-                                                          strokeDasharray="2 2" 
-                                                          strokeWidth={1}
-                                                        />
-                                                      </LineChart>
-                                                    </ResponsiveContainer>
-                                                  </div>
                                                 </div>
-                                              </div>
-                                              
-                                              {/* My Watchlist */}
-                                              <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-600">
-                                                <div className="flex items-center justify-between mb-3">
-                                                  <h4 className="text-sm font-medium text-gray-200">My Watchlist</h4>
-                                                  <span className="text-xs text-gray-400">{watchlistSymbols.length} stocks</span>
-                                                </div>
-                                                
-                                                {/* Search to add stocks */}
-                                                <div className="relative mb-3">
-                                                  <Input
-                                                    placeholder="Search to add stock..."
-                                                    value={watchlistSearchQuery}
-                                                    onChange={(e) => {
-                                                      setWatchlistSearchQuery(e.target.value);
-                                                      searchWatchlistStocks(e.target.value);
-                                                    }}
-                                                    className="h-8 text-xs bg-gray-800 border-gray-600 text-gray-200 placeholder:text-gray-500"
-                                                    data-testid="input-watchlist-search"
-                                                  />
-                                                  {watchlistSearchResults.length > 0 && (
-                                                    <div className="absolute top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg z-50 max-h-40 overflow-y-auto">
-                                                      {watchlistSearchResults.map((result, idx) => (
-                                                        <div
-                                                          key={idx}
-                                                          className="px-3 py-2 border-b border-gray-700 last:border-b-0 flex items-center justify-between hover:bg-gray-700/50 transition-colors"
-                                                          data-testid={`watchlist-search-result-${idx}`}
-                                                        >
-                                                          <div className="flex-1 min-w-0">
-                                                            <div className="text-xs font-medium text-gray-200">{result.displayName || result.symbol}</div>
-                                                            <div className="text-xs text-gray-400 truncate">{result.name}</div>
-                                                          </div>
-                                                          <button
-                                                            onClick={() => {
-                                                              addToWatchlist(result);
-                                                              setWatchlistSearchQuery('');
-                                                            }}
-                                                            className="ml-2 flex-shrink-0 text-gray-400 hover:text-green-400 transition-colors p-1"
-                                                            data-testid={`button-add-watchlist-${idx}`}
-                                                          >
-                                                            <Plus className="h-4 w-4" />
-                                                          </button>
-                                                        </div>
-                                                      ))}
-                                                    </div>
-                                                  )}
-                                                </div>
-                                                
-                                                {/* Watchlist Items */}
-                                                <div className="space-y-1 max-h-48 overflow-y-auto">
-                                                  {watchlistSymbols.map((stock, idx) => (
-                                                    <div
-                                                      key={stock.symbol}
-                                                      className={`flex items-center justify-between px-2 py-2 rounded-lg cursor-pointer transition-colors ${
-                                                        selectedWatchlistSymbol === stock.symbol 
-                                                          ? 'bg-blue-600/30 border border-blue-500/50' 
-                                                          : 'hover:bg-gray-700/50'
-                                                      }`}
-                                                      onClick={() => setSelectedWatchlistSymbol(stock.symbol)}
-                                                      data-testid={`watchlist-item-${idx}`}
+                                                <div className="flex items-center gap-1">
+                                                  {['1D', '5D', '1M', '6M', '1Y'].map((tf) => (
+                                                    <Button
+                                                      key={tf}
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={() => setNifty50Timeframe(tf)}
+                                                      className={`px-1.5 py-0.5 text-xs h-6 ${nifty50Timeframe === tf ? 'bg-blue-600/20 text-blue-400' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'}`}
                                                     >
-                                                      <div className="flex items-center gap-2">
-                                                        <div className={`w-2 h-2 rounded-full ${
-                                                          selectedWatchlistSymbol === stock.symbol ? 'bg-blue-400' : 'bg-gray-500'
-                                                        }`} />
-                                                        <div>
-                                                          <div className="text-xs font-medium text-gray-200">{stock.displayName || stock.symbol.replace('-EQ', '')}</div>
-                                                          <div className="text-xs text-gray-500 truncate max-w-[150px]">{stock.name}</div>
-                                                        </div>
-                                                      </div>
-                                                      <button
-                                                        onClick={(e) => {
-                                                          e.stopPropagation();
-                                                          removeFromWatchlist(stock.symbol);
-                                                        }}
-                                                        className="text-gray-500 hover:text-red-400 transition-colors p-1"
-                                                        data-testid={`button-remove-watchlist-${idx}`}
-                                                      >
-                                                        <X className="h-3 w-3" />
-                                                      </button>
-                                                    </div>
+                                                      {tf}
+                                                    </Button>
                                                   ))}
+                                                </div>
+                                                
+                                                <div className="h-48 w-full bg-gray-800/30 rounded-lg p-2">
+                                                  <ResponsiveContainer width="100%" height="100%">
+                                                    <LineChart data={isNifty50Loading ? [] : nifty50FormattedData} margin={{ top: 5, right: 15, left: 50, bottom: 5 }}>
+                                                      <XAxis 
+                                                        dataKey="time" 
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fontSize: 9, fill: '#64748b' }}
+                                                        tickCount={5}
+                                                      />
+                                                      <YAxis 
+                                                        domain={['dataMin - 50', 'dataMax + 50']}
+                                                        type="number"
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fontSize: 9, fill: '#64748b' }}
+                                                        width={10}
+                                                      />
+                                                      <Tooltip 
+                                                        content={({ active, payload, label }) => {
+                                                          if (!active || !payload || !payload.length) return null;
+                                                          const value = payload[0].value;
+                                                          return (
+                                                            <div style={{
+                                                              backgroundColor: '#1e293b',
+                                                              border: '1px solid #334155',
+                                                              borderRadius: '6px',
+                                                              color: '#e2e8f0',
+                                                              padding: '8px 16px',
+                                                              fontSize: '13px',
+                                                              minWidth: '140px',
+                                                              boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+                                                              display: 'flex',
+                                                              alignItems: 'center',
+                                                              gap: '12px'
+                                                            }}>
+                                                              <span style={{ fontSize: '13px', fontWeight: '500' }}>
+                                                                ₹{Number(value).toFixed(2)}
+                                                              </span>
+                                                              <div style={{
+                                                                width: '1px',
+                                                                height: '20px',
+                                                                backgroundColor: '#475569'
+                                                              }}></div>
+                                                              <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                                                                {label}
+                                                              </span>
+                                                            </div>
+                                                          );
+                                                        }}
+                                                      />
+                                                      <Line 
+                                                        type="linear" 
+                                                        dataKey="price" 
+                                                        stroke="#ef4444"
+                                                        strokeWidth={2}
+                                                        dot={false}
+                                                        activeDot={{ r: 4, fill: '#ef4444' }}
+                                                      />
+                                                      <ReferenceLine 
+                                                        y={getNifty50Baseline()} 
+                                                        stroke="#64748b" 
+                                                        strokeDasharray="2 2" 
+                                                        strokeWidth={1}
+                                                      />
+                                                    </LineChart>
+                                                  </ResponsiveContainer>
                                                 </div>
                                               </div>
                                             </div>
                                             
-                                            {/* Right Column - Related News */}
-                                            <div className="flex-1 bg-gray-900/50 rounded-lg p-4 border border-gray-600">
-                                              <div className="flex items-center justify-between mb-4">
-                                                <div className="flex items-center gap-2">
-                                                  <Clock className="h-4 w-4 text-gray-400" />
-                                                  <h3 className="text-sm font-medium text-gray-200">
-                                                    Related News for {cleanSymbolForNews}
-                                                  </h3>
+                                            {/* Dynamic Watchlist Chart */}
+                                            <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-600">
+                                              <div className="space-y-2">
+                                                <div className="flex items-center justify-between mb-1">
+                                                  <div className="flex items-center gap-1">
+                                                    <h4 className="text-sm font-semibold text-gray-200">
+                                                      {watchlistSymbols.find(s => s.symbol === selectedWatchlistSymbol)?.displayName || selectedWatchlistSymbol.replace('-EQ', '').replace('-BE', '')}
+                                                    </h4>
+                                                    <span className="text-xs text-green-400 flex items-center gap-1">
+                                                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                                      Live
+                                                    </span>
+                                                  </div>
+                                                  <div className="text-right">
+                                                    <div className="text-sm font-mono text-gray-100">₹{getNiftyBankCurrentPrice().toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
+                                                    <div className={`text-xs flex items-center justify-end gap-0.5 ${getNiftyBankChange() >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                                      {getNiftyBankChange() >= 0 ? '▲' : '▼'} ₹{Math.abs(getNiftyBankChange()).toFixed(2)} ({((getNiftyBankChange() / (getNiftyBankCurrentPrice() - getNiftyBankChange())) * 100).toFixed(2)}%)
+                                                    </div>
+                                                  </div>
                                                 </div>
-                                                <Button
-                                                  variant="ghost"
-                                                  size="sm"
-                                                  className="h-7 text-xs text-gray-400 hover:text-gray-200"
-                                                  onClick={() => {
-                                                    setIsWatchlistNewsLoading(true);
-                                                    fetch(`/api/stock-news/${cleanSymbolForNews}?refresh=${Date.now()}`)
-                                                      .then(res => res.json())
-                                                      .then(data => {
-                                                        const newsItems = Array.isArray(data) ? data : (data.news || []);
-                                                        setWatchlistNews(newsItems.slice(0, 20));
-                                                      })
-                                                      .finally(() => setIsWatchlistNewsLoading(false));
-                                                  }}
-                                                  data-testid="button-refresh-news"
-                                                >
-                                                  <RefreshCw className={`h-3 w-3 mr-1 ${isWatchlistNewsLoading ? 'animate-spin' : ''}`} />
-                                                  Refresh
-                                                </Button>
+                                                <div className="flex items-center gap-1">
+                                                  {['1D', '5D', '1M', '6M', '1Y'].map((tf) => (
+                                                    <Button
+                                                      key={tf}
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={() => setNiftyBankTimeframe(tf)}
+                                                      className={`px-1.5 py-0.5 text-xs h-6 ${niftyBankTimeframe === tf ? 'bg-blue-600/20 text-blue-400' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'}`}
+                                                    >
+                                                      {tf}
+                                                    </Button>
+                                                  ))}
+                                                </div>
+                                                
+                                                <div className="h-48 w-full bg-gray-800/30 rounded-lg p-2">
+                                                  <ResponsiveContainer width="100%" height="100%">
+                                                    <LineChart data={isNiftyBankLoading ? [] : niftyBankFormattedData} margin={{ top: 5, right: 15, left: 50, bottom: 5 }}>
+                                                      <XAxis 
+                                                        dataKey="time" 
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fontSize: 9, fill: '#64748b' }}
+                                                        tickCount={5}
+                                                      />
+                                                      <YAxis 
+                                                        domain={['dataMin - 50', 'dataMax + 50']}
+                                                        type="number"
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fontSize: 9, fill: '#64748b' }}
+                                                        width={10}
+                                                      />
+                                                      <Tooltip 
+                                                        content={({ active, payload, label }) => {
+                                                          if (!active || !payload || !payload.length) return null;
+                                                          const value = payload[0].value;
+                                                          return (
+                                                            <div style={{
+                                                              backgroundColor: '#1e293b',
+                                                              border: '1px solid #334155',
+                                                              borderRadius: '6px',
+                                                              color: '#e2e8f0',
+                                                              padding: '8px 16px',
+                                                              fontSize: '13px',
+                                                              minWidth: '140px',
+                                                              boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+                                                              display: 'flex',
+                                                              alignItems: 'center',
+                                                              gap: '12px'
+                                                            }}>
+                                                              <span style={{ fontSize: '13px', fontWeight: '500' }}>
+                                                                ₹{Number(value).toFixed(2)}
+                                                              </span>
+                                                              <div style={{
+                                                                width: '1px',
+                                                                height: '20px',
+                                                                backgroundColor: '#475569'
+                                                              }}></div>
+                                                              <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                                                                {label}
+                                                              </span>
+                                                            </div>
+                                                          );
+                                                        }}
+                                                      />
+                                                      <Line 
+                                                        type="linear" 
+                                                        dataKey="price" 
+                                                        stroke="#10b981"
+                                                        strokeWidth={2}
+                                                        dot={false}
+                                                        activeDot={{ r: 4, fill: '#10b981' }}
+                                                      />
+                                                      <ReferenceLine 
+                                                        y={getNiftyBankBaseline()} 
+                                                        stroke="#64748b" 
+                                                        strokeDasharray="2 2" 
+                                                        strokeWidth={1}
+                                                      />
+                                                    </LineChart>
+                                                  </ResponsiveContainer>
+                                                </div>
+                                              </div>
+                                            </div>
+                                            
+                                            {/* My Watchlist */}
+                                            <div className="bg-gray-900/50 rounded-lg p-3 border border-gray-600">
+                                              <div className="flex items-center justify-between mb-3">
+                                                <h4 className="text-sm font-medium text-gray-200">My Watchlist</h4>
+                                                <span className="text-xs text-gray-400">{watchlistSymbols.length} stocks</span>
                                               </div>
                                               
-                                              <div className="space-y-3 max-h-[450px] overflow-y-auto mb-4">
-                                                {isWatchlistNewsLoading ? (
-                                                  <div className="flex items-center justify-center py-8">
-                                                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-                                                  </div>
-                                                ) : watchlistNews.length > 0 ? (
-                                                  watchlistNews.map((item, index) => (
-                                                    <div 
-                                                      key={index} 
-                                                      className="p-3 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer border border-gray-700"
-                                                      onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
-                                                      data-testid={`news-item-${index}`}
-                                                    >
-                                                      <h4 className="text-gray-200 font-medium text-sm mb-2 hover:text-gray-100 transition-colors line-clamp-2">
-                                                        {item.title} <ExternalLink className="h-3 w-3 inline ml-1" />
-                                                      </h4>
-                                                      {item.description && (
-                                                        <p className="text-gray-400 text-xs mb-2 line-clamp-2">{item.description}</p>
-                                                      )}
-                                                      <div className="flex items-center justify-between">
-                                                        <span className="text-gray-500 text-xs">{item.source}</span>
-                                                        <span className="text-gray-500 text-xs">{getWatchlistNewsRelativeTime(item.publishedAt)}</span>
+                                              {/* Search to add stocks */}
+                                              <div className="relative mb-3">
+                                                <Input
+                                                  placeholder="Search to add stock..."
+                                                  value={watchlistSearchQuery}
+                                                  onChange={(e) => {
+                                                    setWatchlistSearchQuery(e.target.value);
+                                                    searchWatchlistStocks(e.target.value);
+                                                  }}
+                                                  className="h-8 text-xs bg-gray-800 border-gray-600 text-gray-200 placeholder:text-gray-500"
+                                                  data-testid="input-watchlist-search"
+                                                />
+                                                {watchlistSearchResults.length > 0 && (
+                                                  <div className="absolute top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg z-50 max-h-40 overflow-y-auto">
+                                                    {watchlistSearchResults.map((result, idx) => (
+                                                      <div
+                                                        key={idx}
+                                                        className="px-3 py-2 border-b border-gray-700 last:border-b-0 flex items-center justify-between hover:bg-gray-700/50 transition-colors"
+                                                        data-testid={`watchlist-search-result-${idx}`}
+                                                      >
+                                                        <div className="flex-1 min-w-0">
+                                                          <div className="text-xs font-medium text-gray-200">{result.displayName || result.symbol}</div>
+                                                          <div className="text-xs text-gray-400 truncate">{result.name}</div>
+                                                        </div>
+                                                        <button
+                                                          onClick={() => {
+                                                            addToWatchlist(result);
+                                                            setWatchlistSearchQuery('');
+                                                          }}
+                                                          className="ml-2 flex-shrink-0 text-gray-400 hover:text-green-400 transition-colors p-1"
+                                                          data-testid={`button-add-watchlist-${idx}`}
+                                                        >
+                                                          <Plus className="h-4 w-4" />
+                                                        </button>
                                                       </div>
-                                                    </div>
-                                                  ))
-                                                ) : (
-                                                  <div className="text-center py-8 text-gray-500">
-                                                    <Newspaper className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                                    <p className="text-sm">No news available for {cleanSymbolForNews}</p>
-                                                    <p className="text-xs mt-1">Select a stock from the watchlist</p>
+                                                    ))}
                                                   </div>
                                                 )}
                                               </div>
-
-                                              {/* Quarterly Results for Selected Stock Only */}
-                                              <div className="border-t border-gray-700 pt-4">
-                                                <div className="flex items-center justify-between mb-3">
-                                                  <div className="flex items-center gap-2">
-                                                    <TrendingUp className="h-4 w-4 text-gray-400" />
-                                                    <h3 className="text-sm font-medium text-gray-200">
-                                                      Quarterly Performance Trend <span className="text-xs text-gray-500 ml-1">(Net profit)</span>
-                                                    </h3>
-                                                  </div>
-                                                  <div className="flex items-center gap-2">
-                                                    {searchResultsNewsSymbol && (
-                                                      <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={async () => {
-                                                          setIsWatchlistQuarterlyLoading(true);
-                                                          try {
-                                                            const cleanSymbol = searchResultsNewsSymbol.replace("-EQ", "").replace("-BE", "");
-                                                            const response = await fetch(`/api/quarterly-results/${cleanSymbol}`);
-                                                            if (response.ok) {
-                                                              const data = await response.json();
-                                                              setAllWatchlistQuarterlyData(prev => ({
-                                                                ...prev,
-                                                                [searchResultsNewsSymbol]: data.results || []
-                                                              }));
-                                                            }
-                                                          } catch (error) {
-                                                            console.error("Error refreshing quarterly data:", error);
-                                                          } finally {
-                                                            setIsWatchlistQuarterlyLoading(false);
-                                                          }
-                                                        }}
-                                                        data-testid="button-refresh-quarterly"
-                                                        className="h-7 px-2"
-                                                      >
-                                                        <RefreshCw className={`h-3 w-3 ${isWatchlistQuarterlyLoading ? "animate-spin" : ""}`} />
-                                                      </Button>
-                                                    )}
-                                                    {(() => {
-                                                      if (!searchResultsNewsSymbol) return null;
-                                                      const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
-                                                      const hasTrendingUp = quarterlyData.length > 1 && 
-                                                        parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
-                                                      return (
-                                                        <span className={`text-xs px-2 py-1 rounded ${hasTrendingUp ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                                          {hasTrendingUp ? '↑ Uptrend' : '↓ Downtrend'}
-                                                        </span>
-                                                      );
-                                                    })()}
-                                                  </div>
-                                                </div>
-
-                                                <div className="space-y-1.5">
-                                                  {isWatchlistQuarterlyLoading ? (
-                                                    <div className="flex items-center justify-center py-8">
-                                                      <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                                              
+                                              {/* Watchlist Items */}
+                                              <div className="space-y-1 max-h-48 overflow-y-auto">
+                                                {watchlistSymbols.map((stock, idx) => (
+                                                  <div
+                                                    key={stock.symbol}
+                                                    className={`flex items-center justify-between px-2 py-2 rounded-lg cursor-pointer transition-colors ${
+                                                      selectedWatchlistSymbol === stock.symbol 
+                                                        ? 'bg-blue-600/30 border border-blue-500/50' 
+                                                        : 'hover:bg-gray-700/50'
+                                                    }`}
+                                                    onClick={() => setSelectedWatchlistSymbol(stock.symbol)}
+                                                    data-testid={`watchlist-item-${idx}`}
+                                                  >
+                                                    <div className="flex items-center gap-2">
+                                                      <div className={`w-2 h-2 rounded-full ${
+                                                        selectedWatchlistSymbol === stock.symbol ? 'bg-blue-400' : 'bg-gray-500'
+                                                      }`} />
+                                                      <div>
+                                                        <div className="text-xs font-medium text-gray-200">{stock.displayName || stock.symbol.replace('-EQ', '')}</div>
+                                                        <div className="text-xs text-gray-500 truncate max-w-[150px]">{stock.name}</div>
+                                                      </div>
                                                     </div>
-                                                  ) : searchResultsNewsSymbol ? (() => {
+                                                    <button
+                                                      onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        removeFromWatchlist(stock.symbol);
+                                                      }}
+                                                      className="text-gray-500 hover:text-red-400 transition-colors p-1"
+                                                      data-testid={`button-remove-watchlist-${idx}`}
+                                                    >
+                                                      <X className="h-3 w-3" />
+                                                    </button>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                            </div>
+                                            
+                                            {/* Right Column - Related News */}
+                                            <div className="flex-1 bg-gray-900/50 rounded-lg p-4 border border-gray-600">
+                                            <div className="flex items-center justify-between mb-4">
+                                              <div className="flex items-center gap-2">
+                                                <Clock className="h-4 w-4 text-gray-400" />
+                                                <h3 className="text-sm font-medium text-gray-200">
+                                                  Related News for {cleanSymbolForNews}
+                                                </h3>
+                                              </div>
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-7 text-xs text-gray-400 hover:text-gray-200"
+                                                onClick={() => {
+                                                  setIsWatchlistNewsLoading(true);
+                                                  fetch(`/api/stock-news/${cleanSymbolForNews}?refresh=${Date.now()}`)
+                                                    .then(res => res.json())
+                                                    .then(data => {
+                                                      const newsItems = Array.isArray(data) ? data : (data.news || []);
+                                                      setWatchlistNews(newsItems.slice(0, 20));
+                                                    })
+                                                    .finally(() => setIsWatchlistNewsLoading(false));
+                                                }}
+                                                data-testid="button-refresh-news"
+                                              >
+                                                <RefreshCw className={`h-3 w-3 mr-1 ${isWatchlistNewsLoading ? 'animate-spin' : ''}`} />
+                                                Refresh
+                                              </Button>
+                                            </div>
+                                            
+                                            <div className="space-y-3 max-h-[450px] overflow-y-auto mb-4">
+                                              {isWatchlistNewsLoading ? (
+                                                <div className="flex items-center justify-center py-8">
+                                                  <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                                                </div>
+                                              ) : watchlistNews.length > 0 ? (
+                                                watchlistNews.map((item, index) => (
+                                                  <div 
+                                                    key={index} 
+                                                    className="p-3 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer border border-gray-700"
+                                                    onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
+                                                    data-testid={`news-item-${index}`}
+                                                  >
+                                                    <h4 className="text-gray-200 font-medium text-sm mb-2 hover:text-gray-100 transition-colors line-clamp-2">
+                                                      {item.title} <ExternalLink className="h-3 w-3 inline ml-1" />
+                                                    </h4>
+                                                    {item.description && (
+                                                      <p className="text-gray-400 text-xs mb-2 line-clamp-2">{item.description}</p>
+                                                    )}
+                                                    <div className="flex items-center justify-between">
+                                                      <span className="text-gray-500 text-xs">{item.source}</span>
+                                                      <span className="text-gray-500 text-xs">{getWatchlistNewsRelativeTime(item.publishedAt)}</span>
+                                                    </div>
+                                                  </div>
+                                                ))
+                                              ) : (
+                                                <div className="text-center py-8 text-gray-500">
+                                                  <Newspaper className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                                  <p className="text-sm">No news available for {cleanSymbolForNews}</p>
+                                                  <p className="text-xs mt-1">Select a stock from the watchlist</p>
+                                                </div>
+                                              )}
+                                            </div>
+
+                                            {/* Quarterly Results for Selected Stock Only */}
+                                            <div className="border-t border-gray-700 pt-4">
+                                              <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                  <TrendingUp className="h-4 w-4 text-gray-400" />
+                                                  <h3 className="text-sm font-medium text-gray-200">
+                                                    Quarterly Performance Trend <span className="text-xs text-gray-500 ml-1">(Net profit)</span>
+                                                  </h3>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                  {searchResultsNewsSymbol && (
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={async () => {
+                                                        setIsWatchlistQuarterlyLoading(true);
+                                                        try {
+                                                          const cleanSymbol = searchResultsNewsSymbol.replace("-EQ", "").replace("-BE", "");
+                                                          const response = await fetch(`/api/quarterly-results/${cleanSymbol}`);
+                                                          if (response.ok) {
+                                                            const data = await response.json();
+                                                            setAllWatchlistQuarterlyData(prev => ({
+                                                              ...prev,
+                                                              [searchResultsNewsSymbol]: data.results || []
+                                                            }));
+                                                          }
+                                                        } catch (error) {
+                                                          console.error("Error refreshing quarterly data:", error);
+                                                        } finally {
+                                                          setIsWatchlistQuarterlyLoading(false);
+                                                        }
+                                                      }}
+                                                      data-testid="button-refresh-quarterly"
+                                                      className="h-7 px-2"
+                                                    >
+                                                      <RefreshCw className={`h-3 w-3 ${isWatchlistQuarterlyLoading ? "animate-spin" : ""}`} />
+                                                    </Button>
+                                                  )}
+                                                  {(() => {
+                                                    if (!searchResultsNewsSymbol) return null;
                                                     const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
-                                                    // Don't show loading state if we have data
-                                                    // The isWatchlistQuarterlyLoading at the top already handles the loading indicator
-                                                    if (!quarterlyData || quarterlyData.length === 0) {
-                                                      // Check if still loading, otherwise show no data message
-                                                      if (isWatchlistQuarterlyLoading) {
-                                                        return (
-                                                          <div className="text-center py-8 text-gray-500">
-                                                            <Loader2 className="h-5 w-5 animate-spin text-gray-400 mx-auto mb-2" />
-                                                            <p className="text-xs">Loading quarterly results...</p>
-                                                          </div>
-                                                        );
-                                                      }
+                                                    const hasTrendingUp = quarterlyData.length > 1 && 
+                                                      parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
+                                                    return (
+                                                      <span className={`text-xs px-2 py-1 rounded ${hasTrendingUp ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                                        {hasTrendingUp ? '↑ Uptrend' : '↓ Downtrend'}
+                                                      </span>
+                                                    );
+                                                  })()}
+                                                </div>
+                                              </div>
+
+                                              <div className="space-y-1.5">
+                                                {isWatchlistQuarterlyLoading ? (
+                                                  <div className="flex items-center justify-center py-8">
+                                                    <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                                                  </div>
+                                                ) : searchResultsNewsSymbol ? (() => {
+                                                  const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
+                                                  // Don't show loading state if we have data
+                                                  // The isWatchlistQuarterlyLoading at the top already handles the loading indicator
+                                                  if (!quarterlyData || quarterlyData.length === 0) {
+                                                    // Check if still loading, otherwise show no data message
+                                                    if (isWatchlistQuarterlyLoading) {
                                                       return (
-                                                        <div className="text-center py-4 text-gray-500 text-xs">
-                                                          No quarterly data available
+                                                        <div className="text-center py-8 text-gray-500">
+                                                          <Loader2 className="h-5 w-5 animate-spin text-gray-400 mx-auto mb-2" />
+                                                          <p className="text-xs">Loading quarterly results...</p>
                                                         </div>
                                                       );
                                                     }
-                                                    const hasTrendingUp = quarterlyData.length > 1 && 
-                                                      parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
-                                                    
-                                                    const chartData = quarterlyData.map((q: any) => ({
-                                                      quarter: q.quarter,
-                                                      value: parseFloat(q.revenue.replace(/,/g, '')) || 0,
-                                                      changePercent: parseFloat(q.change_percent) || 0
-                                                    }));
-                                                    
-                                                    const trendColor = hasTrendingUp ? '#22c55e' : '#ef4444';
-                                                    
-                                                    return quarterlyData.length > 0 ? (
-                                                      <>
-                                                        <div className="h-40 w-full mb-3">
-                                                          <ResponsiveContainer width="100%" height="100%">
-                                                            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
-                                                              <defs>
-                                                                <linearGradient id={`grad-${searchResultsNewsSymbol}`} x1="0" y1="0" x2="0" y2="1">
-                                                                  <stop offset="0%" stopColor={trendColor} stopOpacity={0.4} />
-                                                                  <stop offset="100%" stopColor={trendColor} stopOpacity={0.05} />
-                                                                </linearGradient>
-                                                              </defs>
-                                                              <XAxis dataKey="quarter" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-                                                              <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K Cr`} axisLine={false} tickLine={false} />
-                                                              <Tooltip 
-                                                                contentStyle={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '6px', fontSize: '11px' }}
-                                                                formatter={(value: any, name: any, props: any) => [`₹${Number(value).toLocaleString()} Cr`, 'Revenue']}
-                                                              />
-                                                              <Area 
-                                                                type="monotone" 
-                                                                dataKey="value" 
-                                                                stroke={trendColor} 
-                                                                strokeWidth={2} 
-                                                                fill={`url(#grad-${searchResultsNewsSymbol})`}
-                                                                dot={{ r: 5, stroke: trendColor, strokeWidth: 2, fill: '#1f2937' }}
-                                                                activeDot={{ r: 7, stroke: trendColor, strokeWidth: 2, fill: '#ffffff' }}
-                                                              />
-                                                            </AreaChart>
-                                                          </ResponsiveContainer>
-                                                        </div>
-                                                        <div className="flex justify-center gap-4 text-xs text-gray-400">
-                                                          <span className="flex items-center gap-1">
-                                                            <span className="w-2 h-2 rounded-full bg-green-500"></span> Positive Quarter
-                                                          </span>
-                                                          <span className="flex items-center gap-1">
-                                                            <span className="w-2 h-2 rounded-full bg-red-500"></span> Negative Quarter
-                                                          </span>
-                                                        </div>
-                                                        {/* PDF Links for Deep Analysis */}
-                                                        {quarterlyData.some((q: any) => q.pdf_url) && (
-                                                          <div className="mt-3 pt-3 border-t border-gray-700">
-                                                            <div className="flex items-center justify-between mb-2">
-                                                              <span className="text-xs font-medium text-gray-400">Quarterly Results PDFs</span>
-                                                              <a 
-                                                                href={`https://www.screener.in/company/${searchResultsNewsSymbol}/consolidated/`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="text-xs text-blue-400 hover:text-blue-300"
-                                                                data-testid="link-screener-full-report"
-                                                              >
-                                                                View Full Report
-                                                              </a>
-                                                            </div>
-                                                            <div className="flex flex-wrap gap-2">
-                                                              {quarterlyData.slice(-4).map((q: any, idx: number) => 
-                                                                q.pdf_url && (
-                                                                  <a
-                                                                    key={idx}
-                                                                    href={q.pdf_url}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded text-xs text-gray-300"
-                                                                    data-testid={`link-pdf-${idx}`}
-                                                                  >
-                                                                    <FileText className="h-3 w-3" />
-                                                                    {q.quarter}
-                                                                  </a>
-                                                                )
-                                                              )}
-                                                            </div>
-                                                          </div>
-                                                        )}
-                                                      </>
-                                                    ) : (
+                                                    return (
                                                       <div className="text-center py-4 text-gray-500 text-xs">
                                                         No quarterly data available
                                                       </div>
                                                     );
-                                                  })() : (
-                                                    <div className="text-center py-8 text-gray-500">
-                                                      <TrendingUp className="h-6 w-6 mx-auto mb-2 opacity-50" />
-                                                      <p className="text-xs">Search for a stock to see quarterly results</p>
+                                                  }
+                                                  const hasTrendingUp = quarterlyData.length > 1 && 
+                                                    parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
+                                                  
+                                                  const chartData = quarterlyData.map((q: any) => ({
+                                                    quarter: q.quarter,
+                                                    value: parseFloat(q.revenue.replace(/,/g, '')) || 0,
+                                                    changePercent: parseFloat(q.change_percent) || 0
+                                                  }));
+                                                  
+                                                  const trendColor = hasTrendingUp ? '#22c55e' : '#ef4444';
+                                                  
+                                                  return quarterlyData.length > 0 ? (
+                                                    <>
+                                                      <div className="h-40 w-full mb-3">
+                                                        <ResponsiveContainer width="100%" height="100%">
+                                                          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+                                                            <defs>
+                                                              <linearGradient id={`grad-${searchResultsNewsSymbol}`} x1="0" y1="0" x2="0" y2="1">
+                                                                <stop offset="0%" stopColor={trendColor} stopOpacity={0.4} />
+                                                                <stop offset="100%" stopColor={trendColor} stopOpacity={0.05} />
+                                                              </linearGradient>
+                                                            </defs>
+                                                            <XAxis dataKey="quarter" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                                                            <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K Cr`} axisLine={false} tickLine={false} />
+                                                            <Tooltip 
+                                                              contentStyle={{ background: '#1f2937', border: '1px solid #374151', borderRadius: '6px', fontSize: '11px' }}
+                                                              formatter={(value: any, name: any, props: any) => [`₹${Number(value).toLocaleString()} Cr`, 'Revenue']}
+                                                            />
+                                                            <Area 
+                                                              type="monotone" 
+                                                              dataKey="value" 
+                                                              stroke={trendColor} 
+                                                              strokeWidth={2} 
+                                                              fill={`url(#grad-${searchResultsNewsSymbol})`}
+                                                              dot={{ r: 5, stroke: trendColor, strokeWidth: 2, fill: '#1f2937' }}
+                                                              activeDot={{ r: 7, stroke: trendColor, strokeWidth: 2, fill: '#ffffff' }}
+                                                            />
+                                                          </AreaChart>
+                                                        </ResponsiveContainer>
+                                                      </div>
+                                                      <div className="flex justify-center gap-4 text-xs text-gray-400">
+                                                        <span className="flex items-center gap-1">
+                                                          <span className="w-2 h-2 rounded-full bg-green-500"></span> Positive Quarter
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                          <span className="w-2 h-2 rounded-full bg-red-500"></span> Negative Quarter
+                                                        </span>
+                                                      </div>
+                                                      {/* PDF Links for Deep Analysis */}
+                                                      {quarterlyData.some((q: any) => q.pdf_url) && (
+                                                        <div className="mt-3 pt-3 border-t border-gray-700">
+                                                          <div className="flex items-center justify-between mb-2">
+                                                            <span className="text-xs font-medium text-gray-400">Quarterly Results PDFs</span>
+                                                            <a 
+                                                              href={`https://www.screener.in/company/${searchResultsNewsSymbol}/consolidated/`}
+                                                              target="_blank"
+                                                              rel="noopener noreferrer"
+                                                              className="text-xs text-blue-400 hover:text-blue-300"
+                                                              data-testid="link-screener-full-report"
+                                                            >
+                                                              View Full Report
+                                                            </a>
+                                                          </div>
+                                                          <div className="flex flex-wrap gap-2">
+                                                            {quarterlyData.slice(-4).map((q: any, idx: number) => 
+                                                              q.pdf_url && (
+                                                                <a
+                                                                  key={idx}
+                                                                  href={q.pdf_url}
+                                                                  target="_blank"
+                                                                  rel="noopener noreferrer"
+                                                                  className="flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded text-xs text-gray-300"
+                                                                  data-testid={`link-pdf-${idx}`}
+                                                                >
+                                                                  <FileText className="h-3 w-3" />
+                                                                  {q.quarter}
+                                                                </a>
+                                                              )
+                                                            )}
+                                                          </div>
+                                                        </div>
+                                                      )}
+                                                    </>
+                                                  ) : (
+                                                    <div className="text-center py-4 text-gray-500 text-xs">
+                                                      No quarterly data available
                                                     </div>
-                                                  )}
-                                                </div>
+                                                  );
+                                                })() : (
+                                                  <div className="text-center py-8 text-gray-500">
+                                                    <TrendingUp className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                                                    <p className="text-xs">Search for a stock to see quarterly results</p>
+                                                  </div>
+                                                )}
                                               </div>
+                                            </div>
                                             </div>
                                           </div>
                                         );
@@ -13436,119 +13441,119 @@ ${
                                           <>
                                             {parts[0]}
                                             {chartData.length > 0 && (
-                                              <div className="my-4 bg-gray-900/50 rounded-lg p-3 border border-gray-600">
-                                                <div className="h-32 w-full">
-                                                  <ResponsiveContainer
-                                                    width="100%"
-                                                    height="100%"
+                                            <div className="my-4 bg-gray-900/50 rounded-lg p-3 border border-gray-600">
+                                              <div className="h-32 w-full">
+                                                <ResponsiveContainer
+                                                  width="100%"
+                                                  height="100%"
+                                                >
+                                                  <AreaChart
+                                                    data={chartData}
+                                                    margin={{
+                                                      top: 20,
+                                                      right: 20,
+                                                      left: 10,
+                                                      bottom: 5,
+                                                    }}
                                                   >
-                                                    <AreaChart
-                                                      data={chartData}
-                                                      margin={{
-                                                        top: 20,
-                                                        right: 20,
-                                                        left: 10,
-                                                        bottom: 5,
+                                                    <defs>
+                                                      <linearGradient
+                                                        id="aiAreaGradient"
+                                                        x1="0"
+                                                        y1="0"
+                                                        x2="0"
+                                                        y2="1"
+                                                      >
+                                                        <stop
+                                                          offset="0%"
+                                                          stopColor="rgb(107, 114, 128)"
+                                                          stopOpacity={0.6}
+                                                        />
+                                                        <stop
+                                                          offset="100%"
+                                                          stopColor="rgb(107, 114, 128)"
+                                                          stopOpacity={0.1}
+                                                        />
+                                                      </linearGradient>
+                                                    </defs>
+                                                    <XAxis
+                                                      dataKey="day"
+                                                      axisLine={false}
+                                                      tickLine={false}
+                                                      tick={false}
+                                                      className="text-slate-500 dark:text-slate-400"
+                                                    />
+                                                    <YAxis
+                                                      axisLine={false}
+                                                      tickLine={false}
+                                                      tick={{
+                                                        fontSize: 10,
+                                                        fill: "#64748b",
                                                       }}
-                                                    >
-                                                      <defs>
-                                                        <linearGradient
-                                                          id="aiAreaGradient"
-                                                          x1="0"
-                                                          y1="0"
-                                                          x2="0"
-                                                          y2="1"
-                                                        >
-                                                          <stop
-                                                            offset="0%"
-                                                            stopColor="rgb(107, 114, 128)"
-                                                            stopOpacity={0.6}
-                                                          />
-                                                          <stop
-                                                            offset="100%"
-                                                            stopColor="rgb(107, 114, 128)"
-                                                            stopOpacity={0.1}
-                                                          />
-                                                        </linearGradient>
-                                                      </defs>
-                                                      <XAxis
-                                                        dataKey="day"
-                                                        axisLine={false}
-                                                        tickLine={false}
-                                                        tick={false}
-                                                        className="text-slate-500 dark:text-slate-400"
-                                                      />
-                                                      <YAxis
-                                                        axisLine={false}
-                                                        tickLine={false}
-                                                        tick={{
-                                                          fontSize: 10,
-                                                          fill: "#64748b",
-                                                        }}
-                                                        tickFormatter={(
+                                                      tickFormatter={(
+                                                        value,
+                                                      ) =>
+                                                        `${
+                                                          value >= 0
+                                                            ? ""
+                                                            : "-"
+                                                        }${(
+                                                          Math.abs(value) /
+                                                          1000
+                                                        ).toFixed(0)}K`
+                                                      }
+                                                      domain={[
+                                                        "dataMin - 1000",
+                                                        "dataMax + 1000",
+                                                      ]}
+                                                      className="text-slate-500 dark:text-slate-400"
+                                                    />
+                                                    <Tooltip
+                                                      contentStyle={{
+                                                        background:
+                                                          "var(--background)",
+                                                        border:
+                                                          "1px solid var(--border)",
+                                                        borderRadius: "8px",
+                                                        color:
+                                                          "var(--foreground)",
+                                                        fontSize: "11px",
+                                                        padding: "6px 10px",
+                                                      }}
+                                                      formatter={(
+                                                        value: any,
+                                                      ) => [
+                                                        `${
+                                                          value >= 0
+                                                            ? "₹"
+                                                            : "-₹"
+                                                        }${Math.abs(
                                                           value,
-                                                        ) =>
-                                                          `${
-                                                            value >= 0
-                                                              ? ""
-                                                              : "-"
-                                                          }${(
-                                                            Math.abs(value) /
-                                                            1000
-                                                          ).toFixed(0)}K`
-                                                        }
-                                                        domain={[
-                                                          "dataMin - 1000",
-                                                          "dataMax + 1000",
-                                                        ]}
-                                                        className="text-slate-500 dark:text-slate-400"
-                                                      />
-                                                      <Tooltip
-                                                        contentStyle={{
-                                                          background:
-                                                            "var(--background)",
-                                                          border:
-                                                            "1px solid var(--border)",
-                                                          borderRadius: "8px",
-                                                          color:
-                                                            "var(--foreground)",
-                                                          fontSize: "11px",
-                                                          padding: "6px 10px",
-                                                        }}
-                                                        formatter={(
-                                                          value: any,
-                                                        ) => [
-                                                          `${
-                                                            value >= 0
-                                                              ? "₹"
-                                                              : "-₹"
-                                                          }${Math.abs(
-                                                            value,
-                                                          ).toLocaleString()}`,
-                                                          "Daily P&L",
-                                                        ]}
-                                                        labelFormatter={(
-                                                          label,
-                                                        ) => `${label}`}
-                                                      />
-                                                      <Area
-                                                        type="monotone"
-                                                        dataKey="value"
-                                                        stroke="#000000"
-                                                        strokeWidth={2}
-                                                        fill="url(#aiAreaGradient)"
-                                                        dot={false}
-                                                        activeDot={{
-                                                          r: 4,
-                                                          stroke: "#000000",
-                                                          strokeWidth: 1,
-                                                          fill: "#ffffff",
-                                                        }}
-                                                      />
-                                                    </AreaChart>
-                                                  </ResponsiveContainer>
-                                                </div>
+                                                        ).toLocaleString()}`,
+                                                        "Daily P&L",
+                                                      ]}
+                                                      labelFormatter={(
+                                                        label,
+                                                      ) => `${label}`}
+                                                    />
+                                                    <Area
+                                                      type="monotone"
+                                                      dataKey="value"
+                                                      stroke="#000000"
+                                                      strokeWidth={2}
+                                                      fill="url(#aiAreaGradient)"
+                                                      dot={false}
+                                                      activeDot={{
+                                                        r: 4,
+                                                        stroke: "#000000",
+                                                        strokeWidth: 1,
+                                                        fill: "#ffffff",
+                                                      }}
+                                                    />
+                                                  </AreaChart>
+                                                </ResponsiveContainer>
                                               </div>
+                                            </div>
                                             )}
                                           </>
                                         );
@@ -13578,11 +13583,11 @@ ${
                                             // Use actual revenue value from scraped data
                                             const actualRevenue = q.value || q.revenue || 0;
                                             chartData.push({
-                                              quarter: q.quarter,
-                                              value: actualRevenue, // Actual revenue in Crores
-                                              revenue: actualRevenue,
-                                              trend: q.changePercent >= 0 ? 'positive' : 'negative',
-                                              changePercent: q.changePercent || 0
+                                            quarter: q.quarter,
+                                            value: actualRevenue, // Actual revenue in Crores
+                                            revenue: actualRevenue,
+                                            trend: q.changePercent >= 0 ? 'positive' : 'negative',
+                                            changePercent: q.changePercent || 0
                                             });
                                           });
                                         }
@@ -13591,8 +13596,8 @@ ${
                                         const overallTrend = companyInsights?.trend || 
                                           (chartData.length > 1 
                                             ? chartData[chartData.length - 1].value > chartData[0].value 
-                                              ? 'positive' 
-                                              : 'negative'
+                                            ? 'positive' 
+                                            : 'negative'
                                             : 'neutral');
                                         
                                         const trendColor = overallTrend === 'positive' ? '#22c55e' : overallTrend === 'negative' ? '#ef4444' : '#6b7280';
@@ -13601,192 +13606,192 @@ ${
                                           <>
                                             {parts[0]}
                                             {chartData.length > 0 && (
-                                              <div className="my-4 bg-gray-900/50 rounded-lg p-4 border border-gray-600">
-                                                <div className="flex items-center justify-between mb-3">
-                                                  <span className="text-sm font-medium text-gray-300">Quarterly Performance Trend</span>
-                                                  <span className={`text-xs px-2 py-1 rounded ${overallTrend === 'positive' ? 'bg-green-500/20 text-green-400' : overallTrend === 'negative' ? 'bg-red-500/20 text-red-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                                                    {overallTrend === 'positive' ? '↑ Uptrend' : overallTrend === 'negative' ? '↓ Downtrend' : '→ Neutral'}
-                                                  </span>
-                                                </div>
-                                                <div className="h-40 w-full">
-                                                  <ResponsiveContainer
-                                                    width="100%"
-                                                    height="100%"
-                                                  >
-                                                    <AreaChart
-                                                      data={chartData}
-                                                      margin={{
-                                                        top: 10,
-                                                        right: 10,
-                                                        left: 10,
-                                                        bottom: 20,
-                                                      }}
-                                                    >
-                                                      <defs>
-                                                        <linearGradient
-                                                          id="companyInsightsGradient"
-                                                          x1="0"
-                                                          y1="0"
-                                                          x2="0"
-                                                          y2="1"
-                                                        >
-                                                          <stop
-                                                            offset="0%"
-                                                            stopColor={trendColor}
-                                                            stopOpacity={0.4}
-                                                          />
-                                                          <stop
-                                                            offset="100%"
-                                                            stopColor={trendColor}
-                                                            stopOpacity={0.05}
-                                                          />
-                                                        </linearGradient>
-                                                      </defs>
-                                                      <XAxis
-                                                        dataKey="quarter"
-                                                        axisLine={false}
-                                                        tickLine={false}
-                                                        tick={{
-                                                          fontSize: 11,
-                                                          fill: "#9ca3af",
-                                                        }}
-                                                      />
-                                                      <YAxis
-                                                        axisLine={false}
-                                                        tickLine={false}
-                                                        tick={{
-                                                          fontSize: 10,
-                                                          fill: "#6b7280",
-                                                        }}
-                                                        tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K Cr`}
-                                                        domain={['dataMin - 1000', 'dataMax + 1000']}
-                                                      />
-                                                      <Tooltip
-                                                        contentStyle={{
-                                                          background: "#1f2937",
-                                                          border: "1px solid #374151",
-                                                          borderRadius: "8px",
-                                                          color: "#f3f4f6",
-                                                          fontSize: "12px",
-                                                          padding: "8px 12px",
-                                                        }}
-                                                        formatter={(value: any, name: any, props: any) => [
-                                                          `₹${Number(value).toLocaleString()} Cr (${props.payload.changePercent >= 0 ? '+' : ''}${props.payload.changePercent.toFixed(2)}%)`,
-                                                          "Revenue"
-                                                        ]}
-                                                        labelFormatter={(label) => `${label}`}
-                                                      />
-                                                      <Area
-                                                        type="monotone"
-                                                        dataKey="value"
-                                                        stroke={trendColor}
-                                                        strokeWidth={2}
-                                                        fill="url(#companyInsightsGradient)"
-                                                        dot={{
-                                                          r: 4,
-                                                          stroke: trendColor,
-                                                          strokeWidth: 2,
-                                                          fill: "#1f2937",
-                                                        }}
-                                                        activeDot={{
-                                                          r: 6,
-                                                          stroke: trendColor,
-                                                          strokeWidth: 2,
-                                                          fill: "#ffffff",
-                                                        }}
-                                                      />
-                                                    </AreaChart>
-                                                  </ResponsiveContainer>
-                                                </div>
-                                                <div className="flex justify-center gap-4 mt-2 text-xs text-gray-400">
-                                                  <span className="flex items-center gap-1">
-                                                    <span className="w-2 h-2 rounded-full bg-green-500"></span> Positive Quarter
-                                                  </span>
-                                                  <span className="flex items-center gap-1">
-                                                    <span className="w-2 h-2 rounded-full bg-red-500"></span> Negative Quarter
-                                                  </span>
-                                                </div>
+                                            <div className="my-4 bg-gray-900/50 rounded-lg p-4 border border-gray-600">
+                                              <div className="flex items-center justify-between mb-3">
+                                                <span className="text-sm font-medium text-gray-300">Quarterly Performance Trend</span>
+                                                <span className={`text-xs px-2 py-1 rounded ${overallTrend === 'positive' ? 'bg-green-500/20 text-green-400' : overallTrend === 'negative' ? 'bg-red-500/20 text-red-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                                                  {overallTrend === 'positive' ? '↑ Uptrend' : overallTrend === 'negative' ? '↓ Downtrend' : '→ Neutral'}
+                                                </span>
                                               </div>
+                                              <div className="h-40 w-full">
+                                                <ResponsiveContainer
+                                                  width="100%"
+                                                  height="100%"
+                                                >
+                                                  <AreaChart
+                                                    data={chartData}
+                                                    margin={{
+                                                      top: 10,
+                                                      right: 10,
+                                                      left: 10,
+                                                      bottom: 20,
+                                                    }}
+                                                  >
+                                                    <defs>
+                                                      <linearGradient
+                                                        id="companyInsightsGradient"
+                                                        x1="0"
+                                                        y1="0"
+                                                        x2="0"
+                                                        y2="1"
+                                                      >
+                                                        <stop
+                                                          offset="0%"
+                                                          stopColor={trendColor}
+                                                          stopOpacity={0.4}
+                                                        />
+                                                        <stop
+                                                          offset="100%"
+                                                          stopColor={trendColor}
+                                                          stopOpacity={0.05}
+                                                        />
+                                                      </linearGradient>
+                                                    </defs>
+                                                    <XAxis
+                                                      dataKey="quarter"
+                                                      axisLine={false}
+                                                      tickLine={false}
+                                                      tick={{
+                                                        fontSize: 11,
+                                                        fill: "#9ca3af",
+                                                      }}
+                                                    />
+                                                    <YAxis
+                                                      axisLine={false}
+                                                      tickLine={false}
+                                                      tick={{
+                                                        fontSize: 10,
+                                                        fill: "#6b7280",
+                                                      }}
+                                                      tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K Cr`}
+                                                      domain={['dataMin - 1000', 'dataMax + 1000']}
+                                                    />
+                                                    <Tooltip
+                                                      contentStyle={{
+                                                        background: "#1f2937",
+                                                        border: "1px solid #374151",
+                                                        borderRadius: "8px",
+                                                        color: "#f3f4f6",
+                                                        fontSize: "12px",
+                                                        padding: "8px 12px",
+                                                      }}
+                                                      formatter={(value: any, name: any, props: any) => [
+                                                        `₹${Number(value).toLocaleString()} Cr (${props.payload.changePercent >= 0 ? '+' : ''}${props.payload.changePercent.toFixed(2)}%)`,
+                                                        "Revenue"
+                                                      ]}
+                                                      labelFormatter={(label) => `${label}`}
+                                                    />
+                                                    <Area
+                                                      type="monotone"
+                                                      dataKey="value"
+                                                      stroke={trendColor}
+                                                      strokeWidth={2}
+                                                      fill="url(#companyInsightsGradient)"
+                                                      dot={{
+                                                        r: 4,
+                                                        stroke: trendColor,
+                                                        strokeWidth: 2,
+                                                        fill: "#1f2937",
+                                                      }}
+                                                      activeDot={{
+                                                        r: 6,
+                                                        stroke: trendColor,
+                                                        strokeWidth: 2,
+                                                        fill: "#ffffff",
+                                                      }}
+                                                    />
+                                                  </AreaChart>
+                                                </ResponsiveContainer>
+                                              </div>
+                                              <div className="flex justify-center gap-4 mt-2 text-xs text-gray-400">
+                                                <span className="flex items-center gap-1">
+                                                  <span className="w-2 h-2 rounded-full bg-green-500"></span> Positive Quarter
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                  <span className="w-2 h-2 rounded-full bg-red-500"></span> Negative Quarter
+                                                </span>
+                                              </div>
+                                            </div>
                                             )}
                                             
                                             {/* Profit & Loss Statement Table */}
                                             {companyInsights?.annualFinancials?.profitLoss && companyInsights.annualFinancials.profitLoss.length > 0 && (
-                                              <div className="my-4 bg-gray-900/50 rounded-lg p-4 border border-gray-600">
-                                                <div className="flex items-center justify-between mb-3">
-                                                  <span className="text-sm font-medium text-gray-300">Profit & Loss Statement (in Cr)</span>
-                                                  <span className="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-400">
-                                                    Annual Data
-                                                  </span>
-                                                </div>
-                                                <div className="overflow-x-auto">
-                                                  <table className="w-full text-sm">
-                                                    <thead>
-                                                      <tr className="border-b border-gray-200 dark:border-gray-700">
-                                                        <th className="text-left py-2 px-2 text-gray-400 font-medium">Particulars</th>
-                                                        {companyInsights.annualFinancials.years.slice(0, 5).map((year: string) => (
-                                                          <th key={year} className="text-right py-2 px-2 text-gray-400 font-medium">{year}</th>
-                                                        ))}
-                                                      </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                      {companyInsights.annualFinancials.profitLoss.map((row: any, idx: number) => (
-                                                        <tr key={idx} className={`border-b border-gray-800 ${row.label.toLowerCase().includes('net profit') || row.label.toLowerCase().includes('eps') ? 'bg-gray-800/30 font-medium' : ''}`}>
-                                                          <td className="py-2 px-2 text-gray-300">{row.label}</td>
-                                                          {row.values.slice(0, 5).map((v: any, vIdx: number) => {
-                                                            const numVal = typeof v.value === 'string' ? parseFloat(v.value.replace(/,/g, '')) : Number(v.value);
-                                                            const displayVal = isNaN(numVal) ? v.value : numVal.toLocaleString();
-                                                            return (
-                                                              <td key={vIdx} className={`text-right py-2 px-2 ${numVal >= 0 ? 'text-gray-200' : 'text-red-400'}`}>
-                                                                {displayVal}
-                                                              </td>
-                                                            );
-                                                          })}
-                                                        </tr>
-                                                      ))}
-                                                    </tbody>
-                                                  </table>
-                                                </div>
+                                            <div className="my-4 bg-gray-900/50 rounded-lg p-4 border border-gray-600">
+                                              <div className="flex items-center justify-between mb-3">
+                                                <span className="text-sm font-medium text-gray-300">Profit & Loss Statement (in Cr)</span>
+                                                <span className="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-400">
+                                                  Annual Data
+                                                </span>
                                               </div>
+                                              <div className="overflow-x-auto">
+                                                <table className="w-full text-sm">
+                                                  <thead>
+                                                    <tr className="border-b border-gray-200 dark:border-gray-700">
+                                                      <th className="text-left py-2 px-2 text-gray-400 font-medium">Particulars</th>
+                                                      {companyInsights.annualFinancials.years.slice(0, 5).map((year: string) => (
+                                                        <th key={year} className="text-right py-2 px-2 text-gray-400 font-medium">{year}</th>
+                                                      ))}
+                                                    </tr>
+                                                  </thead>
+                                                  <tbody>
+                                                    {companyInsights.annualFinancials.profitLoss.map((row: any, idx: number) => (
+                                                      <tr key={idx} className={`border-b border-gray-800 ${row.label.toLowerCase().includes('net profit') || row.label.toLowerCase().includes('eps') ? 'bg-gray-800/30 font-medium' : ''}`}>
+                                                        <td className="py-2 px-2 text-gray-300">{row.label}</td>
+                                                        {row.values.slice(0, 5).map((v: any, vIdx: number) => {
+                                                          const numVal = typeof v.value === 'string' ? parseFloat(v.value.replace(/,/g, '')) : Number(v.value);
+                                                          const displayVal = isNaN(numVal) ? v.value : numVal.toLocaleString();
+                                                          return (
+                                                            <td key={vIdx} className={`text-right py-2 px-2 ${numVal >= 0 ? 'text-gray-200' : 'text-red-400'}`}>
+                                                              {displayVal}
+                                                            </td>
+                                                          );
+                                                        })}
+                                                      </tr>
+                                                    ))}
+                                                  </tbody>
+                                                </table>
+                                              </div>
+                                            </div>
                                             )}
                                             
                                             {/* Balance Sheet Table */}
                                             {companyInsights?.annualFinancials?.balanceSheet && companyInsights.annualFinancials.balanceSheet.length > 0 && (
-                                              <div className="my-4 bg-gray-900/50 rounded-lg p-4 border border-gray-600">
-                                                <div className="flex items-center justify-between mb-3">
-                                                  <span className="text-sm font-medium text-gray-300">Balance Sheet (in Cr)</span>
-                                                  <span className="text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-400">
-                                                    Annual Data
-                                                  </span>
-                                                </div>
-                                                <div className="overflow-x-auto">
-                                                  <table className="w-full text-sm">
-                                                    <thead>
-                                                      <tr className="border-b border-gray-700">
-                                                        <th className="text-left py-2 px-2 text-gray-400 font-medium">Particulars</th>
-                                                        {companyInsights.annualFinancials.years.slice(0, 5).map((year: string) => (
-                                                          <th key={year} className="text-right py-2 px-2 text-gray-400 font-medium">{year}</th>
-                                                        ))}
-                                                      </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                      {companyInsights.annualFinancials.balanceSheet.map((row: any, idx: number) => (
-                                                        <tr key={idx} className={`border-b border-gray-800 ${row.label.toLowerCase().includes('total assets') || row.label.toLowerCase().includes('total liabilities') ? 'bg-gray-800/30 font-medium' : ''}`}>
-                                                          <td className="py-2 px-2 text-gray-300">{row.label}</td>
-                                                          {row.values.slice(0, 5).map((v: any, vIdx: number) => {
-                                                            const numVal = typeof v.value === 'string' ? parseFloat(v.value.replace(/,/g, '')) : Number(v.value);
-                                                            const displayVal = isNaN(numVal) ? v.value : numVal.toLocaleString();
-                                                            return (
-                                                              <td key={vIdx} className={`text-right py-2 px-2 ${numVal >= 0 ? 'text-gray-200' : 'text-red-400'}`}>
-                                                                {displayVal}
-                                                              </td>
-                                                            );
-                                                          })}
-                                                        </tr>
-                                                      ))}
-                                                    </tbody>
-                                                  </table>
-                                                </div>
+                                            <div className="my-4 bg-gray-900/50 rounded-lg p-4 border border-gray-600">
+                                              <div className="flex items-center justify-between mb-3">
+                                                <span className="text-sm font-medium text-gray-300">Balance Sheet (in Cr)</span>
+                                                <span className="text-xs px-2 py-1 rounded bg-purple-500/20 text-purple-400">
+                                                  Annual Data
+                                                </span>
                                               </div>
+                                              <div className="overflow-x-auto">
+                                                <table className="w-full text-sm">
+                                                  <thead>
+                                                    <tr className="border-b border-gray-700">
+                                                      <th className="text-left py-2 px-2 text-gray-400 font-medium">Particulars</th>
+                                                      {companyInsights.annualFinancials.years.slice(0, 5).map((year: string) => (
+                                                        <th key={year} className="text-right py-2 px-2 text-gray-400 font-medium">{year}</th>
+                                                      ))}
+                                                    </tr>
+                                                  </thead>
+                                                  <tbody>
+                                                    {companyInsights.annualFinancials.balanceSheet.map((row: any, idx: number) => (
+                                                      <tr key={idx} className={`border-b border-gray-800 ${row.label.toLowerCase().includes('total assets') || row.label.toLowerCase().includes('total liabilities') ? 'bg-gray-800/30 font-medium' : ''}`}>
+                                                        <td className="py-2 px-2 text-gray-300">{row.label}</td>
+                                                        {row.values.slice(0, 5).map((v: any, vIdx: number) => {
+                                                          const numVal = typeof v.value === 'string' ? parseFloat(v.value.replace(/,/g, '')) : Number(v.value);
+                                                          const displayVal = isNaN(numVal) ? v.value : numVal.toLocaleString();
+                                                          return (
+                                                            <td key={vIdx} className={`text-right py-2 px-2 ${numVal >= 0 ? 'text-gray-200' : 'text-red-400'}`}>
+                                                              {displayVal}
+                                                            </td>
+                                                          );
+                                                        })}
+                                                      </tr>
+                                                    ))}
+                                                  </tbody>
+                                                </table>
+                                              </div>
+                                            </div>
                                             )}
                                             {parts[1] || ""}
                                           </>
@@ -14286,65 +14291,65 @@ ${
                                           {/* Search to add stocks */}
                                           <div className="relative mb-2">
                                             <Input
-                                              placeholder="Search to add stock..."
-                                              value={watchlistSearchQuery}
-                                              onChange={(e) => {
-                                                setWatchlistSearchQuery(e.target.value);
-                                                searchWatchlistStocks(e.target.value);
-                                              }}
-                                              className="h-7 text-xs bg-gray-900 border-gray-600 text-gray-200 placeholder:text-gray-500"
-                                              data-testid="input-watchlist-search-mobile"
+                                            placeholder="Search to add stock..."
+                                            value={watchlistSearchQuery}
+                                            onChange={(e) => {
+                                              setWatchlistSearchQuery(e.target.value);
+                                              searchWatchlistStocks(e.target.value);
+                                            }}
+                                            className="h-7 text-xs bg-gray-900 border-gray-600 text-gray-200 placeholder:text-gray-500"
+                                            data-testid="input-watchlist-search-mobile"
                                             />
                                             {watchlistSearchResults.length > 0 && (
-                                              <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-gray-600 rounded-lg z-50 max-h-32 overflow-y-auto">
-                                                {watchlistSearchResults.map((result, idx) => (
-                                                  <div
-                                                    key={idx}
-                                                    className="px-2 py-1.5 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
-                                                    onClick={() => addToWatchlist(result)}
-                                                    data-testid={`mobile-watchlist-search-result-${idx}`}
-                                                  >
-                                                    <div className="text-xs font-medium text-gray-200">{result.displayName || result.symbol}</div>
-                                                    <div className="text-xs text-gray-400">{result.name}</div>
-                                                  </div>
-                                                ))}
-                                              </div>
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-gray-600 rounded-lg z-50 max-h-32 overflow-y-auto">
+                                              {watchlistSearchResults.map((result, idx) => (
+                                                <div
+                                                  key={idx}
+                                                  className="px-2 py-1.5 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
+                                                  onClick={() => addToWatchlist(result)}
+                                                  data-testid={`mobile-watchlist-search-result-${idx}`}
+                                                >
+                                                  <div className="text-xs font-medium text-gray-200">{result.displayName || result.symbol}</div>
+                                                  <div className="text-xs text-gray-400">{result.name}</div>
+                                                </div>
+                                              ))}
+                                            </div>
                                             )}
                                           </div>
                                           
                                           {/* Watchlist Items */}
                                           <div className="space-y-1 max-h-36 overflow-y-auto">
                                             {watchlistSymbols.map((stock, idx) => (
-                                              <div
-                                                key={stock.symbol}
-                                                className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
-                                                  selectedWatchlistSymbol === stock.symbol 
-                                                    ? 'bg-blue-600/30 border border-blue-500/50' 
-                                                    : 'hover:bg-gray-700/50'
-                                                }`}
-                                                onClick={() => setSelectedWatchlistSymbol(stock.symbol)}
-                                                data-testid={`mobile-watchlist-item-${idx}`}
-                                              >
-                                                <div className="flex items-center gap-2">
-                                                  <div className={`w-1.5 h-1.5 rounded-full ${
-                                                    selectedWatchlistSymbol === stock.symbol ? 'bg-blue-400' : 'bg-gray-500'
-                                                  }`} />
-                                                  <div>
-                                                    <div className="text-xs font-medium text-gray-200">{stock.displayName || stock.symbol.replace('-EQ', '')}</div>
-                                                    <div className="text-xs text-gray-500 truncate max-w-[140px]">{stock.name}</div>
-                                                  </div>
+                                            <div
+                                              key={stock.symbol}
+                                              className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
+                                                selectedWatchlistSymbol === stock.symbol 
+                                                  ? 'bg-blue-600/30 border border-blue-500/50' 
+                                                  : 'hover:bg-gray-700/50'
+                                              }`}
+                                              onClick={() => setSelectedWatchlistSymbol(stock.symbol)}
+                                              data-testid={`mobile-watchlist-item-${idx}`}
+                                            >
+                                              <div className="flex items-center gap-2">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${
+                                                  selectedWatchlistSymbol === stock.symbol ? 'bg-blue-400' : 'bg-gray-500'
+                                                }`} />
+                                                <div>
+                                                  <div className="text-xs font-medium text-gray-200">{stock.displayName || stock.symbol.replace('-EQ', '')}</div>
+                                                  <div className="text-xs text-gray-500 truncate max-w-[140px]">{stock.name}</div>
                                                 </div>
-                                                <button
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    removeFromWatchlist(stock.symbol);
-                                                  }}
-                                                  className="text-gray-500 hover:text-red-400 transition-colors p-0.5"
-                                                  data-testid={`mobile-button-remove-watchlist-${idx}`}
-                                                >
-                                                  <X className="h-3 w-3" />
-                                                </button>
                                               </div>
+                                              <button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  removeFromWatchlist(stock.symbol);
+                                                }}
+                                                className="text-gray-500 hover:text-red-400 transition-colors p-0.5"
+                                                data-testid={`mobile-button-remove-watchlist-${idx}`}
+                                              >
+                                                <X className="h-3 w-3" />
+                                              </button>
+                                            </div>
                                             ))}
                                           </div>
                                         </div>
@@ -14353,59 +14358,59 @@ ${
                                         <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
                                           <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-1.5">
-                                              <Clock className="h-3 w-3 text-gray-400" />
-                                              <h4 className="text-xs font-medium text-gray-200">
-                                                News: {selectedWatchlistSymbol.replace('-EQ', '').replace('-BE', '')}
-                                              </h4>
+                                            <Clock className="h-3 w-3 text-gray-400" />
+                                            <h4 className="text-xs font-medium text-gray-200">
+                                              News: {selectedWatchlistSymbol.replace('-EQ', '').replace('-BE', '')}
+                                            </h4>
                                             </div>
                                             <Button
-                                              variant="ghost"
-                                              size="sm"
-                                              className="h-6 text-xs text-gray-400 hover:text-gray-200 px-2"
-                                              onClick={() => {
-                                                const cleanSymbol = selectedWatchlistSymbol.replace('-EQ', '').replace('-BE', '');
-                                                setIsWatchlistNewsLoading(true);
-                                                fetch(`/api/stock-news/${cleanSymbol}?refresh=${Date.now()}`)
-                                                  .then(res => res.json())
-                                                  .then(data => {
-                                                    const newsItems = Array.isArray(data) ? data : (data.news || []);
-                                                    setWatchlistNews(newsItems.slice(0, 20));
-                                                  })
-                                                  .finally(() => setIsWatchlistNewsLoading(false));
-                                              }}
-                                              data-testid="mobile-button-refresh-news"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-6 text-xs text-gray-400 hover:text-gray-200 px-2"
+                                            onClick={() => {
+                                              const cleanSymbol = selectedWatchlistSymbol.replace('-EQ', '').replace('-BE', '');
+                                              setIsWatchlistNewsLoading(true);
+                                              fetch(`/api/stock-news/${cleanSymbol}?refresh=${Date.now()}`)
+                                                .then(res => res.json())
+                                                .then(data => {
+                                                  const newsItems = Array.isArray(data) ? data : (data.news || []);
+                                                  setWatchlistNews(newsItems.slice(0, 20));
+                                                })
+                                                .finally(() => setIsWatchlistNewsLoading(false));
+                                            }}
+                                            data-testid="mobile-button-refresh-news"
                                             >
-                                              <RefreshCw className={`h-3 w-3 ${isWatchlistNewsLoading ? 'animate-spin' : ''}`} />
+                                            <RefreshCw className={`h-3 w-3 ${isWatchlistNewsLoading ? 'animate-spin' : ''}`} />
                                             </Button>
                                           </div>
                                           
                                           <div className="space-y-2 max-h-48 overflow-y-auto">
                                             {isWatchlistNewsLoading ? (
-                                              <div className="flex items-center justify-center py-4">
-                                                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                                              </div>
+                                            <div className="flex items-center justify-center py-4">
+                                              <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                                            </div>
                                             ) : watchlistNews.length > 0 ? (
-                                              watchlistNews.slice(0, 10).map((item, index) => (
-                                                <div 
-                                                  key={index} 
-                                                  className="p-2 bg-gray-900/50 rounded hover:bg-gray-700/50 transition-colors cursor-pointer"
-                                                  onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
-                                                  data-testid={`mobile-news-item-${index}`}
-                                                >
-                                                  <h5 className="text-gray-200 font-medium text-xs mb-1 line-clamp-2">
-                                                    {item.title} <ExternalLink className="h-2.5 w-2.5 inline ml-0.5" />
-                                                  </h5>
-                                                  <div className="flex items-center justify-between">
-                                                    <span className="text-gray-500 text-xs">{item.source}</span>
-                                                    <span className="text-gray-500 text-xs">{getWatchlistNewsRelativeTime(item.publishedAt)}</span>
-                                                  </div>
+                                            watchlistNews.slice(0, 10).map((item, index) => (
+                                              <div 
+                                                key={index} 
+                                                className="p-2 bg-gray-900/50 rounded hover:bg-gray-700/50 transition-colors cursor-pointer"
+                                                onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
+                                                data-testid={`mobile-news-item-${index}`}
+                                              >
+                                                <h5 className="text-gray-200 font-medium text-xs mb-1 line-clamp-2">
+                                                  {item.title} <ExternalLink className="h-2.5 w-2.5 inline ml-0.5" />
+                                                </h5>
+                                                <div className="flex items-center justify-between">
+                                                  <span className="text-gray-500 text-xs">{item.source}</span>
+                                                  <span className="text-gray-500 text-xs">{getWatchlistNewsRelativeTime(item.publishedAt)}</span>
                                                 </div>
-                                              ))
-                                            ) : (
-                                              <div className="text-center py-4 text-gray-500">
-                                                <Newspaper className="h-5 w-5 mx-auto mb-1 opacity-50" />
-                                                <p className="text-xs">No news available</p>
                                               </div>
+                                            ))
+                                            ) : (
+                                            <div className="text-center py-4 text-gray-500">
+                                              <Newspaper className="h-5 w-5 mx-auto mb-1 opacity-50" />
+                                              <p className="text-xs">No news available</p>
+                                            </div>
                                             )}
                                           </div>
                                         </div>
@@ -14427,33 +14432,33 @@ ${
                                           {/* Compete with Traders Card */}
                                           <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex items-start gap-4">
                                             <div className="flex-shrink-0">
-                                              <Users className="h-6 w-6 text-blue-400" />
+                                            <Users className="h-6 w-6 text-blue-400" />
                                             </div>
                                             <div className="flex-1">
-                                              <h3 className="text-white font-semibold mb-1">Compete with Traders</h3>
-                                              <p className="text-gray-400 text-sm">Join 7-day trading challenges</p>
+                                            <h3 className="text-white font-semibold mb-1">Compete with Traders</h3>
+                                            <p className="text-gray-400 text-sm">Join 7-day trading challenges</p>
                                             </div>
                                           </div>
 
                                           {/* Live P&L Tracking Card */}
                                           <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex items-start gap-4">
                                             <div className="flex-shrink-0">
-                                              <BarChart3 className="h-6 w-6 text-green-400" />
+                                            <BarChart3 className="h-6 w-6 text-green-400" />
                                             </div>
                                             <div className="flex-1">
-                                              <h3 className="text-white font-semibold mb-1">Live P&L Tracking</h3>
-                                              <p className="text-gray-400 text-sm">Real-time ranking based on your trades</p>
+                                            <h3 className="text-white font-semibold mb-1">Live P&L Tracking</h3>
+                                            <p className="text-gray-400 text-sm">Real-time ranking based on your trades</p>
                                             </div>
                                           </div>
 
                                           {/* Leaderboard Rankings Card */}
                                           <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex items-start gap-4">
                                             <div className="flex-shrink-0">
-                                              <Trophy className="h-6 w-6 text-yellow-500" />
+                                            <Trophy className="h-6 w-6 text-yellow-500" />
                                             </div>
                                             <div className="flex-1">
-                                              <h3 className="text-white font-semibold mb-1">Leaderboard Rankings</h3>
-                                              <p className="text-gray-400 text-sm">See your position among all participants</p>
+                                            <h3 className="text-white font-semibold mb-1">Leaderboard Rankings</h3>
+                                            <p className="text-gray-400 text-sm">See your position among all participants</p>
                                             </div>
                                           </div>
                                         </div>
@@ -14959,10 +14964,10 @@ ${
                                         <Input
                                           placeholder={
                                             journalSearchType === 'STOCK'
-                                              ? 'Search RELIANCE, TCS, INFY...'
-                                              : journalSearchType === 'COMMODITY'
-                                              ? 'Search GOLD, SILVER, CRUDEOIL...'
-                                              : 'Search NIFTY, BANKNIFTY...'
+                                            ? 'Search RELIANCE, TCS, INFY...'
+                                            : journalSearchType === 'COMMODITY'
+                                            ? 'Search GOLD, SILVER, CRUDEOIL...'
+                                            : 'Search NIFTY, BANKNIFTY...'
                                           }
                                           value={stockSearchQuery}
                                           onChange={(e) => setStockSearchQuery(e.target.value)}
@@ -15000,25 +15005,25 @@ ${
                                             if (selectedInstrumentCategory === 'all') return true;
                                             
                                             switch(selectedInstrumentCategory) {
-                                              case 'stock':
-                                                // NSE/BSE stocks - equity instruments (like paper trading STOCK type)
-                                                return (i.exchange === 'NSE' || i.exchange === 'BSE') && 
-                                                  (!i.instrumentType || i.instrumentType === '' || i.instrumentType === 'EQ' || 
-                                                   i.symbol?.endsWith('-EQ') || i.instrumentType === 'AMXIDX');
-                                              case 'commodity':
-                                                // MCX and NCDEX - ALL commodity instruments (like paper trading MCX type)
-                                                return i.exchange === 'MCX' || i.exchange === 'NCDEX';
-                                              case 'fo':
-                                                // F&O: NFO and BFO exchanges (like paper trading FUTURES/OPTIONS type)
-                                                return i.exchange === 'NFO' || i.exchange === 'BFO';
-                                              case 'currency':
-                                                // Currency Derivatives: CDS exchange
-                                                return i.exchange === 'CDS';
-                                              case 'index':
-                                                // Indices: AMXIDX is the main index type from Angel One
-                                                return i.instrumentType === 'AMXIDX' || i.instrumentType === 'INDEX';
-                                              default:
-                                                return true;
+                                            case 'stock':
+                                              // NSE/BSE stocks - equity instruments (like paper trading STOCK type)
+                                              return (i.exchange === 'NSE' || i.exchange === 'BSE') && 
+                                                (!i.instrumentType || i.instrumentType === '' || i.instrumentType === 'EQ' || 
+                                                 i.symbol?.endsWith('-EQ') || i.instrumentType === 'AMXIDX');
+                                            case 'commodity':
+                                              // MCX and NCDEX - ALL commodity instruments (like paper trading MCX type)
+                                              return i.exchange === 'MCX' || i.exchange === 'NCDEX';
+                                            case 'fo':
+                                              // F&O: NFO and BFO exchanges (like paper trading FUTURES/OPTIONS type)
+                                              return i.exchange === 'NFO' || i.exchange === 'BFO';
+                                            case 'currency':
+                                              // Currency Derivatives: CDS exchange
+                                              return i.exchange === 'CDS';
+                                            case 'index':
+                                              // Indices: AMXIDX is the main index type from Angel One
+                                              return i.instrumentType === 'AMXIDX' || i.instrumentType === 'INDEX';
+                                            default:
+                                              return true;
                                             }
                                           }).length === 0
                                         ) && (
@@ -15032,91 +15037,91 @@ ${
                                           <>
                                             {/* Show defaults for categories that have them */}
                                             {(defaultInstruments[selectedInstrumentCategory as keyof typeof defaultInstruments]?.length > 0) ? (
-                                              <>
-                                                <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                                                  Popular {selectedInstrumentCategory !== 'all' ? selectedInstrumentCategory.charAt(0).toUpperCase() + selectedInstrumentCategory.slice(1) : ''} Instruments
-                                                </div>
-                                                {(defaultInstruments[selectedInstrumentCategory as keyof typeof defaultInstruments] || defaultInstruments.all).map((instrument) => (
-                                                  <button
-                                                    key={`default-${instrument.exchange}:${instrument.symbol}`}
-                                                    onClick={() => {
-                                                      const formattedSymbol = `${instrument.exchange}:${instrument.symbol}`;
-                                                      setSelectedJournalSymbol(formattedSymbol);
-                                                      setSelectedInstrument({
-                                                        symbol: instrument.symbol,
-                                                        token: instrument.token,
-                                                        exchange: instrument.exchange,
-                                                        tradingSymbol: instrument.tradingSymbol,
-                                                        instrumentType: instrument.instrumentType
-                                                      });
-                                                      setSelectedInstrumentToken({
-                                                        token: instrument.token,
-                                                        exchange: instrument.exchange,
-                                                        tradingSymbol: instrument.tradingSymbol
-                                                      });
-                                                      setShowStockSearch(false);
-                                                      setStockSearchQuery("");
-                                                    }}
-                                                    className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                                                      selectedJournalSymbol === `${instrument.exchange}:${instrument.symbol}`
-                                                        ? "bg-blue-100 dark:bg-blue-900 font-medium"
-                                                        : ""
-                                                    }`}
-                                                    data-testid={`default-stock-${instrument.exchange}:${instrument.symbol}`}
-                                                  >
-                                                    <div className="flex items-center justify-between gap-2">
-                                                      <span className="flex-1 font-medium">{instrument.name}</span>
-                                                      <div className="flex items-center gap-1">
-                                                        <span className={`px-1.5 py-0.5 text-xs font-semibold rounded ${
-                                                          instrument.exchange === 'NSE' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' :
-                                                          instrument.exchange === 'BSE' ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' :
-                                                          instrument.exchange === 'MCX' ? 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300' :
-                                                          instrument.exchange === 'NFO' ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' :
-                                                          instrument.exchange === 'BFO' ? 'bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300' :
-                                                          instrument.exchange === 'CDS' ? 'bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300' :
-                                                          instrument.exchange === 'NCDEX' ? 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300' :
-                                                          'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                                                        }`}>
-                                                          {instrument.exchange}
+                                            <>
+                                              <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                                                Popular {selectedInstrumentCategory !== 'all' ? selectedInstrumentCategory.charAt(0).toUpperCase() + selectedInstrumentCategory.slice(1) : ''} Instruments
+                                              </div>
+                                              {(defaultInstruments[selectedInstrumentCategory as keyof typeof defaultInstruments] || defaultInstruments.all).map((instrument) => (
+                                                <button
+                                                  key={`default-${instrument.exchange}:${instrument.symbol}`}
+                                                  onClick={() => {
+                                                    const formattedSymbol = `${instrument.exchange}:${instrument.symbol}`;
+                                                    setSelectedJournalSymbol(formattedSymbol);
+                                                    setSelectedInstrument({
+                                                      symbol: instrument.symbol,
+                                                      token: instrument.token,
+                                                      exchange: instrument.exchange,
+                                                      tradingSymbol: instrument.tradingSymbol,
+                                                      instrumentType: instrument.instrumentType
+                                                    });
+                                                    setSelectedInstrumentToken({
+                                                      token: instrument.token,
+                                                      exchange: instrument.exchange,
+                                                      tradingSymbol: instrument.tradingSymbol
+                                                    });
+                                                    setShowStockSearch(false);
+                                                    setStockSearchQuery("");
+                                                  }}
+                                                  className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                                                    selectedJournalSymbol === `${instrument.exchange}:${instrument.symbol}`
+                                                      ? "bg-blue-100 dark:bg-blue-900 font-medium"
+                                                      : ""
+                                                  }`}
+                                                  data-testid={`default-stock-${instrument.exchange}:${instrument.symbol}`}
+                                                >
+                                                  <div className="flex items-center justify-between gap-2">
+                                                    <span className="flex-1 font-medium">{instrument.name}</span>
+                                                    <div className="flex items-center gap-1">
+                                                      <span className={`px-1.5 py-0.5 text-xs font-semibold rounded ${
+                                                        instrument.exchange === 'NSE' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' :
+                                                        instrument.exchange === 'BSE' ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' :
+                                                        instrument.exchange === 'MCX' ? 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300' :
+                                                        instrument.exchange === 'NFO' ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' :
+                                                        instrument.exchange === 'BFO' ? 'bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300' :
+                                                        instrument.exchange === 'CDS' ? 'bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300' :
+                                                        instrument.exchange === 'NCDEX' ? 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300' :
+                                                        'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                                                      }`}>
+                                                        {instrument.exchange}
+                                                      </span>
+                                                      {instrument.instrumentType && (
+                                                        <span className="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                                                          {instrument.instrumentType}
                                                         </span>
-                                                        {instrument.instrumentType && (
-                                                          <span className="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
-                                                            {instrument.instrumentType}
-                                                          </span>
-                                                        )}
-                                                      </div>
+                                                      )}
                                                     </div>
-                                                    <div className="text-xs text-gray-500 mt-0.5">
-                                                      {instrument.symbol}
-                                                    </div>
+                                                  </div>
+                                                  <div className="text-xs text-gray-500 mt-0.5">
+                                                    {instrument.symbol}
+                                                  </div>
+                                                </button>
+                                              ))}
+                                              <div className="px-3 py-2 text-xs text-gray-400 dark:text-gray-500 border-t border-gray-200 dark:border-gray-700 mt-1">
+                                                Or type to search more instruments...
+                                              </div>
+                                            </>
+                                            ) : (
+                                            /* Show search suggestions for Commodity and F&O */
+                                            <div className="px-3 py-3 space-y-3">
+                                              <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                Search for {selectedInstrumentCategory === 'commodity' ? 'MCX/NCDEX Commodities' : selectedInstrumentCategory === 'currency' ? 'Currency Derivatives' : 'F&O Derivatives'}:
+                                              </div>
+                                              <div className="flex flex-wrap gap-1.5">
+                                                {(categorySearchSuggestions[selectedInstrumentCategory] || []).map((suggestion) => (
+                                                  <button
+                                                    key={suggestion}
+                                                    onClick={() => setStockSearchQuery(suggestion)}
+                                                    className="px-2.5 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+                                                    data-testid={`search-suggestion-${suggestion}`}
+                                                  >
+                                                    {suggestion}
                                                   </button>
                                                 ))}
-                                                <div className="px-3 py-2 text-xs text-gray-400 dark:text-gray-500 border-t border-gray-200 dark:border-gray-700 mt-1">
-                                                  Or type to search more instruments...
-                                                </div>
-                                              </>
-                                            ) : (
-                                              /* Show search suggestions for Commodity and F&O */
-                                              <div className="px-3 py-3 space-y-3">
-                                                <div className="text-sm text-gray-600 dark:text-gray-400">
-                                                  Search for {selectedInstrumentCategory === 'commodity' ? 'MCX/NCDEX Commodities' : selectedInstrumentCategory === 'currency' ? 'Currency Derivatives' : 'F&O Derivatives'}:
-                                                </div>
-                                                <div className="flex flex-wrap gap-1.5">
-                                                  {(categorySearchSuggestions[selectedInstrumentCategory] || []).map((suggestion) => (
-                                                    <button
-                                                      key={suggestion}
-                                                      onClick={() => setStockSearchQuery(suggestion)}
-                                                      className="px-2.5 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-                                                      data-testid={`search-suggestion-${suggestion}`}
-                                                    >
-                                                      {suggestion}
-                                                    </button>
-                                                  ))}
-                                                </div>
-                                                <div className="text-xs text-gray-400 dark:text-gray-500 pt-1 border-t border-gray-200 dark:border-gray-700">
-                                                  Click a suggestion or type to search...
-                                                </div>
                                               </div>
+                                              <div className="text-xs text-gray-400 dark:text-gray-500 pt-1 border-t border-gray-200 dark:border-gray-700">
+                                                Click a suggestion or type to search...
+                                              </div>
+                                            </div>
                                             )}
                                           </>
                                         )}
@@ -15127,79 +15132,79 @@ ${
                                             if (selectedInstrumentCategory === 'all') return true;
                                             
                                             switch(selectedInstrumentCategory) {
-                                              case 'stock':
-                                                // NSE/BSE stocks - equity instruments (like paper trading STOCK type)
-                                                return (i.exchange === 'NSE' || i.exchange === 'BSE') && 
-                                                  (!i.instrumentType || i.instrumentType === '' || i.instrumentType === 'EQ' || 
-                                                   i.symbol?.endsWith('-EQ') || i.instrumentType === 'AMXIDX');
-                                              case 'commodity':
-                                                // MCX and NCDEX - ALL commodity instruments (like paper trading MCX type)
-                                                return i.exchange === 'MCX' || i.exchange === 'NCDEX';
-                                              case 'fo':
-                                                // F&O: NFO and BFO exchanges (like paper trading FUTURES/OPTIONS type)
-                                                return i.exchange === 'NFO' || i.exchange === 'BFO';
-                                              case 'currency':
-                                                // Currency Derivatives: CDS exchange
-                                                return i.exchange === 'CDS';
-                                              case 'index':
-                                                // Indices: AMXIDX is the main index type from Angel One
-                                                return i.instrumentType === 'AMXIDX' || i.instrumentType === 'INDEX';
-                                              default:
-                                                return true;
+                                            case 'stock':
+                                              // NSE/BSE stocks - equity instruments (like paper trading STOCK type)
+                                              return (i.exchange === 'NSE' || i.exchange === 'BSE') && 
+                                                (!i.instrumentType || i.instrumentType === '' || i.instrumentType === 'EQ' || 
+                                                 i.symbol?.endsWith('-EQ') || i.instrumentType === 'AMXIDX');
+                                            case 'commodity':
+                                              // MCX and NCDEX - ALL commodity instruments (like paper trading MCX type)
+                                              return i.exchange === 'MCX' || i.exchange === 'NCDEX';
+                                            case 'fo':
+                                              // F&O: NFO and BFO exchanges (like paper trading FUTURES/OPTIONS type)
+                                              return i.exchange === 'NFO' || i.exchange === 'BFO';
+                                            case 'currency':
+                                              // Currency Derivatives: CDS exchange
+                                              return i.exchange === 'CDS';
+                                            case 'index':
+                                              // Indices: AMXIDX is the main index type from Angel One
+                                              return i.instrumentType === 'AMXIDX' || i.instrumentType === 'INDEX';
+                                            default:
+                                              return true;
                                             }
                                           })
                                           .map((instrument) => (
                                           <button
                                             key={`${instrument.exchange}:${instrument.symbol}`}
                                             onClick={() => {
-                                              const formattedSymbol = `${instrument.exchange}:${instrument.symbol}`;
-                                              setSelectedJournalSymbol(formattedSymbol);
-                                              setSelectedInstrument({
-                                                symbol: instrument.symbol,
-                                                token: instrument.token,
-                                                exchange: instrument.exchange,
-                                                tradingSymbol: instrument.tradingSymbol,
-                                                instrumentType: instrument.instrumentType
-                                              });
-                                              setSelectedInstrumentToken({
-                                                token: instrument.token,
-                                                exchange: instrument.exchange,
-                                                tradingSymbol: instrument.tradingSymbol
-                                              });
-                                              setShowStockSearch(false);
-                                              setStockSearchQuery("");
+                                            const formattedSymbol = `${instrument.exchange}:${instrument.symbol}`;
+                                            setSelectedJournalSymbol(formattedSymbol);
+                                            setSelectedInstrument({
+                                              symbol: instrument.symbol,
+                                              token: instrument.token,
+                                              exchange: instrument.exchange,
+                                              tradingSymbol: instrument.tradingSymbol,
+                                              instrumentType: instrument.instrumentType
+                                            });
+                                            setSelectedInstrumentToken({
+                                              token: instrument.token,
+                                              exchange: instrument.exchange,
+                                              tradingSymbol: instrument.tradingSymbol
+                                            });
+                                            setShowStockSearch(false);
+                                            setStockSearchQuery("");
                                             }}
                                             className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                                              selectedJournalSymbol === `${instrument.exchange}:${instrument.symbol}`
-                                                ? "bg-blue-100 dark:bg-blue-900 font-medium"
-                                                : ""
+                                            selectedJournalSymbol === `${instrument.exchange}:${instrument.symbol}`
+                                              ? "bg-blue-100 dark:bg-blue-900 font-medium"
+                                              : ""
                                             }`}
                                             data-testid={`stock-option-${instrument.exchange}:${instrument.symbol}`}
                                           >
                                             <div className="flex items-center justify-between gap-2">
-                                              <span className="flex-1 font-medium">{instrument.name}</span>
-                                              <div className="flex items-center gap-1">
-                                                <span className={`px-1.5 py-0.5 text-xs font-semibold rounded ${
-                                                  instrument.exchange === 'NSE' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' :
-                                                  instrument.exchange === 'BSE' ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' :
-                                                  instrument.exchange === 'MCX' ? 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300' :
-                                                  instrument.exchange === 'NFO' ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' :
-                                                  instrument.exchange === 'BFO' ? 'bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300' :
-                                                  instrument.exchange === 'CDS' ? 'bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300' :
-                                                  instrument.exchange === 'NCDEX' ? 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300' :
-                                                  'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                                                }`}>
-                                                  {instrument.exchange}
-                                                </span>
-                                                <span className="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
-                                                  {instrument.instrumentType}
-                                                </span>
-                                              </div>
+                                            <span className="flex-1 font-medium">{instrument.name}</span>
+                                            <div className="flex items-center gap-1">
+                                              <span className={`px-1.5 py-0.5 text-xs font-semibold rounded ${
+                                                instrument.exchange === 'NSE' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' :
+                                                instrument.exchange === 'BSE' ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' :
+                                                instrument.exchange === 'MCX' ? 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300' :
+                                                instrument.exchange === 'NFO' ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' :
+                                                instrument.exchange === 'BFO' ? 'bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300' :
+                                                instrument.exchange === 'CDS' ? 'bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300' :
+                                                instrument.exchange === 'NCDEX' ? 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300' :
+                                                'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                                              }`}>
+                                                {instrument.exchange}
+                                              </span>
+                                              <span className="px-1.5 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded">
+                                                {instrument.instrumentType}
+                                              </span>
+                                            </div>
                                             </div>
                                             {instrument.symbol !== instrument.name && (
-                                              <div className="text-xs text-gray-500 mt-0.5">
-                                                {instrument.symbol}
-                                              </div>
+                                            <div className="text-xs text-gray-500 mt-0.5">
+                                              {instrument.symbol}
+                                            </div>
                                             )}
                                           </button>
                                         ))}
@@ -15294,15 +15299,15 @@ ${
                                           <button 
                                             key={tf.value}
                                             className={`w-full text-left px-2 py-1.5 rounded text-xs transition-colors ${
-                                              journalChartTimeframe === tf.value 
-                                                ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-medium' 
-                                                : 'text-slate-900 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                            journalChartTimeframe === tf.value 
+                                              ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-medium' 
+                                              : 'text-slate-900 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                                             }`}
                                             onClick={() => {
-                                              // 🔴 FIX: Update BOTH display AND countdown interval
-                                              setJournalChartTimeframe(tf.value);
-                                              setSelectedJournalInterval(tf.value); // ← CRITICAL: For countdown calculation
-                                              setShowJournalTimeframeDropdown(false);
+                                            // 🔴 FIX: Update BOTH display AND countdown interval
+                                            setJournalChartTimeframe(tf.value);
+                                            setSelectedJournalInterval(tf.value); // ← CRITICAL: For countdown calculation
+                                            setShowJournalTimeframeDropdown(false);
                                             }}
                                             data-testid={`timeframe-option-${tf.value}`}
                                           >
@@ -15333,15 +15338,15 @@ ${
                                           <button 
                                             key={tf.value}
                                             className={`w-full text-left px-2 py-1.5 rounded text-xs transition-colors ${
-                                              heatmapChartTimeframe === tf.value 
-                                                ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-medium' 
-                                                : 'text-slate-900 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                            heatmapChartTimeframe === tf.value 
+                                              ? 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-medium' 
+                                              : 'text-slate-900 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                                             }`}
                                             onClick={() => {
-                                              // 🔴 FIX: Update BOTH display AND countdown interval
-                                              setHeatmapChartTimeframe(tf.value);
-                                              setSelectedJournalInterval(tf.value); // ← CRITICAL: For countdown calculation
-                                              setShowHeatmapTimeframeDropdown(false);
+                                            // 🔴 FIX: Update BOTH display AND countdown interval
+                                            setHeatmapChartTimeframe(tf.value);
+                                            setSelectedJournalInterval(tf.value); // ← CRITICAL: For countdown calculation
+                                            setShowHeatmapTimeframeDropdown(false);
                                             }}
                                             data-testid={`heatmap-timeframe-option-${tf.value}`}
                                           >
@@ -15369,12 +15374,12 @@ ${
                                           if (d?.tradeHistory && Array.isArray(d.tradeHistory)) {
                                             let totalPnL = 0;
                                             d.tradeHistory.forEach((trade: any) => {
-                                              if (trade.pnl && typeof trade.pnl === 'string') {
-                                                const pnlValue = parseFloat(trade.pnl.replace(/[₹,]/g, ''));
-                                                if (!isNaN(pnlValue)) {
-                                                  totalPnL += pnlValue;
-                                                }
+                                            if (trade.pnl && typeof trade.pnl === 'string') {
+                                              const pnlValue = parseFloat(trade.pnl.replace(/[₹,]/g, ''));
+                                              if (!isNaN(pnlValue)) {
+                                                totalPnL += pnlValue;
                                               }
+                                            }
                                             });
                                             return totalPnL;
                                           }
@@ -15430,7 +15435,7 @@ ${
                                           .filter(([_, data]) => {
                                             // Only show dates with actual trade history or trading data
                                             if (data?.tradeHistory && Array.isArray(data.tradeHistory) && data.tradeHistory.length > 0) {
-                                              return true;
+                                            return true;
                                             }
                                             // Also include dates with performance metrics (actual trades)
                                             const pnl = (data?.netPnL || 0) || ((data?.totalProfit || 0) - Math.abs(data?.totalLoss || 0));
@@ -15440,81 +15445,81 @@ ${
                                           .slice(0, 10)
                                           .map(([date, data]) => {
                                             const getNetPnL = (d: any): number => {
-                                              if (!d) return 0;
-                                              // Try performanceMetrics first (like DemoHeatmap does)
-                                              if (d?.performanceMetrics?.netPnL !== undefined) {
-                                                return d.performanceMetrics.netPnL;
-                                              }
-                                              // Calculate from tradeHistory if no performanceMetrics
-                                              if (d?.tradeHistory && Array.isArray(d.tradeHistory)) {
-                                                let totalPnL = 0;
-                                                d.tradeHistory.forEach((trade: any) => {
-                                                  if (trade.pnl && typeof trade.pnl === 'string') {
-                                                    const pnlValue = parseFloat(trade.pnl.replace(/[₹,]/g, ''));
-                                                    if (!isNaN(pnlValue)) {
-                                                      totalPnL += pnlValue;
-                                                    }
+                                            if (!d) return 0;
+                                            // Try performanceMetrics first (like DemoHeatmap does)
+                                            if (d?.performanceMetrics?.netPnL !== undefined) {
+                                              return d.performanceMetrics.netPnL;
+                                            }
+                                            // Calculate from tradeHistory if no performanceMetrics
+                                            if (d?.tradeHistory && Array.isArray(d.tradeHistory)) {
+                                              let totalPnL = 0;
+                                              d.tradeHistory.forEach((trade: any) => {
+                                                if (trade.pnl && typeof trade.pnl === 'string') {
+                                                  const pnlValue = parseFloat(trade.pnl.replace(/[₹,]/g, ''));
+                                                  if (!isNaN(pnlValue)) {
+                                                    totalPnL += pnlValue;
                                                   }
-                                                });
-                                                return totalPnL;
-                                              }
-                                              // Fallback to netPnL
-                                              if (typeof d?.netPnL === 'number') return d.netPnL;
-                                              // Fallback to calculated P&L
-                                              if (typeof d?.totalProfit === 'number' || typeof d?.totalLoss === 'number') {
-                                                return (d?.totalProfit || 0) - Math.abs(d?.totalLoss || 0);
-                                              }
-                                              return 0;
+                                                }
+                                              });
+                                              return totalPnL;
+                                            }
+                                            // Fallback to netPnL
+                                            if (typeof d?.netPnL === 'number') return d.netPnL;
+                                            // Fallback to calculated P&L
+                                            if (typeof d?.totalProfit === 'number' || typeof d?.totalLoss === 'number') {
+                                              return (d?.totalProfit || 0) - Math.abs(d?.totalLoss || 0);
+                                            }
+                                            return 0;
                                             };
                                             const getHeatmapColor = (netPnL: number) => {
-                                              if (netPnL === 0) return "bg-gray-100 dark:bg-gray-700";
-                                              const absValue = Math.abs(netPnL);
-                                              if (netPnL > 0) {
-                                                if (absValue >= 5000) return "bg-green-800 dark:bg-green-700";
-                                                if (absValue >= 3000) return "bg-green-700 dark:bg-green-600";
-                                                if (absValue >= 1500) return "bg-green-600 dark:bg-green-500";
-                                                if (absValue >= 500) return "bg-green-500 dark:bg-green-400";
-                                                return "bg-green-300 dark:bg-green-300";
-                                              } else {
-                                                if (absValue >= 5000) return "bg-red-800 dark:bg-red-700";
-                                                if (absValue >= 3000) return "bg-red-700 dark:bg-red-600";
-                                                if (absValue >= 1500) return "bg-red-600 dark:bg-red-500";
-                                                if (absValue >= 500) return "bg-red-500 dark:bg-red-400";
-                                                return "bg-red-300 dark:bg-red-300";
-                                              }
+                                            if (netPnL === 0) return "bg-gray-100 dark:bg-gray-700";
+                                            const absValue = Math.abs(netPnL);
+                                            if (netPnL > 0) {
+                                              if (absValue >= 5000) return "bg-green-800 dark:bg-green-700";
+                                              if (absValue >= 3000) return "bg-green-700 dark:bg-green-600";
+                                              if (absValue >= 1500) return "bg-green-600 dark:bg-green-500";
+                                              if (absValue >= 500) return "bg-green-500 dark:bg-green-400";
+                                              return "bg-green-300 dark:bg-green-300";
+                                            } else {
+                                              if (absValue >= 5000) return "bg-red-800 dark:bg-red-700";
+                                              if (absValue >= 3000) return "bg-red-700 dark:bg-red-600";
+                                              if (absValue >= 1500) return "bg-red-600 dark:bg-red-500";
+                                              if (absValue >= 500) return "bg-red-500 dark:bg-red-400";
+                                              return "bg-red-300 dark:bg-red-300";
+                                            }
                                             };
                                             const pnl = getNetPnL(data);
                                             const color = getHeatmapColor(pnl);
                                             const isSelected = heatmapSelectedDate === date;
                                             
                                             return (
-                                              <button
-                                                key={date}
-                                                onClick={() => {
-                                                  // Get symbol from trading data for this date
-                                                  const tradingData = tradingDataByDate[date];
-                                                  let symbolForDate = 'NSE:NIFTY50-INDEX'; // Default to NIFTY
-                                                  
-                                                  if (tradingData?.tradeHistory && tradingData.tradeHistory.length > 0) {
-                                                    const firstTrade = tradingData.tradeHistory[0];
-                                                    if (firstTrade.symbol) {
-                                                      // Format symbol for API (e.g., SENSEX -> NSE:SENSEX-INDEX)
-                                                      const cleanSym = firstTrade.symbol.replace(/NSE:|BSE:|-INDEX|-EQ/g, '');
-                                                      symbolForDate = `NSE:${cleanSym}-INDEX`;
-                                                    }
+                                            <button
+                                              key={date}
+                                              onClick={() => {
+                                                // Get symbol from trading data for this date
+                                                const tradingData = tradingDataByDate[date];
+                                                let symbolForDate = 'NSE:NIFTY50-INDEX'; // Default to NIFTY
+                                                
+                                                if (tradingData?.tradeHistory && tradingData.tradeHistory.length > 0) {
+                                                  const firstTrade = tradingData.tradeHistory[0];
+                                                  if (firstTrade.symbol) {
+                                                    // Format symbol for API (e.g., SENSEX -> NSE:SENSEX-INDEX)
+                                                    const cleanSym = firstTrade.symbol.replace(/NSE:|BSE:|-INDEX|-EQ/g, '');
+                                                    symbolForDate = `NSE:${cleanSym}-INDEX`;
                                                   }
-                                                  
-                                                  console.log(`🗓️ [HEATMAP CLICK] Date: ${date}, Symbol: ${symbolForDate}`);
-                                                  
-                                                  // Use separate heatmap chart - no conflict with search chart!
-                                                  fetchHeatmapChartData(symbolForDate, date);
-                                                }}
-                                                className={`h-6 text-xs font-medium rounded border ${color} ${heatmapSelectedDate === date ? 'ring-2 ring-purple-500 ring-offset-1' : 'border-gray-300 dark:border-gray-600'} hover:opacity-80 transition`}
-                                                title={`${date}: P&L ₹${pnl.toLocaleString('en-IN')}`}
-                                                data-testid={`button-heatmap-date-${date}`}
-                                              >
-                                                {new Date(date).getDate()}
-                                              </button>
+                                                }
+                                                
+                                                console.log(`🗓️ [HEATMAP CLICK] Date: ${date}, Symbol: ${symbolForDate}`);
+                                                
+                                                // Use separate heatmap chart - no conflict with search chart!
+                                                fetchHeatmapChartData(symbolForDate, date);
+                                              }}
+                                              className={`h-6 text-xs font-medium rounded border ${color} ${heatmapSelectedDate === date ? 'ring-2 ring-purple-500 ring-offset-1' : 'border-gray-300 dark:border-gray-600'} hover:opacity-80 transition`}
+                                              title={`${date}: P&L ₹${pnl.toLocaleString('en-IN')}`}
+                                              data-testid={`button-heatmap-date-${date}`}
+                                            >
+                                              {new Date(date).getDate()}
+                                            </button>
                                             );
                                           })}
                                       </div>
@@ -15898,13 +15903,13 @@ ${
                                         <div className="flex flex-wrap gap-1 p-2 bg-gray-50 dark:bg-gray-900 rounded-md">
                                           {selectedDailyFactors.map((factor) => (
                                             <span
-                                              key={factor}
-                                              className="inline-flex items-center px-2 py-1 text-xs font-medium bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 rounded-full cursor-pointer hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors"
-                                              onClick={() => toggleDailyFactor(factor)}
-                                              data-testid={`selected-daily-factor-${factor}`}
+                                            key={factor}
+                                            className="inline-flex items-center px-2 py-1 text-xs font-medium bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 rounded-full cursor-pointer hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors"
+                                            onClick={() => toggleDailyFactor(factor)}
+                                            data-testid={`selected-daily-factor-${factor}`}
                                             >
-                                              {factor}
-                                              <X className="w-3 h-3 ml-1" />
+                                            {factor}
+                                            <X className="w-3 h-3 ml-1" />
                                             </span>
                                           ))}
                                         </div>
@@ -15915,61 +15920,61 @@ ${
                                         {Object.entries(dailyFactorsSystem).map(
                                           ([categoryKey, category]) => (
                                             <div
-                                              key={categoryKey}
-                                              className="space-y-2"
+                                            key={categoryKey}
+                                            className="space-y-2"
                                             >
-                                              <div className="flex items-center justify-between">
-                                                <h5
-                                                  className={`text-xs font-semibold text-${category.color}-600 dark:text-${category.color}-400`}
-                                                >
-                                                  {category.name}
-                                                </h5>
-                                                <span className="text-xs text-gray-500">
-                                                  {
-                                                    selectedDailyFactors.filter((f) =>
-                                                      category.tags.includes(f),
-                                                    ).length
-                                                  }
-                                                  /{category.maxSelections}
-                                                </span>
-                                              </div>
-                                              <div className="grid grid-cols-2 gap-1">
-                                                {category.tags.map((factor) => {
-                                                  const isSelected =
-                                                    selectedDailyFactors.includes(factor);
-                                                  const categoryCount =
-                                                    selectedDailyFactors.filter((f) =>
-                                                      category.tags.includes(f),
-                                                    ).length;
-                                                  const isDisabled =
-                                                    !isSelected &&
-                                                    categoryCount >=
-                                                      category.maxSelections;
+                                            <div className="flex items-center justify-between">
+                                              <h5
+                                                className={`text-xs font-semibold text-${category.color}-600 dark:text-${category.color}-400`}
+                                              >
+                                                {category.name}
+                                              </h5>
+                                              <span className="text-xs text-gray-500">
+                                                {
+                                                  selectedDailyFactors.filter((f) =>
+                                                    category.tags.includes(f),
+                                                  ).length
+                                                }
+                                                /{category.maxSelections}
+                                              </span>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-1">
+                                              {category.tags.map((factor) => {
+                                                const isSelected =
+                                                  selectedDailyFactors.includes(factor);
+                                                const categoryCount =
+                                                  selectedDailyFactors.filter((f) =>
+                                                    category.tags.includes(f),
+                                                  ).length;
+                                                const isDisabled =
+                                                  !isSelected &&
+                                                  categoryCount >=
+                                                    category.maxSelections;
 
-                                                  return (
-                                                    <button
-                                                      key={factor}
-                                                      onClick={() =>
-                                                        toggleDailyFactor(factor)
-                                                      }
-                                                      disabled={isDisabled}
-                                                      className={`
-                                                  px-2 py-1.5 text-xs rounded-md border transition-all duration-200 text-left
-                                                  ${
-                                                    isSelected
-                                                      ? `bg-${category.color}-500 text-white border-${category.color}-500 hover:bg-${category.color}-600`
-                                                      : isDisabled
-                                                        ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-gray-200 dark:border-gray-700 cursor-not-allowed"
-                                                        : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                                  }
-                                                `}
-                                                      data-testid={`daily-factor-option-${factor}`}
-                                                    >
-                                                      {factor}
-                                                    </button>
-                                                  );
-                                                })}
-                                              </div>
+                                                return (
+                                                  <button
+                                                    key={factor}
+                                                    onClick={() =>
+                                                      toggleDailyFactor(factor)
+                                                    }
+                                                    disabled={isDisabled}
+                                                    className={`
+                                                px-2 py-1.5 text-xs rounded-md border transition-all duration-200 text-left
+                                                ${
+                                                  isSelected
+                                                    ? `bg-${category.color}-500 text-white border-${category.color}-500 hover:bg-${category.color}-600`
+                                                    : isDisabled
+                                                      ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-gray-200 dark:border-gray-700 cursor-not-allowed"
+                                                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                                }
+                                              `}
+                                                    data-testid={`daily-factor-option-${factor}`}
+                                                  >
+                                                    {factor}
+                                                  </button>
+                                                );
+                                              })}
+                                            </div>
                                             </div>
                                           ),
                                         )}
@@ -16021,101 +16026,101 @@ ${
                                         <div className="grid grid-cols-4 gap-1">
                                           {timeframeOptions.map((tf) => (
                                             <button
-                                              key={tf.value}
-                                              onClick={() => {
-                                                setIndicatorTimeframe(tf.value);
-                                                if (typeof window !== "undefined") {
-                                                  localStorage.setItem("indicatorTimeframe", tf.value);
-                                                }
-                                              }}
-                                              className={`px-2 py-1.5 text-xs rounded-md border transition-all duration-200 ${
-                                                indicatorTimeframe === tf.value
-                                                  ? "bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600"
-                                                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                              }`}
-                                              data-testid={`timeframe-${tf.value}`}
+                                            key={tf.value}
+                                            onClick={() => {
+                                              setIndicatorTimeframe(tf.value);
+                                              if (typeof window !== "undefined") {
+                                                localStorage.setItem("indicatorTimeframe", tf.value);
+                                              }
+                                            }}
+                                            className={`px-2 py-1.5 text-xs rounded-md border transition-all duration-200 ${
+                                              indicatorTimeframe === tf.value
+                                                ? "bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600"
+                                                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                            }`}
+                                            data-testid={`timeframe-${tf.value}`}
                                             >
-                                              {tf.label}
+                                            {tf.label}
                                             </button>
                                           ))}
                                           {/* Display custom timeframe if selected */}
                                           {!timeframeOptions.some((tf) => tf.value === indicatorTimeframe) && (
                                             <button
-                                              onClick={() => {
-                                                // Clicking on custom timeframe shows it's selected
-                                              }}
-                                              className="px-2 py-1.5 text-xs rounded-md border bg-emerald-500 text-white border-emerald-500 transition-all duration-200 relative group"
-                                              data-testid={`timeframe-custom-${indicatorTimeframe}`}
-                                              title={`Custom: ${indicatorTimeframe}`}
+                                            onClick={() => {
+                                              // Clicking on custom timeframe shows it's selected
+                                            }}
+                                            className="px-2 py-1.5 text-xs rounded-md border bg-emerald-500 text-white border-emerald-500 transition-all duration-200 relative group"
+                                            data-testid={`timeframe-custom-${indicatorTimeframe}`}
+                                            title={`Custom: ${indicatorTimeframe}`}
                                             >
-                                              <span className="truncate">{indicatorTimeframe}</span>
-                                              <button
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setIndicatorTimeframe("5min");
-                                                  localStorage.setItem("indicatorTimeframe", "5min");
-                                                }}
-                                                className="absolute right-0.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                data-testid="button-remove-custom-timeframe"
-                                              >
-                                                <X className="w-2.5 h-2.5" />
-                                              </button>
+                                            <span className="truncate">{indicatorTimeframe}</span>
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setIndicatorTimeframe("5min");
+                                                localStorage.setItem("indicatorTimeframe", "5min");
+                                              }}
+                                              className="absolute right-0.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                              data-testid="button-remove-custom-timeframe"
+                                            >
+                                              <X className="w-2.5 h-2.5" />
+                                            </button>
                                             </button>
                                           )}
                                           <Dialog open={isCustomTimeframeDialogOpen} onOpenChange={setIsCustomTimeframeDialogOpen}>
                                             <DialogTrigger asChild>
-                                              <button
-                                                className="px-2 py-1.5 text-xs rounded-md border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
-                                                data-testid="button-add-custom-timeframe"
-                                              >
-                                                <Plus className="w-3 h-3" />
-                                              </button>
+                                            <button
+                                              className="px-2 py-1.5 text-xs rounded-md border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
+                                              data-testid="button-add-custom-timeframe"
+                                            >
+                                              <Plus className="w-3 h-3" />
+                                            </button>
                                             </DialogTrigger>
                                             <DialogContent className="sm:max-w-[300px]">
-                                              <DialogHeader>
-                                                <DialogTitle>Custom Timeframe</DialogTitle>
-                                              </DialogHeader>
-                                              <div className="space-y-1.5">
-                                                <input
-                                                  type="text"
-                                                  placeholder="e.g., 2h, 4h, 3d, 1w"
-                                                  value={customTimeframeInput}
-                                                  onChange={(e) => setCustomTimeframeInput(e.target.value)}
-                                                  className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
-                                                  data-testid="input-custom-timeframe"
-                                                />
-                                                <div className="flex gap-2">
-                                                  <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => {
+                                            <DialogHeader>
+                                              <DialogTitle>Custom Timeframe</DialogTitle>
+                                            </DialogHeader>
+                                            <div className="space-y-1.5">
+                                              <input
+                                                type="text"
+                                                placeholder="e.g., 2h, 4h, 3d, 1w"
+                                                value={customTimeframeInput}
+                                                onChange={(e) => setCustomTimeframeInput(e.target.value)}
+                                                className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
+                                                data-testid="input-custom-timeframe"
+                                              />
+                                              <div className="flex gap-2">
+                                                <Button
+                                                  variant="outline"
+                                                  size="sm"
+                                                  onClick={() => {
+                                                    setCustomTimeframeInput("");
+                                                    setIsCustomTimeframeDialogOpen(false);
+                                                  }}
+                                                  className="flex-1 text-xs"
+                                                  data-testid="button-cancel-custom-timeframe"
+                                                >
+                                                  Cancel
+                                                </Button>
+                                                <Button
+                                                  size="sm"
+                                                  onClick={() => {
+                                                    if (customTimeframeInput.trim()) {
+                                                      setIndicatorTimeframe(customTimeframeInput.trim());
+                                                      if (typeof window !== "undefined") {
+                                                        localStorage.setItem("indicatorTimeframe", customTimeframeInput.trim());
+                                                      }
                                                       setCustomTimeframeInput("");
                                                       setIsCustomTimeframeDialogOpen(false);
-                                                    }}
-                                                    className="flex-1 text-xs"
-                                                    data-testid="button-cancel-custom-timeframe"
-                                                  >
-                                                    Cancel
-                                                  </Button>
-                                                  <Button
-                                                    size="sm"
-                                                    onClick={() => {
-                                                      if (customTimeframeInput.trim()) {
-                                                        setIndicatorTimeframe(customTimeframeInput.trim());
-                                                        if (typeof window !== "undefined") {
-                                                          localStorage.setItem("indicatorTimeframe", customTimeframeInput.trim());
-                                                        }
-                                                        setCustomTimeframeInput("");
-                                                        setIsCustomTimeframeDialogOpen(false);
-                                                      }
-                                                    }}
-                                                    className="flex-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
-                                                    data-testid="button-confirm-custom-timeframe"
-                                                  >
-                                                    Apply
-                                                  </Button>
-                                                </div>
+                                                    }
+                                                  }}
+                                                  className="flex-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                                                  data-testid="button-confirm-custom-timeframe"
+                                                >
+                                                  Apply
+                                                </Button>
                                               </div>
+                                            </div>
                                             </DialogContent>
                                           </Dialog>
                                         </div>
@@ -16126,13 +16131,13 @@ ${
                                         <div className="flex flex-wrap gap-1 p-2 bg-gray-50 dark:bg-gray-900 rounded-md">
                                           {selectedIndicators.map((indicator) => (
                                             <span
-                                              key={indicator}
-                                              className="inline-flex items-center px-2 py-1 text-xs font-medium bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 rounded-full cursor-pointer hover:bg-emerald-200 dark:hover:bg-emerald-800 transition-colors"
-                                              onClick={() => toggleIndicator(indicator)}
-                                              data-testid={`selected-indicator-${indicator}`}
+                                            key={indicator}
+                                            className="inline-flex items-center px-2 py-1 text-xs font-medium bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 rounded-full cursor-pointer hover:bg-emerald-200 dark:hover:bg-emerald-800 transition-colors"
+                                            onClick={() => toggleIndicator(indicator)}
+                                            data-testid={`selected-indicator-${indicator}`}
                                             >
-                                              {indicator}
-                                              <X className="w-3 h-3 ml-1" />
+                                            {indicator}
+                                            <X className="w-3 h-3 ml-1" />
                                             </span>
                                           ))}
                                         </div>
@@ -16144,16 +16149,16 @@ ${
                                           const isSelected = selectedIndicators.includes(indicator);
                                           return (
                                             <button
-                                              key={indicator}
-                                              onClick={() => toggleIndicator(indicator)}
-                                              className={`px-2 py-1.5 text-xs rounded-md border transition-all duration-200 text-left ${
-                                                isSelected
-                                                  ? "bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600"
-                                                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                              }`}
-                                              data-testid={`indicator-option-${indicator}`}
+                                            key={indicator}
+                                            onClick={() => toggleIndicator(indicator)}
+                                            className={`px-2 py-1.5 text-xs rounded-md border transition-all duration-200 text-left ${
+                                              isSelected
+                                                ? "bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600"
+                                                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                            }`}
+                                            data-testid={`indicator-option-${indicator}`}
                                             >
-                                              {indicator}
+                                            {indicator}
                                             </button>
                                           );
                                         })}
@@ -16202,13 +16207,13 @@ ${
                                         <div className="flex flex-wrap gap-1 p-2 bg-gray-50 dark:bg-gray-900 rounded-md">
                                           {getValidTags(selectedTags).map((tag) => (
                                             <span
-                                              key={tag}
-                                              className="inline-flex items-center px-2 py-1 text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full cursor-pointer hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors"
-                                              onClick={() => toggleTag(tag)}
-                                              data-testid={`selected-tag-${tag}`}
+                                            key={tag}
+                                            className="inline-flex items-center px-2 py-1 text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full cursor-pointer hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors"
+                                            onClick={() => toggleTag(tag)}
+                                            data-testid={`selected-tag-${tag}`}
                                             >
-                                              {tag}
-                                              <X className="w-3 h-3 ml-1" />
+                                            {tag}
+                                            <X className="w-3 h-3 ml-1" />
                                             </span>
                                           ))}
                                         </div>
@@ -16219,71 +16224,71 @@ ${
                                         {Object.entries(tradingTagSystem).map(
                                           ([categoryKey, category]) => (
                                             <div
-                                              key={categoryKey}
-                                              className="space-y-2"
+                                            key={categoryKey}
+                                            className="space-y-2"
                                             >
-                                              <div className="flex items-center justify-between">
-                                                <h5
-                                                  className={`text-xs font-semibold text-${category.color}-600 dark:text-${category.color}-400`}
-                                                >
-                                                  {category.name}
-                                                  {(category as any)
-                                                    .required && (
-                                                    <span className="text-red-500 ml-1">
-                                                      *
-                                                    </span>
-                                                  )}
-                                                </h5>
-                                                <span className="text-xs text-gray-500">
-                                                  {
-                                                    selectedTags.filter((tag) =>
-                                                      category.tags.includes(
-                                                        tag,
-                                                      ),
-                                                    ).length
-                                                  }
-                                                  /{category.maxSelections}
-                                                </span>
-                                              </div>
-                                              <div className="grid grid-cols-2 gap-1">
-                                                {category.tags.map((tag) => {
-                                                  const isSelected =
-                                                    selectedTags.includes(tag);
-                                                  const categoryCount =
-                                                    selectedTags.filter((t) =>
-                                                      category.tags.includes(t),
-                                                    ).length;
-                                                  const isDisabled =
-                                                    !isSelected &&
-                                                    categoryCount >=
-                                                      category.maxSelections;
+                                            <div className="flex items-center justify-between">
+                                              <h5
+                                                className={`text-xs font-semibold text-${category.color}-600 dark:text-${category.color}-400`}
+                                              >
+                                                {category.name}
+                                                {(category as any)
+                                                  .required && (
+                                                  <span className="text-red-500 ml-1">
+                                                    *
+                                                  </span>
+                                                )}
+                                              </h5>
+                                              <span className="text-xs text-gray-500">
+                                                {
+                                                  selectedTags.filter((tag) =>
+                                                    category.tags.includes(
+                                                      tag,
+                                                    ),
+                                                  ).length
+                                                }
+                                                /{category.maxSelections}
+                                              </span>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-1">
+                                              {category.tags.map((tag) => {
+                                                const isSelected =
+                                                  selectedTags.includes(tag);
+                                                const categoryCount =
+                                                  selectedTags.filter((t) =>
+                                                    category.tags.includes(t),
+                                                  ).length;
+                                                const isDisabled =
+                                                  !isSelected &&
+                                                  categoryCount >=
+                                                    category.maxSelections;
 
-                                                  return (
-                                                    <button
-                                                      key={tag}
-                                                      onClick={() =>
-                                                        toggleTagWithValidation(
-                                                          tag,
-                                                        )
-                                                      }
-                                                      disabled={isDisabled}
-                                                      className={`
-                                                  px-2 py-1.5 text-xs rounded-md border transition-all duration-200 text-left
-                                                  ${
-                                                    isSelected
-                                                      ? `bg-${category.color}-500 text-white border-${category.color}-500 hover:bg-${category.color}-600`
-                                                      : isDisabled
-                                                        ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-gray-200 dark:border-gray-700 cursor-not-allowed"
-                                                        : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                                  }
-                                                `}
-                                                      data-testid={`tag-option-${tag}`}
-                                                    >
-                                                      {tag}
-                                                    </button>
-                                                  );
-                                                })}
-                                              </div>
+                                                return (
+                                                  <button
+                                                    key={tag}
+                                                    onClick={() =>
+                                                      toggleTagWithValidation(
+                                                        tag,
+                                                      )
+                                                    }
+                                                    disabled={isDisabled}
+                                                    className={`
+                                                px-2 py-1.5 text-xs rounded-md border transition-all duration-200 text-left
+                                                ${
+                                                  isSelected
+                                                    ? `bg-${category.color}-500 text-white border-${category.color}-500 hover:bg-${category.color}-600`
+                                                    : isDisabled
+                                                      ? "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-gray-200 dark:border-gray-700 cursor-not-allowed"
+                                                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                                }
+                                              `}
+                                                    data-testid={`tag-option-${tag}`}
+                                                  >
+                                                    {tag}
+                                                  </button>
+                                                );
+                                              })}
+                                            </div>
                                             </div>
                                           ),
                                         )}
@@ -16586,8 +16591,8 @@ ${
                                         <span
                                           className={`px-2 py-1 rounded text-xs font-medium ${
                                             trade.order === "BUY"
-                                              ? "bg-green-600 text-white"
-                                              : "bg-red-600 text-white"
+                                            ? "bg-green-600 text-white"
+                                            : "bg-red-600 text-white"
                                           }`}
                                         >
                                           {trade.order}
@@ -16602,8 +16607,8 @@ ${
                                           (trade.pnl || "").includes("+")
                                             ? "text-green-600"
                                             : (trade.pnl || "").includes("-")
-                                              ? "text-red-600"
-                                              : ""
+                                            ? "text-red-600"
+                                            : ""
                                         }`}
                                       >
                                         {trade.pnl}
@@ -16625,8 +16630,8 @@ ${
                                           return percentage > 0
                                             ? "text-green-600"
                                             : percentage < 0
-                                              ? "text-red-600"
-                                              : "text-gray-500";
+                                            ? "text-red-600"
+                                            : "text-gray-500";
                                         })()}`}
                                       >
                                         {(() => {
@@ -17243,43 +17248,43 @@ ${
                                           };
                                           return (
                                             <div className="flex flex-col gap-2">
-                                              <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.pnl && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
-                                                <input type="checkbox" checked={visibleStats.pnl} onChange={(e) => handleCheckChange('pnl', e.target.checked)} disabled={!visibleStats.pnl && isAtLimit} className="rounded" />
-                                                P&L
-                                              </label>
-                                              <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.trend && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
-                                                <input type="checkbox" checked={visibleStats.trend} onChange={(e) => handleCheckChange('trend', e.target.checked)} disabled={!visibleStats.trend && isAtLimit} className="rounded" />
-                                                Trend
-                                              </label>
-                                              <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.fomo && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
-                                                <input type="checkbox" checked={visibleStats.fomo} onChange={(e) => handleCheckChange('fomo', e.target.checked)} disabled={!visibleStats.fomo && isAtLimit} className="rounded" />
-                                                FOMO
-                                              </label>
-                                              <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.winRate && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
-                                                <input type="checkbox" checked={visibleStats.winRate} onChange={(e) => handleCheckChange('winRate', e.target.checked)} disabled={!visibleStats.winRate && isAtLimit} className="rounded" />
-                                                Win Rate
-                                              </label>
-                                              <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.streak && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
-                                                <input type="checkbox" checked={visibleStats.streak} onChange={(e) => handleCheckChange('streak', e.target.checked)} disabled={!visibleStats.streak && isAtLimit} className="rounded" />
-                                                Streak
-                                              </label>
-                                              <div className="border-t border-slate-700 my-1"></div>
-                                              <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.overtrading && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
-                                                <input type="checkbox" checked={visibleStats.overtrading} onChange={(e) => handleCheckChange('overtrading', e.target.checked)} disabled={!visibleStats.overtrading && isAtLimit} className="rounded" />
-                                                Overtrading
-                                              </label>
-                                              <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.planned && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
-                                                <input type="checkbox" checked={visibleStats.planned} onChange={(e) => handleCheckChange('planned', e.target.checked)} disabled={!visibleStats.planned && isAtLimit} className="rounded" />
-                                                Planned
-                                              </label>
-                                              <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.topTags && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
-                                                <input type="checkbox" checked={visibleStats.topTags} onChange={(e) => handleCheckChange('topTags', e.target.checked)} disabled={!visibleStats.topTags && isAtLimit} className="rounded" />
-                                                Top Tags
-                                              </label>
-                                              <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.aiAnalysis && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
-                                                <input type="checkbox" checked={visibleStats.aiAnalysis} onChange={(e) => handleCheckChange('aiAnalysis', e.target.checked)} disabled={!visibleStats.aiAnalysis && isAtLimit} className="rounded" />
-                                                AI Analysis
-                                              </label>
+                                            <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.pnl && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
+                                              <input type="checkbox" checked={visibleStats.pnl} onChange={(e) => handleCheckChange('pnl', e.target.checked)} disabled={!visibleStats.pnl && isAtLimit} className="rounded" />
+                                              P&L
+                                            </label>
+                                            <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.trend && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
+                                              <input type="checkbox" checked={visibleStats.trend} onChange={(e) => handleCheckChange('trend', e.target.checked)} disabled={!visibleStats.trend && isAtLimit} className="rounded" />
+                                              Trend
+                                            </label>
+                                            <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.fomo && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
+                                              <input type="checkbox" checked={visibleStats.fomo} onChange={(e) => handleCheckChange('fomo', e.target.checked)} disabled={!visibleStats.fomo && isAtLimit} className="rounded" />
+                                              FOMO
+                                            </label>
+                                            <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.winRate && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
+                                              <input type="checkbox" checked={visibleStats.winRate} onChange={(e) => handleCheckChange('winRate', e.target.checked)} disabled={!visibleStats.winRate && isAtLimit} className="rounded" />
+                                              Win Rate
+                                            </label>
+                                            <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.streak && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
+                                              <input type="checkbox" checked={visibleStats.streak} onChange={(e) => handleCheckChange('streak', e.target.checked)} disabled={!visibleStats.streak && isAtLimit} className="rounded" />
+                                              Streak
+                                            </label>
+                                            <div className="border-t border-slate-700 my-1"></div>
+                                            <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.overtrading && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
+                                              <input type="checkbox" checked={visibleStats.overtrading} onChange={(e) => handleCheckChange('overtrading', e.target.checked)} disabled={!visibleStats.overtrading && isAtLimit} className="rounded" />
+                                              Overtrading
+                                            </label>
+                                            <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.planned && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
+                                              <input type="checkbox" checked={visibleStats.planned} onChange={(e) => handleCheckChange('planned', e.target.checked)} disabled={!visibleStats.planned && isAtLimit} className="rounded" />
+                                              Planned
+                                            </label>
+                                            <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.topTags && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
+                                              <input type="checkbox" checked={visibleStats.topTags} onChange={(e) => handleCheckChange('topTags', e.target.checked)} disabled={!visibleStats.topTags && isAtLimit} className="rounded" />
+                                              Top Tags
+                                            </label>
+                                            <label className={`flex items-center gap-2 text-sm p-1.5 rounded ${!visibleStats.aiAnalysis && isAtLimit ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-800/50'}`}>
+                                              <input type="checkbox" checked={visibleStats.aiAnalysis} onChange={(e) => handleCheckChange('aiAnalysis', e.target.checked)} disabled={!visibleStats.aiAnalysis && isAtLimit} className="rounded" />
+                                              AI Analysis
+                                            </label>
                                             </div>
                                           );
                                         })()}
@@ -17697,14 +17702,14 @@ ${
                                             y2="1"
                                           >
                                             <stop
-                                              offset="0%"
-                                              stopColor="rgb(107, 114, 128)"
-                                              stopOpacity={0.6}
+                                            offset="0%"
+                                            stopColor="rgb(107, 114, 128)"
+                                            stopOpacity={0.6}
                                             />
                                             <stop
-                                              offset="100%"
-                                              stopColor="rgb(107, 114, 128)"
-                                              stopOpacity={0.1}
+                                            offset="100%"
+                                            stopColor="rgb(107, 114, 128)"
+                                            stopOpacity={0.1}
                                             />
                                           </linearGradient>
                                         </defs>
@@ -17724,7 +17729,7 @@ ${
                                           }}
                                           tickFormatter={(value) =>
                                             `${value >= 0 ? "" : "-"}${(
-                                              Math.abs(value) / 1000
+                                            Math.abs(value) / 1000
                                             ).toFixed(0)}K`
                                           }
                                           domain={[
@@ -17748,20 +17753,20 @@ ${
                                             props: any,
                                           ) => [
                                             `${
-                                              value >= 0 ? "₹" : "-₹"
+                                            value >= 0 ? "₹" : "-₹"
                                             }${Math.abs(
-                                              value,
+                                            value,
                                             ).toLocaleString()}`,
                                             "Daily P&L",
                                           ]}
                                           labelFormatter={(label, payload) => {
                                             if (
-                                              payload &&
-                                              payload[0] &&
-                                              payload[0].payload
+                                            payload &&
+                                            payload[0] &&
+                                            payload[0].payload
                                             ) {
-                                              const data = payload[0].payload;
-                                              return `${data.formattedDate} • ${data.trades} trades`;
+                                            const data = payload[0].payload;
+                                            return `${data.formattedDate} • ${data.trades} trades`;
                                             }
                                             return label;
                                           }}
@@ -17830,8 +17835,8 @@ ${
                                         <span
                                           className={`text-sm font-semibold ${
                                             tag.totalPnL >= 0
-                                              ? "text-emerald-600"
-                                              : "text-red-500"
+                                            ? "text-emerald-600"
+                                            : "text-red-500"
                                           }`}
                                         >
                                           {tag.totalPnL >= 0 ? "+" : ""}₹
@@ -17844,13 +17849,13 @@ ${
                                         <div
                                           className={`h-2 rounded-full transition-all duration-1000 ${
                                             tag.totalPnL >= 0
-                                              ? "bg-gradient-to-r from-emerald-400 to-green-500"
-                                              : "bg-gradient-to-r from-red-400 to-rose-500"
+                                            ? "bg-gradient-to-r from-emerald-400 to-green-500"
+                                            : "bg-gradient-to-r from-red-400 to-rose-500"
                                           }`}
                                           style={{
                                             width: `${Math.min(
-                                              tag.winRate,
-                                              100,
+                                            tag.winRate,
+                                            100,
                                             )}%`,
                                           }}
                                         ></div>
@@ -18134,7 +18139,7 @@ ${
                                       {allData.length > 0
                                         ? (
                                             (riskMetrics.totalLossingDays /
-                                              allData.length) *
+                                            allData.length) *
                                             100
                                           ).toFixed(0)
                                         : 0}
@@ -18160,27 +18165,27 @@ ${
                                         >
                                           <div className="flex items-start gap-3">
                                             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                                              <AlertTriangle className="w-5 h-5" />
+                                            <AlertTriangle className="w-5 h-5" />
                                             </div>
                                             <div className="flex-1">
-                                              <div className="font-semibold text-lg">
-                                                {(tag.displayTag || tag.tag).toUpperCase()}
-                                              </div>
-                                              <div className="text-sm opacity-90 mb-2">
-                                                Avg Loss: ₹
-                                                {Math.abs(tag.avgLoss).toFixed(
-                                                  0
-                                                )}{" "}
-                                                • {tag.lossFrequency.toFixed(0)}
-                                                % loss rate
-                                              </div>
-                                              <div className="text-xs bg-red-500/30 rounded-lg p-2">
-                                                Total Loss: ₹
-                                                {Math.abs(
-                                                  tag.totalPnL
-                                                ).toLocaleString("en-IN")}{" "}
-                                                across {tag.totalDays} days
-                                              </div>
+                                            <div className="font-semibold text-lg">
+                                              {(tag.displayTag || tag.tag).toUpperCase()}
+                                            </div>
+                                            <div className="text-sm opacity-90 mb-2">
+                                              Avg Loss: ₹
+                                              {Math.abs(tag.avgLoss).toFixed(
+                                                0
+                                              )}{" "}
+                                              • {tag.lossFrequency.toFixed(0)}
+                                              % loss rate
+                                            </div>
+                                            <div className="text-xs bg-red-500/30 rounded-lg p-2">
+                                              Total Loss: ₹
+                                              {Math.abs(
+                                                tag.totalPnL
+                                              ).toLocaleString("en-IN")}{" "}
+                                              across {tag.totalDays} days
+                                            </div>
                                             </div>
                                           </div>
                                         </div>
@@ -18478,28 +18483,28 @@ ${
                                           .slice(0, 4)
                                           .map((insight, idx) => (
                                             <div
-                                              key={idx}
-                                              className={`p-4 rounded-xl border ${
-                                                insight.type === "success"
-                                                  ? "bg-emerald-500/20 border-emerald-400/30"
-                                                  : insight.type === "warning"
-                                                    ? "bg-amber-500/20 border-amber-400/30"
-                                                    : "bg-red-500/20 border-red-400/30"
-                                              }`}
+                                            key={idx}
+                                            className={`p-4 rounded-xl border ${
+                                              insight.type === "success"
+                                                ? "bg-emerald-500/20 border-emerald-400/30"
+                                                : insight.type === "warning"
+                                                  ? "bg-amber-500/20 border-amber-400/30"
+                                                  : "bg-red-500/20 border-red-400/30"
+                                            }`}
                                             >
-                                              <div className="flex items-start gap-3">
-                                                <div className="text-xl">
-                                                  {insight.icon}
+                                            <div className="flex items-start gap-3">
+                                              <div className="text-xl">
+                                                {insight.icon}
+                                              </div>
+                                              <div>
+                                                <div className="font-medium">
+                                                  {insight.title}
                                                 </div>
-                                                <div>
-                                                  <div className="font-medium">
-                                                    {insight.title}
-                                                  </div>
-                                                  <div className="text-sm opacity-90">
-                                                    {insight.message}
-                                                  </div>
+                                                <div className="text-sm opacity-90">
+                                                  {insight.message}
                                                 </div>
                                               </div>
+                                            </div>
                                             </div>
                                           ))
                                       ) : (
@@ -18528,15 +18533,15 @@ ${
                                         >
                                           <div className="flex items-start gap-3">
                                             <div className="text-xl">
-                                              {rec.icon}
+                                            {rec.icon}
                                             </div>
                                             <div>
-                                              <div className="font-medium text-sm">
-                                                {rec.title}
-                                              </div>
-                                              <div className="text-xs opacity-90 mt-1">
-                                                {rec.tip}
-                                              </div>
+                                            <div className="font-medium text-sm">
+                                              {rec.title}
+                                            </div>
+                                            <div className="text-xs opacity-90 mt-1">
+                                              {rec.tip}
+                                            </div>
                                             </div>
                                           </div>
                                         </div>
@@ -18894,10 +18899,10 @@ ${
                                           const newPositions = selectedWords.map(word => words.findIndex(w => w === word || w.includes(word) || word.includes(w))).filter(p => p >= 0);
                                           if (newPositions.length > 0) {
                                             setBuildModeData(prev => ({ 
-                                              ...prev,
-                                              sampleLine: firstLine,
-                                              positions: { ...prev.positions, time: [...prev.positions.time, ...newPositions] },
-                                              displayValues: { ...prev.displayValues!, time: prev.displayValues.time ? `${prev.displayValues.time} ${selectedText}` : selectedText }
+                                            ...prev,
+                                            sampleLine: firstLine,
+                                            positions: { ...prev.positions, time: [...prev.positions.time, ...newPositions] },
+                                            displayValues: { ...prev.displayValues!, time: prev.displayValues.time ? `${prev.displayValues.time} ${selectedText}` : selectedText }
                                             }));
                                           } else {
                                             alert("Could not find selected text in first line!");
@@ -18978,10 +18983,10 @@ ${
                                           const newPositions = selectedWords.map(word => words.findIndex(w => w === word || w.includes(word) || word.includes(w))).filter(p => p >= 0);
                                           if (newPositions.length > 0) {
                                             setBuildModeData(prev => ({ 
-                                              ...prev,
-                                              sampleLine: firstLine,
-                                              positions: { ...prev.positions, order: [...prev.positions.order, ...newPositions] },
-                                              displayValues: { ...prev.displayValues!, order: prev.displayValues.order ? `${prev.displayValues.order} ${selectedText}` : selectedText }
+                                            ...prev,
+                                            sampleLine: firstLine,
+                                            positions: { ...prev.positions, order: [...prev.positions.order, ...newPositions] },
+                                            displayValues: { ...prev.displayValues!, order: prev.displayValues.order ? `${prev.displayValues.order} ${selectedText}` : selectedText }
                                             }));
                                           } else {
                                             alert("Could not find selected text in first line!");
@@ -19062,10 +19067,10 @@ ${
                                           const newPositions = selectedWords.map(word => words.findIndex(w => w === word || w.includes(word) || word.includes(w))).filter(p => p >= 0);
                                           if (newPositions.length > 0) {
                                             setBuildModeData(prev => ({ 
-                                              ...prev,
-                                              sampleLine: firstLine,
-                                              positions: { ...prev.positions, symbol: [...prev.positions.symbol, ...newPositions] },
-                                              displayValues: { ...prev.displayValues!, symbol: prev.displayValues.symbol ? `${prev.displayValues.symbol} ${selectedText}` : selectedText }
+                                            ...prev,
+                                            sampleLine: firstLine,
+                                            positions: { ...prev.positions, symbol: [...prev.positions.symbol, ...newPositions] },
+                                            displayValues: { ...prev.displayValues!, symbol: prev.displayValues.symbol ? `${prev.displayValues.symbol} ${selectedText}` : selectedText }
                                             }));
                                           } else {
                                             alert("Could not find selected text in first line!");
@@ -19146,10 +19151,10 @@ ${
                                           const newPositions = selectedWords.map(word => words.findIndex(w => w === word || w.includes(word) || word.includes(w))).filter(p => p >= 0);
                                           if (newPositions.length > 0) {
                                             setBuildModeData(prev => ({ 
-                                              ...prev,
-                                              sampleLine: firstLine,
-                                              positions: { ...prev.positions, type: [...prev.positions.type, ...newPositions] },
-                                              displayValues: { ...prev.displayValues!, type: prev.displayValues.type ? `${prev.displayValues.type} ${selectedText}` : selectedText }
+                                            ...prev,
+                                            sampleLine: firstLine,
+                                            positions: { ...prev.positions, type: [...prev.positions.type, ...newPositions] },
+                                            displayValues: { ...prev.displayValues!, type: prev.displayValues.type ? `${prev.displayValues.type} ${selectedText}` : selectedText }
                                             }));
                                           } else {
                                             alert("Could not find selected text in first line!");
@@ -19230,10 +19235,10 @@ ${
                                           const newPositions = selectedWords.map(word => words.findIndex(w => w === word || w.includes(word) || word.includes(w))).filter(p => p >= 0);
                                           if (newPositions.length > 0) {
                                             setBuildModeData(prev => ({ 
-                                              ...prev,
-                                              sampleLine: firstLine,
-                                              positions: { ...prev.positions, qty: [...prev.positions.qty, ...newPositions] },
-                                              displayValues: { ...prev.displayValues!, qty: prev.displayValues.qty ? `${prev.displayValues.qty} ${selectedText}` : selectedText }
+                                            ...prev,
+                                            sampleLine: firstLine,
+                                            positions: { ...prev.positions, qty: [...prev.positions.qty, ...newPositions] },
+                                            displayValues: { ...prev.displayValues!, qty: prev.displayValues.qty ? `${prev.displayValues.qty} ${selectedText}` : selectedText }
                                             }));
                                           } else {
                                             alert("Could not find selected text in first line!");
@@ -19314,10 +19319,10 @@ ${
                                           const newPositions = selectedWords.map(word => words.findIndex(w => w === word || w.includes(word) || word.includes(w))).filter(p => p >= 0);
                                           if (newPositions.length > 0) {
                                             setBuildModeData(prev => ({ 
-                                              ...prev,
-                                              sampleLine: firstLine,
-                                              positions: { ...prev.positions, price: [...prev.positions.price, ...newPositions] },
-                                              displayValues: { ...prev.displayValues!, price: prev.displayValues.price ? `${prev.displayValues.price} ${selectedText}` : selectedText }
+                                            ...prev,
+                                            sampleLine: firstLine,
+                                            positions: { ...prev.positions, price: [...prev.positions.price, ...newPositions] },
+                                            displayValues: { ...prev.displayValues!, price: prev.displayValues.price ? `${prev.displayValues.price} ${selectedText}` : selectedText }
                                             }));
                                           } else {
                                             alert("Could not find selected text in first line!");
@@ -19395,18 +19400,18 @@ ${
                                           disabled={!currentUser?.userId}
                                           title={!currentUser?.userId ? "Log in to delete formats" : ""}
                                           onClick={async () => {if (confirm(`Delete format "${displayLabel}"?`)) {
-                                              const newFormats = { ...savedFormats };
-                                              delete newFormats[formatId];
-                                              setSavedFormats(newFormats);
-                                              await saveFormatsToAWS(newFormats);
-                                              if (activeFormat === format) {
-                                                setActiveFormat(null);
-                                              }
-                                              // Clear user selection if deleted format was selected
-                                              if (userSelectedFormatId === formatId) {
-                                                setUserSelectedFormatId(null);
-                                              }
-                                              console.log("🗑️ Format deleted:", displayLabel);
+                                            const newFormats = { ...savedFormats };
+                                            delete newFormats[formatId];
+                                            setSavedFormats(newFormats);
+                                            await saveFormatsToAWS(newFormats);
+                                            if (activeFormat === format) {
+                                              setActiveFormat(null);
+                                            }
+                                            // Clear user selection if deleted format was selected
+                                            if (userSelectedFormatId === formatId) {
+                                              setUserSelectedFormatId(null);
+                                            }
+                                            console.log("🗑️ Format deleted:", displayLabel);
                                             }
                                           }}
                                           data-testid={`button-delete-format-${displayLabel}`}
@@ -20124,14 +20129,14 @@ ${
                                           if (paperTradeSLValue || paperTradeSLType === 'high' || paperTradeSLType === 'low') {
                                             setPaperTradeSLEnabled(true);
                                             toast({
-                                              title: "Stop Loss Set",
-                                              description: paperTradeSLType === 'price' 
-                                                ? `SL at ₹${paperTradeSLValue}` 
-                                                : paperTradeSLType === 'percent'
-                                                ? `SL at ${paperTradeSLValue}% loss`
-                                                : paperTradeSLType === 'duration'
-                                                ? `SL after ${paperTradeSLValue} ${paperTradeSLDurationUnit}`
-                                                : `SL at ${paperTradeSLTimeframe} candle ${paperTradeSLType}`
+                                            title: "Stop Loss Set",
+                                            description: paperTradeSLType === 'price' 
+                                              ? `SL at ₹${paperTradeSLValue}` 
+                                              : paperTradeSLType === 'percent'
+                                              ? `SL at ${paperTradeSLValue}% loss`
+                                              : paperTradeSLType === 'duration'
+                                              ? `SL after ${paperTradeSLValue} ${paperTradeSLDurationUnit}`
+                                              : `SL at ${paperTradeSLTimeframe} candle ${paperTradeSLType}`
                                             });
                                           }
                                           setShowMobilePaperTradeSLDropdown(false);
