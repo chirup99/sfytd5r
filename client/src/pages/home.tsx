@@ -13277,7 +13277,7 @@ ${
                                                   <div className="flex items-center gap-2">
                                                     <TrendingUp className="h-4 w-4 text-gray-400" />
                                                     <h3 className="text-sm font-medium text-gray-200">
-                                                      Quarterly Performance Trend
+                                                      Quarterly Performance Trend <span className="text-xs text-gray-500 ml-1">(Net profit)</span>
                                                     </h3>
                                                   </div>
                                                   <div className="flex items-center gap-2">
@@ -13361,7 +13361,7 @@ ${
                                                     
                                                     return quarterlyData.length > 0 ? (
                                                       <>
-                                                        <div className="h-40 w-full mb-3 relative">
+                                                        <div className="h-40 w-full mb-3">
                                                           <ResponsiveContainer width="100%" height="100%">
                                                             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
                                                               <defs>
@@ -13388,7 +13388,6 @@ ${
                                                             </AreaChart>
                                                           </ResponsiveContainer>
                                                         </div>
-                                                          <div className="absolute bottom-1 right-2 text-xs text-gray-500">(Net profit)</div>
                                                         <div className="flex justify-center gap-4 text-xs text-gray-400">
                                                           <span className="flex items-center gap-1">
                                                             <span className="w-2 h-2 rounded-full bg-green-500"></span> Positive Quarter
