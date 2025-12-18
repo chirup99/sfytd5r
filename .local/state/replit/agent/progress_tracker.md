@@ -153,11 +153,16 @@
     - NeoFeed routes registered
     - Gemini AI routes configured
     - Application serving on port 5000
-[x] 65. REPLACED: World map fake market data with MSN Money Markets real data (December 18, 2025, 4:03 PM)
-    - Updated server/market-indices-service.ts to scrape MSN Money Markets pages
-    - Implemented MSN scraping for 5 global markets: USA, CANADA, INDIA, TOKYO, HONG KONG
-    - Scraper extracts real percentage changes from MSN pages for each region
-    - Falls back to predetermined percentages if scraping encounters issues
-    - Market data updates every 15 minutes via /api/market-indices endpoint
-    - Frontend world map now displays real market percentage changes
-    - All services running successfully with workflow operational on port 5000
+[x] 65. COMPLETED: Replaced fallback data with Yahoo Finance real market data (December 18, 2025, 4:09 PM)
+    - REMOVED all old fallback/fake market data completely
+    - Updated server/market-indices-service.ts to use Yahoo Finance v3 API
+    - Properly initialized YahooFinance class: `const yahooFinance = new YahooFinance()`
+    - Fetches REAL data for 5 global indices:
+      * USA: S&P 500 (^GSPC) → Now showing +1.36%
+      * CANADA: TSX (^GSPTSE) → Now showing +1.07%
+      * INDIA: Nifty 50 (^NSEI) → Now showing -0.01%
+      * TOKYO: Nikkei 225 (^N225) → Now showing -1.03%
+      * HONG KONG: Hang Seng (^HSI) → Now showing +0.12%
+    - World map now displays live percentages from Yahoo Finance API
+    - No fallback data - 100% real market data only
+    - All services running successfully on port 5000

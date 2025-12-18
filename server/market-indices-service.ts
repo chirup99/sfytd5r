@@ -1,5 +1,7 @@
-import axios from 'axios';
-import * as cheerio from 'cheerio';
+import YahooFinance from 'yahoo-finance2';
+
+// Initialize Yahoo Finance v3 instance
+const yahooFinance = new YahooFinance();
 
 export interface MarketIndex {
   symbol: string;
@@ -12,135 +14,75 @@ export interface MarketIndex {
   isMarketOpen: boolean;
 }
 
-// Market regions with their MSN page identifiers
-const MARKET_REGIONS = {
-  'USA': 'us',           // S&P 500
-  'CANADA': 'ca',        // TSX Composite
-  'INDIA': 'in',         // Nifty 50
-  'TOKYO': 'jp',         // Nikkei 225
-  'HONG KONG': 'hk',     // Hang Seng
+// Yahoo Finance symbols for global indices
+const YAHOO_FINANCE_INDICES: Record<string, string> = {
+  'USA': '^GSPC',           // S&P 500
+  'CANADA': '^GSPTSE',      // TSX Composite
+  'INDIA': '^NSEI',         // Nifty 50
+  'TOKYO': '^N225',         // Nikkei 225
+  'HONG KONG': '^HSI',      // Hang Seng
 };
 
 /**
- * Scrapes market data from MSN Money Markets page
+ * Fetches market data from Yahoo Finance using yahoo-finance2 library v3
  */
-async function scrapeMSNMarketData(
+async function fetchFromYahooFinance(
   regionName: string,
-  regionCode: string
+  symbol: string
 ): Promise<MarketIndex | null> {
   try {
-    console.log(`📡 Scraping ${regionName} market data from MSN...`);
+    console.log(`📡 Fetching ${regionName} (${symbol}) from Yahoo Finance...`);
     
-    // MSN Money Markets page URL for different regions
-    const url = `https://www.msn.com/en-${regionCode}/money/markets`;
+    // Use yahoo-finance2 v3 instance
+    const quote = await yahooFinance.quote(symbol);
     
-    const response = await axios.get(url, {
-      timeout: 10000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept-Language': 'en-US,en;q=0.9',
-      }
-    });
-
-    const $ = cheerio.load(response.data);
-    
-    // Look for market index data in the page
-    // MSN displays indices in cards with percentage changes
-    let foundData = false;
-    let price = 0;
-    let changePercent = 0;
-    let change = 0;
-    
-    // Try to find index value and change percentage
-    // MSN typically displays main index first
-    const indexCards = $('div[role="article"], div[data-idx], span[aria-label*="%"]');
-    
-    // Extract percentage change from text
-    const pageText = $.text();
-    
-    // Look for patterns like "+0.26%" or "-0.87%"
-    const patterns = {
-      'USA': /S&P.*?\+?(-?\d+\.?\d*)%/,
-      'CANADA': /TSX.*?\+?(-?\d+\.?\d*)%/,
-      'INDIA': /Nifty.*?\+?(-?\d+\.?\d*)%/,
-      'TOKYO': /Nikkei.*?\+?(-?\d+\.?\d*)%/,
-      'HONG KONG': /Hang Seng.*?\+?(-?\d+\.?\d*)%/,
-    };
-    
-    const pattern = patterns[regionName as keyof typeof patterns];
-    if (pattern) {
-      const match = pageText.match(pattern);
-      if (match && match[1]) {
-        changePercent = parseFloat(match[1]);
-        foundData = true;
-      }
+    if (!quote) {
+      console.warn(`⚠️ No quote data found for ${regionName}`);
+      return null;
     }
 
-    // If not found with specific pattern, try general percentage extraction
-    if (!foundData) {
-      const generalPattern = /([0-9,]+(?:\.[0-9]+)?)\s*([+-][0-9.]+%)/;
-      const matches = pageText.match(generalPattern);
-      if (matches) {
-        // Use fallback percentages based on region
-        const regionPercentages: Record<string, number> = {
-          'USA': 0.26,
-          'CANADA': -0.05,
-          'INDIA': 0.90,
-          'TOKYO': 0.31,
-          'HONG KONG': -0.87,
-        };
-        changePercent = regionPercentages[regionName] || 0;
-        foundData = true;
-      }
-    }
+    // Access properties safely with type assertions
+    const quoteData = quote as any;
+    const regularMarketPrice = quoteData.regularMarketPrice || 0;
+    const regularMarketChange = quoteData.regularMarketChange || 0;
+    const changePercent = quoteData.regularMarketChangePercent || 0;
+    const marketState = quoteData.marketState || '';
 
-    if (foundData || changePercent !== 0) {
-      // Use mock prices as we can't always extract them, but use real percentages
-      const basePrices: Record<string, number> = {
-        'USA': 6090.27,
-        'CANADA': 25688.39,
-        'INDIA': 24768.30,
-        'TOKYO': 39091.17,
-        'HONG KONG': 19865.46,
-      };
-      
-      price = basePrices[regionName] || 0;
-      change = (price * changePercent) / 100;
-      
-      console.log(`✅ ${regionName}: ${price.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`);
+    if (regularMarketPrice > 0) {
+      console.log(`✅ ${regionName}: ${regularMarketPrice.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`);
 
       return {
-        symbol: regionName,
+        symbol,
         regionName,
-        price,
-        change,
-        changePercent,
+        price: regularMarketPrice,
+        change: regularMarketChange,
+        changePercent: changePercent,
         isUp: changePercent >= 0,
         marketTime: new Date().toISOString(),
-        isMarketOpen: true,
+        isMarketOpen: marketState === 'REGULAR' || marketState === 'PRE' || marketState === 'POST',
       };
     }
 
-    console.warn(`⚠️ Could not extract market data for ${regionName}`);
+    console.warn(`⚠️ Invalid price for ${regionName}: ${regularMarketPrice}`);
     return null;
 
   } catch (error) {
-    console.error(`❌ Error scraping ${regionName} from MSN: ${error instanceof Error ? error.message : String(error)}`);
+    console.error(`❌ Error fetching ${regionName}: ${error instanceof Error ? error.message : String(error)}`);
     return null;
   }
 }
 
 /**
- * Fetches real market data from MSN Money Markets
+ * Fetches real market data from Yahoo Finance
  */
 export async function getMarketIndices(): Promise<Record<string, MarketIndex>> {
-  console.log('🌍 Fetching real-time market data from MSN Money Markets...');
+  console.log('🌍 Fetching real-time market data from Yahoo Finance...');
   
   const results: Record<string, MarketIndex> = {};
   
   // Fetch data for each market in parallel
-  const fetchPromises = Object.entries(MARKET_REGIONS).map(([regionName, regionCode]) =>
-    scrapeMSNMarketData(regionName, regionCode)
+  const fetchPromises = Object.entries(YAHOO_FINANCE_INDICES).map(([regionName, symbol]) =>
+    fetchFromYahooFinance(regionName, symbol)
   );
 
   const fetchedData = await Promise.allSettled(fetchPromises);
@@ -153,81 +95,21 @@ export async function getMarketIndices(): Promise<Record<string, MarketIndex>> {
     }
   });
 
-  console.log(`📊 Successfully fetched ${successCount}/${Object.keys(MARKET_REGIONS).length} indices from MSN`);
+  console.log(`📊 Successfully fetched ${successCount}/${Object.keys(YAHOO_FINANCE_INDICES).length} indices from Yahoo Finance`);
   
   if (successCount === 0) {
-    throw new Error('Failed to fetch any market data from MSN Money Markets');
+    throw new Error('Failed to fetch any market data from Yahoo Finance');
   }
 
   return results;
 }
 
-// Fallback data when scraping fails
-const FALLBACK_MARKET_DATA: Record<string, MarketIndex> = {
-  'USA': {
-    symbol: 'GSPC',
-    regionName: 'USA',
-    price: 6090.27,
-    change: 15.64,
-    changePercent: 0.26,
-    isUp: true,
-    marketTime: new Date().toISOString(),
-    isMarketOpen: false,
-  },
-  'CANADA': {
-    symbol: 'GSPTSE',
-    regionName: 'CANADA',
-    price: 25688.39,
-    change: -12.45,
-    changePercent: -0.05,
-    isUp: false,
-    marketTime: new Date().toISOString(),
-    isMarketOpen: false,
-  },
-  'INDIA': {
-    symbol: 'NIFTY50',
-    regionName: 'INDIA',
-    price: 24768.30,
-    change: 221.05,
-    changePercent: 0.90,
-    isUp: true,
-    marketTime: new Date().toISOString(),
-    isMarketOpen: false,
-  },
-  'TOKYO': {
-    symbol: 'N225',
-    regionName: 'TOKYO',
-    price: 39091.17,
-    change: 119.21,
-    changePercent: 0.31,
-    isUp: true,
-    marketTime: new Date().toISOString(),
-    isMarketOpen: false,
-  },
-  'HONG KONG': {
-    symbol: 'HSI',
-    regionName: 'HONG KONG',
-    price: 19865.46,
-    change: -175.29,
-    changePercent: -0.87,
-    isUp: false,
-    marketTime: new Date().toISOString(),
-    isMarketOpen: false,
-  },
-};
-
 /**
- * Gets market indices - fetches fresh data with fallback
+ * Gets market indices - fetches fresh data (NO FALLBACK)
  */
 export async function getCachedMarketIndices(): Promise<Record<string, MarketIndex>> {
-  console.log('🌐 Fetching fresh market indices...');
-  try {
-    const data = await getMarketIndices();
-    console.log(`✅ Market data retrieved successfully`);
-    return data;
-  } catch (error) {
-    console.error('❌ Failed to fetch live market indices, using fallback data');
-    console.log('📊 Returning fallback market data for world map display');
-    return FALLBACK_MARKET_DATA;
-  }
+  console.log('🌐 Fetching fresh market indices from Yahoo Finance...');
+  const data = await getMarketIndices();
+  console.log(`✅ Real market data retrieved successfully`);
+  return data;
 }
