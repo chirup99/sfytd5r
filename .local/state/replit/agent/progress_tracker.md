@@ -34,9 +34,9 @@
 [x] 34. FIXED MISSING SATURDAY DATES: Calendar now renders as vertical columns (top-to-bottom) instead of horizontal rows
 [x] 35. Re-installed tsx package and verified application running (December 17, 2025)
 [x] 36. FIXED CHART DISPLAY BUG: Personal heatmap now loads chart data when date is selected from heatmap (December 17, 2025, 12:26 PM)
-[x] 37. Re-installed tsx package and verified workflow running (December 17, 2025, 1:40 PM)
-[x] 38. Re-installed npm packages and verified workflow running (December 17, 2025, 2:36 PM)
-[x] 39. Re-installed tsx package and verified workflow running (December 17, 2025, 2:59 PM)
+[x] 37. Re-installed tsx package and verified application running (December 17, 2025, 1:40 PM)
+[x] 38. Re-installed npm packages and verified application running (December 17, 2025, 2:36 PM)
+[x] 39. Re-installed tsx package and verified application running (December 17, 2025, 2:59 PM)
 [x] 40. Project import migration completed successfully (December 17, 2025, 4:07 PM)
 [x] 41. Re-installed tsx package and verified workflow running (December 17, 2025, 5:20 PM)
 [x] 42. Re-installed tsx package and verified workflow running (December 17, 2025, 5:51 PM)
@@ -274,3 +274,13 @@
     - NLP Agent ready with 25+ intents, 41 stock entities, 9 indicator entities
     - Gemini AI routes configured
     - Application serving on port 5000
+[x] 78. FIXED: "View Full Report" button not triggering financial data (December 19, 2025, 4:02 AM)
+    - ROOT CAUSE: "View Full Report" button passes stock symbol (RELIANCE-EQ), but handleSearch() expects human language (reliance)
+    - The NLP agent doesn't recognize symbol format, so quarterly/company insights don't load
+    - SOLUTION: Added symbol detection logic to handleSearch() function in client/src/pages/home.tsx
+    - NEW CODE: Detects if query is in symbol format (contains '-' and is uppercase)
+    - CONVERSION: Extracts symbol name (RELIANCE from RELIANCE-EQ) and converts to lowercase (reliance)
+    - RESULT: When "View Full Report" passes "RELIANCE-EQ", it's automatically converted to "reliance"
+    - FLOW: handleSearch("RELIANCE-EQ") → detects symbol format → converts to "reliance" → trading agent processes correctly
+    - Now displays: Quarterly Performance Trend, Company Insights, P&L Statement, Balance Sheet
+    - Workflow restarted and running successfully with all services initialized and functional

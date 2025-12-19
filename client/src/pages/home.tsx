@@ -2382,8 +2382,15 @@ export default function Home() {
 
   // Optimized unified search with caching and performance improvements
   const handleSearch = async (queryOverride?: string) => {
-    const query = queryOverride || searchQuery;
+    let query = queryOverride || searchQuery;
     if (!query.trim()) return;
+
+    // Convert stock symbol format (RELIANCE-EQ) to human language (reliance)
+    if (query.includes('-') && query.toUpperCase() === query) {
+      const symbolPart = query.split('-')[0]; // Extract "RELIANCE" from "RELIANCE-EQ"
+      query = symbolPart.toLowerCase(); // Convert to "reliance"
+      console.log(`✅ [SYMBOL-DETECTED] Converted ${queryOverride} to human language: ${query}`);
+    }
 
     // Check authentication before allowing search
     const userId = localStorage.getItem('currentUserId');
