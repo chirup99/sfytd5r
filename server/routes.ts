@@ -272,44 +272,41 @@ async function getStockFundamentalData(symbol: string) {
   console.log(`========================================`);
 
   try {
-    console.log(`🚀 [FUNDAMENTAL] Calling fetchFyersData for ${symbol}...`);
-    // 🚀 PRIMARY: Use Fyers API for real-time OHLC data first
-    const fyersData = await fetchFyersData(symbol);
-    console.log(`📊 [FUNDAMENTAL] fetchFyersData result for ${symbol}:`, {
-      hasData: !!fyersData,
-      priceData: fyersData?.priceData
+    console.log(`🚀 [FUNDAMENTAL] Fetching data from Angel One API for ${symbol}...`);
+    // 🚀 PRIMARY: Use Angel One API for real-time OHLC data
+    const fundamentalData = await getFundamentalDataFromSources(symbol);
+    
+    // Load curated data as backup
+    let curatedData = getCuratedStockData(symbol);
+
+    console.log(`🔍 [FUNDAMENTAL] Data sources loaded for ${symbol}:`, {
+      hasFundamentalData: !!fundamentalData,
+      hasCuratedData: !!curatedData,
+      hasGrowthMetrics: !!curatedData?.growthMetrics,
+      hasAdditionalIndicators: !!curatedData?.additionalIndicators
     });
 
-    if (fyersData) {
-      console.log(`🎯 Fyers API primary OHLC data fetched for ${symbol}`);
-      console.log(`💎 [FYERS-SUCCESS] Using Fyers volume data: ${fyersData.priceData.volume}`);
+    if (fundamentalData || curatedData) {
+      console.log(`✅ Angel One + Curated data loaded for ${symbol}`);
 
-      // Get comprehensive fundamental data from other sources to complement Fyers OHLC
-      const fundamentalData = await getFundamentalDataFromSources(symbol);
-
-      // Get curated data for enhanced metrics
-      const curatedData = getCuratedStockData(symbol);
-
-      console.log(`🔍 [FUNDAMENTAL] Curated data for ${symbol}:`, {
-        hasGrowthMetrics: !!curatedData?.growthMetrics,
-        hasAdditionalIndicators: !!curatedData?.additionalIndicators
-      });
-
-      // Merge Fyers OHLC data (primary) with fundamental data (secondary)
-      // CRITICAL: Preserve Fyers volume data while getting 52W high/low from other sources
+      // Merge fundamental data (primary) with curated data (secondary) for complete coverage
+      // CRITICAL: Ensure ALL fields have fallback to curated data
       const enhancedData = {
         priceData: {
-          ...fyersData.priceData,
-          // Only override 52W high/low from other sources, keep Fyers volume
-          high52W: fundamentalData?.priceData?.high52W || fyersData.priceData.high52W,
-          low52W: fundamentalData?.priceData?.low52W || fyersData.priceData.low52W
+          ...(fundamentalData?.priceData || curatedData?.priceData || {}),
+          high52W: fundamentalData?.priceData?.high52W || curatedData?.priceData?.high52W || 0,
+          low52W: fundamentalData?.priceData?.low52W || curatedData?.priceData?.low52W || 0
         },
-        valuation: fundamentalData?.valuation || fyersData.valuation,
-        financialHealth: fundamentalData?.financialHealth || fyersData.financialHealth,
-        growthMetrics: fundamentalData?.growthMetrics || fyersData.growthMetrics || curatedData?.growthMetrics || {
+        valuation: fundamentalData?.valuation || curatedData?.valuation || {
+          marketCap: 'N/A', peRatio: 0, pbRatio: 0, psRatio: 0, evEbitda: 0, pegRatio: 0
+        },
+        financialHealth: fundamentalData?.financialHealth || curatedData?.financialHealth || {
+          eps: 0, bookValue: 0, dividendYield: 'N/A', roe: 'N/A', roa: 'N/A', deRatio: 0
+        },
+        growthMetrics: fundamentalData?.growthMetrics || curatedData?.growthMetrics || {
           revenueGrowth: 'N/A', epsGrowth: 'N/A', profitMargin: 'N/A', ebitdaMargin: 'N/A', freeCashFlowYield: 'N/A'
         },
-        additionalIndicators: fundamentalData?.additionalIndicators || fyersData.additionalIndicators || curatedData?.additionalIndicators || {
+        additionalIndicators: fundamentalData?.additionalIndicators || curatedData?.additionalIndicators || {
           beta: 0, currentRatio: 0, quickRatio: 0, priceToSales: 0, enterpriseValue: 'N/A'
         }
       };
@@ -323,14 +320,14 @@ async function getStockFundamentalData(symbol: string) {
       };
 
       // Add Market Sentiment analysis
-      const marketSentiment = await calculateMarketSentiment(symbol, fyersData.priceData);
+      const marketSentiment = await calculateMarketSentiment(symbol, enhancedData.priceData);
       enhancedData.marketSentiment = marketSentiment;
 
       return enhancedData;
     }
 
-    // Fallback: Try other sources if Fyers API fails
-    console.log(`⚠️ Fyers API unavailable for ${symbol}, trying backup sources...`);
+    // Fallback: Try other sources if primary sources fail
+    console.log(`⚠️ Primary sources unavailable for ${symbol}, trying backup sources...`);
 
     // Try Google Finance for comprehensive data
     const googleFinanceData = await fetchGoogleFinanceData(symbol);
@@ -472,8 +469,8 @@ async function getStockFundamentalData(symbol: string) {
     }
 
     // Last resort: Use curated real data with full enhancement
-    console.log(`🔄 Using curated data for ${symbol}...`);
-    const curatedData = getCuratedStockData(symbol);
+    console.log(`🔄 Using curated real data for ${symbol}...`);
+    curatedData = getCuratedStockData(symbol);
 
     if (curatedData) {
       // Add technical indicators to curated data

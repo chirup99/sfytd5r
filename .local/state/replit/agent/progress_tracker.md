@@ -357,3 +357,17 @@
       * Real ROE/ROA from screener.in (not N/A)
     - Workflow restarted successfully with all services initialized and streaming live data
     - Application now displays proper fundamental analysis data in Valuation and Financial Health sections
+[x] 85. SWITCHED: Replaced Fyers API with Angel One API (December 19, 2025, 6:06 AM)
+    - USER REQUEST: "dont use fyers use angle one api data"
+    - ROOT CAUSE: getStockFundamentalData was using fetchFyersData as primary OHLC source
+    - SOLUTION: Modified getStockFundamentalData to use Angel One API via getFundamentalDataFromSources()
+    - CHANGED PRIMARY FLOW:
+      * OLD: fetchFyersData (Fyers API) → getFundamentalDataFromSources → getCuratedStockData
+      * NEW: getFundamentalDataFromSources (Angel One API first) → getCuratedStockData
+    - REMOVED: All Fyers API calls from fundamental data fetching
+    - RESULT: All stock data now flows through Angel One API (authenticated and streaming)
+    - FALLBACK CHAIN: Angel One API → Yahoo Finance → Google Finance → MoneyControl → NSE Official → Curated real data
+    - CRITICAL FIX: Fixed duplicate curatedData variable declaration (moved to function scope)
+    - VERIFIED: All backend services running with Angel One authenticated
+    - Angel One API streaming: BANKNIFTY, SENSEX, GOLD live data
+    - Workflow restarted and running successfully
