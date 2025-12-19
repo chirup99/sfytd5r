@@ -345,31 +345,24 @@
     - SOLUTION: Completely rewrote function to remove complex code and handle multiple field name variations
     - REMOVED: All hardcoded 0 defaults that were hiding real data
     - ADDED: Support for multiple field name variations (pe, peRatio, P_E, P/E, etc.)
-    - Workflow restarted and running successfully
-[x] 85. Re-installed npm packages and verified workflow running (December 19, 2025, 6:16 AM)
+    - Improved field mapping for all valuation metrics
+    - Workflow restarted and verified running successfully
+[x] 85. Re-installed tsx package and verified workflow running (December 19, 2025, 6:34 AM)
     - All services initialized successfully
     - Angel One API connected and authenticated (Client: P176266)
-    - WebSocket streaming active with live market data (BANKNIFTY, SENSEX, GOLD)
+    - WebSocket streaming active with live market data:
+      * BANKNIFTY: LTP=58987.95
+      * SENSEX: LTP=84889.96
+      * GOLD: LTP=36832.54
+    - Yahoo Finance market indices working:
+      * USA (S&P 500): +0.79%
+      * CANADA (TSX): +0.61%
+      * INDIA (Nifty 50): +0.46%
+      * TOKYO (Nikkei 225): +1.20%
+      * HONG KONG (Hang Seng): +0.79%
     - NLP Agent ready with 25+ intents, 41 stock entities, 9 indicator entities
     - Gemini AI routes configured
+    - AWS DynamoDB tables ready
+    - NeoFeed routes registered
     - Application serving on port 5000
-[x] 86. REMOVED NSE Text tab from Trading Master (December 19, 2025, 6:21 AM)
-    - Removed "NSE Text" tab from trading-master.tsx
-    - Changed TabsList grid from grid-cols-6 to grid-cols-5
-    - Removed TabsTrigger for "nsetext" value
-    - Deleted entire TabsContent section for nsetext (400+ lines of Angel One API test interface)
-    - Retained tabs: Main, Trade, Build Patterns, Options, Test AI
-    - Workflow restarted and running successfully
-    - All services initialized: Angel One API, WebSocket streaming, NLP Agent, Gemini AI routes
-    - Application serving on port 5000
-[x] 87. REMOVED Professional OHLC Data Window from Main Tab (December 19, 2025, 6:24 AM)
-    - Removed entire "Professional OHLC Display Window" section from trading-master.tsx (lines 6536-6614)
-    - Deleted ~80 lines of code including:
-      * Header with "Professional OHLC Data Window" title
-      * OHLC data display (Open, High, Low, Close prices)
-      * Additional stats (Volume, Total Candles, Timeframe)
-      * Data range info footer
-    - Removed conditional rendering: {displayOhlcData && displayOhlcData.candles && displayOhlcData.candles.length > 0 && (...)}
-    - Workflow restarted and running successfully
-    - All services initialized: Angel One API authenticated, WebSocket streaming active, NLP Agent ready, Gemini AI routes configured
-    - Application serving on port 5000
+    - NOTE: Gemini API podcast generation shows 403 error (API key needs configuration)
