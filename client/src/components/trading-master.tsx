@@ -5001,15 +5001,9 @@ Risk Warning: Past performance does not guarantee future results. Trade responsi
     
     if (allSymbols.length === 0) return;
 
-    // Immediately fetch last traded prices as fallback
-    console.log('📊 Fetching last traded prices for fallback...', allSymbols);
-    
-    // Delay the fetch slightly to avoid race conditions with SSE
-    const timer = setTimeout(() => {
-      fetchLastTradedPrices(allSymbols);
-    }, 100);
-
-    return () => clearTimeout(timer);
+    // Immediately fetch Angel One prices for watchlist stocks
+    console.log('📊 Fetching Angel One live prices...', allSymbols);
+    fetchLastTradedPrices(allSymbols);
   }, [feedStocks, watchlistStocks]);
 
   // Simplified swipe detection
