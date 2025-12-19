@@ -1806,7 +1806,39 @@ function MicroAnimationsDemoPage() {
             </div>
             <div className="space-y-2">
               <Label>Market Status</Label>
-              <div className="p-3 border rounded-lg bg-white dark:bg-gray-700">
+              {isReportLoading && (
+                                                  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 rounded-lg">
+                                                    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-8 border border-gray-700 shadow-2xl max-w-md">
+                                                      <div className="text-center">
+                                                        <style>{`
+                                                          @keyframes thinkingDot {
+                                                            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+                                                            30% { opacity: 1; transform: translateY(-8px); }
+                                                          }
+                                                          .thinking-dot {
+                                                            display: inline-block;
+                                                            width: 10px;
+                                                            height: 10px;
+                                                            border-radius: 50%;
+                                                            background-color: #3b82f6;
+                                                            animation: thinkingDot 1.4s infinite;
+                                                            margin: 0 4px;
+                                                          }
+                                                          .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+                                                          .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+                                                        `}</style>
+                                                        <h3 className="text-lg font-semibold text-white mb-4">Generating Financial Report</h3>
+                                                        <div className="flex items-center justify-center gap-2 mb-3">
+                                                          <div className="thinking-dot"></div>
+                                                          <div className="thinking-dot"></div>
+                                                          <div className="thinking-dot"></div>
+                                                        </div>
+                                                        <p className="text-sm text-gray-400">Analyzing quarterly data, company insights, and financial statements...</p>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                )}
+                                                <div className="p-3 border rounded-lg bg-white dark:bg-gray-700">
                 <MarketStatusPulse isLive={false} />
               </div>
             </div>
@@ -1964,6 +1996,7 @@ export default function Home() {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchResults, setSearchResults] = useState("");
   const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [isReportLoading, setIsReportLoading] = useState(false);
   const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
   const [searchResultsNews, setSearchResultsNews] = useState<any[]>([]);
   const [searchResultsNewsSymbol, setSearchResultsNewsSymbol] = useState("");
