@@ -24,48 +24,7 @@
 [x] 24. Re-installed tsx package and verified application running
 [x] 25. Removed hardcoded local demo heatmap data (6 dates)
 [x] 26. Project import migration verified and completed
-[x] 27. FIXED: Personal heatmap now immediately displays color codes after saving data
-[x] 28. FIXED CRITICAL BUG: Performance Trend chart no longer shows 0-trade dates
-[x] 29. FIXED STALE CACHE BUG: Heatmap now shows all data (17 dates) on first load/toggle
-[x] 30. FIXED DEMO DATA CACHE BUG: Demo heatmap now fetches all data on first load
-[x] 31. FIXED IMMEDIATE DISPLAY: Heatmap colors now show immediately after saving (no reload needed)
-[x] 32. Re-installed tsx package and workflow running successfully
-[x] 33. FIXED CALENDAR GRID LAYOUT: Heatmap now displays proper column-based calendar with all dates visible
-[x] 34. FIXED MISSING SATURDAY DATES: Calendar now renders as vertical columns (top-to-bottom) instead of horizontal rows
-[x] 35. Re-installed tsx package and verified application running (December 17, 2025)
-[x] 36. FIXED CHART DISPLAY BUG: Personal heatmap now loads chart data when date is selected from heatmap (December 17, 2025, 12:26 PM)
-[x] 37. Re-installed tsx package and verified application running (December 17, 2025, 1:40 PM)
-[x] 38. Re-installed npm packages and verified application running (December 17, 2025, 2:36 PM)
-[x] 39. Re-installed tsx package and verified application running (December 17, 2025, 2:59 PM)
-[x] 40. Project import migration completed successfully (December 17, 2025, 4:07 PM)
-[x] 41. Re-installed tsx package and verified application running (December 17, 2025, 5:20 PM)
-[x] 42. Re-installed tsx package and verified application running (December 17, 2025, 5:51 PM)
-[x] 43. Re-installed tsx package and verified application running (December 17, 2025, 6:20 PM)
-[x] 44. Re-installed tsx package and verified application running (December 17, 2025, 6:36 PM)
-[x] 45. Verified workflow running and all services connected (December 17, 2025, 6:55 PM)
-[x] 46. AWS Elastic Beanstalk deployment to perala-live completed successfully (December 17, 2025, 7:00 PM)
-    - Version: v20251217-185747
-    - Status: Ready, Health: Green
-    - Live URL: https://perala-live.eba-pdmvmcm2.eu-north-1.elasticbeanstalk.com
-[x] 47. FIXED Google Sign-In OAuth flow (December 17, 2025, 7:13 PM)
-    - Added exchangeCodeForSession() function to properly complete OAuth token exchange
-    - Updated handleCognitoCallback() to use forceRefresh for fetching session
-    - Improved landing.tsx OAuth callback handling with better error messages
-    - Added URL cleanup after OAuth callback processing
-[x] 48. Re-installed tsx package and verified workflow running (December 17, 2025, 7:37 PM)
-    - All services initialized successfully
-    - Angel One API connected and authenticated
-    - AWS DynamoDB tables ready
-    - NeoFeed routes registered
-    - WebSocket streaming active
-[x] 49. Removed Google Sign-In button and "Or continue with" divider from landing page (December 17, 2025, 7:38 PM)
-    - Simplified login page to email/password only
-[x] 50. Re-installed npm packages and verified workflow running (December 18, 2025, 3:11 AM)
-    - All services initialized successfully
-    - Angel One API connected and authenticated (Client: P176266)
-    - WebSocket streaming active
-    - Application serving on port 5000
-[x] 51-88. Multiple fixes and improvements (See detailed log)
+[x] 27-88. Multiple fixes and improvements (See detailed log)
 [x] 89. Re-installed tsx package and verified workflow running (December 19, 2025, 7:52 AM)
     - All services initialized successfully
     - Angel One API connected and authenticated (Client: P176266)
@@ -75,3 +34,9 @@
     - AWS DynamoDB tables ready
     - NeoFeed routes registered
     - Application serving on port 5000
+[x] 90. HIDDEN: Battu AI button on NeoFeed search bar (December 19, 2025, 7:57 AM)
+    - Removed the default "AI" button that appeared when search bar is empty
+    - Now only shows Search and AI buttons when user types in search
+    - Changed conditional from `{searchQuery.trim() ? (...) : (...)}` to just `{searchQuery.trim() && (...)}`
+    - Button deactivated and hidden from UI completely
+    - Workflow running successfully with all services initialized

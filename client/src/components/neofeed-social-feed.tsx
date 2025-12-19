@@ -980,7 +980,7 @@ function FeedHeader({ onAllClick, isRefreshing, selectedFilter, onFilterChange, 
               data-testid="input-neo-feed-search"
             />
             <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
-              {searchQuery.trim() ? (
+              {searchQuery.trim() && (
                 <>
                   <Button
                     onClick={handleSearch}
@@ -997,15 +997,6 @@ function FeedHeader({ onAllClick, isRefreshing, selectedFilter, onFilterChange, 
                     <Bot className="h-3.5 w-3.5" />
                   </Button>
                 </>
-              ) : (
-                <Button
-                  onClick={handleAskAI}
-                  size="sm"
-                  className="h-7 px-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md font-medium flex items-center gap-1 text-xs"
-                >
-                  <Bot className="h-3 w-3" />
-                  AI
-                </Button>
               )}
             </div>
           </div>
