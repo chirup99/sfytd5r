@@ -362,3 +362,14 @@
     - Workflow restarted and running successfully
     - All services initialized: Angel One API, WebSocket streaming, NLP Agent, Gemini AI routes
     - Application serving on port 5000
+[x] 87. REMOVED Professional OHLC Data Window from Main Tab (December 19, 2025, 6:24 AM)
+    - Removed entire "Professional OHLC Display Window" section from trading-master.tsx (lines 6536-6614)
+    - Deleted ~80 lines of code including:
+      * Header with "Professional OHLC Data Window" title
+      * OHLC data display (Open, High, Low, Close prices)
+      * Additional stats (Volume, Total Candles, Timeframe)
+      * Data range info footer
+    - Removed conditional rendering: {displayOhlcData && displayOhlcData.candles && displayOhlcData.candles.length > 0 && (...)}
+    - Workflow restarted and running successfully
+    - All services initialized: Angel One API authenticated, WebSocket streaming active, NLP Agent ready, Gemini AI routes configured
+    - Application serving on port 5000
