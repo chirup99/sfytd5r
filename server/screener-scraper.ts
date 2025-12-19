@@ -117,8 +117,10 @@ class ScreenerScraper {
   }
 
   async getStockData(symbol: string): Promise<ScreenerStockData | null> {
-    const cleanSymbol = symbol.toUpperCase().trim();
-    console.log(`🔍 [SCREENER] Fetching data for ${cleanSymbol} from screener.in...`);
+    // Strip "-EQ" or other exchange suffixes for screener.in compatibility
+    const symbolWithoutExchange = symbol.toUpperCase().trim().replace(/-EQ$|-BE$|-BO$|-MF$/, '');
+    const cleanSymbol = symbolWithoutExchange;
+    console.log(`🔍 [SCREENER] Fetching data for ${cleanSymbol} (original: ${symbol}) from screener.in...`);
 
     try {
       const url = `https://www.screener.in/company/${cleanSymbol}/consolidated/`;
