@@ -1410,18 +1410,27 @@ async function fetchYahooFinanceData(symbol: string) {
   }
 }
 
-// Transform screener data to match frontend format
+// Transform screener data to match frontend format - SIMPLIFIED to display actual data
 function transformScreenerData(screenerData: any) {
   if (!screenerData || Object.keys(screenerData).length === 0) return null;
   
-  // Log what we're transforming
-  console.log(`✅ [TRANSFORM] Converting screener data for ${screenerData.symbol}:`, {
-    pe: screenerData.pe,
-    bookValue: screenerData.bookValue,
-    eps: screenerData.eps,
-    marketCap: screenerData.marketCap,
-    roe: screenerData.roe,
-    debtToEquity: screenerData.debtToEquity
+  console.log(`✅ [TRANSFORM] Raw screener data received:`, JSON.stringify(screenerData, null, 2));
+  
+  // Extract values - try multiple field name variations for robustness
+  const pe = screenerData.pe || screenerData.peRatio || screenerData.P_E || screenerData['P/E'] || null;
+  const pb = screenerData.pb || screenerData.pbRatio || screenerData.P_B || screenerData['P/B'] || null;
+  const eps = screenerData.eps || screenerData.EPS || null;
+  const bookValue = screenerData.bookValue || screenerData.book_value || screenerData.Book_Value || null;
+  const marketCap = screenerData.marketCap || screenerData.market_cap || screenerData.Market_Cap || null;
+  const roe = screenerData.roe || screenerData.ROE || null;
+  const roa = screenerData.roa || screenerData.ROA || null;
+  const dividendYield = screenerData.dividendYield || screenerData.dividend_yield || screenerData.Dividend_Yield || null;
+  const currentRatio = screenerData.currentRatio || screenerData.current_ratio || screenerData.Current_Ratio || null;
+  const debtToEquity = screenerData.debtToEquity || screenerData.debt_to_equity || screenerData.D_E || screenerData['D/E'] || null;
+  const currentPrice = screenerData.currentPrice || screenerData.current_price || screenerData.Current_Price || screenerData.price || null;
+  
+  console.log(`✅ [TRANSFORM] Extracted values for ${screenerData.symbol || 'unknown'}:`, {
+    pe, pb, eps, bookValue, marketCap, roe, roa, currentRatio, debtToEquity, currentPrice
   });
   
   return {
@@ -1429,40 +1438,40 @@ function transformScreenerData(screenerData: any) {
       open: 0,
       high: 0,
       low: 0,
-      close: screenerData.currentPrice || 0,
+      close: currentPrice || 0,
       volume: 'N/A',
-      high52W: screenerData.high52Week || 0,
-      low52W: screenerData.low52Week || 0
+      high52W: screenerData.high52Week || screenerData.high_52_week || 0,
+      low52W: screenerData.low52Week || screenerData.low_52_week || 0
     },
     valuation: {
-      marketCap: screenerData.marketCap || 'N/A',
-      peRatio: screenerData.pe || 0,
-      pbRatio: screenerData.bookValue > 0 ? (screenerData.currentPrice || 0) / screenerData.bookValue : 0,
-      psRatio: 0,
-      evEbitda: 0,
-      pegRatio: 0
+      marketCap: marketCap || 'N/A',
+      peRatio: pe !== null ? pe : 'N/A',
+      pbRatio: pb !== null ? pb : 'N/A',
+      psRatio: screenerData.psRatio || screenerData.P_S || 'N/A',
+      evEbitda: screenerData.evEbitda || screenerData.EV_EBITDA || 'N/A',
+      pegRatio: screenerData.pegRatio || screenerData.PEG || 'N/A'
     },
     financialHealth: {
-      eps: screenerData.eps || 0,
-      bookValue: screenerData.bookValue || 0,
-      dividendYield: screenerData.dividendYield || 'N/A',
-      roe: screenerData.roe || 'N/A',
-      roa: 'N/A',
-      deRatio: screenerData.debtToEquity || 0
+      eps: eps !== null ? eps : 'N/A',
+      bookValue: bookValue !== null ? bookValue : 'N/A',
+      dividendYield: dividendYield || 'N/A',
+      roe: roe || 'N/A',
+      roa: roa || 'N/A',
+      deRatio: debtToEquity !== null ? debtToEquity : 'N/A'
     },
     growthMetrics: {
-      revenueGrowth: screenerData.salesGrowth3Yr || 'N/A',
-      epsGrowth: screenerData.profitGrowth3Yr || 'N/A',
-      profitMargin: 'N/A',
-      ebitdaMargin: 'N/A',
-      freeCashFlowYield: 'N/A'
+      revenueGrowth: screenerData.salesGrowth3Yr || screenerData.revenue_growth_3yr || 'N/A',
+      epsGrowth: screenerData.profitGrowth3Yr || screenerData.eps_growth_3yr || 'N/A',
+      profitMargin: screenerData.profitMargin || screenerData.profit_margin || 'N/A',
+      ebitdaMargin: screenerData.ebitdaMargin || screenerData.ebitda_margin || 'N/A',
+      freeCashFlowYield: screenerData.freeCashFlowYield || screenerData.fcf_yield || 'N/A'
     },
     additionalIndicators: {
-      beta: 0,
-      currentRatio: screenerData.currentRatio || 0,
-      quickRatio: 0,
-      priceToSales: 0,
-      enterpriseValue: 'N/A'
+      beta: screenerData.beta || 'N/A',
+      currentRatio: currentRatio || 'N/A',
+      quickRatio: screenerData.quickRatio || screenerData.quick_ratio || 'N/A',
+      priceToSales: screenerData.priceToSales || screenerData.P_S || 'N/A',
+      enterpriseValue: screenerData.enterpriseValue || screenerData.enterprise_value || 'N/A'
     },
     marketSentiment: {
       score: 0.5,
