@@ -1410,6 +1410,69 @@ async function fetchYahooFinanceData(symbol: string) {
   }
 }
 
+// Transform screener data to match frontend format
+function transformScreenerData(screenerData: any) {
+  if (!screenerData || Object.keys(screenerData).length === 0) return null;
+  
+  // Log what we're transforming
+  console.log(`✅ [TRANSFORM] Converting screener data for ${screenerData.symbol}:`, {
+    pe: screenerData.pe,
+    bookValue: screenerData.bookValue,
+    eps: screenerData.eps,
+    marketCap: screenerData.marketCap,
+    roe: screenerData.roe,
+    debtToEquity: screenerData.debtToEquity
+  });
+  
+  return {
+    priceData: {
+      open: 0,
+      high: 0,
+      low: 0,
+      close: screenerData.currentPrice || 0,
+      volume: 'N/A',
+      high52W: screenerData.high52Week || 0,
+      low52W: screenerData.low52Week || 0
+    },
+    valuation: {
+      marketCap: screenerData.marketCap || 'N/A',
+      peRatio: screenerData.pe || 0,
+      pbRatio: screenerData.bookValue > 0 ? (screenerData.currentPrice || 0) / screenerData.bookValue : 0,
+      psRatio: 0,
+      evEbitda: 0,
+      pegRatio: 0
+    },
+    financialHealth: {
+      eps: screenerData.eps || 0,
+      bookValue: screenerData.bookValue || 0,
+      dividendYield: screenerData.dividendYield || 'N/A',
+      roe: screenerData.roe || 'N/A',
+      roa: 'N/A',
+      deRatio: screenerData.debtToEquity || 0
+    },
+    growthMetrics: {
+      revenueGrowth: screenerData.salesGrowth3Yr || 'N/A',
+      epsGrowth: screenerData.profitGrowth3Yr || 'N/A',
+      profitMargin: 'N/A',
+      ebitdaMargin: 'N/A',
+      freeCashFlowYield: 'N/A'
+    },
+    additionalIndicators: {
+      beta: 0,
+      currentRatio: screenerData.currentRatio || 0,
+      quickRatio: 0,
+      priceToSales: 0,
+      enterpriseValue: 'N/A'
+    },
+    marketSentiment: {
+      score: 0.5,
+      trend: 'Neutral',
+      volumeSpike: false,
+      confidence: 'Medium'
+    }
+  };
+}
+
 // Helper function to get fundamental data from secondary sources
 async function getFundamentalDataFromSources(symbol: string) {
   try {
@@ -1420,7 +1483,8 @@ async function getFundamentalDataFromSources(symbol: string) {
       const screenerData = await screenerScraper.getStockData(symbol);
       if (screenerData && Object.keys(screenerData).length > 0) {
         console.log(`✅ [SCREENER-PRIMARY] Real web-scraped data found for ${symbol}`);
-        return screenerData;
+        const transformed = transformScreenerData(screenerData);
+        if (transformed) return transformed;
       }
     } catch (screenerError) {
       console.log(`⚠️ [SCREENER] Screener.in fetch failed for ${symbol}:`, screenerError);
