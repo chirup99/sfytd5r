@@ -1415,7 +1415,18 @@ async function getFundamentalDataFromSources(symbol: string) {
   try {
     console.log(`🔍 [ENHANCED-FUNDAMENTAL] Starting comprehensive data fetch for ${symbol}...`);
 
-    // Try Yahoo Finance first for comprehensive fundamental data
+    // PRIMARY: Try Screener.in web scraping first for real fundamental data
+    try {
+      const screenerData = await screenerScraper.getStockData(symbol);
+      if (screenerData && Object.keys(screenerData).length > 0) {
+        console.log(`✅ [SCREENER-PRIMARY] Real web-scraped data found for ${symbol}`);
+        return screenerData;
+      }
+    } catch (screenerError) {
+      console.log(`⚠️ [SCREENER] Screener.in fetch failed for ${symbol}:`, screenerError);
+    }
+
+    // Try Yahoo Finance for comprehensive fundamental data
     const yahooFinanceData = await fetchYahooFinanceData(symbol);
     if (yahooFinanceData) {
       console.log(`✅ [ENHANCED-FUNDAMENTAL] Yahoo Finance data found for ${symbol}`);

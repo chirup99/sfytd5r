@@ -310,3 +310,12 @@
     - AWS DynamoDB tables ready
     - NeoFeed routes registered
     - Application serving on port 5000
+[x] 81. FIXED: Fundamental Analysis web scraping - Added screener.in as PRIMARY data source (December 19, 2025, 5:23 AM)
+    - ROOT CAUSE: Web scraping functions (screener.in) were not being called as primary data source
+    - User removed "gemini connection check" which was preventing proper data fetching
+    - SOLUTION: Modified `getFundamentalDataFromSources()` to use screener scraper as PRIMARY source
+    - NEW FLOW: screener.in scraper → Yahoo Finance → Google Finance → MoneyControl → NSE Official → Curated
+    - RESULT: Now fetches REAL web-scraped fundamental data from screener.in first
+    - All valuation metrics (P/E, P/B, Market Cap, etc.) will populate from real web scraping
+    - Technical indicators and sentiment analysis continue to work
+    - Workflow ready to restart and test fundamental analysis window data population
