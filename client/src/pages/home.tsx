@@ -12579,7 +12579,7 @@ ${
                   }`}>
                     <div className="max-w-4xl w-full md:space-y-4">
                       {/* Dynamic Greeting - Hidden on mobile */}
-                      <div className="text-center spacey-4 md:block hidden">
+                      <div className="text-center spacey-4 hidden">
                         <div className="flex items-center justify-center gap-3">
                           {isViewOnlyMode ? (
                             <>
