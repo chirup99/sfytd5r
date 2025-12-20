@@ -2103,23 +2103,8 @@ export default function Home() {
   });
 
   // Build animated stocks from REAL NSE data + hardcoded indices
-  const animatedStocks = [
-    { symbol: "NIFTY", price: "Loading...", change: +1.24, isProfit: true },
-    { symbol: "BANKNIFTY", price: "Loading...", change: +0.87, isProfit: true },
-    { symbol: "SENSEX", price: "85138.27", change: -0.45, isProfit: false },
-    gainersLosersData?.gainers?.[0] ? {
-      symbol: `${gainersLosersData.gainers[0].symbol}`,
-      price: `+${gainersLosersData.gainers[0].pChange.toFixed(2)}%`,
-      change: gainersLosersData.gainers[0].pChange,
-      isProfit: true
-    } : { symbol: "Top Gainers", price: "Loading...", change: 0, isProfit: true },
-    gainersLosersData?.losers?.[0] ? {
-      symbol: `${gainersLosersData.losers[0].symbol}`,
-      price: `${gainersLosersData.losers[0].pChange.toFixed(2)}%`,
-      change: gainersLosersData.losers[0].pChange,
-      isProfit: false
-    } : { symbol: "Top Losers", price: "Loading...", change: 0, isProfit: false },
-  ];
+  // Animated stocks will be defined after price functions
+  let animatedStocks: any = [];
 
   // Passcode protection state
   const [showPasscodeModal, setShowPasscodeModal] = useState(false);
@@ -6100,6 +6085,37 @@ ${
     const baseline = getNiftyBankBaseline();
     return current - baseline;
   };
+
+  // Build animatedStocks with REAL Angel One API prices
+  const buildAnimatedStocks = () => [
+    { 
+      symbol: "NIFTY", 
+      price: getNifty50CurrentPrice() > 0 ? `${getNifty50CurrentPrice().toFixed(2)}` : "Loading...",
+      change: getNifty50Change(), 
+      isProfit: getNifty50Change() >= 0 
+    },
+    { 
+      symbol: "BANKNIFTY", 
+      price: getNiftyBankCurrentPrice() > 0 ? `${getNiftyBankCurrentPrice().toFixed(2)}` : "Loading...",
+      change: getNiftyBankChange(), 
+      isProfit: getNiftyBankChange() >= 0 
+    },
+    { symbol: "SENSEX", price: "85138.27", change: -0.45, isProfit: false },
+    gainersLosersData?.gainers?.[0] ? {
+      symbol: `${gainersLosersData.gainers[0].symbol}`,
+      price: `+${gainersLosersData.gainers[0].pChange.toFixed(2)}%`,
+      change: gainersLosersData.gainers[0].pChange,
+      isProfit: true
+    } : { symbol: "Top Gainers", price: "Loading...", change: 0, isProfit: true },
+    gainersLosersData?.losers?.[0] ? {
+      symbol: `${gainersLosersData.losers[0].symbol}`,
+      price: `${gainersLosersData.losers[0].pChange.toFixed(2)}%`,
+      change: gainersLosersData.losers[0].pChange,
+      isProfit: false
+    } : { symbol: "Top Losers", price: "Loading...", change: 0, isProfit: false }
+  ];
+
+  animatedStocks = buildAnimatedStocks();
   
   // Save watchlist to localStorage whenever it changes
   useEffect(() => {
