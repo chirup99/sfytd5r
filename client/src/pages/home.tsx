@@ -12579,36 +12579,7 @@ ${
                   }`}>
                     <div className="max-w-4xl w-full md:space-y-4">
                       {/* Dynamic Greeting - Hidden on mobile */}
-                      <div className="text-center spacey-4 hidden">
-                        <div className="flex items-center justify-center gap-3">
-                          {isViewOnlyMode ? (
-                            <>
-                              <Sparkles className="h-5 w-5 text-blue-400" />
-                              <h1 className="text-2xl font-normal text-gray-100">
-                                Welcome to Trading Platform
-                              </h1>
-                            </>
-                          ) : showingInitialGreeting ? (
-                            <>
-                              <Sparkles className="h-5 w-5 text-blue-400" />
-                              <h1 className="text-2xl font-normal text-gray-100">
-                                Hey {currentUser?.displayName || currentUser?.username || "Trader"}
-                              </h1>
-                            </>
-                          ) : (
-                            <div className="flex items-center gap-2 animate-fade-in">
-                              {animatedStocks[currentStockIndex].isProfit ? (
-                                <TrendingUp className="h-5 w-5 text-green-400" />
-                              ) : (
-                                <TrendingDown className="h-5 w-5 text-red-400" />
-                              )}
-                              <span className={`text-lg font-semibold ${animatedStocks[currentStockIndex].isProfit ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {animatedStocks[currentStockIndex].symbol}: {animatedStocks[currentStockIndex].price}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                    
 
                       {/* Search Input - Hidden on mobile, moves to bottom when results appear */}
                       {!searchResults && (
