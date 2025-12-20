@@ -1513,6 +1513,12 @@ function HistoricalDataSection() {
 function MicroAnimationsDemoPage() {
   const [demoPrice, setDemoPrice] = useState(1552.5);
   const [prevPrice, setPrevPrice] = useState(1552.5);
+  const [niftyPrice, setNiftyPrice] = useState("59273.80");
+  const [bankNiftyPrice, setBankNiftyPrice] = useState("52841.35");
+  const [sensexPrice, setSensexPrice] = useState("85138.27");
+  const [niftyChange, setNiftyChange] = useState(1.24);
+  const [bankNiftyChange, setBankNiftyChange] = useState(0.87);
+  const [sensexChange, setSensexChange] = useState(-0.45);
   const [isExecuting, setIsExecuting] = useState(false);
   const [tradeType, setTradeType] = useState<"buy" | "sell">("buy");
   const [volume, setVolume] = useState(1000000);
@@ -2095,9 +2101,9 @@ export default function Home() {
   const [currentStockIndex, setCurrentStockIndex] = useState(0);
   const [showingInitialGreeting, setShowingInitialGreeting] = useState(true);
   const animatedStocks = [
-    { symbol: "NIFTY", price: "59273.80", change: +1.24, isProfit: true },
-    { symbol: "BANKNIFTY", price: "52841.35", change: +0.87, isProfit: true },
-    { symbol: "SENSEX", price: "85138.27", change: -0.45, isProfit: false },
+    { symbol: "NIFTY", price: niftyPrice, change: niftyChange >= 0 ? 1.24 : -1.24, isProfit: niftyChange >= 0 },
+    { symbol: "BANKNIFTY", price: bankNiftyPrice, change: bankNiftyChange >= 0 ? 0.87 : -0.87, isProfit: bankNiftyChange >= 0 },
+    { symbol: "SENSEX", price: sensexPrice, change: sensexChange >= 0 ? -0.45 : 0.45, isProfit: sensexChange >= 0 },
     { symbol: "Top Gainers", price: "TCS +2.1%", change: +2.1, isProfit: true },
     { symbol: "Top Losers", price: "SUNPHARMA -1.8%", change: -1.8, isProfit: false },
   ];
