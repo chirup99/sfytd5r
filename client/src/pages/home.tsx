@@ -6019,12 +6019,21 @@ ${
     refetchOnWindowFocus: false
   });
 
+  // BANKNIFTY Chart Data (Fixed to use BANKNIFTY)
   const { data: niftyBankChartData = [], isLoading: isNiftyBankLoading } = useQuery({
-    queryKey: ['stock-chart', selectedWatchlistSymbol, niftyBankTimeframe],
-    queryFn: () => {
-      const symbol = selectedWatchlistSymbol.replace('-EQ', '').replace('-BE', '');
-      return fetch(`/api/stock-chart-data/${symbol}?timeframe=${niftyBankTimeframe}`).then(res => res.json());
-    },
+    queryKey: ['stock-chart', 'BANKNIFTY', niftyBankTimeframe],
+    queryFn: () => fetch(`/api/stock-chart-data/BANKNIFTY?timeframe=${niftyBankTimeframe}`).then(res => res.json()),
+    refetchInterval: niftyBankTimeframe === '1D' ? 60000 : 300000,
+    staleTime: 0,
+    gcTime: 600000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false
+  });
+
+  // SENSEX Chart Data
+  const { data: sensexChartData = [], isLoading: isSensexLoading } = useQuery({
+    queryKey: ['stock-chart', 'SENSEX', niftyBankTimeframe],
+    queryFn: () => fetch(`/api/stock-chart-data/SENSEX?timeframe=${niftyBankTimeframe}`).then(res => res.json()),
     refetchInterval: niftyBankTimeframe === '1D' ? 60000 : 300000,
     staleTime: 0,
     gcTime: 600000,
@@ -6085,6 +6094,25 @@ ${
     const baseline = getNiftyBankBaseline();
     return current - baseline;
   };
+  const getSensexCurrentPrice = () => {
+    if (sensexChartData && sensexChartData.length > 0) {
+      return sensexChartData[sensexChartData.length - 1]?.price || sensexChartData[sensexChartData.length - 1]?.close || 0;
+    }
+    return 0;
+  };
+
+  const getSensexBaseline = () => {
+    if (!sensexChartData || sensexChartData.length === 0) {
+      return getSensexCurrentPrice();
+    }
+    return sensexChartData[0]?.price || sensexChartData[0]?.close || getSensexCurrentPrice();
+  };
+
+  const getSensexChange = () => {
+    const current = getSensexCurrentPrice();
+    const baseline = getSensexBaseline();
+    return current - baseline;
+  };
 
   // Build animatedStocks with REAL Angel One API prices
   const buildAnimatedStocks = () => [
@@ -6100,7 +6128,12 @@ ${
       change: getNiftyBankChange(), 
       isProfit: getNiftyBankChange() >= 0 
     },
-    { symbol: "SENSEX", price: "85138.27", change: -0.45, isProfit: false },
+    { 
+      symbol: "SENSEX", 
+      price: getSensexCurrentPrice() > 0 ? `${getSensexCurrentPrice().toFixed(2)}` : "Loading...",
+      change: getSensexChange(), 
+      isProfit: getSensexChange() >= 0 
+    },
     gainersLosersData?.gainers?.[0] ? {
       symbol: `${gainersLosersData.gainers[0].symbol}`,
       price: `+${gainersLosersData.gainers[0].pChange.toFixed(2)}%`,
