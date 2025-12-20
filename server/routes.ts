@@ -19954,23 +19954,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ loginUrl });
   });
 
-  // STEP 2: Handle OAuth callback from Zerodha
-  app.post('/api/broker/zerodha/callback', async (req, res) => {
-    const { requestToken } = req.body;
+  // STEP 2: Handle OAuth callback from Zerodha (GET with request_token as query param)
+  app.get('/api/broker/zerodha/callback', async (req, res) => {
+    const requestToken = req.query.request_token as string;
     if (!requestToken) {
-      return res.status(400).json({ error: 'Missing request token' });
+      return res.status(400).json({ 
+        status: 'error',
+        message: 'Missing or empty field `authorize`',
+        data: null,
+        error_type: 'InputException'
+      });
     }
-    // Store in session - Step 3 will exchange this for access token
-    res.json({ success: true, requestToken });
+    try {
+      // Exchange request token for access token using Zerodha API
+      const zerodhaApiKey = process.env.ZERODHA_API_KEY || '';
+      const zerodhaSecret = process.env.ZERODHA_SECRET || '';
+      
+      // For now, store the request token - in production, exchange via Zerodha API
+      // This would typically involve an HMAC-SHA256 signature
+      res.json({ 
+        success: true, 
+        requestToken,
+        message: 'Request token received. Exchange with /api/broker/zerodha/token endpoint.'
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Failed to process callback',
+        data: null,
+        error_type: 'CallbackException'
+      });
+    }
   });
 
   // STEP 3: Exchange request token for access token
   app.post('/api/broker/zerodha/token', async (req, res) => {
     const { requestToken } = req.body;
-    // TODO: Exchange with Zerodha API for real access token
-    // For now, store the request token as session token
-    const accessToken = requestToken; // Placeholder
-    res.json({ accessToken });
+    if (!requestToken) {
+      return res.status(400).json({ error: 'Missing request token' });
+    }
+    // TODO: Call Zerodha API with HMAC-SHA256 signature to exchange for access token
+    // For now, store the request token as placeholder
+    const accessToken = `token_${requestToken}`;
+    res.json({ accessToken, requestToken });
   });
 
   // STEP 4: Fetch trades from Zerodha
@@ -19979,7 +20005,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!accessToken) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
-    // TODO: Call Zerodha API to fetch trades
+    // TODO: Call Zerodha API with access token to fetch trades
     // Placeholder response
     res.json({ 
       trades: [
