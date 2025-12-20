@@ -17060,81 +17060,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log(`📡 Fetching REAL live quote for ${symbol}...`);
 
-      let angelOnePrice = null;
-      let open = null;
-      let high = null;
-      let low = null;
+      let token, ltp, open, high, low;
 
-      // Get latest 1-minute candle (last minute data) using REAL Angel One API
-      try {
-        const now = new Date();
-        const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+      // Get REAL WebSocket prices (same as watchlist) - MOST CURRENT
+      const getWebSocketPrice = (sym) => {
+        let t = null;
+        if (sym === 'NIFTY' || sym === 'NIFTY50') {
+          t = '99926000';  // NIFTY50 correct token
+        } else if (sym === 'BANKNIFTY') {
+          t = '99926009';  // BANKNIFTY correct token
+        } else if (sym === 'SENSEX') {
+          t = '99919000';  // SENSEX correct token
+        }
         
-        const formatDate = (d) => {
-          const year = d.getFullYear();
-          const month = String(d.getMonth() + 1).padStart(2, '0');
-          const day = String(d.getDate()).padStart(2, '0');
-          const hours = String(d.getHours()).padStart(2, '0');
-          const mins = String(d.getMinutes()).padStart(2, '0');
-          return `${year}-${month}-${day} ${hours}:${mins}`;
-        };
-
-        let exchange, token;
-        if (symbol === 'NIFTY' || symbol === 'NIFTY50') {
-          exchange = 'NFO';
-          token = '99926009';
-        } else if (symbol === 'BANKNIFTY') {
-          exchange = 'NFO';
-          token = '99926009';
-        } else if (symbol === 'SENSEX') {
-          exchange = 'BSE';
-          token = '99919000';
-        } else {
-          throw new Error('Unknown symbol');
+        if (t) {
+          const prices = angelOneWebSocket.getLatestPrices([t]);
+          const price = prices.get(t);
+          if (price && price.close > 0) {
+            return {
+              token: t,
+              ltp: price.close,
+              open: price.open,
+              high: price.high,
+              low: price.low,
+              close: price.close,
+              volume: price.volume
+            };
+          }
         }
+        return null;
+      };
 
-        // Use the working angelOneApi.getCandleData method
-        const candles = await angelOneApi.getCandleData(
-          exchange,
-          token,
-          'ONE_MINUTE',
-          formatDate(fiveMinutesAgo),
-          formatDate(now)
-        );
-
-        if (candles && candles.length > 0) {
-          const latestCandle = candles[candles.length - 1];
-          angelOnePrice = latestCandle.close || latestCandle.ltp;
-          open = latestCandle.open || angelOnePrice;
-          high = latestCandle.high || angelOnePrice;
-          low = latestCandle.low || angelOnePrice;
-          console.log(`✅ REAL Angel One price for ${symbol}: ₹${angelOnePrice}`);
-        }
-      } catch (err) {
-        console.log(`⚠️ Angel One API error: ${err.message}`);
+      const wsPrice = getWebSocketPrice(symbol);
+      
+      if (wsPrice) {
+        // ✅ WebSocket price available (REAL-TIME, CURRENT)
+        ltp = wsPrice.ltp;
+        open = wsPrice.open;
+        high = wsPrice.high;
+        low = wsPrice.low;
+        console.log(`✅ REAL WebSocket price for ${symbol}: ₹${ltp}`);
+      } else {
+        // Fallback to simulated price if WebSocket not available
+        console.log(`⚠️ WebSocket not available for ${symbol}, using fallback`);
+        const stockSymbol = symbol.replace('NSE:', '').replace('-EQ', '').replace('-INDEX', '');
+        const stock = updateStockPrice(stockSymbol);
+        ltp = stock.currentPrice;
+        open = stock.basePrice;
+        high = stock.currentPrice * 1.02;
+        low = stock.currentPrice * 0.98;
       }
 
-      // Fallback to simulated price if real data fails
-      const stockSymbol = symbol.replace('NSE:', '').replace('-EQ', '').replace('-INDEX', '');
-      const stock = angelOnePrice ? 
-        { basePrice: open || angelOnePrice, currentPrice: angelOnePrice } : 
-        updateStockPrice(stockSymbol);
+      const change = ltp - open;
+      const changePercent = (change / open) * 100;
 
-      const change = stock.currentPrice - stock.basePrice;
-      const changePercent = (change / stock.basePrice) * 100;
-
-      console.log(`✅ Live quote for ${symbol}: ₹${stock.currentPrice}`);
+      console.log(`✅ Live quote for ${symbol}: ₹${ltp} (change: ${change.toFixed(2)})`);
 
       res.json({
         success: true,
         data: {
           symbol: symbol,
-          ltp: stock.currentPrice,
+          ltp: ltp,
           ch: change,
           chp: changePercent,
-          high_price: high || stock.currentPrice * 1.02,
-          low_price: low || stock.currentPrice * 0.98,
-          open_price: open || stock.basePrice,
+          high_price: high,
+          low_price: low,
+          open_price: open,
           volume: Math.floor(Math.random() * 1000000) + 50000,
           timestamp: Date.now()
         }
