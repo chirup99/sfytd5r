@@ -40,7 +40,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAngelOneAutoconnect } from "@/hooks/useAngelOneAutoconnect";
 import { cognitoSignOut, getCognitoToken, sendEmailVerificationCode, confirmEmailVerification, checkEmailVerified } from "@/cognito";
 import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickSeries, LineSeries, HistogramSeries, IPriceLine, createSeriesMarkers } from 'lightweight-charts';
-import { ArrowLeft, Banknote, Clock, ExternalLink, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp } from "lucide-react";
+import { ArrowLeft, Banknote, Clock, ExternalLink, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award } from "lucide-react";
 import { parseBrokerTrades, ParseError } from "@/utils/trade-parser";
 
 // Global window type declaration for audio control
@@ -1806,7 +1806,39 @@ function MicroAnimationsDemoPage() {
             </div>
             <div className="space-y-2">
               <Label>Market Status</Label>
-              <div className="p-3 border rounded-lg bg-white dark:bg-gray-700">
+              {isReportLoading && (
+                                                  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 rounded-lg">
+                                                    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-8 border border-gray-700 shadow-2xl max-w-md">
+                                                      <div className="text-center">
+                                                        <style>{`
+                                                          @keyframes thinkingDot {
+                                                            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+                                                            30% { opacity: 1; transform: translateY(-8px); }
+                                                          }
+                                                          .thinking-dot {
+                                                            display: inline-block;
+                                                            width: 10px;
+                                                            height: 10px;
+                                                            border-radius: 50%;
+                                                            background-color: #3b82f6;
+                                                            animation: thinkingDot 1.4s infinite;
+                                                            margin: 0 4px;
+                                                          }
+                                                          .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+                                                          .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+                                                        `}</style>
+                                                        <h3 className="text-lg font-semibold text-white mb-4">Generating Financial Report</h3>
+                                                        <div className="flex items-center justify-center gap-2 mb-3">
+                                                          <div className="thinking-dot"></div>
+                                                          <div className="thinking-dot"></div>
+                                                          <div className="thinking-dot"></div>
+                                                        </div>
+                                                        <p className="text-sm text-gray-400">Analyzing quarterly data, company insights, and financial statements...</p>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                )}
+                                                <div className="p-3 border rounded-lg bg-white dark:bg-gray-700">
                 <MarketStatusPulse isLive={false} />
               </div>
             </div>
@@ -1964,6 +1996,8 @@ export default function Home() {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchResults, setSearchResults] = useState("");
   const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [isReportLoading, setIsReportLoading] = useState(false);
+  const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
   const [searchResultsNews, setSearchResultsNews] = useState<any[]>([]);
   const [searchResultsNewsSymbol, setSearchResultsNewsSymbol] = useState("");
   const [aiChartSelectedTimeframe, setAiChartSelectedTimeframe] = useState('1Y');
@@ -2381,8 +2415,15 @@ export default function Home() {
 
   // Optimized unified search with caching and performance improvements
   const handleSearch = async (queryOverride?: string) => {
-    const query = queryOverride || searchQuery;
+    let query = queryOverride || searchQuery;
     if (!query.trim()) return;
+
+    // Convert stock symbol format (RELIANCE-EQ) to human language (reliance)
+    if (query.includes('-') && query.toUpperCase() === query) {
+      const symbolPart = query.split('-')[0]; // Extract "RELIANCE" from "RELIANCE-EQ"
+      query = symbolPart.toLowerCase(); // Convert to "reliance"
+      console.log(`✅ [SYMBOL-DETECTED] Converted ${queryOverride} to human language: ${query}`);
+    }
 
     // Check authentication before allowing search
     const userId = localStorage.getItem('currentUserId');
@@ -2505,6 +2546,26 @@ export default function Home() {
             }
 
             setSearchResults(result);
+            
+            // Fetch news if query is about financial/market topics
+            const isNewsQuery = query.toLowerCase().includes("news") || query.toLowerCase().includes("market") || query.toLowerCase().includes("update") || query.toLowerCase().includes("financial");
+            if (isNewsQuery) {
+              try {
+                const newsPromises = ["IT", "FINANCE", "COMMODITY", "GLOBAL", "BANKS", "AUTOMOBILE"].map(sector =>
+                  fetch("/api/daily-news", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ sector })
+                  })
+                    .then(res => res.json())
+                    .then(data => ({...data, url: "#", source: sector, time: new Date().toLocaleTimeString()}))
+                    .catch(err => null)
+                );
+                const results = await Promise.all(newsPromises);
+                const validResults = results.filter(r => r !== null);
+                if (validResults.length > 0) setSearchResultsNews(validResults);
+              } catch (err) {console.warn("Error fetching news:", err);}
+            }
             console.log("✅ [TRADING-AGENT] Query processing complete!");
             setIsSearchLoading(false);
             return;
@@ -4124,6 +4185,7 @@ ${
   // PAPER TRADING (DEMO TRADING) STATE - Like TradingView Practice Account
   // ============================================
   const [showPaperTradingModal, setShowPaperTradingModal] = useState(false);
+  const [showTradingChallengeModal, setShowTradingChallengeModal] = useState(false); // Trading Challenge Coming Soon modal
   const [hidePositionDetails, setHidePositionDetails] = useState(false); // Eye icon toggle
   const [swipedPositionId, setSwipedPositionId] = useState<string | null>(null);
   const swipeStartXRef = useRef<number>(0);
@@ -4134,6 +4196,15 @@ ${
       return stored ? parseFloat(stored) : 1800000; // 18 Lakhs default
     }
     return 1800000;
+  });
+  
+  // Track cumulative realized P&L from all closed trades (persisted to AWS)
+  const [paperTradingRealizedPnl, setPaperTradingRealizedPnl] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("paperTradingRealizedPnl");
+      return stored ? parseFloat(stored) : 0;
+    }
+    return 0;
   });
   
   // Paper trading position interface
@@ -4187,6 +4258,132 @@ ${
     }
     return [];
   });
+  
+  // AWS Paper Trading Sync State
+  const [paperTradingAwsLoaded, setPaperTradingAwsLoaded] = useState(false);
+  const [paperTradingAwsSaving, setPaperTradingAwsSaving] = useState(false);
+  const paperTradingSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Load paper trading data from AWS when user is authenticated
+  const loadPaperTradingFromAWS = useCallback(async () => {
+    const userId = localStorage.getItem('currentUserId');
+    if (!userId || userId === 'null') return;
+    
+    try {
+      const idToken = await getCognitoToken();
+      if (!idToken) {
+        console.log('⚠️ No Cognito token for paper trading AWS load');
+        return;
+      }
+      
+      console.log('📊 Loading paper trading data from AWS for user:', userId);
+      const response = await fetch(`/api/paper-trading/${userId}`, {
+        headers: { 'Authorization': `Bearer ${idToken}` }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          console.log('✅ Loaded paper trading data from AWS:', result.isNew ? '(new user, defaults)' : '');
+          setPaperTradingCapital(result.data.capital || 1800000);
+          setPaperPositions(result.data.positions || []);
+          setPaperTradeHistory(result.data.tradeHistory || []);
+          setPaperTradingRealizedPnl(result.data.realizedPnl || 0);
+          // Also update localStorage for offline access
+          localStorage.setItem("paperTradingCapital", String(result.data.capital || 1800000));
+          localStorage.setItem("paperPositions", JSON.stringify(result.data.positions || []));
+          localStorage.setItem("paperTradeHistory", JSON.stringify(result.data.tradeHistory || []));
+          localStorage.setItem("paperTradingRealizedPnl", String(result.data.realizedPnl || 0));
+        }
+        setPaperTradingAwsLoaded(true);
+      } else {
+        console.warn('⚠️ Failed to load paper trading data from AWS:', response.status);
+        setPaperTradingAwsLoaded(true); // Mark as loaded even on error to prevent retries
+      }
+    } catch (error) {
+      console.error('❌ Error loading paper trading from AWS:', error);
+      setPaperTradingAwsLoaded(true); // Mark as loaded even on error to prevent retries
+    }
+  }, []);
+  
+  // Save paper trading data to AWS (debounced)
+  const savePaperTradingToAWS = useCallback(async (
+    capital: number, 
+    positions: PaperPosition[], 
+    tradeHistory: PaperTrade[],
+    realizedPnl: number
+  ) => {
+    const userId = localStorage.getItem('currentUserId');
+    if (!userId || userId === 'null') return;
+    
+    try {
+      const idToken = await getCognitoToken();
+      if (!idToken) {
+        console.log('⚠️ No Cognito token for paper trading AWS save');
+        return;
+      }
+      
+      setPaperTradingAwsSaving(true);
+      const totalPnl = positions.reduce((total, p) => total + (p.pnl || 0), 0);
+      
+      const response = await fetch(`/api/paper-trading/${userId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          capital,
+          positions,
+          tradeHistory,
+          totalPnl,
+          realizedPnl
+        })
+      });
+      
+      if (response.ok) {
+        console.log('✅ Paper trading data saved to AWS');
+      } else {
+        console.warn('⚠️ Failed to save paper trading data to AWS:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Error saving paper trading to AWS:', error);
+    } finally {
+      setPaperTradingAwsSaving(false);
+    }
+  }, []);
+  
+  // Debounced save to AWS when paper trading data changes
+  useEffect(() => {
+    if (!paperTradingAwsLoaded) return; // Don't save until we've loaded from AWS
+    
+    const userId = localStorage.getItem('currentUserId');
+    if (!userId || userId === 'null') return;
+    
+    // Clear any pending save
+    if (paperTradingSaveTimeoutRef.current) {
+      clearTimeout(paperTradingSaveTimeoutRef.current);
+    }
+    
+    // Debounce save by 2 seconds to avoid too many API calls
+    paperTradingSaveTimeoutRef.current = setTimeout(() => {
+      savePaperTradingToAWS(paperTradingCapital, paperPositions, paperTradeHistory, paperTradingRealizedPnl);
+    }, 2000);
+    
+    return () => {
+      if (paperTradingSaveTimeoutRef.current) {
+        clearTimeout(paperTradingSaveTimeoutRef.current);
+      }
+    };
+  }, [paperTradingCapital, paperPositions, paperTradeHistory, paperTradingRealizedPnl, paperTradingAwsLoaded, savePaperTradingToAWS]);
+  
+  // Load paper trading data from AWS when user is authenticated
+  useEffect(() => {
+    const userId = localStorage.getItem('currentUserId');
+    if (userId && userId !== 'null' && authInitialized && !isViewOnlyMode && !paperTradingAwsLoaded) {
+      loadPaperTradingFromAWS();
+    }
+  }, [authInitialized, isViewOnlyMode, paperTradingAwsLoaded, loadPaperTradingFromAWS]);
   
   // Paper trading form state
   const [paperTradeSymbol, setPaperTradeSymbol] = useState("");
@@ -4758,7 +4955,7 @@ ${
   };
   
   // Reset paper trading account
-  const resetPaperTradingAccount = () => {
+  const resetPaperTradingAccount = async () => {
     setPaperTradingCapital(1800000);
     setPaperPositions([]);
     setPaperTradeHistory([]);
@@ -4769,6 +4966,26 @@ ${
     localStorage.setItem("paperTradingCapital", "1800000");
     localStorage.setItem("paperPositions", "[]");
     localStorage.setItem("paperTradeHistory", "[]");
+    setPaperTradingRealizedPnl(0);
+    localStorage.setItem("paperTradingRealizedPnl", "0");
+    // Reset AWS data
+    setPaperTradingAwsLoaded(false);
+    const userId = localStorage.getItem('currentUserId');
+    if (userId && userId !== 'null') {
+      try {
+        const idToken = await getCognitoToken();
+        if (idToken) {
+          await fetch(`/api/paper-trading/${userId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${idToken}` }
+          });
+          console.log('✅ Paper trading AWS data reset');
+        }
+      } catch (error) {
+        console.error('❌ Error resetting AWS paper trading data:', error);
+      }
+      setPaperTradingAwsLoaded(true);
+    }
     toast({
       title: "Account Reset",
       description: "Paper trading account reset to ₹18,00,000"
@@ -4942,6 +5159,13 @@ ${
     setPaperTradeHistory(updatedHistory);
     localStorage.setItem("paperTradeHistory", JSON.stringify(updatedHistory));
     
+    // Accumulate realized P&L from all closed positions
+    setPaperTradingRealizedPnl(prev => {
+      const newRealizedPnl = prev + totalPnl;
+      localStorage.setItem("paperTradingRealizedPnl", String(newRealizedPnl));
+      return newRealizedPnl;
+    });
+    
     // Show toast with summary
     toast({
       title: totalPnl >= 0 ? "All Positions Closed - Profit!" : "All Positions Closed - Loss",
@@ -4987,6 +5211,13 @@ ${
     const updatedHistory = [...paperTradeHistory, newTrade];
     setPaperTradeHistory(updatedHistory);
     localStorage.setItem("paperTradeHistory", JSON.stringify(updatedHistory));
+    
+    // Accumulate realized P&L from closed position
+    setPaperTradingRealizedPnl(prev => {
+      const newRealizedPnl = prev + exitPnL;
+      localStorage.setItem("paperTradingRealizedPnl", String(newRealizedPnl));
+      return newRealizedPnl;
+    });
     
     setSwipedPositionId(null);
     
@@ -5126,11 +5357,12 @@ ${
     };
   }, [showPaperTradingModal, activeTab, mobileBottomTab, paperPositions.filter(p => p.isOpen).map(p => `${p.symbol}:${p.action}`).join(',')]);
   
-  // Calculate total unrealized P&L for all open positions
+  // Calculate total P&L: realized (from closed trades) + unrealized (from open positions)
   const paperTradingTotalPnl = useMemo(() => {
-    // Include P&L from BOTH open (unrealized) and closed (realized) positions
-    return paperPositions.reduce((total, p) => total + (p.pnl || 0), 0);
-  }, [paperPositions]);
+    // Realized P&L from closed trades + Unrealized P&L from open positions
+    const unrealizedPnl = paperPositions.filter(p => p.isOpen).reduce((total, p) => total + (p.pnl || 0), 0);
+    return paperTradingRealizedPnl + unrealizedPnl;
+  }, [paperPositions, paperTradingRealizedPnl]);
   
   // SL Monitoring Effect - Auto-exit positions when SL is triggered
   useEffect(() => {
@@ -5296,6 +5528,51 @@ ${
     console.log(`🔄 tradingDataByDate recomputed [Mode: ${isDemoMode ? 'DEMO' : 'PERSONAL'}, Revision: ${personalHeatmapRevision}, Dates: ${Object.keys(activeData).length}]`);
     return activeData;
   }, [isDemoMode, demoTradingDataByDate, personalTradingDataByDate, personalHeatmapRevision]);
+  
+  // Mini sparkline data for navigation bar icon - shows performance trend
+  const navSparklineData = useMemo(() => {
+    // Get data source - prefer personal, fallback to demo
+    const personalHasData = Object.keys(personalTradingDataByDate).length > 0;
+    const dataSource = personalHasData ? personalTradingDataByDate : demoTradingDataByDate;
+    
+    if (Object.keys(dataSource).length === 0) {
+      return { points: "0,12 20,12 40,12", hasData: false, trend: "neutral" };
+    }
+    
+    // Sort dates and calculate cumulative P/L
+    const sortedDates = Object.keys(dataSource).sort();
+    const recentDates = sortedDates.slice(-7); // Last 7 data points
+    
+    let cumulativePnL = 0;
+    const pnlValues: number[] = [];
+    
+    recentDates.forEach(date => {
+      const dayData = dataSource[date];
+      const dailyPnL = dayData?.totalPnL || dayData?.pnl || 0;
+      cumulativePnL += dailyPnL;
+      pnlValues.push(cumulativePnL);
+    });
+    
+    if (pnlValues.length === 0) {
+      return { points: "0,12 20,12 40,12", hasData: false, trend: "neutral" };
+    }
+    
+    // Normalize to SVG coordinates (width: 40, height: 24)
+    const minVal = Math.min(...pnlValues);
+    const maxVal = Math.max(...pnlValues);
+    const range = maxVal - minVal || 1;
+    
+    const points = pnlValues.map((val, idx) => {
+      const x = (idx / (pnlValues.length - 1 || 1)) * 40;
+      const y = 20 - ((val - minVal) / range) * 16; // 4px padding top/bottom
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(" ");
+    
+    const trend = pnlValues[pnlValues.length - 1] >= pnlValues[0] ? "up" : "down";
+    
+    return { points, hasData: true, trend };
+  }, [personalTradingDataByDate, demoTradingDataByDate]);
+
   
   const setTradingDataByDate = isDemoMode ? setDemoTradingDataByDate : setPersonalTradingDataByDate;
   const getActiveStorageKey = () => isDemoMode ? "demoTradingDataByDate" : "personalTradingDataByDate";
@@ -5810,77 +6087,41 @@ ${
     localStorage.setItem('watchlistSymbols', JSON.stringify(watchlistSymbols));
   }, [watchlistSymbols]);
 
-  // Fetch quarterly results for ALL watchlist stocks
+  // Fetch quarterly data when watchlist stock is selected
   useEffect(() => {
-    const fetchAllQuarterlyData = async () => {
-      if (watchlistSymbols.length === 0) {
-        setAllWatchlistQuarterlyData({});
-        return;
-      }
-      
-      setIsWatchlistQuarterlyLoading(true);
-      try {
-        const results: {[symbol: string]: Array<any>} = {};
-        
-        await Promise.all(
-          watchlistSymbols.map(async (stock) => {
-            try {
-              const cleanSymbol = stock.symbol.replace('-EQ', '').replace('-BE', '');
-              const response = await fetch(`/api/quarterly-results/${cleanSymbol}`);
-              if (response.ok) {
-                const data = await response.json();
-                results[stock.symbol] = data.results || [];
-              }
-            } catch (error) {
-              console.error(`Error fetching quarterly data for ${stock.symbol}:`, error);
-              results[stock.symbol] = [];
-            }
-          })
-        );
-        
-        setAllWatchlistQuarterlyData(results);
-      } finally {
-        setIsWatchlistQuarterlyLoading(false);
-      }
-    };
+    if (!searchResultsNewsSymbol) {
+      setAllWatchlistQuarterlyData({});
+      return;
+    }
     
-    fetchAllQuarterlyData();
-  }, [watchlistSymbols]);
-
-  // Fetch quarterly data for the currently searched stock (searchResultsNewsSymbol)
-  useEffect(() => {
-    const fetchSelectedStockQuarterlyData = async () => {
-      if (!searchResultsNewsSymbol) return;
-      
-      // Check if we already have data for this stock
-      if (allWatchlistQuarterlyData[searchResultsNewsSymbol]?.length > 0) return;
-      
+    const fetchQuarterlyData = async () => {
       setIsWatchlistQuarterlyLoading(true);
       try {
         const cleanSymbol = searchResultsNewsSymbol.replace('-EQ', '').replace('-BE', '');
-        console.log(`📊 Fetching quarterly data for searched stock: ${cleanSymbol}`);
         const response = await fetch(`/api/quarterly-results/${cleanSymbol}`);
         if (response.ok) {
           const data = await response.json();
-          if (data.results && data.results.length > 0) {
-            setAllWatchlistQuarterlyData(prev => ({
-              ...prev,
-              [searchResultsNewsSymbol]: data.results
-            }));
-            console.log(`✅ Quarterly data loaded for ${cleanSymbol}:`, data.results.length, 'quarters');
-          } else {
-            console.log(`⚠️ No quarterly data found for ${cleanSymbol}`);
-          }
+          setAllWatchlistQuarterlyData({
+            [searchResultsNewsSymbol]: data.results || []
+          });
         }
       } catch (error) {
-        console.error(`Error fetching quarterly data for ${searchResultsNewsSymbol}:`, error);
+        console.error(`Error fetching quarterly data:`, error);
+        setAllWatchlistQuarterlyData({ [searchResultsNewsSymbol]: [] });
       } finally {
         setIsWatchlistQuarterlyLoading(false);
       }
     };
     
-    fetchSelectedStockQuarterlyData();
+    fetchQuarterlyData();
   }, [searchResultsNewsSymbol]);
+  // Sync watchlist stock selection with search results symbol to trigger quarterly fetch
+  useEffect(() => {
+    if (selectedWatchlistSymbol && searchResults.includes("[CHART:WATCHLIST]")) {
+      setSearchResultsNewsSymbol(selectedWatchlistSymbol);
+    }
+  }, [selectedWatchlistSymbol, searchResults]);
+
 
   
   // Fetch news for selected watchlist symbol
@@ -5905,6 +6146,29 @@ ${
       fetchWatchlistNews();
     }
   }, [selectedWatchlistSymbol, isWatchlistOpen, searchResults]);
+
+  // Auto-fetch news for search results
+  useEffect(() => {
+    if (searchResultsNewsSymbol && searchResults.includes("[CHART:SEARCH_RESULTS]")) {
+      const fetchSearchResultsNews = async () => {
+        setIsWatchlistNewsLoading(true);
+        try {
+          const cleanSymbol = searchResultsNewsSymbol.replace('-EQ', '').replace('-BE', '');
+          const response = await fetch(`/api/stock-news/${cleanSymbol}?refresh=${Date.now()}`);
+          if (response.ok) {
+            const data = await response.json();
+            const newsItems = Array.isArray(data) ? data : (data.news || []);
+            setWatchlistNews(newsItems.slice(0, 20));
+          }
+        } catch (error) {
+          console.error('Error fetching search results news:', error);
+        } finally {
+          setIsWatchlistNewsLoading(false);
+        }
+      };
+      fetchSearchResultsNews();
+    }
+  }, [searchResultsNewsSymbol, searchResults]);
   
   // Search stocks for watchlist
   const searchWatchlistStocks = async (query: string) => {
@@ -12444,20 +12708,27 @@ ${
                               <div className="space-y-1.5">
                                 <div className="flex items-center gap-2 pb-3 border-b border-transparent">
                                   {searchResults.includes("[CHART:WATCHLIST]") ? (
-                                    <>
-                                      <Eye className="h-4 w-4 text-gray-700 dark:text-blue-400" />
-                                      <h3 className="text-lg font-medium text-gray-100">
-                                        Watchlist
+                                      <>
+                      <Eye className="h-4 w-4 text-gray-700 dark:text-blue-400" />
+                      <h3 className="text-lg font-medium text-gray-100">
+                        Watchlist
                                       </h3>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Bot className="h-4 w-4 text-blue-400" />
-                                      <h3 className="text-lg font-medium text-gray-100">
-                                        AI Assistant
+                                      </>
+                                    ) : searchResults.includes("[CHART:TRADE]") ? (
+                                      <>
+                      <Trophy className="h-4 w-4 text-orange-400" />
+                      <h3 className="text-lg font-medium text-gray-100">
+                        Trading Challenge
                                       </h3>
-                                    </>
-                                  )}
+                                      </>
+                                    ) : (
+                                      <>
+                      <Bot className="h-4 w-4 text-blue-400" />
+                      <h3 className="text-lg font-medium text-gray-100">
+                        AI Assistant
+                                      </h3>
+                                      </>
+                                    )}
                                 </div>
                                 <div className="prose prose-invert max-w-none">
                                   <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
@@ -12659,40 +12930,66 @@ ${
                                                 })()}
                                               </div>
                                             )}
-                                            {priceChartData.length > 0 && (
-                                              <div className="w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-xl backdrop-blur-sm">
-                                                <div className="flex items-center gap-2 mb-4">
-                                                  <Clock className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                                                  <h3 className="text-gray-900 dark:text-white font-semibold">Related News</h3>
+                                            {/* Related News for Search Results */}
+                                            <div className="flex-1 bg-gray-900/50 rounded-lg p-4 border border-gray-600">
+                                              <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center gap-2">
+                                                  <Clock className="h-4 w-4 text-gray-400" />
+                                                  <h3 className="text-sm font-medium text-gray-200">
+                                                    Related News
+                                                  </h3>
                                                 </div>
-
-                                                <div className="space-y-3 max-h-80 overflow-y-auto bg-gray-50 dark:bg-gray-700/60 rounded-xl p-4 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-200 dark:scrollbar-track-gray-800 ">
-                                                  {searchResultsNews && searchResultsNews.length > 0 ? (
-                                                    searchResultsNews.map((item: any, index: number) => (
-                                                      <div 
-                                                        key={index} 
-                                                        className="p-3 bg-gray-100 dark:bg-gray-600/60 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600/70 transition-colors backdrop-blur-sm shadow-sm cursor-pointer"
-                                                        onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
-                                                      >
-                                                        <h4 className="text-gray-700 dark:text-gray-300 font-medium text-sm mb-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                                                          {item.title} ↗
-                                                        </h4>
-                                                        <div className="flex items-center justify-between">
-                                                          <span className="text-gray-500 dark:text-gray-400 text-xs ">{item.source}</span>
-                                                          <span className="text-gray-500 dark:text-gray-500 text-xs ">{item.time}</span>
-                                                        </div>
-                                                      </div>
-                                                    ))
-                                                  ) : (
-                                                    <div className="text-center py-6 text-gray-500 dark:text-gray-400 ">
-                                                      <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                                      <p className="text-sm">No recent news available for this stock</p>
-                                                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 ">Check back later for updates</p>
-                                                    </div>
-                                                  )}
-                                                </div>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  className="h-7 text-xs text-gray-400 hover:text-gray-200"
+                                                  onClick={() => {
+                                                    setIsWatchlistNewsLoading(true);
+                                                    const symbol = (window as any).companyInsightsData?.symbol || searchResultsNewsSymbol;
+                                                    if (symbol) {
+                                                      const cleanSymbol = symbol.replace('-EQ', '').replace('-BE', '');
+                                                      fetch(`/api/stock-news/${cleanSymbol}?refresh=${Date.now()}`)
+                                                        .then(res => res.json())
+                                                        .then(data => {
+                                                          const newsItems = Array.isArray(data) ? data : (data.news || []);
+                                                          setWatchlistNews(newsItems.slice(0, 20));
+                                                        })
+                                                        .finally(() => setIsWatchlistNewsLoading(false));
+                                                    }
+                                                  }}
+                                                  data-testid="button-refresh-search-news"
+                                                >
+                                                  <RefreshCw className={`h-3 w-3 mr-1 ${isWatchlistNewsLoading ? 'animate-spin' : ''}`} />
+                                                  Refresh
+                                                </Button>
                                               </div>
-                                            )}
+                                              
+                                              <div className="space-y-3 max-h-[320px] overflow-y-auto mb-4">
+                                                {isWatchlistNewsLoading ? (
+                                                  <div className="flex items-center justify-center py-8">
+                                                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                                                  </div>
+                                                ) : watchlistNews.length > 0 ? (
+                                                  watchlistNews.map((item, index) => (
+                                                    <div 
+                                                      key={index} 
+                                                      className="p-3 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer border border-gray-700"
+                                                      onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
+                                                      data-testid={`search-news-item-${index}`}
+                                                    >
+                                                      <h4 className="text-gray-200 font-medium text-sm mb-2 hover:text-gray-100 transition-colors line-clamp-2">
+                                                        {item.title} <ExternalLink className="h-3 w-3 inline ml-1" />
+                                                      </h4>
+                                                      <p className="text-gray-400 text-xs line-clamp-3">{item.summary}</p>
+                                                    </div>
+                                                  ))
+                                                ) : (
+                                                  <div className="text-center py-8">
+                                                    <p className="text-gray-400 text-sm">No news available</p>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
                                           </div>
                                         );
                                       }
@@ -13029,7 +13326,7 @@ ${
                                                 </Button>
                                               </div>
                                               
-                                              <div className="space-y-3 max-h-[450px] overflow-y-auto mb-4">
+                                              <div className="space-y-3 max-h-[320px] overflow-y-auto mb-4">
                                                 {isWatchlistNewsLoading ? (
                                                   <div className="flex items-center justify-center py-8">
                                                     <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
@@ -13069,21 +13366,50 @@ ${
                                                   <div className="flex items-center gap-2">
                                                     <TrendingUp className="h-4 w-4 text-gray-400" />
                                                     <h3 className="text-sm font-medium text-gray-200">
-                                                      Quarterly Performance Trend
+                                                      Quarterly Performance Trend <span className="text-xs text-gray-500 ml-1">(Net profit)</span>
                                                     </h3>
                                                   </div>
-                                                  {(() => {
-                                                    const selectedStock = watchlistSymbols.find(s => s.symbol === searchResultsNewsSymbol);
-                                                    if (!selectedStock) return null;
-                                                    const quarterlyData = allWatchlistQuarterlyData[selectedStock.symbol] || [];
-                                                    const hasTrendingUp = quarterlyData.length > 1 && 
-                                                      parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
-                                                    return (
-                                                      <span className={`text-xs px-2 py-1 rounded ${hasTrendingUp ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                                        {hasTrendingUp ? '↑ Uptrend' : '↓ Downtrend'}
-                                                      </span>
-                                                    );
-                                                  })()}
+                                                  <div className="flex items-center gap-2">
+                                                    {searchResultsNewsSymbol && (
+                                                      <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={async () => {
+                                                          setIsWatchlistQuarterlyLoading(true);
+                                                          try {
+                                                            const cleanSymbol = searchResultsNewsSymbol.replace("-EQ", "").replace("-BE", "");
+                                                            const response = await fetch(`/api/quarterly-results/${cleanSymbol}`);
+                                                            if (response.ok) {
+                                                              const data = await response.json();
+                                                              setAllWatchlistQuarterlyData(prev => ({
+                                                                ...prev,
+                                                                [searchResultsNewsSymbol]: data.results || []
+                                                              }));
+                                                            }
+                                                          } catch (error) {
+                                                            console.error("Error refreshing quarterly data:", error);
+                                                          } finally {
+                                                            setIsWatchlistQuarterlyLoading(false);
+                                                          }
+                                                        }}
+                                                        data-testid="button-refresh-quarterly"
+                                                        className="h-7 px-2"
+                                                      >
+                                                        <RefreshCw className={`h-3 w-3 ${isWatchlistQuarterlyLoading ? "animate-spin" : ""}`} />
+                                                      </Button>
+                                                    )}
+                                                    {(() => {
+                                                      if (!searchResultsNewsSymbol) return null;
+                                                      const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
+                                                      const hasTrendingUp = quarterlyData.length > 1 && 
+                                                        parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
+                                                      return (
+                                                        <span className={`text-xs px-2 py-1 rounded ${hasTrendingUp ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                                          {hasTrendingUp ? '↑ Uptrend' : '↓ Downtrend'}
+                                                        </span>
+                                                      );
+                                                    })()}
+                                                  </div>
                                                 </div>
 
                                                 <div className="space-y-1.5">
@@ -13092,15 +13418,25 @@ ${
                                                       <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
                                                     </div>
                                                   ) : searchResultsNewsSymbol ? (() => {
-                                                    const selectedStock = watchlistSymbols.find(s => s.symbol === searchResultsNewsSymbol);
-                                                    if (!selectedStock) {
+                                                    const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
+                                                    // Don't show loading state if we have data
+                                                    // The isWatchlistQuarterlyLoading at the top already handles the loading indicator
+                                                    if (!quarterlyData || quarterlyData.length === 0) {
+                                                      // Check if still loading, otherwise show no data message
+                                                      if (isWatchlistQuarterlyLoading) {
+                                                        return (
+                                                          <div className="text-center py-8 text-gray-500">
+                                                            <Loader2 className="h-5 w-5 animate-spin text-gray-400 mx-auto mb-2" />
+                                                            <p className="text-xs">Loading quarterly results...</p>
+                                                          </div>
+                                                        );
+                                                      }
                                                       return (
-                                                        <div className="text-center py-8 text-gray-500">
-                                                          <p className="text-xs">Search for a stock to see quarterly results</p>
+                                                        <div className="text-center py-4 text-gray-500 text-xs">
+                                                          No quarterly data available
                                                         </div>
                                                       );
                                                     }
-                                                    const quarterlyData = allWatchlistQuarterlyData[selectedStock.symbol] || [];
                                                     const hasTrendingUp = quarterlyData.length > 1 && 
                                                       parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
                                                     
@@ -13118,7 +13454,7 @@ ${
                                                           <ResponsiveContainer width="100%" height="100%">
                                                             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
                                                               <defs>
-                                                                <linearGradient id={`grad-${selectedStock.symbol}`} x1="0" y1="0" x2="0" y2="1">
+                                                                <linearGradient id={`grad-${searchResultsNewsSymbol}`} x1="0" y1="0" x2="0" y2="1">
                                                                   <stop offset="0%" stopColor={trendColor} stopOpacity={0.4} />
                                                                   <stop offset="100%" stopColor={trendColor} stopOpacity={0.05} />
                                                                 </linearGradient>
@@ -13134,7 +13470,7 @@ ${
                                                                 dataKey="value" 
                                                                 stroke={trendColor} 
                                                                 strokeWidth={2} 
-                                                                fill={`url(#grad-${selectedStock.symbol})`}
+                                                                fill={`url(#grad-${searchResultsNewsSymbol})`}
                                                                 dot={{ r: 5, stroke: trendColor, strokeWidth: 2, fill: '#1f2937' }}
                                                                 activeDot={{ r: 7, stroke: trendColor, strokeWidth: 2, fill: '#ffffff' }}
                                                               />
@@ -13149,6 +13485,44 @@ ${
                                                             <span className="w-2 h-2 rounded-full bg-red-500"></span> Negative Quarter
                                                           </span>
                                                         </div>
+                                                        {/* PDF Links for Deep Analysis */}
+                                                        {quarterlyData.some((q: any) => q.pdf_url) && (
+                                                          <div className="mt-3 pt-3 border-t border-gray-700">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                              <span className="text-xs font-medium text-gray-400">Quarterly Results PDFs</span>
+                                                              <button
+                                                                onClick={() => {
+                                                                  const symbol = searchResultsNewsSymbol || selectedWatchlistSymbol;
+                                                                  if (symbol) {
+                                                                    // Simply set the query which triggers the existing search handler
+                                                                    handleSearch(symbol);
+                                                                  }
+                                                                }}
+                                                                className="text-xs text-blue-400 hover:text-blue-300 cursor-pointer"
+                                                                data-testid="button-ai-full-report"
+                                                              >
+                                                                View Full Report
+                                                              </button>
+                                                            </div>
+                                                            <div className="flex flex-wrap gap-2">
+                                                              {quarterlyData.slice(-4).map((q: any, idx: number) => 
+                                                                q.pdf_url && (
+                                                                  <a
+                                                                    key={idx}
+                                                                    href={q.pdf_url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded text-xs text-gray-300"
+                                                                    data-testid={`link-pdf-${idx}`}
+                                                                  >
+                                                                    <FileText className="h-3 w-3" />
+                                                                    {q.quarter}
+                                                                  </a>
+                                                                )
+                                                              )}
+                                                            </div>
+                                                          </div>
+                                                        )}
                                                       </>
                                                     ) : (
                                                       <div className="text-center py-4 text-gray-500 text-xs">
@@ -13549,14 +13923,64 @@ ${
                                           <>{renderedContent}{companyInsightsContent}</> : 
                                           companyInsightsContent;
                                       }
+                      // Handle Trading Challenge Coming Soon
+                      if (searchResults.includes("[CHART:TRADE]")) {
+                        renderedContent = (
+                          <div className="w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-xl p-8 border border-gray-700">
+                            <div className="flex flex-col items-center justify-center mb-8">
+                              <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+                                <Trophy className="w-12 h-12 text-white" />
+                              </div>
+                              <h2 className="text-4xl font-bold text-white mb-2">Trading Challenge</h2>
+                              <p className="text-xl text-gray-400">Coming Soon</p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                              <div className="bg-gradient-to-br from-blue-900/30 to-blue-800/20 border border-blue-700/50 rounded-lg p-6 hover:border-blue-600/70 transition-all">
+                                <div className="flex items-center gap-3 mb-3">
+                                  <div className="w-10 h-10 rounded-lg bg-blue-600/30 flex items-center justify-center">
+                                    <Users className="w-5 h-5 text-blue-400" />
+                                  </div>
+                                  <h3 className="text-lg font-semibold text-white">Compete with Traders</h3>
+                                </div>
+                                <p className="text-gray-300 text-sm">Join 7-day trading challenges and test your skills against other traders</p>
+                              </div>
+                              <div className="bg-gradient-to-br from-green-900/30 to-green-800/20 border border-green-700/50 rounded-lg p-6 hover:border-green-600/70 transition-all">
+                                <div className="flex items-center gap-3 mb-3">
+                                  <div className="w-10 h-10 rounded-lg bg-green-600/30 flex items-center justify-center">
+                                    <BarChart3 className="w-5 h-5 text-green-400" />
+                                  </div>
+                                  <h3 className="text-lg font-semibold text-white">Live P&L Tracking</h3>
+                                </div>
+                                <p className="text-gray-300 text-sm">Real-time ranking based on your trades with live profit and loss updates</p>
+                              </div>
+                              <div className="bg-gradient-to-br from-yellow-900/30 to-yellow-800/20 border border-yellow-700/50 rounded-lg p-6 hover:border-yellow-600/70 transition-all">
+                                <div className="flex items-center gap-3 mb-3">
+                                  <div className="w-10 h-10 rounded-lg bg-yellow-600/30 flex items-center justify-center">
+                                    <Award className="w-5 h-5 text-yellow-400" />
+                                  </div>
+                                  <h3 className="text-lg font-semibold text-white">Leaderboard Rankings</h3>
+                                </div>
+                                <p className="text-gray-300 text-sm">See your position among all participants and track your progress</p>
+                              </div>
+                            </div>
+                            <div className="mt-8 text-center">
+                              <p className="text-gray-400 text-sm">More features coming soon. Stay tuned!</p>
+                            </div>
+                          </div>
+                        );
+                      }
+
+
                                       
                                       return renderedContent || processedResults || searchResults;
                                     })()}
+                      
+
                                   </div>
                                   {/* Disclaimer */}
                                   <div className="mt-4 pt-3 border-t border-gray-700">
                                     <p className="text-xs text-gray-500 italic">
-                                      Disclaimer: Financial data is sourced from screener.in and other public sources. 
+                                      Disclaimer: Financial data is sourced from NSE/BSE and other public sources. 
                                       This information is for educational purposes only and should not be considered 
                                       financial advice. Please verify data independently before making investment decisions.
                                     </p>
@@ -13637,30 +14061,27 @@ ${
                           variant="secondary"
                           className="bg-cyan-600 hover:bg-cyan-700  text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
                           onClick={() => {
+                            setIsWatchlistLoading(true);
                             setIsSearchActive(true);
                             setSearchResults("[CHART:WATCHLIST]");
                             setIsWatchlistOpen(true);
+                            // Auto-select first stock in watchlist and fetch its quarterly data
+                            if (watchlistSymbols.length > 0 && !selectedWatchlistSymbol) {
+                              const firstStock = watchlistSymbols[0];
+                              setSelectedWatchlistSymbol(firstStock.symbol);
+                              setSearchResultsNewsSymbol(firstStock.symbol);
+                            }
+                            setTimeout(() => setIsWatchlistLoading(false), 300);
                           }}
                           data-testid="button-watchlist"
                         >
                           <div className="flex items-center justify-center gap-1">
-                            <Eye className="h-3 w-3" />
+                            {isWatchlistLoading ? (
+                              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Eye className="h-3 w-3" />
+                            )}
                             <span>Watchlist</span>
-                          </div>
-                        </Button>
-
-                        <Button
-                          variant="secondary"
-                          className="bg-pink-600 hover:bg-pink-700  text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
-                          onClick={() =>
-                            handleSuggestionClick(
-                              "Social feed community discussions and trending topics",
-                            )
-                          }
-                        >
-                          <div className="flex items-center gap-2">
-                            <User className="h-3 w-3" />
-                            <span>Social Feed</span>
                           </div>
                         </Button>
 
@@ -13681,6 +14102,21 @@ ${
 
                         <Button
                           variant="secondary"
+                          className="bg-pink-600 hover:bg-pink-700  text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
+                          onClick={() =>
+                            handleSuggestionClick(
+                              "Social feed community discussions and trending topics",
+                            )
+                          }
+                        >
+                          <div className="flex items-center gap-2">
+                            <User className="h-3 w-3" />
+                            <span>Social Feed</span>
+                          </div>
+                        </Button>
+
+                        <Button
+                          variant="secondary"
                           className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
                           onClick={generateJournalAIReport}
                           data-testid="button-trading-journal"
@@ -13690,6 +14126,22 @@ ${
                             <span>Trading Journal</span>
                           </div>
                         </Button>
+
+                        <Button
+                          variant="secondary"
+                          className="bg-red-600 hover:bg-red-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
+                          onClick={() => {
+                            setIsSearchActive(true);
+                            setSearchResults("[CHART:TRADE]");
+                          }}
+                          data-testid="button-trade"
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            <Trophy className="h-3 w-3" />
+                            <span>Trade Challenge</span>
+                          </div>
+                        </Button>
+
 
                         {/* <Button
                         variant="secondary"
@@ -13721,20 +14173,7 @@ ${
                         </div>
                       </Button> */}
 
-                        <Button
-                          variant="secondary"
-                          className="bg-orange-600 hover:bg-orange-700  text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
-                          onClick={() =>
-                            handleSuggestionClick(
-                              "Analyze fundamentals for top stocks - P/E ratio, market cap, growth metrics",
-                            )
-                          }
-                        >
-                          <div className="flex items-center gap-2">
-                            <BarChart3 className="h-3 w-3" />
-                            <span>Fundamentals</span>
-                          </div>
-                        </Button>
+
                       </div>
 
                       {/* Trading Tools Section - White container with centered cards */}
@@ -13799,7 +14238,7 @@ ${
                             />
                           )}
 
-                          {/* Mobile Quick Suggestion Buttons - Horizontal scroll when search is active */}
+                          {/* Mobile Quick Suggestion Buttons - Same as desktop, horizontal scroll when search is active */}
                           {isSearchActive && (
                             <div
                               className="mt-2 flex gap-2 overflow-x-auto scrollbar-hide pb-2 relative z-50"
@@ -13810,44 +14249,42 @@ ${
                             >
                               <Button
                                 variant="secondary"
-                                className="bg-blue-600 hover:bg-blue-700 text-white border-0 h-7 px-3 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
-                                onClick={() =>
-                                  handleSuggestionClick(
-                                    "Show me live stock prices for ICICI Bank and TCS",
-                                  )
-                                }
+                                className="bg-cyan-600 hover:bg-cyan-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
+                                onClick={() => {
+                                  setIsWatchlistLoading(true);
+                                  setIsSearchActive(true);
+                                  setSearchResults("[CHART:WATCHLIST]");
+                                  setIsWatchlistOpen(true);
+                                  // Auto-select first stock in watchlist and fetch its quarterly data
+                                  if (watchlistSymbols.length > 0 && !selectedWatchlistSymbol) {
+                                    const firstStock = watchlistSymbols[0];
+                                    setSelectedWatchlistSymbol(firstStock.symbol);
+                                    setSearchResultsNewsSymbol(firstStock.symbol);
+                                  }
+                                  setTimeout(() => setIsWatchlistLoading(false), 300);
+                                }}
+                                data-testid="button-watchlist-mobile"
                               >
-                                <div className="flex items-center gap-1.5">
-                                  <TrendingUp className="h-3 w-3" />
-                                  <span>Stock Prices</span>
+                                <div className="flex items-center justify-center gap-1">
+                                  {isWatchlistLoading ? (
+                                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  ) : (
+                                    <Eye className="h-3 w-3" />
+                                  )}
+                                  <span>Watchlist</span>
                                 </div>
                               </Button>
 
                               <Button
                                 variant="secondary"
-                                className="bg-pink-600 hover:bg-pink-700 text-white border-0 h-7 px-3 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
-                                onClick={() =>
-                                  handleSuggestionClick(
-                                    "Social feed community discussions and trending topics",
-                                  )
-                                }
-                              >
-                                <div className="flex items-center gap-1.5">
-                                  <User className="h-3 w-3" />
-                                  <span>Social Feed</span>
-                                </div>
-                              </Button>
-
-                              <Button
-                                variant="secondary"
-                                className="bg-green-600 hover:bg-green-700 text-white border-0 h-7 px-3 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
+                                className="bg-green-600 hover:bg-green-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
                                 onClick={() =>
                                   handleSuggestionClick(
                                     "What are today's top financial news and market updates?",
                                   )
                                 }
                               >
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1">
                                   <Newspaper className="h-3 w-3" />
                                   <span>Market News</span>
                                 </div>
@@ -13855,28 +14292,43 @@ ${
 
                               <Button
                                 variant="secondary"
-                                className="bg-orange-600 hover:bg-orange-700 text-white border-0 h-7 px-3 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
+                                className="bg-pink-600 hover:bg-pink-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
                                 onClick={() =>
                                   handleSuggestionClick(
-                                    "Analyze fundamentals for top stocks - P/E ratio, market cap, growth metrics",
+                                    "Social feed community discussions and trending topics",
                                   )
                                 }
                               >
-                                <div className="flex items-center gap-1.5">
-                                  <BarChart3 className="h-3 w-3" />
-                                  <span>Fundamentals</span>
+                                <div className="flex items-center gap-1">
+                                  <User className="h-3 w-3" />
+                                  <span>Social Feed</span>
                                 </div>
                               </Button>
 
                               <Button
                                 variant="secondary"
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white border-0 h-7 px-3 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
-                                onClick={() => checkAuthAndNavigate("journal")}
-                                data-testid="button-quick-journal"
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
+                                onClick={generateJournalAIReport}
+                                data-testid="button-trading-journal-mobile"
                               >
-                                <div className="flex items-center gap-1.5">
-                                  <BookOpen className="h-3 w-3" />
-                                  <span>Journal</span>
+                                <div className="flex items-center gap-1">
+                                  <FileText className="h-3 w-3" />
+                                  <span>Trading Journal</span>
+                                </div>
+                              </Button>
+
+                              <Button
+                                variant="secondary"
+                                className="bg-orange-600 hover:bg-orange-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
+                                onClick={() => {
+                                  setIsSearchActive(true);
+                                  setSearchResults("[CHART:TRADE]");
+                                }}
+                                data-testid="button-trade-challenge-mobile"
+                              >
+                                <div className="flex items-center gap-1">
+                                  <Trophy className="h-3 w-3" />
+                                  <span>Trade Challenge</span>
                                 </div>
                               </Button>
                             </div>
@@ -13895,11 +14347,18 @@ ${
                                           Watchlist
                                         </h3>
                                       </>
+                                    ) : searchResults.includes("[CHART:TRADE]") ? (
+                                      <>
+                                        <Trophy className="h-4 w-4 text-red-400" />
+                                        <h3 className="text-xs font-medium text-gray-100">
+                                          Trade Challenge
+                                        </h3>
+                                      </>
                                     ) : (
                                       <>
                                         <Bot className="h-4 w-4 text-blue-400" />
                                         <h3 className="text-xs font-medium text-gray-100">
-                                          AI Assistant
+                                          Trading Challenge
                                         </h3>
                                       </>
                                     )}
@@ -13920,166 +14379,141 @@ ${
                                 <div className="prose prose-invert max-w-none">
                                   <div className="text-gray-300 whitespace-pre-wrap leading-tight text-xs">
                                     {searchResults.includes("[CHART:WATCHLIST]") ? (
-                                      // Mobile Watchlist Layout
-                                      <div className="space-y-1.5">
+// Mobile Watchlist Layout - Using compact desktop layout
+                                      <div className="space-y-2">
                                         {/* NIFTY 50 Chart */}
-                                        <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                                          <div className="flex items-center justify-between mb-2">
-                                            <h4 className="text-xs font-medium text-gray-200">NIFTY 50</h4>
-                                            <span className="text-xs text-gray-400">Index</span>
-                                          </div>
-                                          <div className="h-20">
-                                            <MinimalChart symbol="NIFTY" height={80} showControls={true} />
+                                        <div className="bg-gray-800/50 rounded-lg p-2 border border-gray-700">
+                                          <div className="space-y-1">
+                                            <div className="flex items-center justify-between">
+                                              <div className="flex items-center gap-1">
+                                                <h4 className="text-xs font-semibold text-gray-200">NIFTY 50</h4>
+                                                <span className="text-xs text-green-400 flex items-center gap-0.5">
+                                                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                                  Live
+                                                </span>
+                                              </div>
+                                              <div className="text-right">
+                                                <div className="text-xs font-mono text-gray-100">₹{getNifty50CurrentPrice().toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
+                                                <div className={`text-xs flex items-center justify-end gap-0.5 ${getNifty50Change() >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                                  {getNifty50Change() >= 0 ? '▲' : '▼'} {Math.abs((getNifty50Change() / (getNifty50CurrentPrice() - getNifty50Change())) * 100).toFixed(2)}%
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <div className="flex items-center gap-0.5">
+                                              {['1D', '5D', '1M'].map((tf) => (
+                                                <Button key={tf} variant="ghost" size="sm" onClick={() => setNifty50Timeframe(tf)} className={`px-1 py-0 text-xs h-5 ${nifty50Timeframe === tf ? 'bg-blue-600/20 text-blue-400' : 'text-gray-400'}`}>
+                                                  {tf}
+                                                </Button>
+                                              ))}
+                                            </div>
+                                            <div className="h-24 w-full bg-gray-800/30 rounded p-1">
+                                              <ResponsiveContainer width="100%" height="100%">
+                                                <LineChart data={isNifty50Loading ? [] : nifty50FormattedData} margin={{ top: 2, right: 10, left: 30, bottom: 2 }}>
+                                                  <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 8, fill: '#64748b' }} tickCount={3} />
+                                                  <YAxis domain={['dataMin - 50', 'dataMax + 50']} axisLine={false} tickLine={false} tick={{ fontSize: 8, fill: '#64748b' }} width={8} />
+                                                  <Tooltip content={({ active, payload }) => {if (!active || !payload?.length) return null; const value = payload[0].value; return <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '4px', color: '#e2e8f0', padding: '4px 8px', fontSize: '11px' }}>₹{Number(value).toFixed(2)}</div>;}} />
+                                                  <Line type="linear" dataKey="price" stroke="#ef4444" strokeWidth={1.5} dot={false} />
+                                                </LineChart>
+                                              </ResponsiveContainer>
+                                            </div>
                                           </div>
                                         </div>
                                         
-                                        {/* BANK NIFTY Chart */}
-                                        <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                                          <div className="flex items-center justify-between mb-2">
-                                            <h4 className="text-xs font-medium text-gray-200">BANK NIFTY</h4>
-                                            <span className="text-xs text-gray-400">Index</span>
+                                        {/* Selected Stock Chart */}
+                                        {selectedWatchlistSymbol && (
+                                          <div className="bg-gray-800/50 rounded-lg p-2 border border-gray-700">
+                                            <div className="space-y-1">
+                                              <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-1">
+                                                  <h4 className="text-xs font-semibold text-gray-200">{selectedWatchlistSymbol.replace('-EQ', '')}</h4>
+                                                  <span className="text-xs text-green-400">Live</span>
+                                                </div>
+                                              </div>
+                                              <div className="flex items-center gap-0.5">
+                                                {['1D', '5D', '1M'].map((tf) => (
+                                                  <Button key={tf} variant="ghost" size="sm" onClick={() => {}} className={`px-1 py-0 text-xs h-5 bg-blue-600/20 text-blue-400`}>
+                                                    {tf}
+                                                  </Button>
+                                                ))}
+                                              </div>
+                                              <div className="h-24 w-full bg-gray-800/30 rounded p-1">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                  <LineChart data={[]} margin={{ top: 2, right: 10, left: 30, bottom: 2 }}>
+                                                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 8 }} tickCount={3} />
+                                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 8 }} width={8} />
+                                                    <Line type="linear" dataKey="price" stroke="#22c55e" strokeWidth={1.5} dot={false} />
+                                                  </LineChart>
+                                                </ResponsiveContainer>
+                                              </div>
+                                            </div>
                                           </div>
-                                          <div className="h-20">
-                                            <MinimalChart symbol="BANKNIFTY" height={80} showControls={true} />
-                                          </div>
-                                        </div>
+                                        )}
                                         
                                         {/* My Watchlist */}
-                                        <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+                                        <div className="bg-gray-800/50 rounded-lg p-2 border border-gray-700">
                                           <div className="flex items-center justify-between mb-2">
                                             <h4 className="text-xs font-medium text-gray-200">My Watchlist</h4>
                                             <span className="text-xs text-gray-400">{watchlistSymbols.length} stocks</span>
                                           </div>
-                                          
-                                          {/* Search to add stocks */}
-                                          <div className="relative mb-2">
-                                            <Input
-                                              placeholder="Search to add stock..."
-                                              value={watchlistSearchQuery}
-                                              onChange={(e) => {
-                                                setWatchlistSearchQuery(e.target.value);
-                                                searchWatchlistStocks(e.target.value);
-                                              }}
-                                              className="h-7 text-xs bg-gray-900 border-gray-600 text-gray-200 placeholder:text-gray-500"
-                                              data-testid="input-watchlist-search-mobile"
-                                            />
-                                            {watchlistSearchResults.length > 0 && (
-                                              <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-gray-600 rounded-lg z-50 max-h-32 overflow-y-auto">
-                                                {watchlistSearchResults.map((result, idx) => (
-                                                  <div
-                                                    key={idx}
-                                                    className="px-2 py-1.5 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
-                                                    onClick={() => addToWatchlist(result)}
-                                                    data-testid={`mobile-watchlist-search-result-${idx}`}
-                                                  >
-                                                    <div className="text-xs font-medium text-gray-200">{result.displayName || result.symbol}</div>
-                                                    <div className="text-xs text-gray-400">{result.name}</div>
-                                                  </div>
-                                                ))}
-                                              </div>
-                                            )}
-                                          </div>
-                                          
-                                          {/* Watchlist Items */}
-                                          <div className="space-y-1 max-h-36 overflow-y-auto">
-                                            {watchlistSymbols.map((stock, idx) => (
-                                              <div
-                                                key={stock.symbol}
-                                                className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
-                                                  selectedWatchlistSymbol === stock.symbol 
-                                                    ? 'bg-blue-600/30 border border-blue-500/50' 
-                                                    : 'hover:bg-gray-700/50'
-                                                }`}
-                                                onClick={() => setSelectedWatchlistSymbol(stock.symbol)}
-                                                data-testid={`mobile-watchlist-item-${idx}`}
-                                              >
-                                                <div className="flex items-center gap-2">
-                                                  <div className={`w-1.5 h-1.5 rounded-full ${
-                                                    selectedWatchlistSymbol === stock.symbol ? 'bg-blue-400' : 'bg-gray-500'
-                                                  }`} />
-                                                  <div>
-                                                    <div className="text-xs font-medium text-gray-200">{stock.displayName || stock.symbol.replace('-EQ', '')}</div>
-                                                    <div className="text-xs text-gray-500 truncate max-w-[140px]">{stock.name}</div>
-                                                  </div>
-                                                </div>
-                                                <button
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    removeFromWatchlist(stock.symbol);
-                                                  }}
-                                                  className="text-gray-500 hover:text-red-400 transition-colors p-0.5"
-                                                  data-testid={`mobile-button-remove-watchlist-${idx}`}
-                                                >
-                                                  <X className="h-3 w-3" />
-                                                </button>
+                                          <div className="space-y-1 max-h-20 overflow-y-auto">
+                                            {watchlistSymbols.map((stock) => (
+                                              <div key={stock.symbol} onClick={() => setSelectedWatchlistSymbol(stock.symbol)} className={`px-2 py-1 rounded text-xs cursor-pointer ${selectedWatchlistSymbol === stock.symbol ? 'bg-blue-600/30 border border-blue-500/50' : 'hover:bg-gray-700/50'}`}>
+                                                <div className="font-medium text-gray-200">{stock.displayName || stock.symbol}</div>
                                               </div>
                                             ))}
                                           </div>
                                         </div>
-                                        
-                                        {/* Related News */}
-                                        <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                                          <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-1.5">
-                                              <Clock className="h-3 w-3 text-gray-400" />
-                                              <h4 className="text-xs font-medium text-gray-200">
-                                                News: {selectedWatchlistSymbol.replace('-EQ', '').replace('-BE', '')}
-                                              </h4>
-                                            </div>
-                                            <Button
-                                              variant="ghost"
-                                              size="sm"
-                                              className="h-6 text-xs text-gray-400 hover:text-gray-200 px-2"
-                                              onClick={() => {
-                                                const cleanSymbol = selectedWatchlistSymbol.replace('-EQ', '').replace('-BE', '');
-                                                setIsWatchlistNewsLoading(true);
-                                                fetch(`/api/stock-news/${cleanSymbol}?refresh=${Date.now()}`)
-                                                  .then(res => res.json())
-                                                  .then(data => {
-                                                    const newsItems = Array.isArray(data) ? data : (data.news || []);
-                                                    setWatchlistNews(newsItems.slice(0, 20));
-                                                  })
-                                                  .finally(() => setIsWatchlistNewsLoading(false));
-                                              }}
-                                              data-testid="mobile-button-refresh-news"
-                                            >
-                                              <RefreshCw className={`h-3 w-3 ${isWatchlistNewsLoading ? 'animate-spin' : ''}`} />
-                                            </Button>
+                                      </div>
+                                    ) : searchResults.includes("[CHART:TRADE]") ? (
+
+                                      <div className="w-full max-w-2xl mx-auto py-12">
+                                        {/* Header with Trophy Icon */}
+                                        <div className="flex flex-col items-center mb-8">
+                                          <div className="w-24 h-24 bg-orange-500 rounded-full flex items-center justify-center mb-6 shadow-lg">
+                                            <Trophy className="h-12 w-12 text-white" />
                                           </div>
-                                          
-                                          <div className="space-y-2 max-h-48 overflow-y-auto">
-                                            {isWatchlistNewsLoading ? (
-                                              <div className="flex items-center justify-center py-4">
-                                                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                                              </div>
-                                            ) : watchlistNews.length > 0 ? (
-                                              watchlistNews.slice(0, 10).map((item, index) => (
-                                                <div 
-                                                  key={index} 
-                                                  className="p-2 bg-gray-900/50 rounded hover:bg-gray-700/50 transition-colors cursor-pointer"
-                                                  onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
-                                                  data-testid={`mobile-news-item-${index}`}
-                                                >
-                                                  <h5 className="text-gray-200 font-medium text-xs mb-1 line-clamp-2">
-                                                    {item.title} <ExternalLink className="h-2.5 w-2.5 inline ml-0.5" />
-                                                  </h5>
-                                                  <div className="flex items-center justify-between">
-                                                    <span className="text-gray-500 text-xs">{item.source}</span>
-                                                    <span className="text-gray-500 text-xs">{getWatchlistNewsRelativeTime(item.publishedAt)}</span>
-                                                  </div>
-                                                </div>
-                                              ))
-                                            ) : (
-                                              <div className="text-center py-4 text-gray-500">
-                                                <Newspaper className="h-5 w-5 mx-auto mb-1 opacity-50" />
-                                                <p className="text-xs">No news available</p>
-                                              </div>
-                                            )}
+                                          <h2 className="text-3xl font-bold text-white text-center mb-2">Trading Challenge</h2>
+                                          <p className="text-gray-400 text-lg">Coming Soon</p>
+                                        </div>
+
+                                        {/* Feature Cards */}
+                                        <div className="space-y-3">
+                                          {/* Compete with Traders Card */}
+                                          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex items-start gap-4">
+                                            <div className="flex-shrink-0">
+                                              <Users className="h-6 w-6 text-blue-400" />
+                                            </div>
+                                            <div className="flex-1">
+                                              <h3 className="text-white font-semibold mb-1">Compete with Traders</h3>
+                                              <p className="text-gray-400 text-sm">Join 7-day trading challenges</p>
+                                            </div>
+                                          </div>
+
+                                          {/* Live P&L Tracking Card */}
+                                          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex items-start gap-4">
+                                            <div className="flex-shrink-0">
+                                              <BarChart3 className="h-6 w-6 text-green-400" />
+                                            </div>
+                                            <div className="flex-1">
+                                              <h3 className="text-white font-semibold mb-1">Live P&L Tracking</h3>
+                                              <p className="text-gray-400 text-sm">Real-time ranking based on your trades</p>
+                                            </div>
+                                          </div>
+
+                                          {/* Leaderboard Rankings Card */}
+                                          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex items-start gap-4">
+                                            <div className="flex-shrink-0">
+                                              <Trophy className="h-6 w-6 text-yellow-500" />
+                                            </div>
+                                            <div className="flex-1">
+                                              <h3 className="text-white font-semibold mb-1">Leaderboard Rankings</h3>
+                                              <p className="text-gray-400 text-sm">See your position among all participants</p>
+                                            </div>
                                           </div>
                                         </div>
                                       </div>
-                                    ) : (
-                                      searchResults
+                                      ) : (searchResults
+
                                     )}
                                   </div>
                                 </div>
@@ -15386,13 +15820,13 @@ ${
                       >
                         {/* Top 30% - Performance Insights */}
                         <div className="h-[30%] border-b border-gray-200 dark:border-gray-700">
-                          <CardContent className="p-4 h-full">
-                            <div className="grid grid-cols-3 gap-3 text-sm">
+                          <CardContent className="p-2 h-full">
+                            <div className="grid grid-cols-3 gap-2 text-xs">
                               <div className="text-center">
                                 <p className="text-gray-600 dark:text-gray-400">
                                   Total Trades
                                 </p>
-                                <p className="text-xl font-bold text-gray-800 dark:text-white">
+                                <p className="text-base font-bold text-gray-800 dark:text-white">
                                   {performanceMetrics.totalTrades}
                                 </p>
                               </div>
@@ -15405,7 +15839,7 @@ ${
                                 </p>
                               </div>
                               <div className="text-center">
-                                <p className="text-gray-600 dark:text-gray-400">
+                                <p className="text-gray-600 dark:text-gray-400 text-xs">
                                   Net P&L
                                 </p>
                                 <p
@@ -15423,8 +15857,8 @@ ${
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 mt-3 text-xs">
-                              <div className="space-y-1 bg-white dark:bg-gray-900/50 rounded-lg p-3">
+                            <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                              <div className="space-y-0.5 bg-white dark:bg-gray-900/50 rounded-lg p-2">
                                 <div className="flex justify-between">
                                   <span className="text-gray-600 dark:text-gray-400">
                                     Winning Trades:
@@ -15445,7 +15879,7 @@ ${
                                   </span>
                                 </div>
                               </div>
-                              <div className="space-y-1 bg-white dark:bg-gray-900/50 rounded-lg p-3">
+                              <div className="space-y-0.5 bg-white dark:bg-gray-900/50 rounded-lg p-2">
                                 <div className="flex justify-between">
                                   <span className="text-gray-600 dark:text-gray-400">
                                     Losing Trades:
@@ -16286,7 +16720,7 @@ ${
                           <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wide">
                             Trade History
                           </h3>
-                          <div className="flex gap-1.5">
+                          <div className="flex gap-2">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -16300,11 +16734,21 @@ ${
                               variant="ghost"
                               size="sm"
                               onClick={() => setShowPaperTradingModal(true)}
-                              className="h-7 px-2 text-xs hidden md:block"
+                              className="h-7 px-2 text-xs hidden md:flex items-center gap-1"
                               data-testid="button-paper-trade"
                             >
                               <TrendingUp className="h-4 w-4 mr-1" />
                               Paper Trade
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setShowTradingChallengeModal(true)}
+                              className="h-7 w-7"
+                              data-testid="button-trading-challenge"
+                              title="Trading Challenge"
+                            >
+                              <Trophy className="h-4 w-4" />
                             </Button>
                             <div className="h-7 px-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-md flex items-center justify-center text-xs font-semibold text-blue-600 dark:text-blue-300">
                               <Timer className="h-4 w-4 mr-1.5" />
@@ -16441,7 +16885,7 @@ ${
                     {/* Trade Book - Right Side (Functional Calendar) */}
                     <div className="relative">
                     <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                      <CardContent className="px-0.5 md:px-4 pt-1 pb-20 md:pb-4 md:py-4">
+                      <CardContent className="p-6 px-0.5 md:px-4 md:py-4 pt-[10px] pb-[10px]">
                         <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2 flex items-center justify-between gap-2">
                           <div>Trade Book</div>
                           <div className="flex items-center gap-1">
@@ -16475,7 +16919,12 @@ ${
                               onClick={saveAllTradingData}
                               size="sm"
                               variant="outline"
-                              className="h-5 px-2 text-[10px] text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
+                              disabled={isDemoMode && localStorage.getItem('currentUserId') !== 'c06ce90c-20a1-7033-d457-efac5a682529'}
+                              className={`h-5 px-2 text-[10px] border-gray-300 dark:border-gray-700 ${
+                                (isDemoMode && localStorage.getItem('currentUserId') !== 'c06ce90c-20a1-7033-d457-efac5a682529')
+                                  ? 'text-gray-400 dark:text-gray-500 opacity-50 cursor-not-allowed' 
+                                  : 'text-gray-600 dark:text-gray-400'
+                              }`}
                               data-testid="button-save-trade-book"
                             >
                               Save
@@ -16642,7 +17091,7 @@ ${
                         </div>
 
                         {/* Quick Stats Banner */}
-                        <div className="mt-2 bg-gradient-to-r from-violet-500 to-purple-600 rounded-md px-2 py-1.5 relative" data-testid="banner-quick-stats">
+                        <div className="mt-2 mb-20 md:mb-2 bg-gradient-to-r from-violet-500 to-purple-600 rounded-md px-2 py-1.5 relative" data-testid="banner-quick-stats">
                           {(() => {
                             // Calculate metrics from heatmap data and build tag-to-dates mapping
                             const filteredData = getFilteredHeatmapData();
@@ -16936,8 +17385,37 @@ ${
                 {/* End of Main Journal Content */}
                 {/* Ranking Tab Content - Mobile only - Empty placeholder */}
                 {mobileBottomTab === "ranking" && (
-                  <div className="md:hidden">
-                    {/* Empty ranking tab */}
+                  <div className="md:hidden p-4">
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-4">
+                        <Trophy className="h-10 w-10 text-white" />
+                      </div>
+                      <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Trading Challenge</h3>
+                      <p className="text-slate-500 dark:text-slate-400 mb-4">Coming Soon</p>
+                      <div className="space-y-3 w-full max-w-xs">
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-left">
+                          <Users className="h-5 w-5 text-blue-500" />
+                          <div>
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Compete with Traders</p>
+                            <p className="text-xs text-gray-500">Join 7-day trading challenges</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-left">
+                          <BarChart3 className="h-5 w-5 text-green-500" />
+                          <div>
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Live P&L Tracking</p>
+                            <p className="text-xs text-gray-500">Real-time ranking based on your trades</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-left">
+                          <Trophy className="h-5 w-5 text-amber-500" />
+                          <div>
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Leaderboard Rankings</p>
+                            <p className="text-xs text-gray-500">See your position among all participants</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -17136,7 +17614,7 @@ ${
                                   {selectedDateRange ? 'Range' : 'Total'} P&L
                                 </div>
                                 <div className="text-2xl md:text-3xl font-bold">
-                                  {totalPnL >= 0 ? "+" : "-"}₹
+                                  {totalPnL >= 0 ? "" : "-"}₹
                                   {Math.abs(totalPnL).toLocaleString("en-IN")}
                                 </div>
                               </div>
@@ -19321,6 +19799,53 @@ ${
           </DialogContent>
         </Dialog>
 
+        {/* Trading Challenge Coming Soon Modal */}
+        <Dialog open={showTradingChallengeModal} onOpenChange={setShowTradingChallengeModal}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                  <Trophy className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <DialogTitle className="text-xl font-bold text-center">Trading Challenge</DialogTitle>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">
+                Coming Soon
+              </p>
+            </DialogHeader>
+            <div className="py-4 space-y-3">
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                <Users className="h-5 w-5 text-blue-500" />
+                <div>
+                  <p className="text-sm font-medium">Compete with Traders</p>
+                  <p className="text-xs text-gray-500">Join 7-day trading challenges</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                <BarChart3 className="h-5 w-5 text-green-500" />
+                <div>
+                  <p className="text-sm font-medium">Live P&L Tracking</p>
+                  <p className="text-xs text-gray-500">Real-time ranking based on your trades</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                <Trophy className="h-5 w-5 text-amber-500" />
+                <div>
+                  <p className="text-sm font-medium">Leaderboard Rankings</p>
+                  <p className="text-xs text-gray-500">See your position among all participants</p>
+                </div>
+              </div>
+            </div>
+            <Button 
+              onClick={() => setShowTradingChallengeModal(false)}
+              className="w-full"
+              data-testid="button-close-challenge-modal"
+            >
+              Got It
+            </Button>
+          </DialogContent>
+        </Dialog>
+
         {/* Paper Trading (Demo Trading) Modal - Minimalist Design */}
         <Dialog open={showPaperTradingModal} onOpenChange={setShowPaperTradingModal}>
           <DialogContent className="w-full h-auto sm:max-w-2xl sm:max-h-[85vh] rounded-none sm:rounded-lg overflow-hidden p-0 bg-white sm:dark:bg-gray-900 hidden sm:flex flex-col">
@@ -20232,7 +20757,17 @@ ${
                               className="border-t border-gray-100 dark:border-gray-800"
                               data-testid={`position-row-${position.symbol}`}
                             >
-                              <td className="px-2 py-1.5 font-medium">{position.symbol}</td>
+                              <td className="px-2 py-1.5 font-medium flex items-center gap-2">
+                                <span>{position.symbol}</span>
+                                <button
+                                  onClick={() => exitPosition(position.id)}
+                                  className="h-5 w-5 text-red-500 hover:text-red-600 hover:opacity-80 transition-all"
+                                  data-testid="button-exit-desktop-position"
+                                  title="Exit position"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
                               <td className="px-2 py-1.5 text-center">
                                 <span className={`text-[10px] ${position.action === 'BUY' ? 'text-green-600' : 'text-red-600'}`}>
                                   {position.action}
@@ -21078,7 +21613,32 @@ ${
                   }`}
                   data-testid="mobile-tab-insight"
                 >
-                  <TrendingUp className={`h-5 w-5 ${mobileBottomTab === "insight" ? "stroke-[2.5]" : ""}`} />
+                  <svg viewBox="0 0 24 16" className="h-5 w-6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id={`navAreaGradient-${mobileBottomTab === "insight" ? "active" : navSparklineData.trend}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={mobileBottomTab === "insight" ? "#d1d5db" : (navSparklineData.trend === "up" ? "#22c55e" : navSparklineData.trend === "down" ? "#ef4444" : "#9ca3af")} stopOpacity="0.4" />
+                        <stop offset="100%" stopColor={mobileBottomTab === "insight" ? "#d1d5db" : (navSparklineData.trend === "up" ? "#22c55e" : navSparklineData.trend === "down" ? "#ef4444" : "#9ca3af")} stopOpacity="0.05" />
+                      </linearGradient>
+                    </defs>
+                    <polygon 
+                      points={`0,14 ${navSparklineData.points.split(' ').map((p, i) => {
+                        const [x, y] = p.split(',');
+                        return `${(parseFloat(x) / 40 * 22) + 1},${(parseFloat(y) / 24 * 12) + 1}`;
+                      }).join(' ')} 22,14`}
+                      fill={`url(#navAreaGradient-${mobileBottomTab === "insight" ? "active" : navSparklineData.trend})`}
+                    />
+                    <polyline 
+                      points={navSparklineData.points.split(' ').map(p => {
+                        const [x, y] = p.split(',');
+                        return `${(parseFloat(x) / 40 * 22) + 1},${(parseFloat(y) / 24 * 12) + 1}`;
+                      }).join(' ')}
+                      stroke={mobileBottomTab === "insight" ? "#ffffff" : (navSparklineData.trend === "up" ? "#22c55e" : navSparklineData.trend === "down" ? "#ef4444" : "#9ca3af")} 
+                      strokeWidth={mobileBottomTab === "insight" ? "2" : "1.5"} 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      fill="none"
+                    />
+                  </svg>
                 </button>
 
                 {/* Paper Trade Tab */}
@@ -21091,7 +21651,7 @@ ${
                   }`}
                   data-testid="mobile-tab-paper-trade"
                 >
-                  <Banknote className={`h-5 w-5 ${mobileBottomTab === "paper-trade" ? "fill-current" : ""}`} />
+                  <TrendingUp className={`h-5 w-5 ${mobileBottomTab === "paper-trade" ? "fill-current" : ""}`} />
                 </button>
 
                 {/* Ranking Tab */}
@@ -21608,7 +22168,17 @@ ${
                               </div>
                             </div>
                             <div className="text-[10px] text-gray-400 mt-1">
-                              LTP: ₹{position.currentPrice.toFixed(2)}
+                            <div className="text-[10px] text-gray-400 mt-1 flex items-center justify-between">
+                              <div>
+                                LTP: ₹{position.currentPrice.toFixed(2)}
+                                {(position as any).slTriggerPrice && (
+                                  <span className="text-orange-500 ml-2">SL: ₹{(position as any).slTriggerPrice.toFixed(2)}</span>
+                                )}
+                              </div>
+                              <div className={`text-[10px] font-semibold ${position.pnlPercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {position.pnlPercent >= 0 ? '+' : ''}{position.pnlPercent.toFixed(2)}%
+                              </div>
+                            </div>
                               {(position as any).slTriggerPrice && (
                                 <span className="text-orange-500 ml-2">SL: ₹{(position as any).slTriggerPrice.toFixed(2)}</span>
                               )}
