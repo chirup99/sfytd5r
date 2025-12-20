@@ -2092,6 +2092,23 @@ export default function Home() {
   const [currentCardIndex, setCurrentCardIndex] = useState<number>(0);
 
   // Animated greeting stocks state
+  const [currentStockIndex, setCurrentStockIndex] = useState(0);
+  const [showingInitialGreeting, setShowingInitialGreeting] = useState(true);
+  const animatedStocks = [
+    { symbol: "NIFTY", price: "59273.80", change: +1.24, isProfit: true },
+    { symbol: "BANKNIFTY", price: "52841.35", change: +0.87, isProfit: true },
+    { symbol: "SENSEX", price: "85138.27", change: -0.45, isProfit: false },
+    { symbol: "Top Gainers", price: "TCS +2.1%", change: +2.1, isProfit: true },
+    { symbol: "Top Losers", price: "SUNPHARMA -1.8%", change: -1.8, isProfit: false },
+  ];
+
+  // Passcode protection state
+  const [showPasscodeModal, setShowPasscodeModal] = useState(false);
+  const [passcodeInput, setPasscodeInput] = useState("");
+  const [authenticatedTabs, setAuthenticatedTabs] = useState<Set<string>>(
+    new Set(),
+  );
+  const [pendingTab, setPendingTab] = useState<string>("");
   const [showSavedFormatsDropdown, setShowSavedFormatsDropdown] = useState(false);
 
   // Show initial greeting for 2 seconds, then switch to animated stocks
@@ -2105,6 +2122,14 @@ export default function Home() {
   }, [isViewOnlyMode]);
 
   // Auto-rotate stock display every 3 seconds (only after initial greeting)
+  useEffect(() => {
+    if (!isViewOnlyMode && !showingInitialGreeting) {
+      const interval = setInterval(() => {
+        setCurrentStockIndex(prev => (prev + 1) % animatedStocks.length);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [animatedStocks.length, isViewOnlyMode, showingInitialGreeting]);
 
   // Expose toggle nav function to window for profile icon in right sidebar
   useEffect(() => {
@@ -12535,12 +12560,28 @@ ${
                         </div>
                       ) : (
                         <div className="flex items-center justify-center gap-2">
+                          {animatedStocks[currentStockIndex].isProfit ? (
                             <TrendingUp className="h-4 w-4 text-green-400" />
                           ) : (
                             <TrendingDown className="h-4 w-4 text-red-400" />
                           )}
+                          <span className={`text-sm font-semibold ${animatedStocks[currentStockIndex].isProfit ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {animatedStocks[currentStockIndex].symbol}: {animatedStocks[currentStockIndex].price}
                           </span>
                         </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Blue Section: Expands to 100% when search results show, fixed height otherwise */}
+                  <div className={`w-full bg-blue-900 flex flex-col items-center justify-start md:py-6 py-0 md:px-4 px-0 relative overflow-y-auto ${
+                    searchResults ? "h-screen" : "h-[75vh] md:h-[69vh]"
+                  }`}>
+                    <div className="max-w-4xl w-full md:space-y-4">
+                      {/* Dynamic Greeting - Hidden on mobile */}
+                      <div className="text-center spacey-4 md:block hidden">
+                        <div className="flex items-center justify-center gap-3">
+                          {isViewOnlyMode ? (
                             <>
                               <Sparkles className="h-5 w-5 text-blue-400" />
                               <h1 className="text-2xl font-normal text-gray-100">
@@ -12556,10 +12597,13 @@ ${
                             </>
                           ) : (
                             <div className="flex items-center gap-2 animate-fade-in">
+                              {animatedStocks[currentStockIndex].isProfit ? (
                                 <TrendingUp className="h-5 w-5 text-green-400" />
                               ) : (
                                 <TrendingDown className="h-5 w-5 text-red-400" />
                               )}
+                              <span className={`text-lg font-semibold ${animatedStocks[currentStockIndex].isProfit ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {animatedStocks[currentStockIndex].symbol}: {animatedStocks[currentStockIndex].price}
                               </span>
                             </div>
                           )}
