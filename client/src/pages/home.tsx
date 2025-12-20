@@ -16695,6 +16695,22 @@ ${
                             <Button
                               variant="ghost"
                               size="sm"
+                              className="h-7 px-2 text-xs"
+                              data-testid="button-connect"
+                            >
+                              Connect
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-xs"
+                              data-testid="button-zerodha"
+                            >
+                              Zerodha
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => setShowImportModal(true)}
                               className="h-7 px-2 text-xs"
                               data-testid="button-import-pnl"

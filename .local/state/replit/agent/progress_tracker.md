@@ -14,3 +14,7 @@
    - Server running on port 5000
    - Angel One WebSocket connected and streaming live data
    - Project import completed
+[x] 108. TRADE HISTORY WINDOW - ADD BROKER BUTTONS (December 20, 2025, 7:30 PM)
+   - Added "Connect" button before Import button
+   - Added "Zerodha" button before Import button
+   - Both buttons displayed in trade history header
