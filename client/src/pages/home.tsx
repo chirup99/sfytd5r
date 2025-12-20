@@ -2104,8 +2104,8 @@ export default function Home() {
 
   // Build animated stocks from REAL NSE data + hardcoded indices
   const animatedStocks = [
-    { symbol: "NIFTY", price: "59273.80", change: +1.24, isProfit: true },
-    { symbol: "BANKNIFTY", price: "52841.35", change: +0.87, isProfit: true },
+    { symbol: "NIFTY", price: "Loading...", change: +1.24, isProfit: true },
+    { symbol: "BANKNIFTY", price: "Loading...", change: +0.87, isProfit: true },
     { symbol: "SENSEX", price: "85138.27", change: -0.45, isProfit: false },
     gainersLosersData?.gainers?.[0] ? {
       symbol: `${gainersLosersData.gainers[0].symbol}`,

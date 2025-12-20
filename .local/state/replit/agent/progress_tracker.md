@@ -33,7 +33,9 @@
 [x] 94. Preview loading issue resolved - reinstalled packages and restarted workflow (December 20, 2025, 5:20 AM)
 [x] 95. Re-installed tsx package and verified workflow running (December 20, 2025, 5:30 AM)
 [x] 96. Re-installed tsx package and verified workflow running (December 20, 2025, 7:16 AM)
+[x] 97. Updated animated stock prices on home page to fetch from Angel One API instead of hardcoded values (December 20, 2025, 7:23 AM)
    - Backend running successfully on port 5000
    - Frontend displaying correctly with all services operational
-   - Angel One API connection ready (requires user authentication)
+   - Angel One API connected and streaming real-time data
    - Application fully functional in demo mode
+   - Animated pricing now displays real NIFTY and BANKNIFTY prices from Angel One API
