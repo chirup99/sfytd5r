@@ -2094,13 +2094,17 @@ export default function Home() {
   // Animated greeting stocks state
   const [currentStockIndex, setCurrentStockIndex] = useState(0);
   const [showingInitialGreeting, setShowingInitialGreeting] = useState(true);
-  // Build animated stocks with REAL Angel One API prices (no hardcoding)
   const animatedStocks = [
-    { symbol: "NIFTY", price: getNifty50CurrentPrice().toString(), change: getNifty50Change(), isProfit: getNifty50Change() >= 0 },
-    { symbol: "BANKNIFTY", price: getNiftyBankCurrentPrice().toString(), change: getNiftyBankChange(), isProfit: getNiftyBankChange() >= 0 },
-    { symbol: "SENSEX", price: getSensexCurrentPrice().toString(), change: getSensexChange(), isProfit: getSensexChange() >= 0 },
-
+    { symbol: "NIFTY", price: "59273.80", change: +1.24, isProfit: true },
+    { symbol: "BANKNIFTY", price: "52841.35", change: +0.87, isProfit: true },
+    { symbol: "SENSEX", price: "85138.27", change: -0.45, isProfit: false },
+    { symbol: "Top Gainers", price: "TCS +2.1%", change: +2.1, isProfit: true },
+    { symbol: "Top Losers", price: "SUNPHARMA -1.8%", change: -1.8, isProfit: false },
   ];
+
+  // Passcode protection state
+  const [showPasscodeModal, setShowPasscodeModal] = useState(false);
+  const [passcodeInput, setPasscodeInput] = useState("");
   const [authenticatedTabs, setAuthenticatedTabs] = useState<Set<string>>(
     new Set(),
   );
@@ -5999,7 +6003,6 @@ ${
   const [isWatchlistQuarterlyLoading, setIsWatchlistQuarterlyLoading] = useState(false);
   const [nifty50Timeframe, setNifty50Timeframe] = useState('1D');
   const [niftyBankTimeframe, setNiftyBankTimeframe] = useState('1D');
-  const [sensexTimeframe, setSensexTimeframe] = useState('1D');
   
   // Queries for NIFTY50 and NIFTYBANK chart data - optimized with caching
   const { data: nifty50ChartData = [], isLoading: isNifty50Loading } = useQuery({
@@ -6019,15 +6022,6 @@ ${
       return fetch(`/api/stock-chart-data/${symbol}?timeframe=${niftyBankTimeframe}`).then(res => res.json());
     },
     refetchInterval: niftyBankTimeframe === '1D' ? 60000 : 300000,
-    staleTime: 0,
-    gcTime: 600000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false
-  });
-  const { data: sensexChartData = [], isLoading: isSensexLoading } = useQuery({
-    queryKey: ['stock-chart', 'SENSEX', sensexTimeframe],
-    queryFn: () => fetch(`/api/stock-chart-data/SENSEX?timeframe=${sensexTimeframe}`).then(res => res.json()),
-    refetchInterval: sensexTimeframe === '1D' ? 60000 : 300000,
     staleTime: 0,
     gcTime: 600000,
     refetchOnMount: true,
@@ -6085,25 +6079,6 @@ ${
   const getNiftyBankChange = () => {
     const current = getNiftyBankCurrentPrice();
     const baseline = getNiftyBankBaseline();
-    return current - baseline;
-  };
-  const getSensexCurrentPrice = () => {
-    if (sensexChartData && sensexChartData.length > 0) {
-      return sensexChartData[sensexChartData.length - 1]?.price || sensexChartData[sensexChartData.length - 1]?.close || 0;
-    }
-    return 0;
-  };
-
-  const getSensexBaseline = () => {
-    if (!sensexChartData || sensexChartData.length === 0) {
-      return getSensexCurrentPrice();
-    }
-    return sensexChartData[0]?.price || sensexChartData[0]?.close || getSensexCurrentPrice();
-  };
-
-  const getSensexChange = () => {
-    const current = getSensexCurrentPrice();
-    const baseline = getSensexBaseline();
     return current - baseline;
   };
   
