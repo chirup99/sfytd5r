@@ -17058,100 +17058,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { symbol } = req.params;
 
     try {
-      console.log(`📡 Fetching live quote for ${symbol}...`);
+      console.log(`📡 Fetching REAL live quote for ${symbol}...`);
 
-      // Try to get real Angel One WebSocket price from global store (if available)
-      // Otherwise fallback to simulated data
       let angelOnePrice = null;
-      
-      // Check if Angel One API has real data for this symbol
-      if (symbol === 'NIFTY' || symbol === 'NIFTY50') {
-        try {
-          const quoteRes = await fetch('https://api.smartapi.angelbroking.com/rest/secure/quote/', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${global.angelOneAuth?.jwtToken || ''}`,
-              'Content-Type': 'application/json',
-              'X-UserType': 'USER',
-              'X-SourceID': 'WEB',
-              'X-ClientLocalIP': '127.0.0.1',
-              'X-ClientPublicIP': '127.0.0.1',
-              'X-MACAddress': '00-00-00-00-00-00'
-            },
-            body: JSON.stringify({
-              mode: 'FULL',
-              exchangeTokens: {
-                'NFO': ['99926009']  // NIFTY50
-              }
-            })
-          });
-          const quoteData = await quoteRes.json();
-          if (quoteData?.data?.fetched?.[0]?.ltp) {
-            angelOnePrice = quoteData.data.fetched[0].ltp;
-          }
-        } catch (err) {
-          console.log(`⚠️ Could not fetch real NIFTY price from Angel One API`);
+      let open = null;
+      let high = null;
+      let low = null;
+
+      // Get latest 1-minute candle (last minute data) using REAL Angel One API
+      try {
+        const now = new Date();
+        const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+        
+        const formatDate = (d) => {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          const hours = String(d.getHours()).padStart(2, '0');
+          const mins = String(d.getMinutes()).padStart(2, '0');
+          return `${year}-${month}-${day} ${hours}:${mins}`;
+        };
+
+        let exchange, token;
+        if (symbol === 'NIFTY' || symbol === 'NIFTY50') {
+          exchange = 'NFO';
+          token = '99926009';
+        } else if (symbol === 'BANKNIFTY') {
+          exchange = 'NFO';
+          token = '99926009';
+        } else if (symbol === 'SENSEX') {
+          exchange = 'BSE';
+          token = '99919000';
+        } else {
+          throw new Error('Unknown symbol');
         }
-      } else if (symbol === 'BANKNIFTY') {
-        try {
-          const quoteRes = await fetch('https://api.smartapi.angelbroking.com/rest/secure/quote/', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${global.angelOneAuth?.jwtToken || ''}`,
-              'Content-Type': 'application/json',
-              'X-UserType': 'USER',
-              'X-SourceID': 'WEB',
-              'X-ClientLocalIP': '127.0.0.1',
-              'X-ClientPublicIP': '127.0.0.1',
-              'X-MACAddress': '00-00-00-00-00-00'
-            },
-            body: JSON.stringify({
-              mode: 'FULL',
-              exchangeTokens: {
-                'NFO': ['99926009']  // BANKNIFTY
-              }
-            })
-          });
-          const quoteData = await quoteRes.json();
-          if (quoteData?.data?.fetched?.[0]?.ltp) {
-            angelOnePrice = quoteData.data.fetched[0].ltp;
-          }
-        } catch (err) {
-          console.log(`⚠️ Could not fetch real BANKNIFTY price from Angel One API`);
+
+        // Use the working angelOneApi.getCandleData method
+        const candles = await angelOneApi.getCandleData(
+          exchange,
+          token,
+          'ONE_MINUTE',
+          formatDate(fiveMinutesAgo),
+          formatDate(now)
+        );
+
+        if (candles && candles.length > 0) {
+          const latestCandle = candles[candles.length - 1];
+          angelOnePrice = latestCandle.close || latestCandle.ltp;
+          open = latestCandle.open || angelOnePrice;
+          high = latestCandle.high || angelOnePrice;
+          low = latestCandle.low || angelOnePrice;
+          console.log(`✅ REAL Angel One price for ${symbol}: ₹${angelOnePrice}`);
         }
-      } else if (symbol === 'SENSEX') {
-        try {
-          const quoteRes = await fetch('https://api.smartapi.angelbroking.com/rest/secure/quote/', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${global.angelOneAuth?.jwtToken || ''}`,
-              'Content-Type': 'application/json',
-              'X-UserType': 'USER',
-              'X-SourceID': 'WEB',
-              'X-ClientLocalIP': '127.0.0.1',
-              'X-ClientPublicIP': '127.0.0.1',
-              'X-MACAddress': '00-00-00-00-00-00'
-            },
-            body: JSON.stringify({
-              mode: 'FULL',
-              exchangeTokens: {
-                'BSE': ['99919000']  // SENSEX
-              }
-            })
-          });
-          const quoteData = await quoteRes.json();
-          if (quoteData?.data?.fetched?.[0]?.ltp) {
-            angelOnePrice = quoteData.data.fetched[0].ltp;
-          }
-        } catch (err) {
-          console.log(`⚠️ Could not fetch real SENSEX price from Angel One API`);
-        }
+      } catch (err) {
+        console.log(`⚠️ Angel One API error: ${err.message}`);
       }
 
-      // Fallback to simulated price if real data not available
+      // Fallback to simulated price if real data fails
       const stockSymbol = symbol.replace('NSE:', '').replace('-EQ', '').replace('-INDEX', '');
       const stock = angelOnePrice ? 
-        { basePrice: angelOnePrice, currentPrice: angelOnePrice } : 
+        { basePrice: open || angelOnePrice, currentPrice: angelOnePrice } : 
         updateStockPrice(stockSymbol);
 
       const change = stock.currentPrice - stock.basePrice;
@@ -17166,9 +17132,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ltp: stock.currentPrice,
           ch: change,
           chp: changePercent,
-          high_price: stock.currentPrice * 1.02,
-          low_price: stock.currentPrice * 0.98,
-          open_price: stock.basePrice,
+          high_price: high || stock.currentPrice * 1.02,
+          low_price: low || stock.currentPrice * 0.98,
+          open_price: open || stock.basePrice,
           volume: Math.floor(Math.random() * 1000000) + 50000,
           timestamp: Date.now()
         }
