@@ -12535,17 +12535,12 @@ ${
                         </div>
                       ) : (
                         <div className="flex items-center justify-center gap-2">
-                          {animatedStocks[currentStockIndex].isProfit ? (
                             <TrendingUp className="h-4 w-4 text-green-400" />
                           ) : (
                             <TrendingDown className="h-4 w-4 text-red-400" />
                           )}
-                          <span className={`text-sm font-semibold ${animatedStocks[currentStockIndex].isProfit ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                            {animatedStocks[currentStockIndex].symbol}: {animatedStocks[currentStockIndex].price}
                           </span>
                         </div>
-                        <div className="flex items-center justify-center gap-3">
-                          {isViewOnlyMode ? (
                             <>
                               <Sparkles className="h-5 w-5 text-blue-400" />
                               <h1 className="text-2xl font-normal text-gray-100">
@@ -12561,13 +12556,10 @@ ${
                             </>
                           ) : (
                             <div className="flex items-center gap-2 animate-fade-in">
-                              {animatedStocks[currentStockIndex].isProfit ? (
                                 <TrendingUp className="h-5 w-5 text-green-400" />
                               ) : (
                                 <TrendingDown className="h-5 w-5 text-red-400" />
                               )}
-                              <span className={`text-lg font-semibold ${animatedStocks[currentStockIndex].isProfit ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {animatedStocks[currentStockIndex].symbol}: {animatedStocks[currentStockIndex].price}
                               </span>
                             </div>
                           )}
