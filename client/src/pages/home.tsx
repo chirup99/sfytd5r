@@ -6135,13 +6135,13 @@ ${
       isProfit: getSensexChange() >= 0 
     },
     gainersLosersData?.gainers?.[0] ? {
-      symbol: `${gainersLosersData.gainers[0].symbol}`,
+      symbol: `Top Gainer: ${gainersLosersData.gainers[0].symbol}`,
       price: `+${gainersLosersData.gainers[0].pChange.toFixed(2)}%`,
       change: gainersLosersData.gainers[0].pChange,
       isProfit: true
     } : { symbol: "Top Gainers", price: "Loading...", change: 0, isProfit: true },
     gainersLosersData?.losers?.[0] ? {
-      symbol: `${gainersLosersData.losers[0].symbol}`,
+      symbol: `Top Loser: ${gainersLosersData.losers[0].symbol}`,
       price: `${gainersLosersData.losers[0].pChange.toFixed(2)}%`,
       change: gainersLosersData.losers[0].pChange,
       isProfit: false
