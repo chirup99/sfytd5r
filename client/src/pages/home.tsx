@@ -6011,10 +6011,11 @@ ${
   // Queries for NIFTY50 and NIFTYBANK chart data - optimized with caching
   const { data: nifty50ChartData = [], isLoading: isNifty50Loading } = useQuery({
     queryKey: ['live-quote', 'NIFTY'],
-    queryFn: () => fetch(`/api/live-quotes/NIFTY`).then(res => res.json()).then(data => {
-      // Convert live quote format to chart format for compatibility
+    queryFn: () => fetch(`/api/live-quotes/NIFTY`).then(res => res.json()).then(response => {
+      // Extract data from nested structure (response.data.ltp)
+      const data = response?.data || response;
       if (data?.ltp) {
-        return [{ price: data.ltp, close: data.ltp, open: data.open, high: data.high, low: data.low }];
+        return [{ price: data.ltp, close: data.ltp, open: data.open_price || data.open || data.ltp, high: data.high_price || data.high || data.ltp, low: data.low_price || data.low || data.ltp }];
       }
       return [];
     }),
@@ -6028,10 +6029,11 @@ ${
   // BANKNIFTY Chart Data (Real-time WebSocket prices)
   const { data: niftyBankChartData = [], isLoading: isNiftyBankLoading } = useQuery({
     queryKey: ['live-quote', 'BANKNIFTY'],
-    queryFn: () => fetch(`/api/live-quotes/BANKNIFTY`).then(res => res.json()).then(data => {
-      // Convert live quote format to chart format for compatibility
+    queryFn: () => fetch(`/api/live-quotes/BANKNIFTY`).then(res => res.json()).then(response => {
+      // Extract data from nested structure (response.data.ltp)
+      const data = response?.data || response;
       if (data?.ltp) {
-        return [{ price: data.ltp, close: data.ltp, open: data.open, high: data.high, low: data.low }];
+        return [{ price: data.ltp, close: data.ltp, open: data.open_price || data.open || data.ltp, high: data.high_price || data.high || data.ltp, low: data.low_price || data.low || data.ltp }];
       }
       return [];
     }),
@@ -6045,10 +6047,11 @@ ${
   // SENSEX Chart Data (Real-time WebSocket prices)
   const { data: sensexChartData = [], isLoading: isSensexLoading } = useQuery({
     queryKey: ['live-quote', 'SENSEX'],
-    queryFn: () => fetch(`/api/live-quotes/SENSEX`).then(res => res.json()).then(data => {
-      // Convert live quote format to chart format for compatibility
+    queryFn: () => fetch(`/api/live-quotes/SENSEX`).then(res => res.json()).then(response => {
+      // Extract data from nested structure (response.data.ltp)
+      const data = response?.data || response;
       if (data?.ltp) {
-        return [{ price: data.ltp, close: data.ltp, open: data.open, high: data.high, low: data.low }];
+        return [{ price: data.ltp, close: data.ltp, open: data.open_price || data.open || data.ltp, high: data.high_price || data.high || data.ltp, low: data.low_price || data.low || data.ltp }];
       }
       return [];
     }),
