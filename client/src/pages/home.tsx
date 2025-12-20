@@ -2094,12 +2094,31 @@ export default function Home() {
   // Animated greeting stocks state
   const [currentStockIndex, setCurrentStockIndex] = useState(0);
   const [showingInitialGreeting, setShowingInitialGreeting] = useState(true);
+  // Fetch real top gainers and losers from NSE API
+  const { data: gainersLosersData } = useQuery({
+    queryKey: ["market-gainers-losers"],
+    queryFn: () => fetch("/api/market-gainers-losers").then(res => res.json()),
+    refetchInterval: 60000,
+    staleTime: 30000,
+  });
+
+  // Build animated stocks from REAL NSE data + hardcoded indices
   const animatedStocks = [
     { symbol: "NIFTY", price: "59273.80", change: +1.24, isProfit: true },
     { symbol: "BANKNIFTY", price: "52841.35", change: +0.87, isProfit: true },
     { symbol: "SENSEX", price: "85138.27", change: -0.45, isProfit: false },
-    { symbol: "Top Gainers", price: "TCS +2.1%", change: +2.1, isProfit: true },
-    { symbol: "Top Losers", price: "SUNPHARMA -1.8%", change: -1.8, isProfit: false },
+    gainersLosersData?.gainers?.[0] ? {
+      symbol: `${gainersLosersData.gainers[0].symbol}`,
+      price: `+${gainersLosersData.gainers[0].pChange.toFixed(2)}%`,
+      change: gainersLosersData.gainers[0].pChange,
+      isProfit: true
+    } : { symbol: "Top Gainers", price: "Loading...", change: 0, isProfit: true },
+    gainersLosersData?.losers?.[0] ? {
+      symbol: `${gainersLosersData.losers[0].symbol}`,
+      price: `${gainersLosersData.losers[0].pChange.toFixed(2)}%`,
+      change: gainersLosersData.losers[0].pChange,
+      isProfit: false
+    } : { symbol: "Top Losers", price: "Loading...", change: 0, isProfit: false },
   ];
 
   // Passcode protection state
