@@ -19945,5 +19945,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+  // STEP 1: Generate Zerodha login URL
+  app.get('/api/broker/zerodha/login-url', (req, res) => {
+    const zerodhaApiKey = process.env.ZERODHA_API_KEY || 'YOUR_API_KEY';
+    const baseUrl = 'https://kite.zerodha.com/connect/login';
+    const loginUrl = `${baseUrl}?api_key=${zerodhaApiKey}`;
+    res.json({ loginUrl });
+  });
+
+  // STEP 2: Handle OAuth callback from Zerodha
+  app.post('/api/broker/zerodha/callback', async (req, res) => {
+    const { requestToken } = req.body;
+    if (!requestToken) {
+      return res.status(400).json({ error: 'Missing request token' });
+    }
+    // Store in session - Step 3 will exchange this for access token
+    res.json({ success: true, requestToken });
+  });
+
+  // STEP 3: Exchange request token for access token
+  app.post('/api/broker/zerodha/token', async (req, res) => {
+    const { requestToken } = req.body;
+    // TODO: Exchange with Zerodha API for real access token
+    // For now, store the request token as session token
+    const accessToken = requestToken; // Placeholder
+    res.json({ accessToken });
+  });
+
+  // STEP 4: Fetch trades from Zerodha
+  app.get('/api/broker/zerodha/trades', async (req, res) => {
+    const accessToken = req.headers.authorization?.split(' ')[1];
+    if (!accessToken) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    // TODO: Call Zerodha API to fetch trades
+    // Placeholder response
+    res.json({ 
+      trades: [
+        { symbol: 'INFY', quantity: 1, price: 3500, order: 'BUY', pnl: '+500' },
+        { symbol: 'TCS', quantity: 2, price: 4200, order: 'SELL', pnl: '-200' }
+      ]
+    });
+  });
+
+
   return httpServer;
 }

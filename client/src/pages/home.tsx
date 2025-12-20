@@ -3730,6 +3730,11 @@ ${
 
   // Import Modal State
   const [showImportModal, setShowImportModal] = useState(false);
+
+  const [zerodhaAccessToken, setZerodhaAccessToken] = useState<string | null>(null);
+  const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
+  const [zerodhaTradesLoading, setZerodhaTradesLoading] = useState(false);
+  const [zerodhaTradesData, setZerodhaTradesData] = useState<any[]>([]);
   const [importData, setImportData] = useState("");
   const [importError, setImportError] = useState("");
   const [parseErrors, setParseErrors] = useState<ParseError[]>([]);
@@ -16703,6 +16708,7 @@ ${
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={handleZerodhaConnect}
                               className="h-7 px-2 text-xs"
                               data-testid="button-zerodha"
                             >
@@ -22730,7 +22736,42 @@ ${
                                 pnl: pnl,
                               }));
 
-                              return (
+                              
+  // Zerodha OAuth Handler
+  const handleZerodhaConnect = async () => {
+    try {
+      const response = await fetch('/api/broker/zerodha/login-url');
+      const { loginUrl } = await response.json();
+      window.location.href = loginUrl;
+    } catch (error) {
+      console.error('Error connecting to Zerodha:', error);
+      alert('Failed to connect to Zerodha');
+    }
+  };
+
+  const handleFetchZerodhaTrades = async () => {
+    if (!zerodhaAccessToken) {
+      alert('Please connect to Zerodha first');
+      return;
+    }
+    
+    setZerodhaTradesLoading(true);
+    try {
+      const response = await fetch('/api/broker/zerodha/trades', {
+        headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
+      });
+      const { trades } = await response.json();
+      setZerodhaTradesData(trades);
+      setZerodhaTradesDialog(true);
+    } catch (error) {
+      console.error('Error fetching trades:', error);
+      alert('Failed to fetch trades');
+    } finally {
+      setZerodhaTradesLoading(false);
+    }
+  };
+
+  return (
                                 <ResponsiveContainer width="100%" height="100%">
                                   <AreaChart
                                     data={chartData}
