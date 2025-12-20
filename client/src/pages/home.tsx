@@ -12542,7 +12542,7 @@ ${
                   )}
 
                   {/* Mobile Greeting - Visible only on mobile */}
-                  <div className="w-full md:hidden bg-blue-900 px-4 py-3 flex justify-center pt-[1px] pb-[1px] pt-[1px] pb-[1px]">
+                  <div className="w-full hidden bg-blue-900 px-4 py-3 flex justify-center pt-[1px] pb-[1px] pt-[1px] pb-[1px]">
                     <div className="text-center">
                       {isViewOnlyMode ? (
                         <div className="flex items-center justify-center gap-2">
