@@ -6010,31 +6010,49 @@ ${
   
   // Queries for NIFTY50 and NIFTYBANK chart data - optimized with caching
   const { data: nifty50ChartData = [], isLoading: isNifty50Loading } = useQuery({
-    queryKey: ['stock-chart', 'NIFTY50', nifty50Timeframe],
-    queryFn: () => fetch(`/api/stock-chart-data/NIFTY50?timeframe=${nifty50Timeframe}`).then(res => res.json()),
-    refetchInterval: nifty50Timeframe === '1D' ? 60000 : 300000,
+    queryKey: ['live-quote', 'NIFTY'],
+    queryFn: () => fetch(`/api/live-quotes/NIFTY`).then(res => res.json()).then(data => {
+      // Convert live quote format to chart format for compatibility
+      if (data?.ltp) {
+        return [{ price: data.ltp, close: data.ltp, open: data.open, high: data.high, low: data.low }];
+      }
+      return [];
+    }),
+    refetchInterval: 1000, // Real-time updates every 1 second
     staleTime: 0,
     gcTime: 600000,
     refetchOnMount: true,
     refetchOnWindowFocus: false
   });
 
-  // BANKNIFTY Chart Data (Fixed to use BANKNIFTY)
+  // BANKNIFTY Chart Data (Real-time WebSocket prices)
   const { data: niftyBankChartData = [], isLoading: isNiftyBankLoading } = useQuery({
-    queryKey: ['stock-chart', 'BANKNIFTY', niftyBankTimeframe],
-    queryFn: () => fetch(`/api/stock-chart-data/BANKNIFTY?timeframe=${niftyBankTimeframe}`).then(res => res.json()),
-    refetchInterval: niftyBankTimeframe === '1D' ? 60000 : 300000,
+    queryKey: ['live-quote', 'BANKNIFTY'],
+    queryFn: () => fetch(`/api/live-quotes/BANKNIFTY`).then(res => res.json()).then(data => {
+      // Convert live quote format to chart format for compatibility
+      if (data?.ltp) {
+        return [{ price: data.ltp, close: data.ltp, open: data.open, high: data.high, low: data.low }];
+      }
+      return [];
+    }),
+    refetchInterval: 1000, // Real-time updates every 1 second
     staleTime: 0,
     gcTime: 600000,
     refetchOnMount: true,
     refetchOnWindowFocus: false
   });
 
-  // SENSEX Chart Data
+  // SENSEX Chart Data (Real-time WebSocket prices)
   const { data: sensexChartData = [], isLoading: isSensexLoading } = useQuery({
-    queryKey: ['stock-chart', 'SENSEX', niftyBankTimeframe],
-    queryFn: () => fetch(`/api/stock-chart-data/SENSEX?timeframe=${niftyBankTimeframe}`).then(res => res.json()),
-    refetchInterval: niftyBankTimeframe === '1D' ? 60000 : 300000,
+    queryKey: ['live-quote', 'SENSEX'],
+    queryFn: () => fetch(`/api/live-quotes/SENSEX`).then(res => res.json()).then(data => {
+      // Convert live quote format to chart format for compatibility
+      if (data?.ltp) {
+        return [{ price: data.ltp, close: data.ltp, open: data.open, high: data.high, low: data.low }];
+      }
+      return [];
+    }),
+    refetchInterval: 1000, // Real-time updates every 1 second
     staleTime: 0,
     gcTime: 600000,
     refetchOnMount: true,

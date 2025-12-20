@@ -17060,11 +17060,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log(`📡 Fetching live quote for ${symbol}...`);
 
-      // Extract stock symbol from NSE:SYMBOL-EQ format
-      const stockSymbol = symbol.replace('NSE:', '').replace('-EQ', '').replace('-INDEX', '');
+      // Try to get real Angel One WebSocket price from global store (if available)
+      // Otherwise fallback to simulated data
+      let angelOnePrice = null;
+      
+      // Check if Angel One API has real data for this symbol
+      if (symbol === 'NIFTY' || symbol === 'NIFTY50') {
+        try {
+          const quoteRes = await fetch('https://api.smartapi.angelbroking.com/rest/secure/quote/', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${global.angelOneAuth?.jwtToken || ''}`,
+              'Content-Type': 'application/json',
+              'X-UserType': 'USER',
+              'X-SourceID': 'WEB',
+              'X-ClientLocalIP': '127.0.0.1',
+              'X-ClientPublicIP': '127.0.0.1',
+              'X-MACAddress': '00-00-00-00-00-00'
+            },
+            body: JSON.stringify({
+              mode: 'FULL',
+              exchangeTokens: {
+                'NFO': ['99926009']  // NIFTY50
+              }
+            })
+          });
+          const quoteData = await quoteRes.json();
+          if (quoteData?.data?.fetched?.[0]?.ltp) {
+            angelOnePrice = quoteData.data.fetched[0].ltp;
+          }
+        } catch (err) {
+          console.log(`⚠️ Could not fetch real NIFTY price from Angel One API`);
+        }
+      } else if (symbol === 'BANKNIFTY') {
+        try {
+          const quoteRes = await fetch('https://api.smartapi.angelbroking.com/rest/secure/quote/', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${global.angelOneAuth?.jwtToken || ''}`,
+              'Content-Type': 'application/json',
+              'X-UserType': 'USER',
+              'X-SourceID': 'WEB',
+              'X-ClientLocalIP': '127.0.0.1',
+              'X-ClientPublicIP': '127.0.0.1',
+              'X-MACAddress': '00-00-00-00-00-00'
+            },
+            body: JSON.stringify({
+              mode: 'FULL',
+              exchangeTokens: {
+                'NFO': ['99926009']  // BANKNIFTY
+              }
+            })
+          });
+          const quoteData = await quoteRes.json();
+          if (quoteData?.data?.fetched?.[0]?.ltp) {
+            angelOnePrice = quoteData.data.fetched[0].ltp;
+          }
+        } catch (err) {
+          console.log(`⚠️ Could not fetch real BANKNIFTY price from Angel One API`);
+        }
+      } else if (symbol === 'SENSEX') {
+        try {
+          const quoteRes = await fetch('https://api.smartapi.angelbroking.com/rest/secure/quote/', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${global.angelOneAuth?.jwtToken || ''}`,
+              'Content-Type': 'application/json',
+              'X-UserType': 'USER',
+              'X-SourceID': 'WEB',
+              'X-ClientLocalIP': '127.0.0.1',
+              'X-ClientPublicIP': '127.0.0.1',
+              'X-MACAddress': '00-00-00-00-00-00'
+            },
+            body: JSON.stringify({
+              mode: 'FULL',
+              exchangeTokens: {
+                'BSE': ['99919000']  // SENSEX
+              }
+            })
+          });
+          const quoteData = await quoteRes.json();
+          if (quoteData?.data?.fetched?.[0]?.ltp) {
+            angelOnePrice = quoteData.data.fetched[0].ltp;
+          }
+        } catch (err) {
+          console.log(`⚠️ Could not fetch real SENSEX price from Angel One API`);
+        }
+      }
 
-      // Update and get current price
-      const stock = updateStockPrice(stockSymbol);
+      // Fallback to simulated price if real data not available
+      const stockSymbol = symbol.replace('NSE:', '').replace('-EQ', '').replace('-INDEX', '');
+      const stock = angelOnePrice ? 
+        { basePrice: angelOnePrice, currentPrice: angelOnePrice } : 
+        updateStockPrice(stockSymbol);
 
       const change = stock.currentPrice - stock.basePrice;
       const changePercent = (change / stock.basePrice) * 100;
