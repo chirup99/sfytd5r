@@ -2094,17 +2094,14 @@ export default function Home() {
   // Animated greeting stocks state
   const [currentStockIndex, setCurrentStockIndex] = useState(0);
   const [showingInitialGreeting, setShowingInitialGreeting] = useState(true);
+  // Build animated stocks with REAL Angel One API prices (no hardcoding)
   const animatedStocks = [
-    { symbol: "NIFTY", price: "59273.80", change: +1.24, isProfit: true },
-    { symbol: "BANKNIFTY", price: "52841.35", change: +0.87, isProfit: true },
+    { symbol: "NIFTY", price: getNifty50CurrentPrice().toString(), change: getNifty50Change(), isProfit: getNifty50Change() >= 0 },
+    { symbol: "BANKNIFTY", price: getNiftyBankCurrentPrice().toString(), change: getNiftyBankChange(), isProfit: getNiftyBankChange() >= 0 },
     { symbol: "SENSEX", price: "85138.27", change: -0.45, isProfit: false },
     { symbol: "Top Gainers", price: "TCS +2.1%", change: +2.1, isProfit: true },
     { symbol: "Top Losers", price: "SUNPHARMA -1.8%", change: -1.8, isProfit: false },
   ];
-
-  // Passcode protection state
-  const [showPasscodeModal, setShowPasscodeModal] = useState(false);
-  const [passcodeInput, setPasscodeInput] = useState("");
   const [authenticatedTabs, setAuthenticatedTabs] = useState<Set<string>>(
     new Set(),
   );

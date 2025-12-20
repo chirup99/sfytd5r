@@ -1806,7 +1806,39 @@ function MicroAnimationsDemoPage() {
             </div>
             <div className="space-y-2">
               <Label>Market Status</Label>
-              <div className="p-3 border rounded-lg bg-white dark:bg-gray-700">
+              {isReportLoading && (
+                                                  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 rounded-lg">
+                                                    <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-8 border border-gray-700 shadow-2xl max-w-md">
+                                                      <div className="text-center">
+                                                        <style>{`
+                                                          @keyframes thinkingDot {
+                                                            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+                                                            30% { opacity: 1; transform: translateY(-8px); }
+                                                          }
+                                                          .thinking-dot {
+                                                            display: inline-block;
+                                                            width: 10px;
+                                                            height: 10px;
+                                                            border-radius: 50%;
+                                                            background-color: #3b82f6;
+                                                            animation: thinkingDot 1.4s infinite;
+                                                            margin: 0 4px;
+                                                          }
+                                                          .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+                                                          .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+                                                        `}</style>
+                                                        <h3 className="text-lg font-semibold text-white mb-4">Generating Financial Report</h3>
+                                                        <div className="flex items-center justify-center gap-2 mb-3">
+                                                          <div className="thinking-dot"></div>
+                                                          <div className="thinking-dot"></div>
+                                                          <div className="thinking-dot"></div>
+                                                        </div>
+                                                        <p className="text-sm text-gray-400">Analyzing quarterly data, company insights, and financial statements...</p>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                )}
+                                                <div className="p-3 border rounded-lg bg-white dark:bg-gray-700">
                 <MarketStatusPulse isLive={false} />
               </div>
             </div>
@@ -1964,6 +1996,8 @@ export default function Home() {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchResults, setSearchResults] = useState("");
   const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [isReportLoading, setIsReportLoading] = useState(false);
+  const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
   const [searchResultsNews, setSearchResultsNews] = useState<any[]>([]);
   const [searchResultsNewsSymbol, setSearchResultsNewsSymbol] = useState("");
   const [aiChartSelectedTimeframe, setAiChartSelectedTimeframe] = useState('1Y');
@@ -2381,8 +2415,15 @@ export default function Home() {
 
   // Optimized unified search with caching and performance improvements
   const handleSearch = async (queryOverride?: string) => {
-    const query = queryOverride || searchQuery;
+    let query = queryOverride || searchQuery;
     if (!query.trim()) return;
+
+    // Convert stock symbol format (RELIANCE-EQ) to human language (reliance)
+    if (query.includes('-') && query.toUpperCase() === query) {
+      const symbolPart = query.split('-')[0]; // Extract "RELIANCE" from "RELIANCE-EQ"
+      query = symbolPart.toLowerCase(); // Convert to "reliance"
+      console.log(`✅ [SYMBOL-DETECTED] Converted ${queryOverride} to human language: ${query}`);
+    }
 
     // Check authentication before allowing search
     const userId = localStorage.getItem('currentUserId');
@@ -2505,6 +2546,26 @@ export default function Home() {
             }
 
             setSearchResults(result);
+            
+            // Fetch news if query is about financial/market topics
+            const isNewsQuery = query.toLowerCase().includes("news") || query.toLowerCase().includes("market") || query.toLowerCase().includes("update") || query.toLowerCase().includes("financial");
+            if (isNewsQuery) {
+              try {
+                const newsPromises = ["IT", "FINANCE", "COMMODITY", "GLOBAL", "BANKS", "AUTOMOBILE"].map(sector =>
+                  fetch("/api/daily-news", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ sector })
+                  })
+                    .then(res => res.json())
+                    .then(data => ({...data, url: "#", source: sector, time: new Date().toLocaleTimeString()}))
+                    .catch(err => null)
+                );
+                const results = await Promise.all(newsPromises);
+                const validResults = results.filter(r => r !== null);
+                if (validResults.length > 0) setSearchResultsNews(validResults);
+              } catch (err) {console.warn("Error fetching news:", err);}
+            }
             console.log("✅ [TRADING-AGENT] Query processing complete!");
             setIsSearchLoading(false);
             return;
@@ -6026,77 +6087,41 @@ ${
     localStorage.setItem('watchlistSymbols', JSON.stringify(watchlistSymbols));
   }, [watchlistSymbols]);
 
-  // Fetch quarterly results for ALL watchlist stocks
+  // Fetch quarterly data when watchlist stock is selected
   useEffect(() => {
-    const fetchAllQuarterlyData = async () => {
-      if (watchlistSymbols.length === 0) {
-        setAllWatchlistQuarterlyData({});
-        return;
-      }
-      
-      setIsWatchlistQuarterlyLoading(true);
-      try {
-        const results: {[symbol: string]: Array<any>} = {};
-        
-        await Promise.all(
-          watchlistSymbols.map(async (stock) => {
-            try {
-              const cleanSymbol = stock.symbol.replace('-EQ', '').replace('-BE', '');
-              const response = await fetch(`/api/quarterly-results/${cleanSymbol}`);
-              if (response.ok) {
-                const data = await response.json();
-                results[stock.symbol] = data.results || [];
-              }
-            } catch (error) {
-              console.error(`Error fetching quarterly data for ${stock.symbol}:`, error);
-              results[stock.symbol] = [];
-            }
-          })
-        );
-        
-        setAllWatchlistQuarterlyData(results);
-      } finally {
-        setIsWatchlistQuarterlyLoading(false);
-      }
-    };
+    if (!searchResultsNewsSymbol) {
+      setAllWatchlistQuarterlyData({});
+      return;
+    }
     
-    fetchAllQuarterlyData();
-  }, [watchlistSymbols]);
-
-  // Fetch quarterly data for the currently searched stock (searchResultsNewsSymbol)
-  useEffect(() => {
-    const fetchSelectedStockQuarterlyData = async () => {
-      if (!searchResultsNewsSymbol) return;
-      
-      // Check if we already have data for this stock
-      if (allWatchlistQuarterlyData[searchResultsNewsSymbol]?.length > 0) return;
-      
+    const fetchQuarterlyData = async () => {
       setIsWatchlistQuarterlyLoading(true);
       try {
         const cleanSymbol = searchResultsNewsSymbol.replace('-EQ', '').replace('-BE', '');
-        console.log(`📊 Fetching quarterly data for searched stock: ${cleanSymbol}`);
         const response = await fetch(`/api/quarterly-results/${cleanSymbol}`);
         if (response.ok) {
           const data = await response.json();
-          if (data.results && data.results.length > 0) {
-            setAllWatchlistQuarterlyData(prev => ({
-              ...prev,
-              [searchResultsNewsSymbol]: data.results
-            }));
-            console.log(`✅ Quarterly data loaded for ${cleanSymbol}:`, data.results.length, 'quarters');
-          } else {
-            console.log(`⚠️ No quarterly data found for ${cleanSymbol}`);
-          }
+          setAllWatchlistQuarterlyData({
+            [searchResultsNewsSymbol]: data.results || []
+          });
         }
       } catch (error) {
-        console.error(`Error fetching quarterly data for ${searchResultsNewsSymbol}:`, error);
+        console.error(`Error fetching quarterly data:`, error);
+        setAllWatchlistQuarterlyData({ [searchResultsNewsSymbol]: [] });
       } finally {
         setIsWatchlistQuarterlyLoading(false);
       }
     };
     
-    fetchSelectedStockQuarterlyData();
+    fetchQuarterlyData();
   }, [searchResultsNewsSymbol]);
+  // Sync watchlist stock selection with search results symbol to trigger quarterly fetch
+  useEffect(() => {
+    if (selectedWatchlistSymbol && searchResults.includes("[CHART:WATCHLIST]")) {
+      setSearchResultsNewsSymbol(selectedWatchlistSymbol);
+    }
+  }, [selectedWatchlistSymbol, searchResults]);
+
 
   
   // Fetch news for selected watchlist symbol
@@ -6121,6 +6146,29 @@ ${
       fetchWatchlistNews();
     }
   }, [selectedWatchlistSymbol, isWatchlistOpen, searchResults]);
+
+  // Auto-fetch news for search results
+  useEffect(() => {
+    if (searchResultsNewsSymbol && searchResults.includes("[CHART:SEARCH_RESULTS]")) {
+      const fetchSearchResultsNews = async () => {
+        setIsWatchlistNewsLoading(true);
+        try {
+          const cleanSymbol = searchResultsNewsSymbol.replace('-EQ', '').replace('-BE', '');
+          const response = await fetch(`/api/stock-news/${cleanSymbol}?refresh=${Date.now()}`);
+          if (response.ok) {
+            const data = await response.json();
+            const newsItems = Array.isArray(data) ? data : (data.news || []);
+            setWatchlistNews(newsItems.slice(0, 20));
+          }
+        } catch (error) {
+          console.error('Error fetching search results news:', error);
+        } finally {
+          setIsWatchlistNewsLoading(false);
+        }
+      };
+      fetchSearchResultsNews();
+    }
+  }, [searchResultsNewsSymbol, searchResults]);
   
   // Search stocks for watchlist
   const searchWatchlistStocks = async (query: string) => {
@@ -12882,40 +12930,66 @@ ${
                                                 })()}
                                               </div>
                                             )}
-                                            {priceChartData.length > 0 && (
-                                              <div className="w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-xl backdrop-blur-sm">
-                                                <div className="flex items-center gap-2 mb-4">
-                                                  <Clock className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                                                  <h3 className="text-gray-900 dark:text-white font-semibold">Related News</h3>
+                                            {/* Related News for Search Results */}
+                                            <div className="flex-1 bg-gray-900/50 rounded-lg p-4 border border-gray-600">
+                                              <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center gap-2">
+                                                  <Clock className="h-4 w-4 text-gray-400" />
+                                                  <h3 className="text-sm font-medium text-gray-200">
+                                                    Related News
+                                                  </h3>
                                                 </div>
-
-                                                <div className="space-y-3 max-h-80 overflow-y-auto bg-gray-50 dark:bg-gray-700/60 rounded-xl p-4 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-200 dark:scrollbar-track-gray-800 ">
-                                                  {searchResultsNews && searchResultsNews.length > 0 ? (
-                                                    searchResultsNews.map((item: any, index: number) => (
-                                                      <div 
-                                                        key={index} 
-                                                        className="p-3 bg-gray-100 dark:bg-gray-600/60 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600/70 transition-colors backdrop-blur-sm shadow-sm cursor-pointer"
-                                                        onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
-                                                      >
-                                                        <h4 className="text-gray-700 dark:text-gray-300 font-medium text-sm mb-1 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-                                                          {item.title} ↗
-                                                        </h4>
-                                                        <div className="flex items-center justify-between">
-                                                          <span className="text-gray-500 dark:text-gray-400 text-xs ">{item.source}</span>
-                                                          <span className="text-gray-500 dark:text-gray-500 text-xs ">{item.time}</span>
-                                                        </div>
-                                                      </div>
-                                                    ))
-                                                  ) : (
-                                                    <div className="text-center py-6 text-gray-500 dark:text-gray-400 ">
-                                                      <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                                      <p className="text-sm">No recent news available for this stock</p>
-                                                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 ">Check back later for updates</p>
-                                                    </div>
-                                                  )}
-                                                </div>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  className="h-7 text-xs text-gray-400 hover:text-gray-200"
+                                                  onClick={() => {
+                                                    setIsWatchlistNewsLoading(true);
+                                                    const symbol = (window as any).companyInsightsData?.symbol || searchResultsNewsSymbol;
+                                                    if (symbol) {
+                                                      const cleanSymbol = symbol.replace('-EQ', '').replace('-BE', '');
+                                                      fetch(`/api/stock-news/${cleanSymbol}?refresh=${Date.now()}`)
+                                                        .then(res => res.json())
+                                                        .then(data => {
+                                                          const newsItems = Array.isArray(data) ? data : (data.news || []);
+                                                          setWatchlistNews(newsItems.slice(0, 20));
+                                                        })
+                                                        .finally(() => setIsWatchlistNewsLoading(false));
+                                                    }
+                                                  }}
+                                                  data-testid="button-refresh-search-news"
+                                                >
+                                                  <RefreshCw className={`h-3 w-3 mr-1 ${isWatchlistNewsLoading ? 'animate-spin' : ''}`} />
+                                                  Refresh
+                                                </Button>
                                               </div>
-                                            )}
+                                              
+                                              <div className="space-y-3 max-h-[320px] overflow-y-auto mb-4">
+                                                {isWatchlistNewsLoading ? (
+                                                  <div className="flex items-center justify-center py-8">
+                                                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                                                  </div>
+                                                ) : watchlistNews.length > 0 ? (
+                                                  watchlistNews.map((item, index) => (
+                                                    <div 
+                                                      key={index} 
+                                                      className="p-3 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer border border-gray-700"
+                                                      onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
+                                                      data-testid={`search-news-item-${index}`}
+                                                    >
+                                                      <h4 className="text-gray-200 font-medium text-sm mb-2 hover:text-gray-100 transition-colors line-clamp-2">
+                                                        {item.title} <ExternalLink className="h-3 w-3 inline ml-1" />
+                                                      </h4>
+                                                      <p className="text-gray-400 text-xs line-clamp-3">{item.summary}</p>
+                                                    </div>
+                                                  ))
+                                                ) : (
+                                                  <div className="text-center py-8">
+                                                    <p className="text-gray-400 text-sm">No news available</p>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
                                           </div>
                                         );
                                       }
@@ -13252,7 +13326,7 @@ ${
                                                 </Button>
                                               </div>
                                               
-                                              <div className="space-y-3 max-h-[450px] overflow-y-auto mb-4">
+                                              <div className="space-y-3 max-h-[320px] overflow-y-auto mb-4">
                                                 {isWatchlistNewsLoading ? (
                                                   <div className="flex items-center justify-center py-8">
                                                     <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
@@ -13292,21 +13366,50 @@ ${
                                                   <div className="flex items-center gap-2">
                                                     <TrendingUp className="h-4 w-4 text-gray-400" />
                                                     <h3 className="text-sm font-medium text-gray-200">
-                                                      Quarterly Performance Trend
+                                                      Quarterly Performance Trend <span className="text-xs text-gray-500 ml-1">(Net profit)</span>
                                                     </h3>
                                                   </div>
-                                                  {(() => {
-                                                    const selectedStock = watchlistSymbols.find(s => s.symbol === searchResultsNewsSymbol);
-                                                    if (!selectedStock) return null;
-                                                    const quarterlyData = allWatchlistQuarterlyData[selectedStock.symbol] || [];
-                                                    const hasTrendingUp = quarterlyData.length > 1 && 
-                                                      parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
-                                                    return (
-                                                      <span className={`text-xs px-2 py-1 rounded ${hasTrendingUp ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                                        {hasTrendingUp ? '↑ Uptrend' : '↓ Downtrend'}
-                                                      </span>
-                                                    );
-                                                  })()}
+                                                  <div className="flex items-center gap-2">
+                                                    {searchResultsNewsSymbol && (
+                                                      <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={async () => {
+                                                          setIsWatchlistQuarterlyLoading(true);
+                                                          try {
+                                                            const cleanSymbol = searchResultsNewsSymbol.replace("-EQ", "").replace("-BE", "");
+                                                            const response = await fetch(`/api/quarterly-results/${cleanSymbol}`);
+                                                            if (response.ok) {
+                                                              const data = await response.json();
+                                                              setAllWatchlistQuarterlyData(prev => ({
+                                                                ...prev,
+                                                                [searchResultsNewsSymbol]: data.results || []
+                                                              }));
+                                                            }
+                                                          } catch (error) {
+                                                            console.error("Error refreshing quarterly data:", error);
+                                                          } finally {
+                                                            setIsWatchlistQuarterlyLoading(false);
+                                                          }
+                                                        }}
+                                                        data-testid="button-refresh-quarterly"
+                                                        className="h-7 px-2"
+                                                      >
+                                                        <RefreshCw className={`h-3 w-3 ${isWatchlistQuarterlyLoading ? "animate-spin" : ""}`} />
+                                                      </Button>
+                                                    )}
+                                                    {(() => {
+                                                      if (!searchResultsNewsSymbol) return null;
+                                                      const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
+                                                      const hasTrendingUp = quarterlyData.length > 1 && 
+                                                        parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
+                                                      return (
+                                                        <span className={`text-xs px-2 py-1 rounded ${hasTrendingUp ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                                          {hasTrendingUp ? '↑ Uptrend' : '↓ Downtrend'}
+                                                        </span>
+                                                      );
+                                                    })()}
+                                                  </div>
                                                 </div>
 
                                                 <div className="space-y-1.5">
@@ -13315,15 +13418,25 @@ ${
                                                       <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
                                                     </div>
                                                   ) : searchResultsNewsSymbol ? (() => {
-                                                    const selectedStock = watchlistSymbols.find(s => s.symbol === searchResultsNewsSymbol);
-                                                    if (!selectedStock) {
+                                                    const quarterlyData = allWatchlistQuarterlyData[searchResultsNewsSymbol] || [];
+                                                    // Don't show loading state if we have data
+                                                    // The isWatchlistQuarterlyLoading at the top already handles the loading indicator
+                                                    if (!quarterlyData || quarterlyData.length === 0) {
+                                                      // Check if still loading, otherwise show no data message
+                                                      if (isWatchlistQuarterlyLoading) {
+                                                        return (
+                                                          <div className="text-center py-8 text-gray-500">
+                                                            <Loader2 className="h-5 w-5 animate-spin text-gray-400 mx-auto mb-2" />
+                                                            <p className="text-xs">Loading quarterly results...</p>
+                                                          </div>
+                                                        );
+                                                      }
                                                       return (
-                                                        <div className="text-center py-8 text-gray-500">
-                                                          <p className="text-xs">Search for a stock to see quarterly results</p>
+                                                        <div className="text-center py-4 text-gray-500 text-xs">
+                                                          No quarterly data available
                                                         </div>
                                                       );
                                                     }
-                                                    const quarterlyData = allWatchlistQuarterlyData[selectedStock.symbol] || [];
                                                     const hasTrendingUp = quarterlyData.length > 1 && 
                                                       parseFloat(quarterlyData[quarterlyData.length - 1]?.change_percent || '0') >= 0;
                                                     
@@ -13341,7 +13454,7 @@ ${
                                                           <ResponsiveContainer width="100%" height="100%">
                                                             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
                                                               <defs>
-                                                                <linearGradient id={`grad-${selectedStock.symbol}`} x1="0" y1="0" x2="0" y2="1">
+                                                                <linearGradient id={`grad-${searchResultsNewsSymbol}`} x1="0" y1="0" x2="0" y2="1">
                                                                   <stop offset="0%" stopColor={trendColor} stopOpacity={0.4} />
                                                                   <stop offset="100%" stopColor={trendColor} stopOpacity={0.05} />
                                                                 </linearGradient>
@@ -13357,7 +13470,7 @@ ${
                                                                 dataKey="value" 
                                                                 stroke={trendColor} 
                                                                 strokeWidth={2} 
-                                                                fill={`url(#grad-${selectedStock.symbol})`}
+                                                                fill={`url(#grad-${searchResultsNewsSymbol})`}
                                                                 dot={{ r: 5, stroke: trendColor, strokeWidth: 2, fill: '#1f2937' }}
                                                                 activeDot={{ r: 7, stroke: trendColor, strokeWidth: 2, fill: '#ffffff' }}
                                                               />
@@ -13372,6 +13485,44 @@ ${
                                                             <span className="w-2 h-2 rounded-full bg-red-500"></span> Negative Quarter
                                                           </span>
                                                         </div>
+                                                        {/* PDF Links for Deep Analysis */}
+                                                        {quarterlyData.some((q: any) => q.pdf_url) && (
+                                                          <div className="mt-3 pt-3 border-t border-gray-700">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                              <span className="text-xs font-medium text-gray-400">Quarterly Results PDFs</span>
+                                                              <button
+                                                                onClick={() => {
+                                                                  const symbol = searchResultsNewsSymbol || selectedWatchlistSymbol;
+                                                                  if (symbol) {
+                                                                    // Simply set the query which triggers the existing search handler
+                                                                    handleSearch(symbol);
+                                                                  }
+                                                                }}
+                                                                className="text-xs text-blue-400 hover:text-blue-300 cursor-pointer"
+                                                                data-testid="button-ai-full-report"
+                                                              >
+                                                                View Full Report
+                                                              </button>
+                                                            </div>
+                                                            <div className="flex flex-wrap gap-2">
+                                                              {quarterlyData.slice(-4).map((q: any, idx: number) => 
+                                                                q.pdf_url && (
+                                                                  <a
+                                                                    key={idx}
+                                                                    href={q.pdf_url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded text-xs text-gray-300"
+                                                                    data-testid={`link-pdf-${idx}`}
+                                                                  >
+                                                                    <FileText className="h-3 w-3" />
+                                                                    {q.quarter}
+                                                                  </a>
+                                                                )
+                                                              )}
+                                                            </div>
+                                                          </div>
+                                                        )}
                                                       </>
                                                     ) : (
                                                       <div className="text-center py-4 text-gray-500 text-xs">
@@ -13829,7 +13980,7 @@ ${
                                   {/* Disclaimer */}
                                   <div className="mt-4 pt-3 border-t border-gray-700">
                                     <p className="text-xs text-gray-500 italic">
-                                      Disclaimer: Financial data is sourced from screener.in and other public sources. 
+                                      Disclaimer: Financial data is sourced from NSE/BSE and other public sources. 
                                       This information is for educational purposes only and should not be considered 
                                       financial advice. Please verify data independently before making investment decisions.
                                     </p>
@@ -13910,14 +14061,26 @@ ${
                           variant="secondary"
                           className="bg-cyan-600 hover:bg-cyan-700  text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200"
                           onClick={() => {
+                            setIsWatchlistLoading(true);
                             setIsSearchActive(true);
                             setSearchResults("[CHART:WATCHLIST]");
                             setIsWatchlistOpen(true);
+                            // Auto-select first stock in watchlist and fetch its quarterly data
+                            if (watchlistSymbols.length > 0 && !selectedWatchlistSymbol) {
+                              const firstStock = watchlistSymbols[0];
+                              setSelectedWatchlistSymbol(firstStock.symbol);
+                              setSearchResultsNewsSymbol(firstStock.symbol);
+                            }
+                            setTimeout(() => setIsWatchlistLoading(false), 300);
                           }}
                           data-testid="button-watchlist"
                         >
                           <div className="flex items-center justify-center gap-1">
-                            <Eye className="h-3 w-3" />
+                            {isWatchlistLoading ? (
+                              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Eye className="h-3 w-3" />
+                            )}
                             <span>Watchlist</span>
                           </div>
                         </Button>
@@ -14088,14 +14251,26 @@ ${
                                 variant="secondary"
                                 className="bg-cyan-600 hover:bg-cyan-700 text-white border-0 h-7 px-2 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0"
                                 onClick={() => {
+                                  setIsWatchlistLoading(true);
                                   setIsSearchActive(true);
                                   setSearchResults("[CHART:WATCHLIST]");
                                   setIsWatchlistOpen(true);
+                                  // Auto-select first stock in watchlist and fetch its quarterly data
+                                  if (watchlistSymbols.length > 0 && !selectedWatchlistSymbol) {
+                                    const firstStock = watchlistSymbols[0];
+                                    setSelectedWatchlistSymbol(firstStock.symbol);
+                                    setSearchResultsNewsSymbol(firstStock.symbol);
+                                  }
+                                  setTimeout(() => setIsWatchlistLoading(false), 300);
                                 }}
                                 data-testid="button-watchlist-mobile"
                               >
                                 <div className="flex items-center justify-center gap-1">
-                                  <Eye className="h-3 w-3" />
+                                  {isWatchlistLoading ? (
+                                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  ) : (
+                                    <Eye className="h-3 w-3" />
+                                  )}
                                   <span>Watchlist</span>
                                 </div>
                               </Button>
@@ -14204,166 +14379,93 @@ ${
                                 <div className="prose prose-invert max-w-none">
                                   <div className="text-gray-300 whitespace-pre-wrap leading-tight text-xs">
                                     {searchResults.includes("[CHART:WATCHLIST]") ? (
-                                      // Mobile Watchlist Layout
-                                      <div className="space-y-1.5">
+// Mobile Watchlist Layout - Using compact desktop layout
+                                      <div className="space-y-2">
                                         {/* NIFTY 50 Chart */}
-                                        <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                                          <div className="flex items-center justify-between mb-2">
-                                            <h4 className="text-xs font-medium text-gray-200">NIFTY 50</h4>
-                                            <span className="text-xs text-gray-400">Index</span>
-                                          </div>
-                                          <div className="h-20">
-                                            <MinimalChart symbol="NIFTY" height={80} showControls={true} />
+                                        <div className="bg-gray-800/50 rounded-lg p-2 border border-gray-700">
+                                          <div className="space-y-1">
+                                            <div className="flex items-center justify-between">
+                                              <div className="flex items-center gap-1">
+                                                <h4 className="text-xs font-semibold text-gray-200">NIFTY 50</h4>
+                                                <span className="text-xs text-green-400 flex items-center gap-0.5">
+                                                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                                  Live
+                                                </span>
+                                              </div>
+                                              <div className="text-right">
+                                                <div className="text-xs font-mono text-gray-100">₹{getNifty50CurrentPrice().toLocaleString('en-IN', { maximumFractionDigits: 2 })}</div>
+                                                <div className={`text-xs flex items-center justify-end gap-0.5 ${getNifty50Change() >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                                  {getNifty50Change() >= 0 ? '▲' : '▼'} {Math.abs((getNifty50Change() / (getNifty50CurrentPrice() - getNifty50Change())) * 100).toFixed(2)}%
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <div className="flex items-center gap-0.5">
+                                              {['1D', '5D', '1M'].map((tf) => (
+                                                <Button key={tf} variant="ghost" size="sm" onClick={() => setNifty50Timeframe(tf)} className={`px-1 py-0 text-xs h-5 ${nifty50Timeframe === tf ? 'bg-blue-600/20 text-blue-400' : 'text-gray-400'}`}>
+                                                  {tf}
+                                                </Button>
+                                              ))}
+                                            </div>
+                                            <div className="h-24 w-full bg-gray-800/30 rounded p-1">
+                                              <ResponsiveContainer width="100%" height="100%">
+                                                <LineChart data={isNifty50Loading ? [] : nifty50FormattedData} margin={{ top: 2, right: 10, left: 30, bottom: 2 }}>
+                                                  <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 8, fill: '#64748b' }} tickCount={3} />
+                                                  <YAxis domain={['dataMin - 50', 'dataMax + 50']} axisLine={false} tickLine={false} tick={{ fontSize: 8, fill: '#64748b' }} width={8} />
+                                                  <Tooltip content={({ active, payload }) => {if (!active || !payload?.length) return null; const value = payload[0].value; return <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '4px', color: '#e2e8f0', padding: '4px 8px', fontSize: '11px' }}>₹{Number(value).toFixed(2)}</div>;}} />
+                                                  <Line type="linear" dataKey="price" stroke="#ef4444" strokeWidth={1.5} dot={false} />
+                                                </LineChart>
+                                              </ResponsiveContainer>
+                                            </div>
                                           </div>
                                         </div>
                                         
-                                        {/* BANK NIFTY Chart */}
-                                        <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                                          <div className="flex items-center justify-between mb-2">
-                                            <h4 className="text-xs font-medium text-gray-200">BANK NIFTY</h4>
-                                            <span className="text-xs text-gray-400">Index</span>
+                                        {/* Selected Stock Chart */}
+                                        {selectedWatchlistSymbol && (
+                                          <div className="bg-gray-800/50 rounded-lg p-2 border border-gray-700">
+                                            <div className="space-y-1">
+                                              <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-1">
+                                                  <h4 className="text-xs font-semibold text-gray-200">{selectedWatchlistSymbol.replace('-EQ', '')}</h4>
+                                                  <span className="text-xs text-green-400">Live</span>
+                                                </div>
+                                              </div>
+                                              <div className="flex items-center gap-0.5">
+                                                {['1D', '5D', '1M'].map((tf) => (
+                                                  <Button key={tf} variant="ghost" size="sm" onClick={() => {}} className={`px-1 py-0 text-xs h-5 bg-blue-600/20 text-blue-400`}>
+                                                    {tf}
+                                                  </Button>
+                                                ))}
+                                              </div>
+                                              <div className="h-24 w-full bg-gray-800/30 rounded p-1">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                  <LineChart data={[]} margin={{ top: 2, right: 10, left: 30, bottom: 2 }}>
+                                                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 8 }} tickCount={3} />
+                                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 8 }} width={8} />
+                                                    <Line type="linear" dataKey="price" stroke="#22c55e" strokeWidth={1.5} dot={false} />
+                                                  </LineChart>
+                                                </ResponsiveContainer>
+                                              </div>
+                                            </div>
                                           </div>
-                                          <div className="h-20">
-                                            <MinimalChart symbol="BANKNIFTY" height={80} showControls={true} />
-                                          </div>
-                                        </div>
+                                        )}
                                         
                                         {/* My Watchlist */}
-                                        <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+                                        <div className="bg-gray-800/50 rounded-lg p-2 border border-gray-700">
                                           <div className="flex items-center justify-between mb-2">
                                             <h4 className="text-xs font-medium text-gray-200">My Watchlist</h4>
                                             <span className="text-xs text-gray-400">{watchlistSymbols.length} stocks</span>
                                           </div>
-                                          
-                                          {/* Search to add stocks */}
-                                          <div className="relative mb-2">
-                                            <Input
-                                              placeholder="Search to add stock..."
-                                              value={watchlistSearchQuery}
-                                              onChange={(e) => {
-                                                setWatchlistSearchQuery(e.target.value);
-                                                searchWatchlistStocks(e.target.value);
-                                              }}
-                                              className="h-7 text-xs bg-gray-900 border-gray-600 text-gray-200 placeholder:text-gray-500"
-                                              data-testid="input-watchlist-search-mobile"
-                                            />
-                                            {watchlistSearchResults.length > 0 && (
-                                              <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-gray-600 rounded-lg z-50 max-h-32 overflow-y-auto">
-                                                {watchlistSearchResults.map((result, idx) => (
-                                                  <div
-                                                    key={idx}
-                                                    className="px-2 py-1.5 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
-                                                    onClick={() => addToWatchlist(result)}
-                                                    data-testid={`mobile-watchlist-search-result-${idx}`}
-                                                  >
-                                                    <div className="text-xs font-medium text-gray-200">{result.displayName || result.symbol}</div>
-                                                    <div className="text-xs text-gray-400">{result.name}</div>
-                                                  </div>
-                                                ))}
-                                              </div>
-                                            )}
-                                          </div>
-                                          
-                                          {/* Watchlist Items */}
-                                          <div className="space-y-1 max-h-36 overflow-y-auto">
-                                            {watchlistSymbols.map((stock, idx) => (
-                                              <div
-                                                key={stock.symbol}
-                                                className={`flex items-center justify-between px-2 py-1.5 rounded cursor-pointer transition-colors ${
-                                                  selectedWatchlistSymbol === stock.symbol 
-                                                    ? 'bg-blue-600/30 border border-blue-500/50' 
-                                                    : 'hover:bg-gray-700/50'
-                                                }`}
-                                                onClick={() => setSelectedWatchlistSymbol(stock.symbol)}
-                                                data-testid={`mobile-watchlist-item-${idx}`}
-                                              >
-                                                <div className="flex items-center gap-2">
-                                                  <div className={`w-1.5 h-1.5 rounded-full ${
-                                                    selectedWatchlistSymbol === stock.symbol ? 'bg-blue-400' : 'bg-gray-500'
-                                                  }`} />
-                                                  <div>
-                                                    <div className="text-xs font-medium text-gray-200">{stock.displayName || stock.symbol.replace('-EQ', '')}</div>
-                                                    <div className="text-xs text-gray-500 truncate max-w-[140px]">{stock.name}</div>
-                                                  </div>
-                                                </div>
-                                                <button
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    removeFromWatchlist(stock.symbol);
-                                                  }}
-                                                  className="text-gray-500 hover:text-red-400 transition-colors p-0.5"
-                                                  data-testid={`mobile-button-remove-watchlist-${idx}`}
-                                                >
-                                                  <X className="h-3 w-3" />
-                                                </button>
+                                          <div className="space-y-1 max-h-20 overflow-y-auto">
+                                            {watchlistSymbols.map((stock) => (
+                                              <div key={stock.symbol} onClick={() => setSelectedWatchlistSymbol(stock.symbol)} className={`px-2 py-1 rounded text-xs cursor-pointer ${selectedWatchlistSymbol === stock.symbol ? 'bg-blue-600/30 border border-blue-500/50' : 'hover:bg-gray-700/50'}`}>
+                                                <div className="font-medium text-gray-200">{stock.displayName || stock.symbol}</div>
                                               </div>
                                             ))}
                                           </div>
                                         </div>
-                                        
-                                        {/* Related News */}
-                                        <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-                                          <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-1.5">
-                                              <Clock className="h-3 w-3 text-gray-400" />
-                                              <h4 className="text-xs font-medium text-gray-200">
-                                                News: {selectedWatchlistSymbol.replace('-EQ', '').replace('-BE', '')}
-                                              </h4>
-                                            </div>
-                                            <Button
-                                              variant="ghost"
-                                              size="sm"
-                                              className="h-6 text-xs text-gray-400 hover:text-gray-200 px-2"
-                                              onClick={() => {
-                                                const cleanSymbol = selectedWatchlistSymbol.replace('-EQ', '').replace('-BE', '');
-                                                setIsWatchlistNewsLoading(true);
-                                                fetch(`/api/stock-news/${cleanSymbol}?refresh=${Date.now()}`)
-                                                  .then(res => res.json())
-                                                  .then(data => {
-                                                    const newsItems = Array.isArray(data) ? data : (data.news || []);
-                                                    setWatchlistNews(newsItems.slice(0, 20));
-                                                  })
-                                                  .finally(() => setIsWatchlistNewsLoading(false));
-                                              }}
-                                              data-testid="mobile-button-refresh-news"
-                                            >
-                                              <RefreshCw className={`h-3 w-3 ${isWatchlistNewsLoading ? 'animate-spin' : ''}`} />
-                                            </Button>
-                                          </div>
-                                          
-                                          <div className="space-y-2 max-h-48 overflow-y-auto">
-                                            {isWatchlistNewsLoading ? (
-                                              <div className="flex items-center justify-center py-4">
-                                                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                                              </div>
-                                            ) : watchlistNews.length > 0 ? (
-                                              watchlistNews.slice(0, 10).map((item, index) => (
-                                                <div 
-                                                  key={index} 
-                                                  className="p-2 bg-gray-900/50 rounded hover:bg-gray-700/50 transition-colors cursor-pointer"
-                                                  onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
-                                                  data-testid={`mobile-news-item-${index}`}
-                                                >
-                                                  <h5 className="text-gray-200 font-medium text-xs mb-1 line-clamp-2">
-                                                    {item.title} <ExternalLink className="h-2.5 w-2.5 inline ml-0.5" />
-                                                  </h5>
-                                                  <div className="flex items-center justify-between">
-                                                    <span className="text-gray-500 text-xs">{item.source}</span>
-                                                    <span className="text-gray-500 text-xs">{getWatchlistNewsRelativeTime(item.publishedAt)}</span>
-                                                  </div>
-                                                </div>
-                                              ))
-                                            ) : (
-                                              <div className="text-center py-4 text-gray-500">
-                                                <Newspaper className="h-5 w-5 mx-auto mb-1 opacity-50" />
-                                                <p className="text-xs">No news available</p>
-                                              </div>
-                                            )}
-                                          </div>
-                                        </div>
                                       </div>
                                     ) : searchResults.includes("[CHART:TRADE]") ? (
-                                      // Trading Challenge Coming Soon
+
                                       <div className="w-full max-w-2xl mx-auto py-12">
                                         {/* Header with Trophy Icon */}
                                         <div className="flex flex-col items-center mb-8">
