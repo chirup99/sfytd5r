@@ -2094,13 +2094,13 @@ export default function Home() {
   // Animated greeting stocks state
   const [currentStockIndex, setCurrentStockIndex] = useState(0);
   const [showingInitialGreeting, setShowingInitialGreeting] = useState(true);
-  const animatedStocks = [
-    { symbol: "NIFTY", price: "59273.80", change: +1.24, isProfit: true },
-    { symbol: "BANKNIFTY", price: "52841.35", change: +0.87, isProfit: true },
-    { symbol: "SENSEX", price: "85138.27", change: -0.45, isProfit: false },
-    { symbol: "Top Gainers", price: "TCS +2.1%", change: +2.1, isProfit: true },
-    { symbol: "Top Losers", price: "SUNPHARMA -1.8%", change: -1.8, isProfit: false },
-  ];
+  // const animatedStocks = [
+  //   { symbol: "NIFTY", price: "59273.80", change: +1.24, isProfit: true },
+  //   { symbol: "BANKNIFTY", price: "52841.35", change: +0.87, isProfit: true },
+  //   { symbol: "SENSEX", price: "85138.27", change: -0.45, isProfit: false },
+  //   { symbol: "Top Gainers", price: "TCS +2.1%", change: +2.1, isProfit: true },
+  //   { symbol: "Top Losers", price: "SUNPHARMA -1.8%", change: -1.8, isProfit: false },
+  // ];
 
   // Passcode protection state
   const [showPasscodeModal, setShowPasscodeModal] = useState(false);
