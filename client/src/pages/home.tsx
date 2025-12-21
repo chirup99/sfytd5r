@@ -3805,27 +3805,38 @@ ${
   // Listen for messages from popup windows
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      console.log('📡 [MESSAGE] Received message:', event.data.type);
+      
       if (event.data.type === 'ZERODHA_TOKEN' && event.data.token) {
-        console.log('📡 Received token from popup');
-        localStorage.setItem('zerodha_token', event.data.token);
-        setZerodhaAccessToken(event.data.token);
+        const token = event.data.token;
+        console.log('✅ [ZERODHA] Token received from popup:', token.substring(0, 20) + '...');
+        
+        localStorage.setItem('zerodha_token', token);
+        setZerodhaAccessToken(token);
         setZerodhaIsConnected(true);
+        console.log('✅ [ZERODHA] Connection established and saved to localStorage');
         
         // Fetch trades
         setTimeout(() => {
+          console.log('📡 [ZERODHA] Fetching trades with token...');
           setZerodhaTradesLoading(true);
           fetch("/api/broker/zerodha/trades", {
-            headers: { "Authorization": `Bearer ${event.data.token}` }
+            headers: { "Authorization": `Bearer ${token}` }
           })
             .then(res => res.json())
             .then(data => {
               setZerodhaTradesData(data.trades || []);
               setZerodhaTradesDialog(true);
-              console.log('✅ Zerodha trades fetched from popup message:', data.trades?.length);
+              console.log('✅ [ZERODHA] Trades fetched:', data.trades?.length || 0, 'trades');
             })
-            .catch(err => console.error("Error fetching Zerodha trades:", err))
+            .catch(err => {
+              console.error("❌ [ZERODHA] Error fetching trades:", err);
+            })
             .finally(() => setZerodhaTradesLoading(false));
         }, 300);
+      } else if (event.data.type === 'ZERODHA_ERROR') {
+        console.error('❌ [ZERODHA] Error from callback:', event.data.error);
+        alert('Zerodha error: ' + event.data.error);
       }
     };
     

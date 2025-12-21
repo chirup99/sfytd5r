@@ -20047,65 +20047,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('✅ [Zerodha] Token exchange successful for user:', userId);
 
-      // Return HTML page that sends token to parent window (for popup flow)
-      const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Connecting to Zerodha...</title>
-          <script>
-            window.addEventListener('load', function() {
-              if (window.opener) {
-                console.log('📡 [POPUP] Sending token to parent window');
-                window.opener.postMessage({
-                  type: 'ZERODHA_TOKEN',
-                  token: '${encodeURIComponent(accessToken)}',
-                  userId: '${encodeURIComponent(userId || '')}'
-                }, '*');
-                setTimeout(() => window.close(), 1000);
-              } else {
-                // Fallback: redirect in main window
-                console.log('📡 [POPUP] No parent window, redirecting...');
-                window.location.href = '/?zerodha_token=${encodeURIComponent(accessToken)}&zerodha_user=${encodeURIComponent(userId || '')}';
-              }
-            });
-          </script>
-        </head>
-        <body>
-          <p>Connecting to Zerodha... Please wait.</p>
-        </body>
-        </html>
-      `;
-      res.send(html);
+      console.log('✅ [ZERODHA] Token exchange successful, preparing callback response');
+      console.log('📡 [ZERODHA] Access Token:', accessToken.substring(0, 30) + '...');
+      
+      // Return pure HTML that communicates token to parent window
+      const callbackHtml = '<!DOCTYPE html><html><head><title>Auth</title><script>var t="' + accessToken + '";var u="' + (userId || '') + '";if(window.opener){window.opener.postMessage({type:"ZERODHA_TOKEN",token:t,userId:u},"*");setTimeout(function(){window.close()},500);}else{window.location.href="/?zerodha_token="+encodeURIComponent(t)+"&zerodha_user="+encodeURIComponent(u);}</script></head><body><p>Connecting...</p></body></html>';
+      
+      console.log('📤 [ZERODHA] Sending callback response');
+      res.type('text/html');
+      res.status(200);
+      res.send(callbackHtml);
 
     } catch (error) {
       console.error('❌ [Zerodha] Error:', error instanceof Error ? error.message : error);
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Zerodha Error</title>
-          <script>
-            window.addEventListener('load', function() {
-              if (window.opener) {
-                window.opener.postMessage({
-                  type: 'ZERODHA_ERROR',
-                  error: '${errorMsg}'
-                }, '*');
-                setTimeout(() => window.close(), 2000);
-              } else {
-                window.location.href = '/?zerodha_error=${encodeURIComponent(errorMsg)}';
-              }
-            });
-          </script>
-        </head>
-        <body>
-          <p>Error: ${errorMsg}</p>
-        </body>
-        </html>
-      `;
-      res.send(html);
+      console.error('❌ [ZERODHA] Error:', errorMsg);
+      
+      const errorHtml = '<!DOCTYPE html><html><head><title>Error</title><script>var e="' + errorMsg.replace(/"/g, '\"') + '";if(window.opener){window.opener.postMessage({type:"ZERODHA_ERROR",error:e},"*");window.close();}else{window.location.href="/?zerodha_error="+encodeURIComponent(e);}</script></head><body><p>Error</p></body></html>';
+      
+      res.type('text/html');
+      res.status(200);
+      res.send(errorHtml);
     }
   });
 
