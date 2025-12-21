@@ -20047,14 +20047,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('✅ [Zerodha] Token exchange successful for user:', userId);
 
-      // Redirect back to frontend with token
-      const redirectUrl = `${req.protocol}://${req.get('host')}/?zerodha_token=${encodeURIComponent(accessToken)}&zerodha_user=${encodeURIComponent(userId || '')}`;
-      res.redirect(redirectUrl);
+      // Return HTML page that sends token to parent window (for popup flow)
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Connecting to Zerodha...</title>
+          <script>
+            window.addEventListener('load', function() {
+              if (window.opener) {
+                console.log('📡 [POPUP] Sending token to parent window');
+                window.opener.postMessage({
+                  type: 'ZERODHA_TOKEN',
+                  token: '${encodeURIComponent(accessToken)}',
+                  userId: '${encodeURIComponent(userId || '')}'
+                }, '*');
+                setTimeout(() => window.close(), 1000);
+              } else {
+                // Fallback: redirect in main window
+                console.log('📡 [POPUP] No parent window, redirecting...');
+                window.location.href = '/?zerodha_token=${encodeURIComponent(accessToken)}&zerodha_user=${encodeURIComponent(userId || '')}';
+              }
+            });
+          </script>
+        </head>
+        <body>
+          <p>Connecting to Zerodha... Please wait.</p>
+        </body>
+        </html>
+      `;
+      res.send(html);
 
     } catch (error) {
       console.error('❌ [Zerodha] Error:', error instanceof Error ? error.message : error);
-      const redirectUrl = `${req.protocol}://${req.get('host')}/?zerodha_error=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`;
-      res.redirect(redirectUrl);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Zerodha Error</title>
+          <script>
+            window.addEventListener('load', function() {
+              if (window.opener) {
+                window.opener.postMessage({
+                  type: 'ZERODHA_ERROR',
+                  error: '${errorMsg}'
+                }, '*');
+                setTimeout(() => window.close(), 2000);
+              } else {
+                window.location.href = '/?zerodha_error=${encodeURIComponent(errorMsg)}';
+              }
+            });
+          </script>
+        </head>
+        <body>
+          <p>Error: ${errorMsg}</p>
+        </body>
+        </html>
+      `;
+      res.send(html);
     }
   });
 

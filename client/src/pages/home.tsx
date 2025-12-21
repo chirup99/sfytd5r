@@ -3742,44 +3742,100 @@ ${
   // Zerodha OAuth Handlers
   // Check localStorage on mount to restore connection state
   useEffect(() => {
+    console.log('🔷 [ZERODHA] Checking localStorage on mount...');
     const savedToken = localStorage.getItem('zerodha_token');
+    console.log('🔷 [ZERODHA] Saved token:', savedToken ? 'FOUND ✅' : 'NOT FOUND ❌');
     if (savedToken) {
       setZerodhaAccessToken(savedToken);
       setZerodhaIsConnected(true);
-      console.log('✅ Zerodha connection restored from localStorage');
+      console.log('✅ [ZERODHA] Connection restored from localStorage');
+    } else {
+      console.log('⚠️ [ZERODHA] No saved token in localStorage');
     }
   }, []);
 
-  // Handle Zerodha OAuth callback from URL
+  // Handle Zerodha OAuth callback from URL (popup communication)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const zerodhaToken = params.get("zerodha_token");
-    if (zerodhaToken) {
-      localStorage.setItem('zerodha_token', zerodhaToken);
-      setZerodhaAccessToken(zerodhaToken);
-      setZerodhaIsConnected(true);
-      console.log('✅ Zerodha connected and token saved');
+    const handleZerodhaCallback = async () => {
+      console.log('🔷 [ZERODHA] Checking URL for callback token...');
+      const params = new URLSearchParams(window.location.search);
+      const zerodhaToken = params.get("zerodha_token");
+      console.log('🔷 [ZERODHA] Token in URL:', zerodhaToken ? '✅ FOUND' : '❌ NOT FOUND');
       
-      setTimeout(() => {
-        setZerodhaTradesLoading(true);
-        fetch("/api/broker/zerodha/trades", {
-          headers: { "Authorization": `Bearer ${zerodhaToken}` }
-        })
-          .then(res => res.json())
-          .then(data => {
-            setZerodhaTradesData(data.trades || []);
-            setZerodhaTradesDialog(true);
-            console.log('✅ Zerodha trades fetched:', data.trades?.length);
+      if (zerodhaToken) {
+        console.log('✅ [ZERODHA] Token received in URL:', zerodhaToken.substring(0, 20) + '...');
+        localStorage.setItem('zerodha_token', zerodhaToken);
+        setZerodhaAccessToken(zerodhaToken);
+        setZerodhaIsConnected(true);
+        
+        // Notify parent window if this is a popup
+        if (window.opener) {
+          window.opener.postMessage({ type: 'ZERODHA_TOKEN', token: zerodhaToken }, '*');
+          console.log('📡 Sent token to parent window');
+        }
+        
+        // Fetch trades
+        setTimeout(() => {
+          setZerodhaTradesLoading(true);
+          fetch("/api/broker/zerodha/trades", {
+            headers: { "Authorization": `Bearer ${zerodhaToken}` }
           })
-          .catch(err => console.error("Error fetching Zerodha trades:", err))
-          .finally(() => setZerodhaTradesLoading(false));
-      }, 500);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
+            .then(res => res.json())
+            .then(data => {
+              setZerodhaTradesData(data.trades || []);
+              setZerodhaTradesDialog(true);
+              console.log('✅ Zerodha trades fetched:', data.trades?.length);
+              
+              // Close popup after trades loaded
+              if (window.opener) {
+                setTimeout(() => window.close(), 2000);
+              }
+            })
+            .catch(err => console.error("Error fetching Zerodha trades:", err))
+            .finally(() => setZerodhaTradesLoading(false));
+        }, 300);
+        
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    };
+    
+    handleZerodhaCallback();
+  }, []);
+
+  // Listen for messages from popup windows
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'ZERODHA_TOKEN' && event.data.token) {
+        console.log('📡 Received token from popup');
+        localStorage.setItem('zerodha_token', event.data.token);
+        setZerodhaAccessToken(event.data.token);
+        setZerodhaIsConnected(true);
+        
+        // Fetch trades
+        setTimeout(() => {
+          setZerodhaTradesLoading(true);
+          fetch("/api/broker/zerodha/trades", {
+            headers: { "Authorization": `Bearer ${event.data.token}` }
+          })
+            .then(res => res.json())
+            .then(data => {
+              setZerodhaTradesData(data.trades || []);
+              setZerodhaTradesDialog(true);
+              console.log('✅ Zerodha trades fetched from popup message:', data.trades?.length);
+            })
+            .catch(err => console.error("Error fetching Zerodha trades:", err))
+            .finally(() => setZerodhaTradesLoading(false));
+        }, 300);
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
   }, []);
 
   const handleZerodhaConnect = async () => {
     try {
+      console.log('🔷 Starting Zerodha OAuth flow...');
       const response = await fetch('/api/broker/zerodha/login-url');
       const data = await response.json();
       
@@ -3789,45 +3845,35 @@ ${
       }
       
       const { loginUrl } = data;
-      console.log('🔗 Opening Zerodha login in popup...');
+      console.log('🔗 Zerodha login URL:', loginUrl);
       
       const popup = window.open(
         loginUrl,
-        'zerodha_login',
+        'zerodha_oauth',
         'width=600,height=800,resizable=yes,scrollbars=yes'
       );
       
       if (!popup) {
-        alert('Popup blocked. Please enable popups for this site.');
-        window.location.href = loginUrl;
+        console.warn('❌ Popup blocked, falling back to main window');
+        alert('Popup blocked. Please enable popups and try again.');
         return;
       }
       
+      console.log('✅ Popup opened, waiting for OAuth callback...');
+      
+      // Monitor popup closing
       let checkCount = 0;
-      const checkInterval = setInterval(() => {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('zerodha_token');
-        
-        if (token) {
-          clearInterval(checkInterval);
-          if (!popup.closed) popup.close();
-          localStorage.setItem('zerodha_token', token);
-          setZerodhaAccessToken(token);
-          setZerodhaIsConnected(true);
-          console.log('✅ Zerodha connected successfully and saved!');
-          return;
-        }
-        
+      const monitorPopup = setInterval(() => {
+        checkCount++;
         if (popup.closed) {
-          clearInterval(checkInterval);
+          clearInterval(monitorPopup);
           console.log('⚠️ Zerodha popup closed');
           return;
         }
-        
-        checkCount++;
         if (checkCount > 300) {
-          clearInterval(checkInterval);
+          clearInterval(monitorPopup);
           popup.close();
+          console.log('⚠️ Zerodha popup timeout');
         }
       }, 1000);
       
