@@ -16886,12 +16886,13 @@ ${
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => setShowConnectDialog(true)}
                               className="h-7 px-2 text-xs"
                               data-testid="button-connect"
                             >
                               Connect
                             </Button>
-                            {zerodhaIsConnected ? (
+                            {zerodhaIsConnected && (
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -16901,16 +16902,6 @@ ${
                                 title="Click to revoke connection"
                               >
                                 ✓ Connected
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleZerodhaConnect}
-                                className="h-7 px-2 text-xs"
-                                data-testid="button-zerodha"
-                              >
-                                Zerodha
                               </Button>
                             )}
                             <Button
@@ -17072,6 +17063,27 @@ ${
                           </table>
                         </div>
                       </CardContent>
+
+                    {/* Connect Dialog - Shows Zerodha and other broker options */}
+                    <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Connect Your Broker</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-3">
+                          <Button
+                            onClick={handleZerodhaConnect}
+                            className="w-full h-10"
+                            data-testid="button-zerodha-dialog"
+                          >
+                            Zerodha
+                          </Button>
+                          <p className="text-xs text-center text-muted-foreground mt-4">
+                            Connect your broker account to auto-import trades
+                          </p>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     </Card>
 
                     {/* Trade Book - Right Side (Functional Calendar) */}
