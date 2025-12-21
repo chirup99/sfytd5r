@@ -19969,13 +19969,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!apiKey) {
       return res.status(500).json({ 
         error: 'Zerodha API key not configured',
-        message: 'Please set ZERODHA_API_KEY environment variable'
+        message: 'ZERODHA_API_KEY environment variable not set'
       });
     }
 
+    // CRITICAL: For this to work, you MUST register the callback URL in Zerodha dashboard:
+    // 1. Go to https://developers.kite.trade
+    // 2. Click on your app
+    // 3. Find "Redirect URL" section
+    // 4. Add this URL: https://YOUR_APP_DOMAIN/api/broker/zerodha/callback
+    // 5. Save
+    // WITHOUT this step, Zerodha will skip the login page and go straight to authorize
+    
+    const callbackUrl = `${req.protocol}://${req.get('host')}/api/broker/zerodha/callback`;
     const loginUrl = `https://kite.zerodha.com/connect/login?v=3&api_key=${apiKey}`;
-    console.log('🔗 [Zerodha] Login URL generated');
-    res.json({ loginUrl });
+    
+    console.log('🔗 [Zerodha] Login URL:', loginUrl);
+    console.log('📝 [Zerodha] Expected callback URL (register in dashboard):', callbackUrl);
+    
+    res.json({ 
+      loginUrl,
+      callbackUrl,
+      setupRequired: 'Please register callback URL in Zerodha developer dashboard'
+    });
   });
 
   // STEP 2: Handle Zerodha callback - user redirected here after login

@@ -3765,11 +3765,60 @@ ${
   const handleZerodhaConnect = async () => {
     try {
       const response = await fetch('/api/broker/zerodha/login-url');
-      const { loginUrl } = await response.json();
-      window.location.href = loginUrl;
+      const data = await response.json();
+      
+      if (data.error) {
+        alert('Setup Error:\n' + data.message + '\n\nSteps to fix:\n1. Go to https://developers.kite.trade\n2. Click your app\n3. Find "Redirect URL" and register:\nhttps://YOUR_APP_DOMAIN/api/broker/zerodha/callback\n4. Save and try again');
+        return;
+      }
+      
+      const { loginUrl } = data;
+      console.log('🔗 Opening Zerodha login in popup...');
+      
+      // Open Zerodha login in popup window
+      const popup = window.open(
+        loginUrl,
+        'zerodha_login',
+        'width=600,height=800,resizable=yes,scrollbars=yes'
+      );
+      
+      if (!popup) {
+        alert('Popup blocked. Please enable popups for this site.');
+        // Fallback: redirect main window
+        window.location.href = loginUrl;
+        return;
+      }
+      
+      // Listen for token coming back in main window URL
+      let checkCount = 0;
+      const checkInterval = setInterval(() => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('zerodha_token');
+        
+        if (token) {
+          clearInterval(checkInterval);
+          if (!popup.closed) popup.close();
+          setZerodhaAccessToken(token);
+          console.log('✅ Zerodha connected successfully!');
+          return;
+        }
+        
+        if (popup.closed) {
+          clearInterval(checkInterval);
+          console.log('⚠️ Zerodha popup closed');
+          return;
+        }
+        
+        checkCount++;
+        if (checkCount > 300) { // 5 minute timeout
+          clearInterval(checkInterval);
+          popup.close();
+        }
+      }, 1000);
+      
     } catch (error) {
-      console.error('Error connecting to Zerodha:', error);
-      alert('Failed to connect to Zerodha');
+      console.error('❌ Zerodha error:', error);
+      alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect'));
     }
   };
 
