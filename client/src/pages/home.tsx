@@ -3730,6 +3730,7 @@ ${
 
   // Import Modal State
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showConnectDialog, setShowConnectDialog] = useState(false);
 
   const [zerodhaAccessToken, setZerodhaAccessToken] = useState<string | null>(null);
   const [zerodhaIsConnected, setZerodhaIsConnected] = useState(false);
