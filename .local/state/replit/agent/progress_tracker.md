@@ -91,3 +91,40 @@
       • Token expiry auto-refresh scheduler
    ✅ Server listening on port 5000
    ✅ Import migration complete
+[x] 126. ZERODHA CONNECTION PERSISTENCE & AUTO-FETCH TRADES (December 21, 2025, 6:27 PM)
+   ✅ Added zerodhaIsConnected state to track connection status
+   ✅ Implemented localStorage persistence for tokens:
+      - Token saved to localStorage after successful OAuth
+      - Token restored from localStorage on component mount
+      - Connection status persists across page reloads
+   ✅ Updated handleZerodhaConnect function:
+      - Now saves token to localStorage when received
+      - Sets zerodhaIsConnected to true after connection
+      - Auto-fetches trades immediately after connection
+   ✅ Added handleRevokeZerodha function:
+      - Clears token from localStorage
+      - Resets all connection-related state
+      - Clears cached trade data
+   ✅ Updated Zerodha button JSX:
+      - Shows "✓ Connected" when user is authenticated
+      - Shows "Zerodha" with sign-in behavior when not connected
+      - "Connected" button changes to revoke on hover
+      - Button styling indicates current connection state
+   ✅ Workflow restarted and running successfully
+   ✅ Angel One API streaming live data
+   ✅ All services initialized and authenticated
+   🎯 Flow Fixed:
+      1. User clicks "Zerodha" button
+      2. OAuth popup opens (standard pattern)
+      3. User logs in and grants permissions
+      4. Token saved to localStorage
+      5. Trades auto-fetched immediately
+      6. Button changes to "✓ Connected" state
+      7. Connection persists on page reload
+      8. User can revoke by clicking "✓ Connected" button
+   📝 User-Facing Improvements:
+      - No more repeated "Sign in" prompt on reconnect
+      - Clear visual indication of connection status
+      - One-click revoke to disconnect
+      - Trades auto-loaded after authentication
+      - Connection remembered across browser sessions

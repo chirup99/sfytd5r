@@ -3732,6 +3732,7 @@ ${
   const [showImportModal, setShowImportModal] = useState(false);
 
   const [zerodhaAccessToken, setZerodhaAccessToken] = useState<string | null>(null);
+  const [zerodhaIsConnected, setZerodhaIsConnected] = useState(false);
   const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [zerodhaTradesLoading, setZerodhaTradesLoading] = useState(false);
   const [zerodhaTradesData, setZerodhaTradesData] = useState<any[]>([]);
@@ -3739,12 +3740,26 @@ ${
   const [importError, setImportError] = useState("");
 
   // Zerodha OAuth Handlers
+  // Check localStorage on mount to restore connection state
+  useEffect(() => {
+    const savedToken = localStorage.getItem('zerodha_token');
+    if (savedToken) {
+      setZerodhaAccessToken(savedToken);
+      setZerodhaIsConnected(true);
+      console.log('✅ Zerodha connection restored from localStorage');
+    }
+  }, []);
+
   // Handle Zerodha OAuth callback from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const zerodhaToken = params.get("zerodha_token");
     if (zerodhaToken) {
+      localStorage.setItem('zerodha_token', zerodhaToken);
       setZerodhaAccessToken(zerodhaToken);
+      setZerodhaIsConnected(true);
+      console.log('✅ Zerodha connected and token saved');
+      
       setTimeout(() => {
         setZerodhaTradesLoading(true);
         fetch("/api/broker/zerodha/trades", {
@@ -3754,6 +3769,7 @@ ${
           .then(data => {
             setZerodhaTradesData(data.trades || []);
             setZerodhaTradesDialog(true);
+            console.log('✅ Zerodha trades fetched:', data.trades?.length);
           })
           .catch(err => console.error("Error fetching Zerodha trades:", err))
           .finally(() => setZerodhaTradesLoading(false));
@@ -3775,7 +3791,6 @@ ${
       const { loginUrl } = data;
       console.log('🔗 Opening Zerodha login in popup...');
       
-      // Open Zerodha login in popup window
       const popup = window.open(
         loginUrl,
         'zerodha_login',
@@ -3784,12 +3799,10 @@ ${
       
       if (!popup) {
         alert('Popup blocked. Please enable popups for this site.');
-        // Fallback: redirect main window
         window.location.href = loginUrl;
         return;
       }
       
-      // Listen for token coming back in main window URL
       let checkCount = 0;
       const checkInterval = setInterval(() => {
         const params = new URLSearchParams(window.location.search);
@@ -3798,8 +3811,10 @@ ${
         if (token) {
           clearInterval(checkInterval);
           if (!popup.closed) popup.close();
+          localStorage.setItem('zerodha_token', token);
           setZerodhaAccessToken(token);
-          console.log('✅ Zerodha connected successfully!');
+          setZerodhaIsConnected(true);
+          console.log('✅ Zerodha connected successfully and saved!');
           return;
         }
         
@@ -3810,7 +3825,7 @@ ${
         }
         
         checkCount++;
-        if (checkCount > 300) { // 5 minute timeout
+        if (checkCount > 300) {
           clearInterval(checkInterval);
           popup.close();
         }
@@ -3820,6 +3835,14 @@ ${
       console.error('❌ Zerodha error:', error);
       alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect'));
     }
+  };
+
+  const handleRevokeZerodha = () => {
+    localStorage.removeItem('zerodha_token');
+    setZerodhaAccessToken(null);
+    setZerodhaIsConnected(false);
+    setZerodhaTradesData([]);
+    console.log('🔓 Zerodha connection revoked');
   };
 
   const handleFetchZerodhaTrades = async () => {
@@ -16811,15 +16834,28 @@ ${
                             >
                               Connect
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleZerodhaConnect}
-                              className="h-7 px-2 text-xs"
-                              data-testid="button-zerodha"
-                            >
-                              Zerodha
-                            </Button>
+                            {zerodhaIsConnected ? (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleRevokeZerodha}
+                                className="h-7 px-2 text-xs bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-400"
+                                data-testid="button-zerodha"
+                                title="Click to revoke connection"
+                              >
+                                ✓ Connected
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleZerodhaConnect}
+                                className="h-7 px-2 text-xs"
+                                data-testid="button-zerodha"
+                              >
+                                Zerodha
+                              </Button>
+                            )}
                             <Button
                               variant="ghost"
                               size="sm"
