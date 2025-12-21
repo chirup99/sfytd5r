@@ -3739,6 +3739,29 @@ ${
   const [importError, setImportError] = useState("");
 
   // Zerodha OAuth Handlers
+  // Handle Zerodha OAuth callback from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const zerodhaToken = params.get("zerodha_token");
+    if (zerodhaToken) {
+      setZerodhaAccessToken(zerodhaToken);
+      setTimeout(() => {
+        setZerodhaTradesLoading(true);
+        fetch("/api/broker/zerodha/trades", {
+          headers: { "Authorization": `Bearer ${zerodhaToken}` }
+        })
+          .then(res => res.json())
+          .then(data => {
+            setZerodhaTradesData(data.trades || []);
+            setZerodhaTradesDialog(true);
+          })
+          .catch(err => console.error("Error fetching Zerodha trades:", err))
+          .finally(() => setZerodhaTradesLoading(false));
+      }, 500);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   const handleZerodhaConnect = async () => {
     try {
       const response = await fetch('/api/broker/zerodha/login-url');
