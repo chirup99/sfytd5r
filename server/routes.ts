@@ -19950,17 +19950,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/broker/zerodha/login-url', (req, res) => {
     const zerodhaApiKey = process.env.ZERODHA_API_KEY || 'YOUR_API_KEY';
     const baseUrl = 'https://kite.zerodha.com/connect/login';
-    const loginUrl = `${baseUrl}?api_key=${zerodhaApiKey}`;
+    const loginUrl = `${baseUrl}?v=3&api_key=${zerodhaApiKey}`;
+    console.log('🔗 [Zerodha] Generated login URL:', loginUrl);
     res.json({ loginUrl });
   });
 
   // STEP 2: Handle OAuth callback from Zerodha (GET with request_token as query param)
   app.get('/api/broker/zerodha/callback', async (req, res) => {
+    console.log('🔍 [Zerodha Callback] Received with params:', req.query);
+    console.log('🔍 [Zerodha Callback] Full URL:', req.originalUrl);
     const requestToken = req.query.request_token as string;
     if (!requestToken) {
+      console.error('❌ [Zerodha] Missing request_token - callback URL may not be registered');
       return res.status(400).json({ 
         status: 'error',
-        message: 'Missing or empty field `request_token`',
+        message: 'Missing or empty field `request_token` - ensure callback URL is registered in Zerodha developer console',
         data: null,
         error_type: 'InputException'
       });
