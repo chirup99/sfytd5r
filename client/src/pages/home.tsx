@@ -183,6 +183,8 @@ import {
 } from "lucide-react";
 import { AIChatWindow } from "@/components/ai-chat-window";
 import { BrokerImportDialog } from "@/components/broker-import-dialog";
+import { ZerodhaOAuth } from "@/components/zerodha-oauth";
+import { ZerodhaOAuth } from "@/components/zerodha-oauth";
 import { TradeBlockEditor } from "@/components/TradeBlockEditor";
 import type { BrokerTrade } from "@shared/schema";
 
@@ -3729,7 +3731,9 @@ ${
   // Removed AI image generation effects
 
   // Import Modal State
+  const [showZerodhaOAuth, setShowZerodhaOAuth] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showZerodhaOAuth, setShowZerodhaOAuth] = useState(false);
 
   const [zerodhaAccessToken, setZerodhaAccessToken] = useState<string | null>(null);
   const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
@@ -3762,15 +3766,27 @@ ${
     }
   }, []);
 
-  const handleZerodhaConnect = async () => {
-    try {
-      const response = await fetch('/api/broker/zerodha/login-url');
-      const { loginUrl } = await response.json();
-      window.location.href = loginUrl;
-    } catch (error) {
-      console.error('Error connecting to Zerodha:', error);
-      alert('Failed to connect to Zerodha');
-    }
+  const handleZerodhaConnect = () => {
+    setShowZerodhaOAuth(true);
+  };
+
+  const handleZerodhaSuccess = (token: string) => {
+    console.log("✅ Zerodha authorization successful");
+    setZerodhaAccessToken(token);
+    setTimeout(() => {
+      setZerodhaTradesLoading(true);
+      fetch("/api/broker/zerodha/trades", {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          setZerodhaTradesData(data.trades || []);
+          setZerodhaTradesDialog(true);
+        })
+        .catch(err => console.error("Error fetching Zerodha trades:", err))
+        .finally(() => setZerodhaTradesLoading(false));
+    }, 500);
+  };
   };
 
   const handleFetchZerodhaTrades = async () => {
@@ -22897,4 +22913,12 @@ ${
       </div>
     </div>
   );
+      <ZerodhaOAuth
+        open={showZerodhaOAuth}
+        onOpenChange={setShowZerodhaOAuth}
+        onSuccess={handleZerodhaSuccess}
+      }
+    </QueryClientProvider>
+  </TooltipProvider>
+</SidebarProvider>
 }
