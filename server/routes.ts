@@ -19946,152 +19946,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  // STEP 1: Generate Zerodha login URL
+  // ========================================
+  // ZERODHA OAUTH 2.0 IMPLEMENTATION
+  // ========================================
+  // Proper implementation based on https://kite.trade/docs/connect/v3/
+  // 
+  // FLOW:
+  // 1. User clicks "Connect Zerodha" button
+  // 2. Frontend calls GET /api/broker/zerodha/login-url
+  // 3. Backend returns proper login URL
+  // 4. Frontend opens login URL in new window
+  // 5. User logs in at kite.zerodha.com and grants permissions
+  // 6. Zerodha redirects to callback URL with request_token
+  // 7. Backend exchanges request_token for access_token
+  // 8. Frontend receives token and can fetch trades
+  // ========================================
+
+  // STEP 1: Generate login URL
   app.get('/api/broker/zerodha/login-url', (req, res) => {
-    const zerodhaApiKey = process.env.ZERODHA_API_KEY || 'YOUR_API_KEY';
-    const baseUrl = 'https://kite.zerodha.com/connect/login';
-    const loginUrl = `${baseUrl}?v=3&api_key=${zerodhaApiKey}`;
-    console.log('🔗 [Zerodha] Generated login URL:', loginUrl);
+    const apiKey = process.env.ZERODHA_API_KEY;
+    
+    if (!apiKey) {
+      return res.status(500).json({ 
+        error: 'Zerodha API key not configured',
+        message: 'Please set ZERODHA_API_KEY environment variable'
+      });
+    }
+
+    const loginUrl = `https://kite.zerodha.com/connect/login?v=3&api_key=${apiKey}`;
+    console.log('🔗 [Zerodha] Login URL generated');
     res.json({ loginUrl });
   });
 
-  // STEP 2: Handle OAuth callback from Zerodha (GET with request_token as query param)
+  // STEP 2: Handle Zerodha callback - user redirected here after login
   app.get('/api/broker/zerodha/callback', async (req, res) => {
-    console.log('🔍 [Zerodha Callback] Received with params:', req.query);
-    console.log('🔍 [Zerodha Callback] Full URL:', req.originalUrl);
     const requestToken = req.query.request_token as string;
+    
     if (!requestToken) {
-      console.error('❌ [Zerodha] Missing request_token - callback URL may not be registered');
+      console.error('❌ [Zerodha] Missing request_token in callback');
       return res.status(400).json({ 
-        status: 'error',
-        message: 'Missing or empty field `request_token` - ensure callback URL is registered in Zerodha developer console',
-        data: null,
-        error_type: 'InputException'
+        error: 'No request token received',
+        message: 'Callback URL may not be registered in Zerodha dashboard. Go to https://developers.kite.trade → Redirect URL section and register: ' + `${req.protocol}://${req.get('host')}/api/broker/zerodha/callback`
       });
     }
+
     try {
       const crypto = require('crypto');
-      const zerodhaApiKey = process.env.ZERODHA_API_KEY || '';
-      const zerodhaSecret = process.env.ZERODHA_SECRET || '';
-      
-      if (!zerodhaSecret) {
-        console.error('❌ ZERODHA_SECRET not configured');
-        return res.status(500).json({
-          status: 'error',
-          message: 'Server misconfiguration - API secret not set',
-          data: null,
-          error_type: 'ConfigException'
-        });
+      const apiKey = process.env.ZERODHA_API_KEY;
+      const apiSecret = process.env.ZERODHA_SECRET;
+
+      if (!apiKey || !apiSecret) {
+        throw new Error('Zerodha credentials not configured');
       }
-      
-      // Generate HMAC-SHA256 signature for token exchange
-      // Format: api_key + request_token + api_secret (NO pipes - direct concatenation!)
-      const signatureString = zerodhaApiKey + requestToken + zerodhaSecret;
-      const signature = crypto
+
+      // Generate checksum: SHA256(api_key + request_token + api_secret)
+      const checksum = crypto
         .createHash('sha256')
-        .update(signatureString)
+        .update(apiKey + requestToken + apiSecret)
         .digest('hex');
-      
-      console.log('🔐 [Zerodha] Token Exchange:');
-      console.log('   API Key:', zerodhaApiKey);
-      console.log('   Request Token:', requestToken);
-      console.log('   Signature String:', signatureString.substring(0, 20) + '...');
-      console.log('   Signature:', signature);
-      
-      // Exchange request token for access token using Zerodha API
-      // Must use form data (application/x-www-form-urlencoded), not JSON!
-      const tokenUrl = 'https://api.kite.trade/session/token';
-      try {
-        const params = new URLSearchParams();
-        params.append('api_key', zerodhaApiKey);
-        params.append('request_token', requestToken);
-        params.append('checksum', signature);
-        
-        const tokenResponse = await axios.post(tokenUrl, params, {
+
+      console.log('🔐 [Zerodha] Exchanging token...');
+
+      // Exchange request_token for access_token
+      const response = await axios.post('https://api.kite.trade/session/token', 
+        new URLSearchParams({
+          api_key: apiKey,
+          request_token: requestToken,
+          checksum: checksum
+        }),
+        {
           headers: {
             'X-Kite-Version': '3',
             'Content-Type': 'application/x-www-form-urlencoded'
           }
-        });
-        
-        console.log('✅ [Zerodha] Token Exchange Success:', tokenResponse.data);
-        
-        const accessToken = tokenResponse.data.data?.access_token || tokenResponse.data.access_token;
-        const userId = tokenResponse.data.data?.user_id || tokenResponse.data.user_id;
-        
-        // Redirect back to frontend with access token in URL
-        const frontendUrl = `${req.protocol}://${req.get('host')}/?zerodha_token=${encodeURIComponent(accessToken)}&request_token=${encodeURIComponent(requestToken)}&user_id=${encodeURIComponent(userId || '')}`;
-        res.redirect(frontendUrl);
-      } catch (apiError: any) {
-        console.error('❌ [Zerodha] API Error:', apiError.response?.data || apiError.message);
-        // If API exchange fails, still allow frontend flow with request_token for testing
-        const accessToken = `${zerodhaApiKey}:${requestToken}`;
-        const frontendUrl = `${req.protocol}://${req.get('host')}/?zerodha_token=${encodeURIComponent(accessToken)}&request_token=${encodeURIComponent(requestToken)}`;
-        res.redirect(frontendUrl);
-      }
-    } catch (error) {
-      res.status(500).json({
-        status: 'error',
-        message: error instanceof Error ? error.message : 'Failed to process callback',
-        data: null,
-        error_type: 'CallbackException'
-      });
-    }
-  });
-
-  // STEP 3: Exchange request token for access token (alternative POST endpoint)
-  app.post('/api/broker/zerodha/token', async (req, res) => {
-    const { requestToken } = req.body;
-    if (!requestToken) {
-      return res.status(400).json({ error: 'Missing request token' });
-    }
-    
-    try {
-      const crypto = require('crypto');
-      const zerodhaApiKey = process.env.ZERODHA_API_KEY || '';
-      const zerodhaSecret = process.env.ZERODHA_SECRET || '';
-      
-      // Generate HMAC-SHA256 signature (direct concatenation, no pipes!)
-      const signatureString = zerodhaApiKey + requestToken + zerodhaSecret;
-      const signature = crypto
-        .createHash('sha256')
-        .update(signatureString)
-        .digest('hex');
-      
-      // Exchange with Zerodha API using form data
-      const tokenUrl = 'https://api.kite.trade/session/token';
-      const params = new URLSearchParams();
-      params.append('api_key', zerodhaApiKey);
-      params.append('request_token', requestToken);
-      params.append('checksum', signature);
-      
-      const tokenResponse = await axios.post(tokenUrl, params, {
-        headers: {
-          'X-Kite-Version': '3',
-          'Content-Type': 'application/x-www-form-urlencoded'
         }
-      });
-      
-      const accessToken = tokenResponse.data.data?.access_token || tokenResponse.data.access_token;
-      res.json({ accessToken, requestToken, success: true });
+      );
+
+      const accessToken = response.data.data?.access_token;
+      const userId = response.data.data?.user_id;
+
+      if (!accessToken) {
+        throw new Error('No access token in response');
+      }
+
+      console.log('✅ [Zerodha] Token exchange successful for user:', userId);
+
+      // Redirect back to frontend with token
+      const redirectUrl = `${req.protocol}://${req.get('host')}/?zerodha_token=${encodeURIComponent(accessToken)}&zerodha_user=${encodeURIComponent(userId || '')}`;
+      res.redirect(redirectUrl);
+
     } catch (error) {
-      console.error('[Zerodha Token Exchange Error]:', error instanceof Error ? error.message : error);
-      // Fallback for testing
-      const accessToken = `${process.env.ZERODHA_API_KEY}:${requestToken}`;
-      res.json({ accessToken, requestToken, success: true, note: 'Using fallback token' });
+      console.error('❌ [Zerodha] Error:', error instanceof Error ? error.message : error);
+      const redirectUrl = `${req.protocol}://${req.get('host')}/?zerodha_error=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`;
+      res.redirect(redirectUrl);
     }
   });
 
-  // STEP 4: Fetch trades from Zerodha
+  // STEP 3: Fetch trades from Zerodha
   app.get('/api/broker/zerodha/trades', async (req, res) => {
     const accessToken = req.headers.authorization?.split(' ')[1];
-    if (!accessToken) {
-      return res.status(401).json({ error: 'Unauthorized', trades: [] });
-    }
     
+    if (!accessToken) {
+      return res.status(401).json({ 
+        error: 'Unauthorized',
+        trades: [] 
+      });
+    }
+
     try {
-      // In production, call Zerodha API with access token to fetch actual trades
-      // For now return sample trades - replace with actual API call when needed
+      // Future: Call Zerodha API with access token
+      // For now, return demo trades
       const trades = [
         { 
           time: '3:16:47 PM',
@@ -20114,7 +20078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           duration: '2m 50s'
         }
       ];
-      
+
       res.json({ 
         trades,
         success: true
