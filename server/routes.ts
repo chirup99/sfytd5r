@@ -19981,25 +19981,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Generate HMAC-SHA256 signature for token exchange
-      // Format: api_key|request_token
-      const signatureString = zerodhaApiKey + '|' + requestToken;
+      // Format: api_key + request_token + api_secret (NO pipes - direct concatenation!)
+      const signatureString = zerodhaApiKey + requestToken + zerodhaSecret;
       const signature = crypto
-        .createHmac('sha256', zerodhaSecret)
+        .createHash('sha256')
         .update(signatureString)
         .digest('hex');
       
       console.log('🔐 [Zerodha] Token Exchange:');
       console.log('   API Key:', zerodhaApiKey);
       console.log('   Request Token:', requestToken);
+      console.log('   Signature String:', signatureString.substring(0, 20) + '...');
       console.log('   Signature:', signature);
       
       // Exchange request token for access token using Zerodha API
+      // Must use form data (application/x-www-form-urlencoded), not JSON!
       const tokenUrl = 'https://api.kite.trade/session/token';
       try {
-        const tokenResponse = await axios.post(tokenUrl, {
-          api_key: zerodhaApiKey,
-          request_token: requestToken,
-          checksum: signature
+        const params = new URLSearchParams();
+        params.append('api_key', zerodhaApiKey);
+        params.append('request_token', requestToken);
+        params.append('checksum', signature);
+        
+        const tokenResponse = await axios.post(tokenUrl, params, {
+          headers: {
+            'X-Kite-Version': '3',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
         });
         
         console.log('✅ [Zerodha] Token Exchange Success:', tokenResponse.data);
@@ -20039,19 +20047,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const zerodhaApiKey = process.env.ZERODHA_API_KEY || '';
       const zerodhaSecret = process.env.ZERODHA_SECRET || '';
       
-      // Generate HMAC-SHA256 signature
-      const signatureString = zerodhaApiKey + '|' + requestToken;
+      // Generate HMAC-SHA256 signature (direct concatenation, no pipes!)
+      const signatureString = zerodhaApiKey + requestToken + zerodhaSecret;
       const signature = crypto
-        .createHmac('sha256', zerodhaSecret)
+        .createHash('sha256')
         .update(signatureString)
         .digest('hex');
       
-      // Exchange with Zerodha API
+      // Exchange with Zerodha API using form data
       const tokenUrl = 'https://api.kite.trade/session/token';
-      const tokenResponse = await axios.post(tokenUrl, {
-        api_key: zerodhaApiKey,
-        request_token: requestToken,
-        checksum: signature
+      const params = new URLSearchParams();
+      params.append('api_key', zerodhaApiKey);
+      params.append('request_token', requestToken);
+      params.append('checksum', signature);
+      
+      const tokenResponse = await axios.post(tokenUrl, params, {
+        headers: {
+          'X-Kite-Version': '3',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
       });
       
       const accessToken = tokenResponse.data.data?.access_token || tokenResponse.data.access_token;
