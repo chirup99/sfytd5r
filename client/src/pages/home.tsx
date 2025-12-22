@@ -3739,7 +3739,8 @@ ${
   const [zerodhaTradesData, setZerodhaTradesData] = useState<any[]>([]);
   const [importData, setImportData] = useState("");
   const [importError, setImportError] = useState("");
-
+  const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
+  const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
   // Zerodha OAuth Handlers
   // Check localStorage on mount to restore connection state
   useEffect(() => {
@@ -17054,7 +17055,7 @@ ${
                         </div>
                       </CardContent>
 
-                    {/* Connect Dialog - Shows Zerodha and other broker options */}
+                    {/* Connect Dialog - Shows Zerodha and Upstox broker options */}
                     <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
                       <DialogContent className="max-w-md">
                         <DialogHeader>
@@ -17104,13 +17105,20 @@ ${
                               Zerodha
                             </Button>
                           )}
+                          <Button
+                            variant="outline"
+                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
+                            data-testid="button-upstox-dialog"
+                          >
+                            <span className="mr-2 text-lg font-bold" style={{color: "#6C5CE7"}}>₹</span>
+                            Upstox
+                          </Button>
                           <p className="text-xs text-center text-muted-foreground mt-4">
                             Connect your broker account to auto-import trades
                           </p>
                         </div>
                       </DialogContent>
                     </Dialog>
-                    </Card>
 
                     {/* Trade Book - Right Side (Functional Calendar) */}
                     <div className="relative">
