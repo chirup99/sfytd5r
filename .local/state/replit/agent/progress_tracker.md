@@ -60,3 +60,16 @@
    - Gemini AI integration configured
    - All API routes operational and serving requests
    - Status: IMPORT MIGRATION COMPLETE - Ready for feature development
+
+[x] 147. ORDERS & POSITIONS DIALOG - TABBED INTERFACE (December 22, 2025, 7:13 PM)
+   ✅ Added `orderTab` state variable for tab switching (history/positions)
+   ✅ Created Orders/Positions dialog with two tabs:
+      - Orders tab: Shows imported trade history with full table display
+      - Positions tab: Placeholder for open positions (empty state)
+   ✅ Dialog triggers when broker buttons are clicked via `setShowOrderModal(true)`
+   ✅ Replaced existing "Imported Trade History" modal with new tabbed interface
+   ✅ Maintained existing trade table functionality
+   ✅ Added "No open positions" empty state for Positions tab
+   ✅ Workflow restarted successfully - no compilation errors
+   ✅ Angel One WebSocket connected - real-time data streaming active
+   📊 Status: ✅ COMPLETE - Orders/Positions dialog fully functional

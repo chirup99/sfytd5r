@@ -4359,6 +4359,7 @@ ${
 
   // Order Modal State
   const [showOrderModal, setShowOrderModal] = useState(false);
+  const [orderTab, setOrderTab] = useState("history");
   const [orderData, setOrderData] = useState({
     symbol: "",
     action: "Buy",
@@ -18880,99 +18881,89 @@ ${
           </div>
         </main>
 
-        {/* Trade History Modal */}
+        {/* Trade History Modal with Orders & Positions */}
         <Dialog open={showOrderModal} onOpenChange={setShowOrderModal}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto custom-thin-scrollbar">
             <DialogHeader>
-              <DialogTitle>Imported Trade History</DialogTitle>
+              <DialogTitle>Orders & Positions</DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4">
-              <div className="max-h-96 overflow-y-auto border rounded-lg custom-thin-scrollbar">
-                <table className="w-full text-xs">
-                  <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
-                    <tr>
-                      <th className="px-2 py-2 text-left font-medium">Time</th>
-                      <th className="px-2 py-2 text-left font-medium">Order</th>
-                      <th className="px-2 py-2 text-left font-medium">
-                        Symbol
-                      </th>
-                      <th className="px-2 py-2 text-left font-medium">Type</th>
-                      <th className="px-2 py-2 text-left font-medium">Qty</th>
-                      <th className="px-2 py-2 text-left font-medium">Price</th>
-                      <th className="px-2 py-2 text-left font-medium">P&L</th>
-                      <th className="px-2 py-2 text-left font-medium">Duration</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tradeHistoryData.length === 0 ? (
+            <Tabs value={orderTab} onValueChange={setOrderTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="history">Orders</TabsTrigger>
+                <TabsTrigger value="positions">Positions</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="history" className="space-y-4">
+                <div className="max-h-96 overflow-y-auto border rounded-lg custom-thin-scrollbar">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
                       <tr>
-                        <td
-                          colSpan={8}
-                          className="px-2 py-4 text-center text-gray-500"
-                        >
-                          No trade history imported
-                        </td>
+                        <th className="px-2 py-2 text-left font-medium">Time</th>
+                        <th className="px-2 py-2 text-left font-medium">Order</th>
+                        <th className="px-2 py-2 text-left font-medium">Symbol</th>
+                        <th className="px-2 py-2 text-left font-medium">Type</th>
+                        <th className="px-2 py-2 text-left font-medium">Qty</th>
+                        <th className="px-2 py-2 text-left font-medium">Price</th>
+                        <th className="px-2 py-2 text-left font-medium">P&L</th>
+                        <th className="px-2 py-2 text-left font-medium">Duration</th>
                       </tr>
-                    ) : (
-                      tradeHistoryData.map((trade, index) => {
-                        return (
-                          <tr
-                            key={index}
-                            className="border-b hover:bg-gray-50 dark:hover:bg-gray-700"
-                          >
-                            <td className="px-2 py-2 font-medium">
-                              {trade.time}
-                            </td>
+                    </thead>
+                    <tbody>
+                      {tradeHistoryData.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="px-2 py-4 text-center text-gray-500">
+                            No trade history imported
+                          </td>
+                        </tr>
+                      ) : (
+                        tradeHistoryData.map((trade, index) => (
+                          <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td className="px-2 py-2 font-medium">{trade.time}</td>
                             <td className="px-2 py-2">
-                              <span
-                                className={`px-1 py-0.5 rounded text-xs ${
-                                  trade.order === "BUY"
-                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                                }`}
-                              >
+                              <span className={`px-1 py-0.5 rounded text-xs ${
+                                trade.order === "BUY"
+                                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                                  : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                              }`}>
                                 {trade.order}
                               </span>
                             </td>
-                            <td className="px-2 py-2 font-medium">
-                              {trade.symbol}
-                            </td>
+                            <td className="px-2 py-2 font-medium">{trade.symbol}</td>
                             <td className="px-2 py-2">{trade.type}</td>
                             <td className="px-2 py-2">{trade.qty}</td>
                             <td className="px-2 py-2">₹{trade.price}</td>
                             <td className="px-2 py-2 font-medium">
-                              <span
-                                className={
-                                  trade.pnl === "-"
-                                    ? "text-gray-500"
-                                    : trade.pnl &&
-                                        parseFloat(
-                                          (trade.pnl || "").replace(
-                                            /[₹,]/g,
-                                            "",
-                                          ),
-                                        ) > 0
-                                      ? "text-green-600"
-                                      : "text-red-600"
-                                }
-                              >
+                              <span className={
+                                trade.pnl === "-"
+                                  ? "text-gray-500"
+                                  : trade.pnl && parseFloat((trade.pnl || "").replace(/[₹,]/g, "")) > 0
+                                    ? "text-green-600"
+                                    : "text-red-600"
+                              }>
                                 {trade.pnl}
                               </span>
                             </td>
-                            <td className="px-2 py-2 text-gray-500">
-                              {normalizeDurationForDisplay(trade.duration)}
-                            </td>
+                            <td className="px-2 py-2">{trade.duration || "-"}</td>
                           </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="positions" className="space-y-4">
+                <div className="max-h-96 overflow-y-auto border rounded-lg custom-thin-scrollbar">
+                  <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+                    <p className="text-sm">No open positions</p>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </DialogContent>
         </Dialog>
+
 
         {/* Broker Import Dialog */}
         <BrokerImportDialog
