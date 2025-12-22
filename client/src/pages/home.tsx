@@ -1,6 +1,5 @@
 import React, {
   useState,
-import angelOneLogo from '@assets/image_1766417427306.png';
   useEffect,
   useMemo,
   useCallback,
@@ -17120,11 +17119,8 @@ ${
                             data-testid="button-angelone-dialog"
                             disabled
                           >
-                            <img src={angelOneLogo} alt="Angel One" className="h-4 mr-2" />
                             Angel One
                           </Button>
-                            variant="outline"
-                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                           <Button
                             variant="outline"
                             className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
@@ -17133,6 +17129,7 @@ ${
                           >
                             Dhan
                           </Button>
+                          <p className="text-xs text-center text-muted-foreground mt-4">
                             Connect your broker account to auto-import trades
                           </p>
                         </div>
