@@ -16894,18 +16894,6 @@ ${
                             >
                               Connect
                             </Button>
-                            {zerodhaIsConnected && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleRevokeZerodha}
-                                className="h-7 px-2 text-xs bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-400"
-                                data-testid="button-zerodha"
-                                title="Click to revoke connection"
-                              >
-                                ✓ Connected
-                              </Button>
-                            )}
                             <Button
                               variant="ghost"
                               size="sm"
