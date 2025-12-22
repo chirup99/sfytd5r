@@ -12,9 +12,13 @@ if (!fs.existsSync(distFolder)) {
 }
 
 try {
-  console.log('Creating deployment zip file...');
-  execSync(`zip -r ${zipFileName} ${distFolder}`, { stdio: 'inherit' });
+  console.log('Creating deployment zip file for AWS Elastic Beanstalk...');
+  
+  // Change to dist folder and zip from there (so files are at root, not in dist/ subfolder)
+  execSync(`cd ${distFolder} && zip -r ../${zipFileName} .`, { stdio: 'inherit' });
+  
   console.log(`✓ Created ${zipFileName} successfully!`);
+  console.log(`Ready to deploy to AWS Elastic Beanstalk!`);
 } catch (error) {
   console.error('Error creating zip file. Make sure zip command is available.');
   process.exit(1);
