@@ -17117,16 +17117,16 @@ ${
                             variant="outline"
                             className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-angelone-dialog"
-                            disabled
                           >
+                            <img src="https://www.angelone.in/favicon.ico" alt="Angel One" className="h-4 mr-2" />
                             Angel One
                           </Button>
                           <Button
                             variant="outline"
                             className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-dhan-dialog"
-                            disabled
                           >
+                            <img src="https://www.dhan.co/favicon.ico" alt="Dhan" className="h-4 mr-2" />
                             Dhan
                           </Button>
                           <p className="text-xs text-center text-muted-foreground mt-4">

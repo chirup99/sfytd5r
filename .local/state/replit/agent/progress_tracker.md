@@ -47,3 +47,10 @@
    ✅ Angel One WebSocket connected and streaming live data
    ✅ All routes registered and server operational
    📊 Status: ✅ COMPLETE - Import verified and working
+[x] 141. ANGEL ONE & DHAN BUTTON STYLING - MATCHES UPSTOX (December 22, 2025, 5:43 PM)
+   ✅ Updated Angel One button: added Angel One logo from angelone.in/favicon.ico
+   ✅ Updated Dhan button: added Dhan logo from dhan.co/favicon.ico
+   ✅ Removed disabled attribute from both buttons
+   ✅ Styled consistently with Upstox button (h-4 mr-2 logo sizing)
+   ✅ Both buttons now functional and visually match Upstox
+   📊 Status: ✅ COMPLETE - Broker button styling unified
