@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const zipFileName = 'dist.zip';
+// Allow custom zip filename from command line, default to 'dist.zip'
+const zipFileName = process.argv[2] || 'dist.zip';
 const distFolder = './dist';
 
 if (!fs.existsSync(distFolder)) {
