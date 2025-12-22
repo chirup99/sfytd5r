@@ -3730,6 +3730,7 @@ ${
 
   // Import Modal State
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showConnectDialog, setShowConnectDialog] = useState(false);
 
   const [zerodhaAccessToken, setZerodhaAccessToken] = useState<string | null>(null);
   const [zerodhaIsConnected, setZerodhaIsConnected] = useState(false);
@@ -3738,7 +3739,7 @@ ${
   const [zerodhaTradesData, setZerodhaTradesData] = useState<any[]>([]);
   const [importData, setImportData] = useState("");
   const [importError, setImportError] = useState("");
-
+  const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
   // Zerodha OAuth Handlers
   // Check localStorage on mount to restore connection state
   useEffect(() => {
@@ -3764,13 +3765,13 @@ ${
       
       if (zerodhaToken) {
         console.log('✅ [ZERODHA] Token received in URL:', zerodhaToken.substring(0, 20) + '...');
-        localStorage.setItem('zerodha_token', zerodhaToken);
+        localStorage.setItem("zerodha_token", zerodhaToken); document.cookie = `zerodha_token=${zerodhaToken}; path=/; SameSite=Lax; Secure`; setZerodhaAccessToken(zerodhaToken); setZerodhaIsConnected(true);
         setZerodhaAccessToken(zerodhaToken);
         setZerodhaIsConnected(true);
         
         // Notify parent window if this is a popup
         if (window.opener) {
-          window.opener.postMessage({ type: 'ZERODHA_TOKEN', token: zerodhaToken }, '*');
+          console.log("📡 Sending token to opener:", window.opener.location.origin); window.opener.postMessage({ type: "ZERODHA_TOKEN", token: zerodhaToken }, "*");
           console.log('📡 Sent token to parent window');
         }
         
@@ -3805,15 +3806,16 @@ ${
   // Listen for messages from popup windows
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      console.log('📡 [MESSAGE] Received message:', event.data.type);
+      console.log("📡 [MESSAGE] Received message:", event.data.type, event.data);
       
       if (event.data.type === 'ZERODHA_TOKEN' && event.data.token) {
         const token = event.data.token;
         console.log('✅ [ZERODHA] Token received from popup:', token.substring(0, 20) + '...');
         
-        localStorage.setItem('zerodha_token', token);
+        localStorage.setItem("zerodha_token", token); document.cookie = `zerodha_token=${token}; path=/; SameSite=Lax; Secure`; setZerodhaAccessToken(token); setZerodhaIsConnected(true);
         setZerodhaAccessToken(token);
         setZerodhaIsConnected(true);
+        setShowConnectDialog(false);
         console.log('✅ [ZERODHA] Connection established and saved to localStorage');
         
         // Fetch trades
@@ -3895,7 +3897,7 @@ ${
   };
 
   const handleRevokeZerodha = () => {
-    localStorage.removeItem('zerodha_token');
+    localStorage.removeItem("zerodha_token"); document.cookie = "zerodha_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     setZerodhaAccessToken(null);
     setZerodhaIsConnected(false);
     setZerodhaTradesData([]);
@@ -16886,33 +16888,26 @@ ${
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => setShowConnectDialog(true)}
                               className="h-7 px-2 text-xs"
                               data-testid="button-connect"
                             >
                               Connect
                             </Button>
-                            {zerodhaIsConnected ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleRevokeZerodha}
-                                className="h-7 px-2 text-xs bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-400"
-                                data-testid="button-zerodha"
-                                title="Click to revoke connection"
-                              >
-                                ✓ Connected
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleZerodhaConnect}
-                                className="h-7 px-2 text-xs"
-                                data-testid="button-zerodha"
-                              >
-                                Zerodha
-                              </Button>
-                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-xs"
+                              data-testid="button-empty-next-to-connect"
+                            >
+                              {zerodhaIsConnected && (
+                                <img 
+                                  src="https://zerodha.com/static/images/products/kite-logo.svg" 
+                                  alt="Zerodha" 
+                                  className="h-4 w-4"
+                                />
+                              )}
+                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -16961,7 +16956,7 @@ ${
                                 <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[60px]">Price</th>
                                 <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[60px]">P&L</th>
                                 <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[45px]">%</th>
-                                <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[70px]">Duration</th>
+                                <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[50px]">Duration</th>
                               </tr>
                             </thead>
                             <tbody className="bg-white dark:bg-slate-900">
@@ -17072,7 +17067,88 @@ ${
                           </table>
                         </div>
                       </CardContent>
+
                     </Card>
+                    {/* Connect Dialog - Shows Zerodha and Upstox broker options */}
+                    <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Connect Your Broker</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-3">
+                          {zerodhaIsConnected ? (
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                className="flex-1 h-10 bg-white text-black hover:bg-slate-50 border-slate-200 cursor-default"
+                                data-testid="button-zerodha-connected-display"
+                              >
+                                <img 
+                                  src="https://zerodha.com/static/images/products/kite-logo.svg" 
+                                  alt="Zerodha" 
+                                  className="w-4 h-4 mr-2"
+                                />
+                                Zerodha
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-10 w-10 border border-slate-200 hover:border-red-100"
+                                onClick={() => {
+                                  localStorage.removeItem("zerodha_token"); document.cookie = "zerodha_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+                                  setZerodhaAccessToken(null);
+                                  setZerodhaIsConnected(false);
+                                }}
+                                title="Disconnect Zerodha"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              onClick={handleZerodhaConnect}
+                              variant="outline"
+                              className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
+                              data-testid="button-zerodha-dialog"
+                            >
+                              <img 
+                                src="https://zerodha.com/static/images/products/kite-logo.svg" 
+                                alt="Zerodha" 
+                                className="w-4 h-4 mr-2"
+                              />
+                              Zerodha
+                            </Button>
+                          )}
+                          <Button
+                            variant="outline"
+                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
+                            data-testid="button-upstox-dialog"
+                          >
+                            <img src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" alt="Upstox" className="h-4 mr-2" />
+                            Upstox
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
+                            data-testid="button-angelone-dialog"
+                          >
+                            <img src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw?v=1701" alt="Angel One" className="h-4 mr-2" />
+                            Angel One
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
+                            data-testid="button-dhan-dialog"
+                          >
+                            <img src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw?v=1701" alt="Dhan" className="h-4 mr-2" />
+                            Dhan
+                          </Button>
+                          <p className="text-xs text-center text-muted-foreground mt-4">
+                            Connect your broker account to auto-import trades
+                          </p>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
 
                     {/* Trade Book - Right Side (Functional Calendar) */}
                     <div className="relative">

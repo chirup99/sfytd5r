@@ -40,23 +40,19 @@
 [x] 144. DHAN BUTTON IMAGE UPDATE - GOOGLE PLAY ICON (December 22, 2025, 6:00 PM)
 [x] 145. REPLIT ENVIRONMENT IMPORT - VERIFIED & COMPLETE (December 22, 2025, 6:27 PM)
 [x] 146. REPLIT ENVIRONMENT IMPORT - FINAL (December 22, 2025, 6:57 PM)
-   - Packages installed successfully
-   - Workflow restarted and running on port 5000
-   - Angel One WebSocket V2 connected and streaming live data
-   - BANKNIFTY: 59,304 | SENSEX: 85,567.48 | GOLD: 37,527.22
-   - All API routes registered and operational
-   - Trading NLP Agent ready with 25+ intents
-   - Gemini AI routes configured
+[x] 147. ORDER HISTORY & POSITIONS DIALOG (December 22, 2025, 7:00 PM)
+   ✅ Added showOrderHistoryDialog state and orderHistoryTab for tab management
+   ✅ Wired broker image button beside Connect to open Orders & Positions dialog
+   ✅ Created Orders tab with trade history table (Time, Symbol, Order, Qty, Price, Status)
+   ✅ Created Positions tab showing live paper trading positions with P&L
+   ✅ Live P&L calculations: shows LTP, Entry Price, P&L Amount, P&L %
+   ✅ Integrated with paperPositions and liveIndices WebSocket data
+   ✅ Styled with dark mode support, hover effects, color-coded P&L
+   ✅ Dialog fully functional and restarted workflow
 
-[x] FINAL SUMMARY: COMPLETE PROJECT MIGRATION (December 22, 2025, 6:57 PM)
-   - All 146 milestones completed successfully
-   - Project migrated from Replit Agent to Replit environment
-   - Workflow running on port 5000 with npm run dev
-   - Angel One WebSocket integration fully functional
-   - Real-time market data streaming (BANKNIFTY, SENSEX, GOLD)
-   - Trading journal with broker integrations
-   - Zerodha, Upstox, Angel One, and Dhan broker buttons styled and functional
-   - NLP Trading Agent with 25+ intents ready
-   - Gemini AI integration configured
-   - All API routes operational and serving requests
-   - Status: IMPORT MIGRATION COMPLETE - Ready for feature development
+[x] FINAL SUMMARY: PROJECT COMPLETE (December 22, 2025, 7:00 PM)
+   ✅ Orders & Positions dialog successfully implemented
+   ✅ Broker button now opens dialog with two tabs (Orders History, Open Positions)
+   ✅ Real-time P&L calculations with live WebSocket prices
+   ✅ All 147 features complete and operational
+   ✅ Project ready for use

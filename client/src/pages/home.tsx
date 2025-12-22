@@ -4379,6 +4379,8 @@ ${
   // ============================================
   const [showPaperTradingModal, setShowPaperTradingModal] = useState(false);
   const [showTradingChallengeModal, setShowTradingChallengeModal] = useState(false); // Trading Challenge Coming Soon modal
+  const [showOrderHistoryDialog, setShowOrderHistoryDialog] = useState(false); // Orders & Positions dialog
+  const [orderHistoryTab, setOrderHistoryTab] = useState<"orders" | "positions">("orders");
   const [hidePositionDetails, setHidePositionDetails] = useState(false); // Eye icon toggle
   const [swipedPositionId, setSwipedPositionId] = useState<string | null>(null);
   const swipeStartXRef = useRef<number>(0);
@@ -17147,6 +17149,110 @@ ${
                             Connect your broker account to auto-import trades
                           </p>
                         </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Orders & Positions Dialog */}
+                    <Dialog open={showOrderHistoryDialog} onOpenChange={setShowOrderHistoryDialog}>
+                      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Orders & Positions</DialogTitle>
+                        </DialogHeader>
+                        
+                        <Tabs value={orderHistoryTab} onValueChange={(v) => setOrderHistoryTab(v as "orders" | "positions")} className="w-full">
+                          <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="orders" data-testid="tab-orders">Orders History</TabsTrigger>
+                            <TabsTrigger value="positions" data-testid="tab-positions">Open Positions</TabsTrigger>
+                          </TabsList>
+                          
+                          <TabsContent value="orders" className="mt-4">
+                            <div className="max-h-96 overflow-y-auto border rounded-lg custom-thin-scrollbar">
+                              <table className="w-full text-xs">
+                                <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
+                                  <tr>
+                                    <th className="px-2 py-2 text-left font-medium">Time</th>
+                                    <th className="px-2 py-2 text-left font-medium">Symbol</th>
+                                    <th className="px-2 py-2 text-left font-medium">Order</th>
+                                    <th className="px-2 py-2 text-left font-medium">Qty</th>
+                                    <th className="px-2 py-2 text-left font-medium">Price</th>
+                                    <th className="px-2 py-2 text-left font-medium">Status</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {tradeHistoryData.length === 0 ? (
+                                    <tr>
+                                      <td colSpan={6} className="px-2 py-4 text-center text-gray-500">
+                                        No orders found
+                                      </td>
+                                    </tr>
+                                  ) : (
+                                    tradeHistoryData.map((trade, index) => (
+                                      <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        <td className="px-2 py-2">{trade.time}</td>
+                                        <td className="px-2 py-2 font-medium">{trade.symbol}</td>
+                                        <td className="px-2 py-2">
+                                          <span className={`px-1 py-0.5 rounded text-xs ${trade.order === "BUY" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"}`}>
+                                            {trade.order}
+                                          </span>
+                                        </td>
+                                        <td className="px-2 py-2">{trade.qty}</td>
+                                        <td className="px-2 py-2">₹{trade.price}</td>
+                                        <td className="px-2 py-2 text-green-600">Executed</td>
+                                      </tr>
+                                    ))
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </TabsContent>
+                          
+                          <TabsContent value="positions" className="mt-4">
+                            <div className="max-h-96 overflow-y-auto border rounded-lg custom-thin-scrollbar">
+                              <table className="w-full text-xs">
+                                <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
+                                  <tr>
+                                    <th className="px-2 py-2 text-left font-medium">Symbol</th>
+                                    <th className="px-2 py-2 text-left font-medium">Qty</th>
+                                    <th className="px-2 py-2 text-left font-medium">Avg Price</th>
+                                    <th className="px-2 py-2 text-left font-medium">LTP</th>
+                                    <th className="px-2 py-2 text-left font-medium">P&L</th>
+                                    <th className="px-2 py-2 text-left font-medium">P&L %</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {paperPositions.length === 0 ? (
+                                    <tr>
+                                      <td colSpan={6} className="px-2 py-4 text-center text-gray-500">
+                                        No open positions
+                                      </td>
+                                    </tr>
+                                  ) : (
+                                    paperPositions.filter(p => p.isOpen).map((position, index) => {
+                                      const ltp = liveIndices.get(position.symbol)?.ltp || position.entryPrice;
+                                      const unrealizedPnl = (ltp - position.entryPrice) * position.quantity;
+                                      const pnlPercent = ((ltp - position.entryPrice) / position.entryPrice) * 100;
+                                      
+                                      return (
+                                        <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
+                                          <td className="px-2 py-2 font-medium">{position.symbol}</td>
+                                          <td className="px-2 py-2">{position.quantity}</td>
+                                          <td className="px-2 py-2">₹{position.entryPrice.toFixed(2)}</td>
+                                          <td className="px-2 py-2 font-medium">₹{ltp.toFixed(2)}</td>
+                                          <td className={`px-2 py-2 font-bold ${unrealizedPnl >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                            ₹{unrealizedPnl.toFixed(2)}
+                                          </td>
+                                          <td className={`px-2 py-2 font-bold ${pnlPercent >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                            {pnlPercent >= 0 ? "+" : ""}{pnlPercent.toFixed(2)}%
+                                          </td>
+                                        </tr>
+                                      );
+                                    })
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </TabsContent>
+                        </Tabs>
                       </DialogContent>
                     </Dialog>
 
