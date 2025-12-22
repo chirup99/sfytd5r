@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import angelOneLogoPath from "@assets/image_1766425477573.png";
 import { AuthButtonAngelOne, AngelOneStatus, AngelOneApiStatistics, AngelOneSystemStatus, AngelOneLiveMarketPrices } from "@/components/auth-button-angelone";
 // REMOVED: All Fyers-related imports
 // import { AuthButton } from "@/components/auth-button";
@@ -17115,14 +17114,15 @@ ${
                             Upstox
                           </Button>
                           <Button
-                          <Button
                             variant="outline"
                             className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-angelone-dialog"
+                            disabled
                           >
-                            <img src={angelOneLogoPath} alt="Angel One" className="h-4 mr-2" />
                             Angel One
                           </Button>
+                          <Button
+                            variant="outline"
                             className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-dhan-dialog"
                             disabled
