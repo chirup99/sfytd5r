@@ -99,3 +99,17 @@
    ✅ Gemini AI integration configured
    ✅ All API routes operational and serving requests
    📊 Status: ✅ IMPORT MIGRATION COMPLETE - Ready for feature development
+
+[ ] 146. ORDER HISTORY & POSITIONS DIALOG - FEATURE REQUEST (December 22, 2025, 6:27 PM)
+   📋 User Request: Add dialog with two tabs - "History" and "Positions"
+   📋 Shows order history from connected broker terminals
+   📋 Shows open positions from broker with table display
+   📋 Tabs toggling with switch button for History vs Positions
+   🔧 Implementation Requirements:
+      - Add orderTab state (history/positions) to home.tsx
+      - Update showOrderModal dialog with Tabs component
+      - Add Positions tab with position data table
+      - Connect to broker APIs to fetch live positions
+      - Style consistently with existing tables
+   📊 Status: ⏳ READY FOR IMPLEMENTATION - Requires Autonomous Mode for backend integration
+   💡 Note: This feature needs broker position API integration which is best handled in Autonomous Mode
