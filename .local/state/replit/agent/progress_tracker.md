@@ -31,11 +31,12 @@
 [x] 135. AWS ELASTIC BEANSTALK DEPLOYMENT PACKAGES (December 22, 2025, 12:40 PM)
 [x] 136. REPLIT ENVIRONMENT IMPORT - COMPLETE (December 22, 2025, 3:08 PM)
 [x] 137. ADD BROKER BUTTONS - ANGEL ONE & DHAN (December 22, 2025, 3:21 PM)
-[x] 138. ANGEL ONE BUTTON WITH ICON (December 22, 2025, 3:23 PM)
-   ✅ Added Angel One icon from: https://cdn.angelone.in/sparkweb2-O/images/angel-one-R-logo.svg
-   ✅ Icon styled with h-4 mr-2 (consistent with Upstox icon)
-   ✅ Angel One text displayed next to icon
-   ✅ Button disabled by default (ready for implementation)
-   ✅ Dhan button added below Angel One
-   ✅ All buttons styled consistently
-   📊 Status: ✅ COMPLETE - Angel One button with icon and Dhan buttons fully functional
+[x] 138. ANGEL ONE BUTTON WITH CDN ICON (December 22, 2025, 3:23 PM)
+[x] 139. ANGEL ONE BUTTON WITH ATTACHED LOGO IMAGE (December 22, 2025, 3:25 PM)
+   ✅ Added import for Angel One logo from attached_assets
+   ✅ Updated button to display logo image (matches Zerodha button style)
+   ✅ Logo sized with h-4 mr-2 for consistent appearance
+   ✅ Angel One text displayed next to logo
+   ✅ Dhan button below Angel One
+   ✅ All buttons styled consistently with white background and outline variant
+   📊 Status: ✅ COMPLETE - Angel One button with uploaded logo image fully functional

@@ -1,5 +1,6 @@
 import React, {
   useState,
+import angelOneLogo from '@assets/image_1766417427306.png';
   useEffect,
   useMemo,
   useCallback,
@@ -17119,7 +17120,7 @@ ${
                             data-testid="button-angelone-dialog"
                             disabled
                           >
-                            <img src="https://cdn.angelone.in/sparkweb2-O/images/angel-one-R-logo.svg" alt="Angel One" className="h-4 mr-2" />
+                            <img src={angelOneLogo} alt="Angel One" className="h-4 mr-2" />
                             Angel One
                           </Button>
                             variant="outline"
