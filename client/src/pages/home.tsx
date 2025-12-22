@@ -17118,7 +17118,7 @@ ${
                             className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-angelone-dialog"
                           >
-                            <img src="https://www.angelone.in/favicon.ico" alt="Angel One" className="h-4 mr-2" />
+                            <img src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw" alt="Angel One" className="h-4 mr-2" />
                             Angel One
                           </Button>
                           <Button

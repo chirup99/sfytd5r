@@ -54,3 +54,9 @@
    ✅ Styled consistently with Upstox button (h-4 mr-2 logo sizing)
    ✅ Both buttons now functional and visually match Upstox
    📊 Status: ✅ COMPLETE - Broker button styling unified
+[x] 142. ANGEL ONE IMAGE UPDATE - GOOGLE PLAY ICON (December 22, 2025, 5:49 PM)
+   ✅ Updated Angel One button image from favicon to Google Play icon
+   ✅ New image URL: https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw
+   ✅ Maintained consistent sizing (h-4 mr-2) and button styling
+   ✅ Workflow restarted and running successfully
+   📊 Status: ✅ COMPLETE - Angel One icon upgraded
