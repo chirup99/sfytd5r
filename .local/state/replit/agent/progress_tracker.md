@@ -94,4 +94,4 @@
    ✅ Updated Dhan button with disabled={!dhanIsConnected}
    ✅ Added opacity-50 and cursor-not-allowed styling for disabled state
    ✅ Workflow restarted and running on port 5000
-   📊 Status: ✅ COMPLETE - Broker buttons now disable when not connected
+   📊 Status: ✅ COMPLETE - Broker buttons now properly disabled when not connected

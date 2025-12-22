@@ -17123,7 +17123,8 @@ ${
                           )}
                           <Button
                             variant="outline"
-                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
+                            disabled={!upstoxIsConnected}
+                            className={`w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200 ${!upstoxIsConnected ? "opacity-50 cursor-not-allowed" : ""}`}
                             data-testid="button-upstox-dialog"
                           >
                             <img src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" alt="Upstox" className="h-4 mr-2" />
@@ -17131,7 +17132,8 @@ ${
                           </Button>
                           <Button
                             variant="outline"
-                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
+                            disabled={!angelOneIsConnected}
+                            className={`w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200 ${!angelOneIsConnected ? "opacity-50 cursor-not-allowed" : ""}`}
                             data-testid="button-angelone-dialog"
                           >
                             <img src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw?v=1701" alt="Angel One" className="h-4 mr-2" />
@@ -17139,7 +17141,8 @@ ${
                           </Button>
                           <Button
                             variant="outline"
-                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
+                            disabled={!dhanIsConnected}
+                            className={`w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200 ${!dhanIsConnected ? "opacity-50 cursor-not-allowed" : ""}`}
                             data-testid="button-dhan-dialog"
                           >
                             <img src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw?v=1701" alt="Dhan" className="h-4 mr-2" />
