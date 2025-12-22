@@ -14,8 +14,8 @@ if (!fs.existsSync(distFolder)) {
 try {
   console.log('Creating deployment zip file for AWS Elastic Beanstalk...');
   
-  // Change to dist folder and zip from there (so files are at root, not in dist/ subfolder)
-  execSync(`cd ${distFolder} && zip -r ../${zipFileName} .`, { stdio: 'inherit' });
+  // Include everything needed for AWS Elastic Beanstalk
+  execSync(`zip -r ${zipFileName} dist package.json Procfile .ebextensions`, { stdio: 'inherit' });
   
   console.log(`✓ Created ${zipFileName} successfully!`);
   console.log(`Ready to deploy to AWS Elastic Beanstalk!`);
