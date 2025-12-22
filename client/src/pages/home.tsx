@@ -17089,15 +17089,16 @@ ${
                               </Button>
                               <Button 
                                 variant="ghost" 
-                                size="sm" 
-                                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-10 px-3 border border-slate-200 hover:border-red-100"
+                                size="icon" 
+                                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-10 w-10 border border-slate-200 hover:border-red-100"
                                 onClick={() => {
                                   localStorage.removeItem("zerodha_token"); document.cookie = "zerodha_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
                                   setZerodhaAccessToken(null);
                                   setZerodhaIsConnected(false);
                                 }}
+                                title="Disconnect Zerodha"
                               >
-                                Revoke
+                                <LogOut className="h-4 w-4" />
                               </Button>
                             </div>
                           ) : (
