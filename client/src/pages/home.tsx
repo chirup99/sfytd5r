@@ -16899,7 +16899,9 @@ ${
                               variant="ghost"
                               size="sm"
                               className="h-7 px-2 text-xs"
-                              data-testid="button-empty-next-to-connect"
+                              onClick={() => setShowOrderModal(true)}
+                              data-testid="button-broker-orders"
+                              title="View Orders & Positions"
                             >
                               {zerodhaIsConnected && (
                                 <img 

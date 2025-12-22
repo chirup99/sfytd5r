@@ -73,3 +73,13 @@
    ✅ Workflow restarted successfully - no compilation errors
    ✅ Angel One WebSocket connected - real-time data streaming active
    📊 Status: ✅ COMPLETE - Orders/Positions dialog fully functional
+
+[x] 148. BROKER BUTTON - OPENS ORDERS & POSITIONS DIALOG (December 22, 2025, 7:16 PM)
+   ✅ Found broker image button next to Connect button (line 16905)
+   ✅ Added `onClick={() => setShowOrderModal(true)}` to open dialog
+   ✅ Updated button testid to "button-broker-orders"
+   ✅ Added title tooltip: "View Orders & Positions"
+   ✅ Fixed duplicate className warning in button element
+   ✅ Workflow running successfully with no errors
+   ✅ Angel One WebSocket connected and streaming live data
+   📊 Status: ✅ COMPLETE - Broker button now opens Orders/Positions dialog
