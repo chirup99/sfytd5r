@@ -3765,13 +3765,13 @@ ${
       
       if (zerodhaToken) {
         console.log('✅ [ZERODHA] Token received in URL:', zerodhaToken.substring(0, 20) + '...');
-        localStorage.setItem('zerodha_token', zerodhaToken);
+        localStorage.setItem("zerodha_token", zerodhaToken); document.cookie = `zerodha_token=${zerodhaToken}; path=/; SameSite=Lax; Secure`; setZerodhaAccessToken(zerodhaToken); setZerodhaIsConnected(true);
         setZerodhaAccessToken(zerodhaToken);
         setZerodhaIsConnected(true);
         
         // Notify parent window if this is a popup
         if (window.opener) {
-          window.opener.postMessage({ type: 'ZERODHA_TOKEN', token: zerodhaToken }, '*');
+          console.log("📡 Sending token to opener:", window.opener.location.origin); window.opener.postMessage({ type: "ZERODHA_TOKEN", token: zerodhaToken }, "*");
           console.log('📡 Sent token to parent window');
         }
         
@@ -3806,13 +3806,13 @@ ${
   // Listen for messages from popup windows
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      console.log('📡 [MESSAGE] Received message:', event.data.type);
+      console.log("📡 [MESSAGE] Received message:", event.data.type, event.data);
       
       if (event.data.type === 'ZERODHA_TOKEN' && event.data.token) {
         const token = event.data.token;
         console.log('✅ [ZERODHA] Token received from popup:', token.substring(0, 20) + '...');
         
-        localStorage.setItem('zerodha_token', token);
+        localStorage.setItem("zerodha_token", token); document.cookie = `zerodha_token=${token}; path=/; SameSite=Lax; Secure`; setZerodhaAccessToken(token); setZerodhaIsConnected(true);
         setZerodhaAccessToken(token);
         setZerodhaIsConnected(true);
         setShowConnectDialog(false);
@@ -3897,7 +3897,7 @@ ${
   };
 
   const handleRevokeZerodha = () => {
-    localStorage.removeItem('zerodha_token');
+    localStorage.removeItem("zerodha_token"); document.cookie = "zerodha_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     setZerodhaAccessToken(null);
     setZerodhaIsConnected(false);
     setZerodhaTradesData([]);
@@ -17085,7 +17085,7 @@ ${
                                   size="sm" 
                                   className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8"
                                   onClick={() => {
-                                    localStorage.removeItem("zerodha_token");
+                                    localStorage.removeItem("zerodha_token"); document.cookie = "zerodha_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
                                     setZerodhaAccessToken(null);
                                     setZerodhaIsConnected(false);
                                   }}
