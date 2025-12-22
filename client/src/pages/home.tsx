@@ -17074,25 +17074,31 @@ ${
                         </DialogHeader>
                         <div className="space-y-3">
                           {zerodhaIsConnected ? (
-                            <div className="space-y-3">
-                              <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
-                                <div className="flex items-center gap-2 text-green-700 dark:text-green-400 font-medium">
-                                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                  Zerodha Connected
-                                </div>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8"
-                                  onClick={() => {
-                                    localStorage.removeItem("zerodha_token"); document.cookie = "zerodha_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-                                    setZerodhaAccessToken(null);
-                                    setZerodhaIsConnected(false);
-                                  }}
-                                >
-                                  Revoke
-                                </Button>
-                              </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                className="flex-1 h-10 bg-white text-black hover:bg-slate-50 border-slate-200 cursor-default"
+                                data-testid="button-zerodha-connected-display"
+                              >
+                                <img 
+                                  src="https://zerodha.com/static/images/products/kite-logo.svg" 
+                                  alt="Zerodha" 
+                                  className="w-4 h-4 mr-2"
+                                />
+                                Zerodha
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-10 px-3 border border-slate-200 hover:border-red-100"
+                                onClick={() => {
+                                  localStorage.removeItem("zerodha_token"); document.cookie = "zerodha_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+                                  setZerodhaAccessToken(null);
+                                  setZerodhaIsConnected(false);
+                                }}
+                              >
+                                Revoke
+                              </Button>
                             </div>
                           ) : (
                             <Button
