@@ -3815,6 +3815,7 @@ ${
         localStorage.setItem('zerodha_token', token);
         setZerodhaAccessToken(token);
         setZerodhaIsConnected(true);
+        setShowConnectDialog(false);
         console.log('✅ [ZERODHA] Connection established and saved to localStorage');
         
         // Fetch trades
@@ -17072,13 +17073,36 @@ ${
                           <DialogTitle>Connect Your Broker</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-3">
-                          <Button
-                            onClick={handleZerodhaConnect}
-                            className="w-full h-10"
-                            data-testid="button-zerodha-dialog"
-                          >
-                            Zerodha
-                          </Button>
+                          {zerodhaIsConnected ? (
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+                                <div className="flex items-center gap-2 text-green-700 dark:text-green-400 font-medium">
+                                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                  Zerodha Connected
+                                </div>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8"
+                                  onClick={() => {
+                                    localStorage.removeItem("zerodha_token");
+                                    setZerodhaAccessToken(null);
+                                    setZerodhaIsConnected(false);
+                                  }}
+                                >
+                                  Revoke
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button
+                              onClick={handleZerodhaConnect}
+                              className="w-full h-10"
+                              data-testid="button-zerodha-dialog"
+                            >
+                              Zerodha
+                            </Button>
+                          )}
                           <p className="text-xs text-center text-muted-foreground mt-4">
                             Connect your broker account to auto-import trades
                           </p>
