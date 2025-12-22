@@ -16942,7 +16942,7 @@ ${
                                 <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[60px]">Price</th>
                                 <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[60px]">P&L</th>
                                 <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[45px]">%</th>
-                                <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[70px]">Duration</th>
+                                <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[50px]">Duration</th>
                               </tr>
                             </thead>
                             <tbody className="bg-white dark:bg-slate-900">
@@ -17118,7 +17118,7 @@ ${
                             className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-angelone-dialog"
                           >
-                            <img src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw" alt="Angel One" className="h-4 mr-2" />
+                            <img src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw?v=1701" alt="Angel One" className="h-4 mr-2" />
                             Angel One
                           </Button>
                           <Button
@@ -17126,7 +17126,7 @@ ${
                             className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-dhan-dialog"
                           >
-                            <img src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw" alt="Dhan" className="h-4 mr-2" />
+                            <img src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw?v=1701" alt="Dhan" className="h-4 mr-2" />
                             Dhan
                           </Button>
                           <p className="text-xs text-center text-muted-foreground mt-4">
