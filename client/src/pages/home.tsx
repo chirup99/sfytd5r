@@ -17097,9 +17097,15 @@ ${
                           ) : (
                             <Button
                               onClick={handleZerodhaConnect}
-                              className="w-full h-10"
+                              variant="outline"
+                              className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                               data-testid="button-zerodha-dialog"
                             >
+                              <img 
+                                src="https://zerodha.com/static/images/products/kite-logo.svg" 
+                                alt="Zerodha" 
+                                className="w-4 h-4 mr-2"
+                              />
                               Zerodha
                             </Button>
                           )}
