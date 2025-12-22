@@ -3740,7 +3740,6 @@ ${
   const [importData, setImportData] = useState("");
   const [importError, setImportError] = useState("");
   const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
-  const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
   // Zerodha OAuth Handlers
   // Check localStorage on mount to restore connection state
   useEffect(() => {
@@ -17055,6 +17054,7 @@ ${
                         </div>
                       </CardContent>
 
+                    </Card>
                     {/* Connect Dialog - Shows Zerodha and Upstox broker options */}
                     <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
                       <DialogContent className="max-w-md">
