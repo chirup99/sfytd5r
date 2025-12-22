@@ -86,3 +86,12 @@
    ✅ Trading NLP Agent ready with 25+ intents
    ✅ Gemini AI routes configured
    📊 Status: ✅ COMPLETE - Import fully verified and working
+[x] 146. BROKER BUTTONS - DISABLE WHEN NOT CONNECTED (December 22, 2025, 6:28 PM)
+   ✅ Added angelOneIsConnected state variable
+   ✅ Added dhanIsConnected state variable
+   ✅ Updated Upstox button with disabled={!upstoxIsConnected}
+   ✅ Updated Angel One button with disabled={!angelOneIsConnected}
+   ✅ Updated Dhan button with disabled={!dhanIsConnected}
+   ✅ Added opacity-50 and cursor-not-allowed styling for disabled state
+   ✅ Workflow restarted and running on port 5000
+   📊 Status: ✅ COMPLETE - Broker buttons now disable when not connected

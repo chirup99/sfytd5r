@@ -3740,6 +3740,8 @@ ${
   const [importData, setImportData] = useState("");
   const [importError, setImportError] = useState("");
   const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
+  const [angelOneIsConnected, setAngelOneIsConnected] = useState(false);
+  const [dhanIsConnected, setDhanIsConnected] = useState(false);
   // Zerodha OAuth Handlers
   // Check localStorage on mount to restore connection state
   useEffect(() => {
