@@ -3740,8 +3740,6 @@ ${
   const [importData, setImportData] = useState("");
   const [importError, setImportError] = useState("");
   const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
-  const [angelOneIsConnected, setAngelOneIsConnected] = useState(false);
-  const [dhanIsConnected, setDhanIsConnected] = useState(false);
   // Zerodha OAuth Handlers
   // Check localStorage on mount to restore connection state
   useEffect(() => {
@@ -17123,8 +17121,7 @@ ${
                           )}
                           <Button
                             variant="outline"
-                            disabled={!upstoxIsConnected}
-                            className={`w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200 ${!upstoxIsConnected ? "opacity-50 cursor-not-allowed" : ""}`}
+                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-upstox-dialog"
                           >
                             <img src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" alt="Upstox" className="h-4 mr-2" />
@@ -17132,8 +17129,7 @@ ${
                           </Button>
                           <Button
                             variant="outline"
-                            disabled={!angelOneIsConnected}
-                            className={`w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200 ${!angelOneIsConnected ? "opacity-50 cursor-not-allowed" : ""}`}
+                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-angelone-dialog"
                           >
                             <img src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw?v=1701" alt="Angel One" className="h-4 mr-2" />
@@ -17141,8 +17137,7 @@ ${
                           </Button>
                           <Button
                             variant="outline"
-                            disabled={!dhanIsConnected}
-                            className={`w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200 ${!dhanIsConnected ? "opacity-50 cursor-not-allowed" : ""}`}
+                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-dhan-dialog"
                           >
                             <img src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw?v=1701" alt="Dhan" className="h-4 mr-2" />
