@@ -69,3 +69,11 @@
    ✅ Gemini AI routes configured
    ✅ Trading NLP Agent ready with 25+ intents
    📊 Status: ✅ COMPLETE - Import verified and fully functional
+[x] 144. DHAN BUTTON IMAGE UPDATE - GOOGLE PLAY ICON (December 22, 2025, 6:00 PM)
+   ✅ Updated Dhan button image from favicon to Google Play icon
+   ✅ New image URL: https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw
+   ✅ Updated line 17129 in client/src/pages/home.tsx
+   ✅ Maintained consistent sizing (h-4 mr-2) with Angel One button
+   ✅ Workflow running with HMR detecting changes at 6:00:29 PM
+   ✅ Angel One WebSocket streaming live market data (GOLD: ₹37,520+)
+   📊 Status: ✅ COMPLETE - Dhan button icon upgraded to match Angel One

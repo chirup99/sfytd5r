@@ -17126,7 +17126,7 @@ ${
                             className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-dhan-dialog"
                           >
-                            <img src="https://www.dhan.co/favicon.ico" alt="Dhan" className="h-4 mr-2" />
+                            <img src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw" alt="Dhan" className="h-4 mr-2" />
                             Dhan
                           </Button>
                           <p className="text-xs text-center text-muted-foreground mt-4">
