@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import axios from "axios";
+import crypto from "crypto";
 import { storage } from "./storage";
 import { angelOneApi } from "./angel-one-api";
 import { AnalysisProcessor } from "./analysis-processor";
@@ -20007,7 +20008,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const crypto = require('crypto');
       const apiKey = process.env.ZERODHA_API_KEY;
       const apiSecret = process.env.ZERODHA_SECRET;
 
