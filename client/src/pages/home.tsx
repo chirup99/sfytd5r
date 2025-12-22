@@ -17110,7 +17110,7 @@ ${
                             className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-upstox-dialog"
                           >
-                            <span className="mr-2 text-lg font-bold" style={{color: "#6C5CE7"}}>₹</span>
+                            <img src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" alt="Upstox" className="h-4 mr-2" />
                             Upstox
                           </Button>
                           <p className="text-xs text-center text-muted-foreground mt-4">
