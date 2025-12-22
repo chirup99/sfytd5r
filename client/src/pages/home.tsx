@@ -16900,6 +16900,13 @@ ${
                               className="h-7 px-2 text-xs"
                               data-testid="button-empty-next-to-connect"
                             >
+                              {zerodhaIsConnected && (
+                                <img 
+                                  src="https://zerodha.com/static/images/products/kite-logo.svg" 
+                                  alt="Zerodha" 
+                                  className="h-4 w-4"
+                                />
+                              )}
                             </Button>
                             <Button
                               variant="ghost"
