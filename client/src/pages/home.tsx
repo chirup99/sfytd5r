@@ -3734,6 +3734,7 @@ ${
 
   const [zerodhaAccessToken, setZerodhaAccessToken] = useState<string | null>(null);
   const [zerodhaIsConnected, setZerodhaIsConnected] = useState(false);
+  const [zerodhaClientId, setZerodhaClientId] = useState<string | null>(null);
   const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [zerodhaTradesLoading, setZerodhaTradesLoading] = useState(false);
   const [zerodhaTradesData, setZerodhaTradesData] = useState<any[]>([]);
@@ -3754,6 +3755,33 @@ ${
       console.log('⚠️ [ZERODHA] No saved token in localStorage');
     }
   }, []);
+
+
+  // Fetch Zerodha profile to get client ID
+  useEffect(() => {
+    if (zerodhaAccessToken && !zerodhaClientId) {
+      const fetchZerodhaProfile = async () => {
+        try {
+          const response = await fetch('https://api.kite.trade/user/profile', {
+            headers: {
+              'Authorization': `Bearer ${zerodhaAccessToken}`,
+              'X-Kite-Version': '3'
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            if (data.data && data.data.user_id) {
+              setZerodhaClientId(data.data.user_id);
+              console.log('✅ [ZERODHA] Client ID fetched:', data.data.user_id);
+            }
+          }
+        } catch (error) {
+          console.error('❌ [ZERODHA] Failed to fetch profile:', error);
+        }
+      };
+      fetchZerodhaProfile();
+    }
+  }, [zerodhaAccessToken, zerodhaClientId]);
 
   // Handle Zerodha OAuth callback from URL (popup communication)
   useEffect(() => {
@@ -18912,8 +18940,8 @@ ${
             <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between gap-4">
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
               <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
-                <span>userid: {currentUser?.userId || 'N/A'}</span>
-                <span>user name: {currentUser?.userName || 'N/A'}</span>
+                <span>broker id: {zerodhaClientId || 'N/A'}</span>
+                <span>broker: Zerodha</span>
               </div>
             </div>
 

@@ -48,3 +48,17 @@
 [x]    ✅ Gap spacing maintained for readability
 [x]    ✅ Workflow restarted successfully
 [x]    📊 Status: DIALOG HEADER UPDATED & OPERATIONAL
+
+[x] 155. ORDERS & POSITIONS DIALOG - UPDATE TO BROKER ID (December 23, 2025, 8:10 AM)
+[x]    ✅ Added zerodhaClientId state variable (useState)
+[x]    ✅ Added useEffect to fetch Zerodha profile from API
+[x]       - Calls https://api.kite.trade/user/profile with Bearer token
+[x]       - Extracts user_id from response and sets zerodhaClientId
+[x]       - Logs success with console message for debugging
+[x]    ✅ Updated dialog header to display broker info:
+[x]       - Replaced "userid: {currentUser?.userId}" with "broker id: {zerodhaClientId || 'N/A'}"
+[x]       - Added "broker: Zerodha" on right side
+[x]    ✅ Styled with consistent colors and gap spacing
+[x]    ✅ Application compiled and running successfully
+[x]    ✅ Workflow restarted and verified on port 5000
+[x]    📊 Status: BROKER ID DISPLAY - COMPLETE & OPERATIONAL
