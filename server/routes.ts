@@ -20146,6 +20146,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // STEP 4: Fetch Zerodha profile details
+  app.get('/api/broker/zerodha/profile', async (req, res) => {
+    const accessToken = req.headers.authorization?.split(' ')[1];
+    
+    if (!accessToken) {
+      return res.status(401).json({ 
+        error: 'Unauthorized',
+        profile: null 
+      });
+    }
+
+    try {
+      console.log('📊 [ZERODHA] Fetching user profile from https://api.kite.trade/user/profile');
+      
+      // Fetch user profile from Zerodha API
+      const response = await axios.get('https://api.kite.trade/user/profile', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'X-Kite-Version': '3'
+        }
+      });
+
+      const userData = response.data.data || {};
+      
+      // Extract profile information
+      const profile = {
+        userId: userData.user_id,
+        email: userData.email,
+        username: userData.user_name,
+        phone: userData.phone,
+        broker: userData.broker,
+        accountType: userData.account_type,
+        brokerName: 'Zerodha',
+        apiKey: userData.api_key,
+        fetchedAt: new Date().toISOString()
+      };
+
+      console.log('✅ [ZERODHA] Profile fetched successfully for user:', profile.userId);
+      console.log('📋 [ZERODHA] Profile Details:', JSON.stringify(profile, null, 2));
+      
+      res.json({ 
+        profile,
+        success: true,
+        rawData: userData // Include raw data for debugging
+      });
+    } catch (error) {
+      console.error('❌ [ZERODHA] Error fetching profile:', error instanceof Error ? error.message : error);
+      
+      res.status(500).json({ 
+        error: 'Failed to fetch Zerodha profile',
+        profile: null,
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // DEBUG: Show what data Zerodha is fetching
+  app.get('/api/broker/zerodha/debug', (req, res) => {
+    res.json({
+      status: 'Zerodha Integration Active',
+      endpoints: {
+        'GET /api/broker/zerodha/login-url': 'Generates Zerodha login URL',
+        'GET /api/broker/zerodha/callback': 'Handles OAuth callback and exchanges token',
+        'GET /api/broker/zerodha/trades': 'Fetches orders from https://api.kite.trade/orders',
+        'GET /api/broker/zerodha/profile': 'Fetches user profile from https://api.kite.trade/user/profile'
+      },
+      dataFetched: {
+        trades: {
+          endpoint: 'https://api.kite.trade/orders',
+          fields: ['time', 'order_type', 'symbol', 'quantity', 'price', 'pnl', 'order_type', 'filled_quantity'],
+          transformedFormat: {
+            time: 'Order timestamp converted to local time',
+            order: 'BUY or SELL (from transaction_type)',
+            symbol: 'Trading symbol (e.g., RELIANCE-EQ)',
+            qty: 'Order quantity',
+            price: 'Order price',
+            pnl: 'Profit/Loss in ₹',
+            type: 'Order type (MIS, CNC, etc)',
+            duration: 'Filled or Pending status'
+          }
+        },
+        profile: {
+          endpoint: 'https://api.kite.trade/user/profile',
+          fields: ['user_id', 'email', 'user_name', 'phone', 'broker', 'account_type', 'api_key'],
+          transformedFormat: {
+            userId: 'Your Zerodha client ID',
+            email: 'Email associated with account',
+            username: 'Zerodha username',
+            phone: 'Phone number',
+            broker: 'Broker code',
+            accountType: 'Account type (regular, pro, etc)',
+            brokerName: 'Zerodha',
+            apiKey: 'API Key'
+          }
+        }
+      },
+      authentication: 'Bearer token in Authorization header',
+      note: 'All data is fetched in real-time from Zerodha API'
+    });
+  });
+
 
   return httpServer;
 }
