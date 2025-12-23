@@ -21536,7 +21536,7 @@ ${
                 </div>
 
                 {/* Spot Price */}
-                <div className="text-center bg-gray-50 dark:bg-gray-800 rounded px-2 py-1 border border-gray-200 dark:border-gray-700">
+                <div className="text-center bg-gray-50 dark:bg-gray-800 rounded px-2 py-0.5 border border-gray-200 dark:border-gray-700">
                   <span className="text-green-600 dark:text-green-400 font-semibold text-sm" data-testid="text-option-spot-price-mobile">
                     Spot: ₹{(optionChainData?.spotPrice || 0)?.toLocaleString() || "-"}
                   </span>
@@ -21582,11 +21582,11 @@ ${
             </div>
 
             {/* Content Area */}
-            <div className="md:hidden px-3 pb-3 overflow-y-auto max-h-[calc(100vh-300px)]">
+            <div className="md:hidden px-2 pb-2 overflow-y-auto max-h-64">
               {optionChainLoading && (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-400 mx-auto mb-3"></div>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">Loading {selectedOptionIndex} options...</p>
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-400 mx-auto mb-1"></div>
+                  <p className="text-gray-600 dark:text-gray-400 text-xs">Loading {selectedOptionIndex} options...</p>
                 </div>
               )}
 
@@ -21769,8 +21769,8 @@ ${
               })()}
 
               {!optionChainLoading && !optionChainData && (
-                <div className="text-center py-8">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Loading option chain data...</p>
+                <div className="text-center py-4">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Loading option chain data...</p>
                 </div>
               )}
             </div>

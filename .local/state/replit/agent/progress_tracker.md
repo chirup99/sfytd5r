@@ -6,7 +6,7 @@
 [x] 3. Verify the project is working using the feedback tool
 [x] 4. Inform user the import is completed and they can start building
 
-## Desktop Option Chain Redesign (Turn 11-12)
+## Desktop & Mobile Option Chain Redesign (Turn 11-13)
 [x] Fixed light theme display issues
 [x] Redesigned desktop option chain to match paper trading dialog style
 [x] Minimalist design: clean white/dark backgrounds (no gradients)
@@ -18,17 +18,21 @@
 [x] Centered spot price display
 [x] Reduced padding and spacing throughout
 [x] Reduced font sizes for compact look
+[x] **Applied same tiny design to mobile**
+[x] **Mobile and desktop now have consistent design**
 
 ## Design Changes:
 - DialogContent: Removed gradient, now uses `bg-white dark:bg-gray-900` with proper borders
 - Desktop Header: Clean centered spot price at top
+- Mobile Header: Centered spot price matching desktop
 - Controls: Grouped in center with proper compact spacing
 - Table: Light-themed table with `bg-gray-100 dark:bg-gray-800` headers
 - Hover States: Light theme now shows `hover:bg-gray-50 dark:hover:bg-gray-800`
-- Size: max-w-2xl (tiny dialog) instead of max-w-4xl/max-w-5xl
-- Spot Price: Centered display instead of right-aligned
-- Padding: Reduced from px-6 py-4 to px-4 py-2 for compact feel
-- Font: Reduced sizes - text-base→text-sm, text-sm→text-xs
+- Size: max-w-2xl (tiny dialog) - both desktop and mobile
+- Spot Price: Centered display on both mobile and desktop
+- Padding: Reduced for compact feel - px-2 pb-2 on mobile
+- Font: Reduced sizes across the board for minimal appearance
+- Mobile max-height: Reduced to max-h-64 for compact display
 
 ## Features Implemented
 
@@ -49,6 +53,7 @@
 ✅ **Desktop Option Chain: Minimalist redesign matching paper trading dialog**
 ✅ **Light Theme: Fixed option chain display for light mode**
 ✅ **Tiny Option Chain Dialog: Compact size with centered spot price**
+✅ **Mobile Option Chain: Same tiny design as desktop - consistent across all devices**
 
 ## Code Changes Made
 
@@ -62,6 +67,7 @@
 - recordAllBrokerOrders() function handles Record button for broker orders (line ~5413)
 - "Record to Journal" button added to Orders table footer (line ~19088)
 - **Redesigned desktop option chain dialog - tiny and minimalist (lines 21491-21585)**
+- **Updated mobile option chain to match desktop design - same tiny, centered layout**
 
 ## Import Status: COMPLETE ✅
 
@@ -73,6 +79,6 @@
 - **Record button available in both Paper Trading and Broker Orders dialogs**
 - **✨ AUTO-TAP FEATURE: New broker orders now auto-record with count increment logic**
 - **✨ Option Chain Spot Price: Displays rupee symbol (₹) instead of dollar ($)**
-- **✨ Desktop Option Chain: Minimalist redesign matching paper trading dialog style**
-- **✨ Light Theme: Option chain now displays correctly in light mode with proper colors**
-- **✨ Tiny Option Chain Dialog: Compact, centered spot price display for better UX**
+- **✨ Desktop & Mobile Option Chain: Identical tiny design with centered spot price**
+- **✨ Light Theme: Option chain displays correctly on all devices**
+- **✨ Consistent UI: Mobile and desktop option chains now have unified minimalist design**
