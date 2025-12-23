@@ -3745,11 +3745,6 @@ ${
   const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
   // Zerodha OAuth Handlers
   // Check localStorage on mount to restore connection state
-  const [upstoxAccessToken, setUpstoxAccessToken] = useState<string | null>(null);
-  const [upstoxTradesDialog, setUpstoxTradesDialog] = useState(false);
-  const [upstoxTradesLoading, setUpstoxTradesLoading] = useState(false);
-  const [upstoxTradesData, setUpstoxTradesData] = useState<any[]>([]);
-  const [upstoxProfileData, setUpstoxProfileData] = useState<any>(null);
   useEffect(() => {
     console.log('🔷 [ZERODHA] Checking localStorage on mount...');
     const savedToken = localStorage.getItem('zerodha_token');
@@ -3903,18 +3898,6 @@ ${
             .finally(() => setZerodhaTradesLoading(false));
         }, 300);
       } else if (event.data.type === 'ZERODHA_ERROR') {
-      } else if (event.data.type === 'UPSTOX_TOKEN' && event.data.token) {
-        const token = event.data.token;
-        console.log('✅ [UPSTOX] Token received from popup:', token.substring(0, 20) + '...');
-        localStorage.setItem("upstox_token", token);
-        document.cookie = `upstox_token=${token}; path=/; SameSite=Lax; Secure`;
-        setUpstoxAccessToken(token);
-        setUpstoxIsConnected(true);
-        setShowConnectDialog(false);
-        console.log('✅ [UPSTOX] Connection established and saved to localStorage');
-      } else if (event.data.type === 'UPSTOX_ERROR') {
-        console.error('❌ [UPSTOX] Error from callback:', event.data.error);
-        alert('Upstox error: ' + event.data.error);
         console.error('❌ [ZERODHA] Error from callback:', event.data.error);
         alert('Zerodha error: ' + event.data.error);
       }
@@ -3975,92 +3958,6 @@ ${
   };
 
   const handleRevokeZerodha = () => {
-
-  // Upstox OAuth Callback Handler
-  useEffect(() => {
-    const handleUpstoxCallback = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const upstoxToken = params.get("upstox_token");
-      
-      if (upstoxToken) {
-        console.log('✅ [UPSTOX] Token received in URL:', upstoxToken.substring(0, 20) + '...');
-        localStorage.setItem("upstox_token", upstoxToken);
-        document.cookie = `upstox_token=${upstoxToken}; path=/; SameSite=Lax; Secure`;
-        setUpstoxAccessToken(upstoxToken);
-        setUpstoxIsConnected(true);
-        
-        if (window.opener) {
-          window.opener.postMessage({ type: "UPSTOX_TOKEN", token: upstoxToken }, "*");
-        }
-        
-        setTimeout(() => {
-          setUpstoxTradesLoading(true);
-          fetch("/api/broker/upstox/trades", {
-            headers: { "Authorization": `Bearer ${upstoxToken}` }
-          })
-            .then(res => res.json())
-            .then(data => {
-              setUpstoxTradesData(data.trades || []);
-              setUpstoxTradesDialog(true);
-              console.log('✅ Upstox trades fetched:', data.trades?.length);
-              if (window.opener) {
-                setTimeout(() => window.close(), 2000);
-              }
-            })
-            .catch(err => console.error("Error fetching Upstox trades:", err))
-            .finally(() => setUpstoxTradesLoading(false));
-        }, 300);
-        
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-    };
-    
-    handleUpstoxCallback();
-  }, []);
-
-  // Upstox Connect Handler
-  const handleUpstoxConnect = async () => {
-    try {
-      console.log('🔷 Starting Upstox OAuth flow...');
-      const response = await fetch('/api/broker/upstox/login-url');
-      const data = await response.json();
-      
-      if (data.error) {
-        alert('Upstox Setup Error: ' + data.message);
-        return;
-      }
-      
-      const { loginUrl } = data;
-      const popup = window.open(
-        loginUrl,
-        'upstox_oauth',
-        'width=600,height=800,resizable=yes,scrollbars=yes'
-      );
-      
-      if (!popup) {
-        alert('Popup blocked. Please enable popups and try again.');
-        return;
-      }
-      
-      let checkCount = 0;
-      const monitorPopup = setInterval(() => {
-        checkCount++;
-        if (popup.closed) {
-          clearInterval(monitorPopup);
-          return;
-        }
-        if (checkCount > 300) {
-          clearInterval(monitorPopup);
-          popup.close();
-        }
-      }, 1000);
-      
-    } catch (error) {
-      console.error('❌ Upstox error:', error);
-      alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect'));
-    }
-  };
-
     localStorage.removeItem("zerodha_token"); document.cookie = "zerodha_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     setZerodhaAccessToken(null);
     setZerodhaIsConnected(false);
@@ -17443,8 +17340,7 @@ ${
                                 className="w-4 h-4 mr-2"
                               />
                               Zerodha
-                            onClick={handleUpstoxConnect}
-                          >
+                            </Button>
                           )}
                           <Button
                             variant="outline"
