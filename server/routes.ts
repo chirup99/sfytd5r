@@ -20152,39 +20152,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get Zerodha broker margins (available funds)
   app.get('/api/broker/zerodha/margins', async (req, res) => {
-    const accessToken = req.headers.authorization?.split('Bearer ')[1];
-    if (!accessToken) {
+    const accessToken = req.headers.authorization?.split(' ')[1];
+    const apiKey = process.env.ZERODHA_API_KEY;
+    
+    if (!accessToken || !apiKey) {
+      console.log('❌ [ZERODHA] Missing accessToken or apiKey');
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
     try {
-      const response = await fetch('https://api.kite.trade/user/margins', {
+      console.log('📊 [ZERODHA] Fetching user margins from https://api.kite.trade/user/margins');
+      
+      // Use axios like the profile endpoint (proven to work with Zerodha)
+      const response = await axios.get('https://api.kite.trade/user/margins', {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': `token ${apiKey}:${accessToken}`,
           'X-Kite-Version': '3'
         }
       });
 
-      if (!response.ok) {
-        throw new Error(`Zerodha API error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = response.data || {};
       const equity = data.data?.equity || {};
       const availableCash = equity.available_balance || 0;
 
       console.log('✅ [ZERODHA] Fetched available balance:', availableCash);
+      console.log('📊 [ZERODHA] Equity data:', equity);
 
       res.json({
         success: true,
         availableCash,
         equity: data.data?.equity || {}
       });
-    } catch (error) {
-      console.error('❌ [ZERODHA] Error fetching margins:', error);
+    } catch (error: any) {
+      console.error('❌ [ZERODHA] Error fetching margins:', error.response?.status, error.response?.data || error.message);
       res.status(500).json({
         success: false,
-        error: 'Failed to fetch broker margins'
+        error: 'Failed to fetch broker margins',
+        details: error.response?.data?.message || error.message
       });
     }
   });
