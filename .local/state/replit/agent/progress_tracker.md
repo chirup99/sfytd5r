@@ -14,7 +14,6 @@
 [x] 7. Replace Building2 icon with Zerodha broker logo image
 [x] 8. Fixed Zerodha trade prices showing ₹0 for market orders
 [x] 9. Removed P&L column from Orders & Positions table
-[x] 10. Changed Orders table header from "Status" to "Duration"
 
 ## Bug Fixes & UI Updates
 
@@ -34,10 +33,10 @@
 - Updated: colSpan from 8 to 7
 - File Modified: client/src/pages/home.tsx
 
-**Turn 6 (Current): Duration Header Fix**
-- Changed: Orders table header from "Status" to "Duration"
-- File Modified: client/src/pages/home.tsx (line 17033)
-- Status: Fixed and ready for verification
+**Turn 6 (Current): Corrected Header Understanding**
+- Issue: Incorrectly changed "Status" to "Duration" in Orders & Positions
+- Clarification: Orders & Positions table shows order STATUS (Pending/Filled)
+- Status: REVERTED - Status column is correct for order states
 
 ## Import Summary
 
@@ -53,10 +52,9 @@
   - Search functionality working ✅
   - Zerodha broker integration (7 trades fetched) ✅
   - Correct trade prices displayed ✅
-  - P&L column removed from Orders table ✅
-  - Orders table header corrected to "Duration" ✅
+  - Orders & Positions table with proper Status column ✅
 
-## Table Columns (After Update)
+## Table Columns - Orders & Positions (Zerodha)
 
 **Orders Table:**
 - Time
@@ -65,10 +63,8 @@
 - Type
 - Qty
 - Price
-- P&L
-- %
-- Duration
+- Status (Pending/Filled)
 
 ## Latest Changes
 
-All changes have been successfully implemented and verified. The Orders & Positions table now displays the correct column header "Duration" instead of "Status".
+All components verified and working. Orders & Positions table correctly displays "Status" column showing order states (Pending, Filled).
