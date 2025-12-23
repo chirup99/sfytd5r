@@ -21503,7 +21503,7 @@ ${
                   <select
                     value={selectedOptionIndex}
                     onChange={(e) => { const idx = e.target.value; setSelectedOptionIndex(idx); setSelectedOptionExpiryDate(""); setOptionChainData(null); setTimeout(() => fetchOptionChainData(idx), 0); }}
-                    className="flex-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-xs"
+                    className="flex-1 px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-900 dark:text-white text-xs"
                     data-testid="select-option-index-mobile"
                   >
                     <option value="NIFTY">NIFTY</option>
@@ -21518,7 +21518,7 @@ ${
                         setSelectedOptionExpiryDate(newExpiry); fetchOptionChainData(selectedOptionIndex, newExpiry);
                       }
                     }}
-                    className="flex-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-xs"
+                    className="flex-1 px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-900 dark:text-white text-xs"
                     data-testid="select-option-expiry-date-mobile"
                   >
                     {optionChainLoading ? (
@@ -21555,7 +21555,7 @@ ${
                 <select
                   value={selectedOptionIndex}
                   onChange={(e) => { const idx = e.target.value; setSelectedOptionIndex(idx); setSelectedOptionExpiryDate(""); setOptionChainData(null); setTimeout(() => fetchOptionChainData(idx), 0); }}
-                  className="px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-xs"
+                  className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-900 dark:text-white text-xs"
                   data-testid="select-option-index-desktop"
                 >
                   <option value="NIFTY">NIFTY</option>
@@ -21569,7 +21569,7 @@ ${
                     const newExpiry = e.target.value;
                     setSelectedOptionExpiryDate(newExpiry); fetchOptionChainData(selectedOptionIndex, newExpiry);
                   }}
-                  className="px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-xs"
+                  className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-900 dark:text-white text-xs"
                   data-testid="select-option-expiry-date-desktop"
                 >
                   {getOptionExpiryDates(selectedOptionIndex).map((date) => (
