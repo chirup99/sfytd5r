@@ -15,6 +15,7 @@
 [x] 8. Fixed Zerodha trade prices showing ₹0 for market orders
 [x] 9. Removed P&L column from Orders & Positions table
 [x] 10. Fixed Trade History table header - Changed "Status" to "Duration"
+[x] 11. Added auto-refresh polling for Orders & Positions - refreshes every 3 seconds
 
 ## Bug Fixes & UI Updates
 
@@ -39,10 +40,21 @@
 - Trade History Table: "Duration" ✅ (shows trade duration: 2m 50s, etc.)
 - File Modified: client/src/pages/home.tsx (line 17033)
 
+**Turn 7-8 (Current): Real-Time Order Refresh**
+- Issue: Orders & Positions table only updated when dialog reopened
+- Solution: Implemented polling mechanism that refreshes every 3 seconds
+- Implementation:
+  - Extracts fetch logic into `fetchOrders()` function
+  - Calls fetchOrders immediately when dialog opens
+  - Sets up `setInterval(fetchOrders, 3000)` for auto-refresh
+  - Cleans up interval when dialog closes
+- File Modified: client/src/pages/home.tsx (lines 4431-4458)
+- Behavior: When user places order on terminal, it appears in table within 3 seconds
+
 ## Import Summary
 
 - **Date**: December 23, 2025
-- **Status**: COMPLETED
+- **Status**: COMPLETED + ENHANCEMENTS
 - **Application**: Trading Platform with Angel One API integration
 - **Features Verified**:
   - Server running on port 5000 ✅
@@ -55,10 +67,11 @@
   - Correct trade prices displayed ✅
   - Orders & Positions table with proper Status column ✅
   - Trade History table with Duration column ✅
+  - **NEW**: Auto-refresh polling for real-time order updates ✅
 
 ## Table Column Reference
 
-**Orders & Positions Table (Zerodha):**
+**Orders & Positions Table (Zerodha) - WITH AUTO-REFRESH:**
 - Time
 - Order (BUY/SELL)
 - Symbol
@@ -66,6 +79,7 @@
 - Qty
 - Price
 - Status (Pending/Filled)
+- **Auto-refreshes every 3 seconds**
 
 **Trade History Table (Trading Journal):**
 - Time
@@ -80,6 +94,8 @@
 
 ## Latest Changes
 
-✅ Trade History table header corrected to "Duration" 
-✅ Both tables now display correct column headers
-✅ Application fully functional and verified
+✅ Orders & Positions polling implemented - refreshes every 3 seconds
+✅ New orders from terminal now display automatically without reopening dialog
+✅ Clean interval cleanup when dialog closes
+✅ All UI fixes and table headers corrected
+✅ Application fully functional with real-time updates

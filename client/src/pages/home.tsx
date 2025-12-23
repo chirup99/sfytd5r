@@ -4428,23 +4428,34 @@ ${
   // Trade History Data State
   const [tradeHistoryData, setTradeHistoryData] = useState([]);
 
-  // Fetch broker orders when Orders dialog opens
+  // Fetch broker orders when Orders dialog opens - with auto-refresh polling
   useEffect(() => {
     if (showOrderModal && zerodhaAccessToken) {
-      setFetchingBrokerOrders(true);
-      fetch('/api/broker/zerodha/trades', {
-        headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
-      })
-        .then(res => res.json())
-        .then(data => {
+      const fetchOrders = async () => {
+        setFetchingBrokerOrders(true);
+        try {
+          const res = await fetch('/api/broker/zerodha/trades', {
+            headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
+          });
+          const data = await res.json();
           setBrokerOrders(data.trades || []);
           console.log('✅ [ORDERS] Fetched', (data.trades || []).length, 'trades from Zerodha');
-        })
-        .catch(err => {
+        } catch (err) {
           console.error('❌ [ORDERS] Error fetching trades:', err);
           setBrokerOrders([]);
-        })
-        .finally(() => setFetchingBrokerOrders(false));
+        } finally {
+          setFetchingBrokerOrders(false);
+        }
+      };
+
+      // Fetch orders immediately when dialog opens
+      fetchOrders();
+
+      // Set up polling to refresh every 3 seconds while dialog is open
+      const pollInterval = setInterval(fetchOrders, 3000);
+
+      // Cleanup: clear interval when dialog closes
+      return () => clearInterval(pollInterval);
     }
   }, [showOrderModal, zerodhaAccessToken]);
   // PAPER TRADING (DEMO TRADING) STATE - Like TradingView Practice Account
