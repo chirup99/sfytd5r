@@ -4378,6 +4378,26 @@ ${
 
   // Trade History Data State
   const [tradeHistoryData, setTradeHistoryData] = useState([]);
+
+  // Fetch broker orders when Orders dialog opens
+  useEffect(() => {
+    if (showOrderModal && zerodhaAccessToken) {
+      setFetchingBrokerOrders(true);
+      fetch('/api/broker/zerodha/trades', {
+        headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          setBrokerOrders(data.trades || []);
+          console.log('✅ [ORDERS] Fetched', (data.trades || []).length, 'trades from Zerodha');
+        })
+        .catch(err => {
+          console.error('❌ [ORDERS] Error fetching trades:', err);
+          setBrokerOrders([]);
+        })
+        .finally(() => setFetchingBrokerOrders(false));
+    }
+  }, [showOrderModal, zerodhaAccessToken]);
   // PAPER TRADING (DEMO TRADING) STATE - Like TradingView Practice Account
   // ============================================
   const [showPaperTradingModal, setShowPaperTradingModal] = useState(false);

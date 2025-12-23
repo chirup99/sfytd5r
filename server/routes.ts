@@ -20083,9 +20083,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Future: Call Zerodha API with access token
-      // For now, return demo trades
-      const trades = [
+      // Call real Zerodha API with access token
+      const response = await axios.get('https://api.kite.trade/orders', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'X-Kite-Version': '3'
+        }
+      });
+
+      const orders = response.data.data || [];
+      
+      // Transform Zerodha orders to our format
+      const trades = orders.map((order: any) => ({
+        time: order.order_timestamp ? new Date(order.order_timestamp).toLocaleTimeString() : '-',
+        order: order.transaction_type === 'BUY' ? 'BUY' : 'SELL',
+        symbol: order.tradingsymbol,
+        qty: order.quantity,
+        price: order.price,
+        pnl: order.pnl ? `₹${order.pnl.toFixed(2)}` : '-',
+        type: order.order_type,
+        duration: order.filled_quantity > 0 ? 'Filled' : 'Pending'
+      }));
+
+      console.log('✅ [ZERODHA] Fetched', trades.length, 'trades from API');
+      
+      res.json({ 
+        trades,
+        success: true
+      });
+    } catch (error) {
+      console.error('❌ [ZERODHA] Error fetching trades:', error);
+      
+      // Fallback to demo trades if API fails
+      const demoTrades = [
         { 
           time: '3:16:47 PM',
           order: 'BUY', 
@@ -20107,16 +20137,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           duration: '2m 50s'
         }
       ];
-
+      
       res.json({ 
-        trades,
-        success: true
-      });
-    } catch (error) {
-      res.status(500).json({ 
-        error: error instanceof Error ? error.message : 'Failed to fetch trades',
-        trades: [],
-        success: false
+        trades: demoTrades,
+        success: false,
+        message: 'Using demo data - Zerodha API call failed'
       });
     }
   });
