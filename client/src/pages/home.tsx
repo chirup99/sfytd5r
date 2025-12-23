@@ -21490,12 +21490,11 @@ ${
 
         {/* Option Chain Modal */}
         <Dialog open={showOptionChain} onOpenChange={(open) => { setShowOptionChain(open); if (open) { fetchOptionChainData(selectedOptionIndex); } }}>
-          <DialogContent className="w-full max-w-4xl md:max-w-5xl p-0 md:p-6 bg-gradient-to-b from-gray-950 to-gray-900 dark:from-gray-950 dark:to-gray-900 md:dark:from-gray-900 md:dark:to-gray-800 md:bg-white md:dark:bg-gray-900 md:rounded-xl rounded-2xl border-0 md:border md:border-gray-200 md:dark:border-gray-700">
-
+          <DialogContent className="w-full max-w-4xl md:max-w-5xl p-0 md:p-0 bg-white dark:bg-gray-900 rounded-lg md:rounded-lg border border-gray-200 dark:border-gray-700">
 
             {/* Mobile Header */}
             <div className="md:hidden px-4 pt-1.5 pb-1.5">
-              <h2 className="text-base font-semibold text-white mb-1">Option Chain</h2>
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Option Chain</h2>
 
               {/* Controls */}
               <div className="space-y-1.5">
@@ -21504,7 +21503,7 @@ ${
                   <select
                     value={selectedOptionIndex}
                     onChange={(e) => { const idx = e.target.value; setSelectedOptionIndex(idx); setSelectedOptionExpiryDate(""); setOptionChainData(null); setTimeout(() => fetchOptionChainData(idx), 0); }}
-                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm"
+                    className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm"
                     data-testid="select-option-index-mobile"
                   >
                     <option value="NIFTY">NIFTY</option>
@@ -21519,7 +21518,7 @@ ${
                         setSelectedOptionExpiryDate(newExpiry); fetchOptionChainData(selectedOptionIndex, newExpiry);
                       }
                     }}
-                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm"
+                    className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm"
                     data-testid="select-option-expiry-date-mobile"
                   >
                     {optionChainLoading ? (
@@ -21537,9 +21536,9 @@ ${
                 </div>
 
                 {/* Spot Price */}
-                <div className="flex items-center justify-between bg-gray-800 rounded-lg px-2.5 py-1.5">
-                  <span className="text-gray-400 text-sm">Spot Price:</span>
-                  <span className="text-green-400 font-semibold text-lg" data-testid="text-option-spot-price-mobile">
+                <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-lg px-2.5 py-1.5 border border-gray-200 dark:border-gray-700">
+                  <span className="text-gray-600 dark:text-gray-400 text-sm">Spot Price:</span>
+                  <span className="text-green-600 dark:text-green-400 font-semibold text-lg" data-testid="text-option-spot-price-mobile">
                     ₹{(optionChainData?.spotPrice || 0)?.toLocaleString() || "-"}
                   </span>
                 </div>
@@ -21547,17 +21546,18 @@ ${
             </div>
 
             {/* Desktop Header */}
-            <div className="hidden md:block mb-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Option Chain</h2>
+            <div className="hidden md:block border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-semibold text-gray-900 dark:text-white">Option Chain</h2>
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">Spot: ₹{(optionChainData?.spotPrice || 0)?.toLocaleString()}</span>
               </div>
 
               {/* Desktop Controls */}
-              <div className="flex items-center gap-4 mt-4">
+              <div className="flex items-center gap-3">
                 <select
                   value={selectedOptionIndex}
                   onChange={(e) => { const idx = e.target.value; setSelectedOptionIndex(idx); setSelectedOptionExpiryDate(""); setOptionChainData(null); setTimeout(() => fetchOptionChainData(idx), 0); }}
-                  className="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                  className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   data-testid="select-option-index-desktop"
                 >
                   <option value="NIFTY">NIFTY</option>
@@ -21565,17 +21565,13 @@ ${
                   <option value="SENSEX">SENSEX</option>
                 </select>
 
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Spot: <span className="font-semibold text-green-600 dark:text-green-400">₹{(optionChainData?.spotPrice || 0)?.toLocaleString()}</span>
-                </span>
-
                 <select
                   value={selectedOptionExpiryDate || (getOptionExpiryDates(selectedOptionIndex)[0]?.value || "")}
                   onChange={(e) => {
                     const newExpiry = e.target.value;
                     setSelectedOptionExpiryDate(newExpiry); fetchOptionChainData(selectedOptionIndex, newExpiry);
                   }}
-                  className="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                  className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
                   data-testid="select-option-expiry-date-desktop"
                 >
                   {getOptionExpiryDates(selectedOptionIndex).map((date) => (
@@ -21592,30 +21588,25 @@ ${
               {optionChainLoading && (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-400 mx-auto mb-3"></div>
-                  <p className="text-gray-300 text-sm">Loading {selectedOptionIndex} options...</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">Loading {selectedOptionIndex} options...</p>
                 </div>
               )}
 
               {!optionChainLoading && optionChainData && (() => {
                 const getOptionSymbols = () => {
-                  // While loading, return empty; after loading, use actual data
                   const calls = optionChainData?.calls || [];
                   const puts = optionChainData?.puts || [];
-
                   const effectiveExpiry = normalizeExpiryDate(getEffectiveExpiry());
                   const filteredCalls = filterOptionsByExpiry(calls, effectiveExpiry);
                   const filteredPuts = filterOptionsByExpiry(puts, effectiveExpiry);
-
                   return { calls: filteredCalls, puts: filteredPuts };
                 };
 
                 const { calls, puts } = getOptionSymbols();
                 const currentPrice = optionChainData?.spotPrice || 0;
-
                 const allStrikes = new Set();
                 calls.forEach(c => allStrikes.add(c.strikePrice));
                 puts.forEach(p => allStrikes.add(p.strikePrice));
-
                 const strikeArray = Array.from(allStrikes) as number[];
                 let atmStrike = null;
                 if (strikeArray.length > 0) {
@@ -21643,10 +21634,8 @@ ${
                   const allStrikes = new Set();
                   calls.forEach(c => allStrikes.add(c.strikePrice));
                   puts.forEach(p => allStrikes.add(p.strikePrice));
-
                   const strikeArray = Array.from(allStrikes);
                   if (strikeArray.length === 0) return 'OTM';
-
                   if (strike === atmStrike) return 'ATM';
                   if (isCall) return strike < currentPrice ? 'ITM' : 'OTM';
                   return strike > currentPrice ? 'ITM' : 'OTM';
@@ -21672,7 +21661,6 @@ ${
                   if (ltp && ltp > 0) {
                     setPaperTradeCurrentPrice(ltp);
                     setPaperTradePriceLoading(false);
-
                     const optionInstrument = {
                       symbol: instrumentSymbol,
                       exchange: optionExchange || getExchangeForIndex(selectedOptionIndex),
@@ -21682,7 +21670,6 @@ ${
                     setSelectedPaperTradingInstrument(optionInstrument);
                     fetchPaperTradePrice(optionInstrument);
                   }
-
                   setShowOptionChain(false);
                 };
 
@@ -21703,41 +21690,33 @@ ${
                 };
 
                 if (maxRows === 0) {
-                  return <div className="text-center py-8"><p className="text-sm text-gray-300">No options available for {selectedOptionIndex}</p></div>;
+                  return <div className="text-center py-8"><p className="text-sm text-gray-400">No options available for {selectedOptionIndex}</p></div>;
                 }
 
                 return (
                   <div className="space-y-2">
                     <div className="space-y-0">
-                      {/* Headers */}
                       <div className="grid grid-cols-3 gap-1 mb-2 px-1">
                         <div className="text-center text-xs font-semibold text-blue-400">Calls</div>
                         <div className="text-center text-xs font-semibold text-gray-400">Strike</div>
                         <div className="text-center text-xs font-semibold text-red-400">Puts</div>
                       </div>
 
-                      {/* Compact 3-Column Option Chain with ITM/ATM Color Coding */}
                       <div className="space-y-0.5">
                         {(() => {
                           const spotPrice = optionChainData?.spotPrice || 0;
-                          const atmRange = spotPrice * 0.01; // ±1% for ATM
-
-                          // Get color class for a strike
+                          const atmRange = spotPrice * 0.01;
                           const getStrikeColor = (strike: number, isCall: boolean) => {
                             const distance = Math.abs(strike - spotPrice);
-
                             if (isCall) {
-                              // For calls: ITM if strike < spotPrice
                               if (strike < spotPrice) {
                                 return distance <= atmRange ? 'bg-yellow-900 text-yellow-200 border-yellow-700' : 'bg-blue-900 text-blue-200 border-blue-700';
                               }
                             } else {
-                              // For puts: ITM if strike > spotPrice
                               if (strike > spotPrice) {
                                 return distance <= atmRange ? 'bg-yellow-900 text-yellow-200 border-yellow-700' : 'bg-blue-900 text-blue-200 border-blue-700';
                               }
                             }
-                            // OTM - no color
                             return 'bg-gray-800 text-gray-300 border-gray-700';
                           };
 
@@ -21754,7 +21733,6 @@ ${
 
                             return (
                               <div key={`${strike}-row`} className="grid grid-cols-3 gap-1 px-1">
-                                {/* Call Price - ITM (light blue) / ATM (yellow) / OTM (gray) */}
                                 <button
                                   onClick={() => call && handleOptionClick(call)}
                                   disabled={!call}
@@ -21766,14 +21744,12 @@ ${
                                   {call ? `₹${call.ltp?.toFixed(0) || '0'}` : '-'}
                                 </button>
 
-                                {/* Strike Price - Center - Highlight ATM */}
                                 <div className={`py-1.5 px-1 rounded text-xs font-bold text-center flex items-center justify-center transition-all ${
                                   callStrikeAtm ? 'bg-yellow-700 text-yellow-100 border-yellow-600' : 'bg-gray-800 text-yellow-400 border-gray-700'
                                 } border`}>
                                   {strike}
                                 </div>
 
-                                {/* Put Price - ITM (light blue) / ATM (yellow) / OTM (gray) */}
                                 <button
                                   onClick={() => put && handleOptionClick(put)}
                                   disabled={!put}
@@ -21796,40 +21772,35 @@ ${
 
               {!optionChainLoading && !optionChainData && (
                 <div className="text-center py-8">
-                  <p className="text-sm text-gray-300">Loading option chain data...</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Loading option chain data...</p>
                 </div>
               )}
             </div>
 
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-y-auto max-h-96">
+            <div className="hidden md:block px-6 py-4 overflow-y-auto max-h-96">
               {optionChainLoading && (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Loading {selectedOptionIndex} options...</p>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Loading {selectedOptionIndex} options...</p>
                 </div>
               )}
 
               {!optionChainLoading && optionChainData && (() => {
                 const getOptionSymbols = () => {
-                  // While loading, return empty; after loading, use actual data
                   const calls = optionChainData?.calls || [];
                   const puts = optionChainData?.puts || [];
-
                   const effectiveExpiry = normalizeExpiryDate(getEffectiveExpiry());
                   const filteredCalls = filterOptionsByExpiry(calls, effectiveExpiry);
                   const filteredPuts = filterOptionsByExpiry(puts, effectiveExpiry);
-
                   return { calls: filteredCalls, puts: filteredPuts };
                 };
 
                 const { calls, puts } = getOptionSymbols();
                 const currentPrice = optionChainData?.spotPrice || 0;
-
                 const allStrikes = new Set();
                 calls.forEach(c => allStrikes.add(c.strikePrice));
                 puts.forEach(p => allStrikes.add(p.strikePrice));
-
                 const strikeArray = Array.from(allStrikes) as number[];
                 let atmStrike = null;
                 if (strikeArray.length > 0) {
@@ -21857,10 +21828,8 @@ ${
                   const allStrikes = new Set();
                   calls.forEach(c => allStrikes.add(c.strikePrice));
                   puts.forEach(p => allStrikes.add(p.strikePrice));
-
                   const strikeArray = Array.from(allStrikes);
                   if (strikeArray.length === 0) return 'OTM';
-
                   if (strike === atmStrike) return 'ATM';
                   if (isCall) return strike < currentPrice ? 'ITM' : 'OTM';
                   return strike > currentPrice ? 'ITM' : 'OTM';
@@ -21886,7 +21855,6 @@ ${
                   if (ltp && ltp > 0) {
                     setPaperTradeCurrentPrice(ltp);
                     setPaperTradePriceLoading(false);
-
                     const optionInstrument = {
                       symbol: instrumentSymbol,
                       exchange: optionExchange || getExchangeForIndex(selectedOptionIndex),
@@ -21896,22 +21864,21 @@ ${
                     setSelectedPaperTradingInstrument(optionInstrument);
                     fetchPaperTradePrice(optionInstrument);
                   }
-
                   setShowOptionChain(false);
                 };
 
                 const getClasses = (strike, isCall) => {
                   const status = getOptionStatus(strike, isCall);
-                  if (status === 'ATM') return 'px-2 py-1 bg-yellow-50 dark:bg-yellow-900/20 rounded text-center cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition-colors';
-                  if (status === 'ITM' && isCall) return 'px-2 py-1 bg-blue-50 dark:bg-blue-900/20 rounded text-center cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors';
-                  if (status === 'ITM') return 'px-2 py-1 bg-red-50 dark:bg-red-900/20 rounded text-center cursor-pointer hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors';
-                  return 'px-2 py-1 bg-gray-50 dark:bg-gray-800/40 rounded text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors';
+                  if (status === 'ATM') return 'px-2 py-1 bg-yellow-100 dark:bg-yellow-900/20 rounded text-center cursor-pointer hover:bg-yellow-200 dark:hover:bg-yellow-900/40 transition-colors';
+                  if (status === 'ITM' && isCall) return 'px-2 py-1 bg-green-100 dark:bg-green-900/20 rounded text-center cursor-pointer hover:bg-green-200 dark:hover:bg-green-900/40 transition-colors';
+                  if (status === 'ITM') return 'px-2 py-1 bg-red-100 dark:bg-red-900/20 rounded text-center cursor-pointer hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors';
+                  return 'px-2 py-1 bg-gray-100 dark:bg-gray-800/40 rounded text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800/60 transition-colors';
                 };
 
                 const getTextClasses = (strike, isCall) => {
                   const status = getOptionStatus(strike, isCall);
                   if (status === 'ATM') return 'text-xs font-semibold text-yellow-900 dark:text-yellow-300';
-                  if (status === 'ITM' && isCall) return 'text-xs font-semibold text-blue-900 dark:text-blue-300';
+                  if (status === 'ITM' && isCall) return 'text-xs font-semibold text-green-900 dark:text-green-300';
                   if (status === 'ITM') return 'text-xs font-semibold text-red-900 dark:text-red-300';
                   return 'text-xs font-semibold text-gray-700 dark:text-gray-400';
                 };
@@ -21919,20 +21886,21 @@ ${
                 const getPriceClasses = (strike, isCall) => {
                   const status = getOptionStatus(strike, isCall);
                   if (status === 'ATM') return 'text-xs text-yellow-700 dark:text-yellow-400 mt-0.5';
-                  if (status === 'ITM' && isCall) return 'text-xs text-blue-700 dark:text-blue-400 mt-0.5';
+                  if (status === 'ITM' && isCall) return 'text-xs text-green-700 dark:text-green-400 mt-0.5';
                   if (status === 'ITM') return 'text-xs text-red-700 dark:text-red-400 mt-0.5';
                   return 'text-xs text-gray-600 dark:text-gray-500 mt-0.5';
                 };
 
                 if (maxRows === 0) {
-                  return <div className="text-center py-8"><p className="text-sm text-gray-500 dark:text-gray-400">No options available for {selectedOptionIndex} on {selectedOptionExpiryDate}</p></div>;
+                  return <div className="text-center py-8"><p className="text-sm text-gray-600 dark:text-gray-400">No options available for {selectedOptionIndex} on {selectedOptionExpiryDate}</p></div>;
                 }
 
-                return <div className="overflow-x-auto"><table className="w-full text-xs"><thead className="sticky top-0 bg-gray-50 dark:bg-gray-800"><tr className="border-b border-gray-300 dark:border-gray-600"><th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-white">CE</th><th className="text-center py-2 px-2 font-semibold text-gray-900 dark:text-white">Strike</th><th className="text-right py-2 px-3 font-semibold text-gray-900 dark:text-white">PE</th></tr></thead><tbody>{Array.from({ length: maxRows }).map((_, index) => <tr key={index} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"><td className="py-2 px-3">{filteredCalls[index] ? <div onClick={() => handleOptionClick(filteredCalls[index])} className={getClasses(filteredCalls[index].strikePrice, true)} data-testid={`option-call-${filteredCalls[index].strikePrice}`}><div className={getPriceClasses(filteredCalls[index].strikePrice, true)}>₹{filteredCalls[index].ltp?.toFixed(2) || 0}</div></div> : null}</td><td className="py-2 px-2 text-center font-medium text-gray-700 dark:text-gray-300">{filteredCalls[index]?.strikePrice || filteredPuts[index]?.strikePrice || '-'}</td><td className="py-2 px-3">{filteredPuts[index] ? <div onClick={() => handleOptionClick(filteredPuts[index])} className={getClasses(filteredPuts[index].strikePrice, false)} data-testid={`option-put-${filteredPuts[index].strikePrice}`}><div className={getPriceClasses(filteredPuts[index].strikePrice, false)}>₹{filteredPuts[index].ltp?.toFixed(2) || 0}</div></div> : null}</td></tr>)}</tbody></table></div>;
+                return <div className="overflow-x-auto"><table className="w-full text-xs"><thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700"><tr><th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-white">CE</th><th className="text-center py-2 px-2 font-semibold text-gray-900 dark:text-white">Strike</th><th className="text-right py-2 px-3 font-semibold text-gray-900 dark:text-white">PE</th></tr></thead><tbody>{Array.from({ length: maxRows }).map((_, index) => <tr key={index} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"><td className="py-2 px-3">{filteredCalls[index] ? <div onClick={() => handleOptionClick(filteredCalls[index])} className={getClasses(filteredCalls[index].strikePrice, true)} data-testid={`option-call-${filteredCalls[index].strikePrice}`}><div className={getPriceClasses(filteredCalls[index].strikePrice, true)}>₹{filteredCalls[index].ltp?.toFixed(2) || 0}</div></div> : null}</td><td className="py-2 px-2 text-center font-medium text-gray-700 dark:text-gray-300">{filteredCalls[index]?.strikePrice || filteredPuts[index]?.strikePrice || '-'}</td><td className="py-2 px-3 text-right">{filteredPuts[index] ? <div onClick={() => handleOptionClick(filteredPuts[index])} className={getClasses(filteredPuts[index].strikePrice, false)} data-testid={`option-put-${filteredPuts[index].strikePrice}`}><div className={getPriceClasses(filteredPuts[index].strikePrice, false)}>₹{filteredPuts[index].ltp?.toFixed(2) || 0}</div></div> : null}</td></tr>)}</tbody></table></div>;
               })()}
             </div>
           </DialogContent>
         </Dialog>
+
 
         {/* Trading Master Coming Soon Modal */}
         <Dialog open={showTradingMasterComingSoon} onOpenChange={setShowTradingMasterComingSoon}>
