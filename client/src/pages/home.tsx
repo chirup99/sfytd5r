@@ -8,6 +8,7 @@ import React, {
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { AuthButtonAngelOne, AngelOneStatus, AngelOneApiStatistics, AngelOneSystemStatus, AngelOneLiveMarketPrices } from "@/components/auth-button-angelone";
+import { AuthButtonUpstox } from "@/components/auth-button-upstox";
 // REMOVED: All Fyers-related imports
 // import { AuthButton } from "@/components/auth-button";
 // import { ConnectionStatus } from "@/components/connection-status";

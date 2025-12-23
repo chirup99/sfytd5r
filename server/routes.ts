@@ -68,6 +68,7 @@ import { getDemoHeatmapData, seedDemoDataToAWS } from './demo-heatmap-data';
 import { tradingNLPAgent } from './nlp-trading-agent';
 import { nlpDataRouter } from './nlp-data-router';
 import { tradingChallengeService } from './trading-challenge-service';
+import { upstoxOAuthManager } from './upstox-oauth';
 
 // 🔶 Angel One Stock Token Mappings for historical data
 const ANGEL_ONE_STOCK_TOKENS: { [key: string]: { token: string; exchange: string; tradingSymbol: string } } = {
@@ -20476,6 +20477,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // ========================================
+  // UPSTOX OAUTH 2.0 IMPLEMENTATION
+  // ========================================
+
+  // Get authorization URL for Upstox OAuth flow
+  app.get('/api/upstox/auth-url', (req, res) => {
+    try {
+      const { url, state } = upstoxOAuthManager.generateAuthorizationUrl();
+      res.json({ authUrl: url, state });
+    } catch (error: any) {
+      console.error('🔴 [UPSTOX] Error generating auth URL:', error.message);
+      res.status(500).json({ error: 'Failed to generate authorization URL' });
+    }
+  });
+
+  // Handle Upstox OAuth callback
+  app.get('/api/upstox/callback', async (req, res) => {
+    try {
+      const code = req.query.code as string;
+      const state = req.query.state as string;
+
+      if (!code || !state) {
+        console.error('🔴 [UPSTOX] Missing code or state in callback');
+        return res.status(400).json({ error: 'Missing authorization code or state' });
+      }
+
+      console.log('🔵 [UPSTOX] Processing OAuth callback...');
+
+      const success = await upstoxOAuthManager.exchangeCodeForToken(code, state);
+
+      if (success) {
+        console.log('✅ [UPSTOX] Successfully authenticated');
+        // Redirect to a success page or close the window
+        res.send(`
+          <html>
+            <body>
+              <h1>✅ Upstox Connected Successfully!</h1>
+              <p>You can now close this window and return to the trading app.</p>
+              <script>
+                window.setTimeout(() => {
+                  window.close();
+                }, 2000);
+              </script>
+            </body>
+          </html>
+        `);
+      } else {
+        res.status(400).json({ error: 'Failed to authenticate with Upstox' });
+      }
+    } catch (error: any) {
+      console.error('🔴 [UPSTOX] Callback error:', error.message);
+      res.status(500).json({ error: 'OAuth callback failed' });
+    }
+  });
+
+  // Get Upstox connection status
+  app.get('/api/upstox/status', (req, res) => {
+    try {
+      const status = upstoxOAuthManager.getStatus();
+      res.json({
+        success: true,
+        ...status,
+      });
+    } catch (error: any) {
+      console.error('🔴 [UPSTOX] Error getting status:', error.message);
+      res.status(500).json({ success: false, error: 'Failed to get status' });
+    }
+  });
+
+  // Disconnect from Upstox
+  app.post('/api/upstox/disconnect', (req, res) => {
+    try {
+      upstoxOAuthManager.disconnect();
+      res.json({ success: true, message: 'Disconnected from Upstox' });
+    } catch (error: any) {
+      console.error('🔴 [UPSTOX] Error disconnecting:', error.message);
+      res.status(500).json({ success: false, error: 'Failed to disconnect' });
+    }
+  });
 
   return httpServer;
 }

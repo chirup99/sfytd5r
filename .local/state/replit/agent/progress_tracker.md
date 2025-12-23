@@ -80,6 +80,36 @@
 - **Applied minimalist dropdown styling to all select elements (4 dropdowns total)**
 - **Replaced native HTML select with Radix UI Select components for proper mobile positioning (lines 21502-21530)**
 
+## Upstox OAuth Integration (Turn 14 - COMPLETE ✅)
+
+[x] 1. Implemented Upstox OAuth 2.0 Manager (`server/upstox-oauth.ts`)
+   - Full OAuth state management
+   - Authorization URL generation with CSRF protection
+   - Token exchange and validation
+   - User profile fetching
+   - Token expiry handling
+   
+[x] 2. Created Upstox Auth Button Component (`client/src/components/auth-button-upstox.tsx`)
+   - Connect/disconnect UI
+   - Status monitoring
+   - Loading and error states
+   - User profile display
+   
+[x] 3. Added Upstox OAuth Routes in `server/routes.ts`
+   - GET `/api/upstox/auth-url` - Generate authorization URL
+   - GET `/api/upstox/callback` - Handle OAuth callback
+   - GET `/api/upstox/status` - Get connection status
+   - POST `/api/upstox/disconnect` - Disconnect session
+   
+[x] 4. Updated `client/src/pages/home.tsx`
+   - Imported AuthButtonUpstox component
+   - Integrated into broker connection dialog
+   
+[x] 5. Secured API Credentials
+   - Stored UPSTOX_API_KEY in secrets
+   - Stored UPSTOX_API_SECRET in secrets
+   - Environment variables properly configured
+
 ## Import Status: COMPLETE ✅
 
 - All migration steps completed
@@ -94,3 +124,4 @@
 - **✨ Light Theme: Option chain displays correctly on all devices**
 - **✨ Minimalist Design: Clean dropdowns and consistent UI across the app**
 - **✨ Mobile Dropdown Fix: Radix UI Select components for proper positioning on all screen sizes**
+- **✨ UPSTOX OAUTH: Complete OAuth 2.0 integration with secure token management**
