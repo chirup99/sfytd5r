@@ -18962,19 +18962,18 @@ ${
                   <table className="w-full text-xs">
                     <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
                       <tr>
-                        <th className="px-2 py-2 text-left font-medium">Time</th>
-                        <th className="px-2 py-2 text-left font-medium">Order</th>
                         <th className="px-2 py-2 text-left font-medium">Symbol</th>
-                        <th className="px-2 py-2 text-left font-medium">Type</th>
+                        <th className="px-2 py-2 text-left font-medium">Entry Price</th>
+                        <th className="px-2 py-2 text-left font-medium">Current Price</th>
                         <th className="px-2 py-2 text-left font-medium">Qty</th>
-                        <th className="px-2 py-2 text-left font-medium">Price</th>
-                        <th className="px-2 py-2 text-left font-medium">P&L</th>
-                        <th className="px-2 py-2 text-left font-medium">Duration</th>
+                        <th className="px-2 py-2 text-left font-medium">Unrealized P&L</th>
+                        <th className="px-2 py-2 text-left font-medium">Return %</th>
+                        <th className="px-2 py-2 text-left font-medium">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td colSpan={8} className="px-2 py-4 text-center text-gray-500">
+                        <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
                           No open positions
                         </td>
                       </tr>
