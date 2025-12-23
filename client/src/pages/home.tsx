@@ -18885,13 +18885,15 @@ ${
 
         {/* Trade History Modal with Orders & Positions */}
         <Dialog open={showOrderModal} onOpenChange={setShowOrderModal}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto custom-thin-scrollbar">
-            <DialogHeader>
-              <DialogTitle>Orders & Positions</DialogTitle>
-            </DialogHeader>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto custom-thin-scrollbar p-0">
+            {/* Compact Header */}
+            <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
+              <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
+            </div>
 
-            <Tabs value={orderTab} onValueChange={setOrderTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
+            <div className="p-4">
+              <Tabs value={orderTab} onValueChange={setOrderTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-3">
                 <TabsTrigger value="history">Orders</TabsTrigger>
                 <TabsTrigger value="positions">Positions</TabsTrigger>
               </TabsList>
@@ -18981,7 +18983,8 @@ ${
                 </div>
               </TabsContent>
 
-            </Tabs>
+              </Tabs>
+            </div>
           </DialogContent>
         </Dialog>
 
