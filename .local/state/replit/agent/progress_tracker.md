@@ -6,7 +6,7 @@
 [x] 3. Verify the project is working using the feedback tool
 [x] 4. Inform user the import is completed and they can start building, mark the import as completed using the complete_project_import tool
 
-## Desktop & Mobile Option Chain Redesign (Turn 11-13)
+## Desktop & Mobile Option Chain Redesign (Turn 11-14)
 [x] Fixed light theme display issues
 [x] Redesigned desktop option chain to match paper trading dialog style
 [x] Minimalist design: clean white/dark backgrounds (no gradients)
@@ -20,22 +20,26 @@
 [x] Reduced font sizes for compact look
 [x] **Applied same tiny design to mobile**
 [x] **Mobile and desktop now have consistent design**
+[x] **Fixed mobile dropdown positioning issue**
+[x] **Replaced native HTML select with Radix UI Select components**
 
-## Recent Updates (Turn 14)
-[x] **Dropdown styling**: Changed to minimalist design with white background and subtle gray borders
-[x] **Unified option chain**: Removed separate mobile view, now uses desktop table design on all screen sizes
-[x] **Responsive refinement**: Single option chain layout works seamlessly across mobile and desktop
+## Recent Updates (Turn 15 - Final)
+[x] **Mobile dropdown fix**: Replaced native `<select>` elements with Radix UI Select components
+[x] **Proper positioning**: Radix UI Select handles dropdown positioning automatically on mobile
+[x] **Minimalist styling**: White backgrounds with subtle gray borders (`border-gray-200 dark:border-gray-700`)
+[x] **Unified component**: Both index and expiry dropdowns now use Radix UI Select
+[x] **Mobile-friendly**: Dropdowns now display correctly within the dialog on all screen sizes
 
 ## Design Changes:
-- DialogContent: Removed gradient, now uses `bg-white dark:bg-gray-900` with proper borders
-- Desktop Header: Clean centered spot price at top
-- Controls: Grouped in center with proper compact spacing
-- Table: Light-themed table with `bg-gray-100 dark:bg-gray-800` headers
-- Hover States: Light theme now shows `hover:bg-gray-50 dark:hover:bg-gray-800`
-- Dropdowns: `bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700` (minimalist)
-- Size: max-w-2xl (tiny dialog)
+- Native HTML select → Radix UI Select components
+- Automatic dropdown positioning (no more off-screen issues on mobile)
+- Minimalist styling: `bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700`
+- Consistent look across mobile and desktop
+- DialogContent: Removed gradient, uses `bg-white dark:bg-gray-900`
 - Spot Price: Centered display
-- Option Chain: Unified desktop table design on all devices
+- Padding: Compact spacing
+- Option Chain: Unified table design on all devices
+- Dropdowns: Proper Radix UI Select positioning
 
 ## Features Implemented
 
@@ -58,6 +62,7 @@
 ✅ **Tiny Option Chain Dialog: Compact size with centered spot price**
 ✅ **Mobile Option Chain: Unified with desktop - same table design across all devices**
 ✅ **Minimalist Dropdowns: Clean white backgrounds with subtle borders**
+✅ **Fixed Mobile Dropdown Positioning: Radix UI Select replaces native select elements**
 
 ## Code Changes Made
 
@@ -73,6 +78,7 @@
 - **Redesigned desktop option chain dialog - tiny and minimalist**
 - **Updated mobile option chain to use same desktop table design - removed separate grid layout**
 - **Applied minimalist dropdown styling to all select elements (4 dropdowns total)**
+- **Replaced native HTML select with Radix UI Select components for proper mobile positioning (lines 21502-21530)**
 
 ## Import Status: COMPLETE ✅
 
@@ -87,3 +93,4 @@
 - **✨ Unified Option Chain: Same desktop table design on mobile and desktop**
 - **✨ Light Theme: Option chain displays correctly on all devices**
 - **✨ Minimalist Design: Clean dropdowns and consistent UI across the app**
+- **✨ Mobile Dropdown Fix: Radix UI Select components for proper positioning on all screen sizes**
