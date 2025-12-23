@@ -3960,21 +3960,50 @@ ${
 
   const handleUpstoxConnect = async () => {
     try {
-      console.log("🔵 Starting Upstox OAuth flow...");
-      const response = await fetch("/api/upstox/auth-url");
+      console.log('🔵 Starting Upstox OAuth flow...');
+      const response = await fetch('/api/upstox/auth-url');
       const data = await response.json();
       
       if (!data.authUrl) {
-        alert("Error: Could not generate Upstox authorization URL");
+        alert('Error: Could not generate Upstox authorization URL');
         return;
       }
       
-      console.log("🔗 Upstox auth URL:", data.authUrl);
-      window.location.href = data.authUrl;
+      console.log('🔗 Upstox auth URL:', data.authUrl);
+      
+      const popup = window.open(
+        data.authUrl,
+        'upstox_oauth',
+        'width=600,height=800,resizable=yes,scrollbars=yes'
+      );
+      
+      if (!popup) {
+        console.warn('❌ Popup blocked, falling back to main window');
+        alert('Popup blocked. Please enable popups and try again.');
+        return;
+      }
+      
+      console.log('✅ Upstox popup opened, waiting for OAuth callback...');
+      
+      // Monitor popup closing
+      let checkCount = 0;
+      const monitorPopup = setInterval(() => {
+        checkCount++;
+        if (popup.closed) {
+          clearInterval(monitorPopup);
+          console.log('⚠️ Upstox popup closed');
+          return;
+        }
+        if (checkCount > 300) {
+          clearInterval(monitorPopup);
+          popup.close();
+          console.log('⚠️ Upstox popup timeout');
+        }
+      }, 1000);
       
     } catch (error) {
-      console.error("❌ Upstox error:", error);
-      alert("Error: " + (error instanceof Error ? error.message : "Failed to connect to Upstox"));
+      console.error('❌ Upstox error:', error);
+      alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect to Upstox'));
     }
   };
 

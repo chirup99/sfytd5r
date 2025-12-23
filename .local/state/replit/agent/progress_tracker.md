@@ -126,9 +126,14 @@
 - **✨ Mobile Dropdown Fix: Radix UI Select components for proper positioning on all screen sizes**
 - **✨ UPSTOX OAUTH: Complete OAuth 2.0 integration with secure token management**
 
-## Recent Fix (Turn 17)
-[x] **UPSTOX BUTTON FIX**: Connected Upstox dialog button to actual OAuth flow
+## Recent Fixes (Turn 17-18)
+[x] **UPSTOX BUTTON FIX - PART 1**: Connected Upstox dialog button to actual OAuth flow
    - Added `handleUpstoxConnect` function to home.tsx (line 3961)
    - Updated Upstox button with `onClick={handleUpstoxConnect}` (line 17350)
-   - Button now redirects to Upstox OAuth login when clicked
-   - Completes the OAuth flow similar to Angel One and Zerodha
+   
+[x] **UPSTOX BUTTON FIX - PART 2**: Fixed popup implementation
+   - Changed from `window.location.href` (full page redirect) to `window.open()` (popup)
+   - Now opens OAuth popup in new window like Zerodha button does
+   - Added popup monitoring to detect when user completes login
+   - Handles popup blocking with user-friendly error message
+   - Popup size: 600x800 with scrollbars enabled
