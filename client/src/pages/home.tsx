@@ -3958,6 +3958,26 @@ ${
     }
   };
 
+  const handleUpstoxConnect = async () => {
+    try {
+      console.log("🔵 Starting Upstox OAuth flow...");
+      const response = await fetch("/api/upstox/auth-url");
+      const data = await response.json();
+      
+      if (!data.authUrl) {
+        alert("Error: Could not generate Upstox authorization URL");
+        return;
+      }
+      
+      console.log("🔗 Upstox auth URL:", data.authUrl);
+      window.location.href = data.authUrl;
+      
+    } catch (error) {
+      console.error("❌ Upstox error:", error);
+      alert("Error: " + (error instanceof Error ? error.message : "Failed to connect to Upstox"));
+    }
+  };
+
   const handleRevokeZerodha = () => {
     localStorage.removeItem("zerodha_token"); document.cookie = "zerodha_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     setZerodhaAccessToken(null);
@@ -17327,6 +17347,7 @@ ${
                               >
                                 <X className="h-4 w-4" />
                               </Button>
+                            onClick={handleUpstoxConnect}
                             </div>
                           ) : (
                             <Button
