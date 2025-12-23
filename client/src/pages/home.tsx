@@ -3763,32 +3763,43 @@ ${
   }, []);
 
 
-  // Fetch Zerodha profile to get client ID
+  // Fetch Zerodha profile to get client ID - with persistence
   useEffect(() => {
-    if (zerodhaAccessToken && !zerodhaClientId) {
-      const fetchZerodhaProfile = async () => {
-        try {
-          const response = await fetch('https://api.kite.trade/user/profile', {
-            headers: {
-              'Authorization': `Bearer ${zerodhaAccessToken}`,
-              'X-Kite-Version': '3'
+    if (zerodhaAccessToken) {
+      // Check if we already have it in localStorage
+      const savedId = localStorage.getItem('zerodha_client_id');
+      if (savedId && !zerodhaClientId) {
+        setZerodhaClientId(savedId);
+        console.log('✅ [ZERODHA] Client ID restored from cache');
+        return;
+      }
+      
+      // If not in cache or state, fetch it from API
+      if (!zerodhaClientId) {
+        const fetchZerodhaProfile = async () => {
+          try {
+            const response = await fetch('https://api.kite.trade/user/profile', {
+              headers: {
+                'Authorization': `Bearer ${zerodhaAccessToken}`,
+                'X-Kite-Version': '3'
+              }
+            });
+            if (response.ok) {
+              const data = await response.json();
+              if (data.data && data.data.user_id) {
+                localStorage.setItem('zerodha_client_id', data.data.user_id);
+                setZerodhaClientId(data.data.user_id);
+                console.log('✅ [ZERODHA] Client ID fetched and saved:', data.data.user_id);
+              }
             }
-          });
-          if (response.ok) {
-            const data = await response.json();
-            if (data.data && data.data.user_id) {
-              localStorage.setItem('zerodha_client_id', data.data.user_id);
-              setZerodhaClientId(data.data.user_id);
-              console.log('✅ [ZERODHA] Client ID fetched:', data.data.user_id);
-            }
+          } catch (error) {
+            console.error('❌ [ZERODHA] Failed to fetch profile:', error);
           }
-        } catch (error) {
-          console.error('❌ [ZERODHA] Failed to fetch profile:', error);
-        }
-      };
-      fetchZerodhaProfile();
+        };
+        fetchZerodhaProfile();
+      }
     }
-  }, [zerodhaAccessToken, zerodhaClientId]);
+  }, [zerodhaAccessToken]);
 
   // Handle Zerodha OAuth callback from URL (popup communication)
   useEffect(() => {
