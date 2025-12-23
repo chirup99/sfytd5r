@@ -4470,8 +4470,7 @@ ${
       return () => clearInterval(pollInterval);
     }
   }, [showOrderModal, zerodhaAccessToken]);
-
-  // 🤖 AUTO-IMPORT: Automatically import broker orders to Trade History (except Status column)
+  // 🤖 AUTO-IMPORT: Automatically import broker orders to Trade History & Personal Heatmap (Today's Date)
   const importedOrdersRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -4513,13 +4512,55 @@ ${
           );
           if (uniqueNewTrades.length > 0) {
             console.log(`✅ Auto-imported ${uniqueNewTrades.length} orders to Trade History`);
+            
+            // 📊 ALSO save to today's personal heatmap for tracking
+            const today = new Date();
+            const todayKey = formatDateKey(today);
+            const existingData = tradingDataByDate[todayKey] || {};
+            const existingTrades = existingData.tradeHistory || [];
+
+            // Convert broker trades to heatmap format
+            const heatmapTrades = uniqueNewTrades.map((trade: any) => ({
+              symbol: trade.symbol,
+              type: trade.type || 'MKT',
+              action: trade.order,
+              quantity: trade.qty,
+              price: trade.price,
+              time: trade.time,
+              pnl: trade.pnl !== '-' ? parseFloat(String(trade.pnl).replace('₹', '')) : null,
+            }));
+
+            const mergedTrades = [...existingTrades, ...heatmapTrades];
+            const totalPnL = mergedTrades.reduce((sum: number, trade: any) => {
+              if (trade.pnl) return sum + (trade.pnl || 0);
+              return sum;
+            }, 0);
+
+            const updatedData = {
+              ...existingData,
+              tradeHistory: mergedTrades,
+              profitLossAmount: totalPnL,
+              totalTrades: mergedTrades.length
+            };
+
+            // Save to personal heatmap for today
+            setPersonalTradingDataByDate((prev: any) => ({
+              ...prev,
+              [todayKey]: updatedData
+            }));
+
+            // Auto-select today's date on heatmap to show updated P&L
+            setHeatmapSelectedDate(todayKey);
+            
+            console.log(`📊 Saved ${uniqueNewTrades.length} trades to personal heatmap for ${todayKey}`);
+            
             return [...uniqueNewTrades, ...prev];
           }
           return prev;
         });
       }
     }
-  }, [brokerOrders]);
+  }, [brokerOrders, tradingDataByDate]);
 
 
   // Fetch broker funds when dialog opens - with auto-refresh polling
