@@ -3738,6 +3738,7 @@ ${
   const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [zerodhaTradesLoading, setZerodhaTradesLoading] = useState(false);
   const [zerodhaTradesData, setZerodhaTradesData] = useState<any[]>([]);
+  const [zerodhaProfileData, setZerodhaProfileData] = useState<any>(null);
   const [importData, setImportData] = useState("");
   const [importError, setImportError] = useState("");
   const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
@@ -3848,6 +3849,20 @@ ${
         
         // Fetch trades
         setTimeout(() => {
+          // Also fetch profile
+          fetch("/api/broker/zerodha/profile", {
+            headers: { "Authorization": `Bearer ${token}` }
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.profile) {
+                setZerodhaProfileData(data.profile);
+                setZerodhaClientId(data.profile.userId);
+                console.log('✅ [ZERODHA] Profile fetched:', data.profile.email);
+              }
+            })
+            .catch(err => console.error("❌ [ZERODHA] Error fetching profile:", err));
+
           console.log('📡 [ZERODHA] Fetching trades with token...');
           setZerodhaTradesLoading(true);
           fetch("/api/broker/zerodha/trades", {
