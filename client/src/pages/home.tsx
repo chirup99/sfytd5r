@@ -17030,7 +17030,7 @@ ${
                                 <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[60px]">Price</th>
                                 <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[60px]">P&L</th>
                                 <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[45px]">%</th>
-                                <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[50px]">Duration</th>
+                                <th className="px-2 py-2 text-left text-slate-600 dark:text-slate-400 font-medium min-w-[50px]">Status</th>
                               </tr>
                             </thead>
                             <tbody className="bg-white dark:bg-slate-900">
@@ -18983,7 +18983,7 @@ ${
                         <th className="px-2 py-2 text-left font-medium">Type</th>
                         <th className="px-2 py-2 text-left font-medium">Qty</th>
                         <th className="px-2 py-2 text-left font-medium">Price</th>
-                        <th className="px-2 py-2 text-left font-medium">Duration</th>
+                        <th className="px-2 py-2 text-left font-medium">Status</th>
                       </tr>
                     </thead>
                     <tbody>
