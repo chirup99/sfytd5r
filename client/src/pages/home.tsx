@@ -4372,7 +4372,6 @@ ${
     target: "",
   });
 
-  const [brokerProfile, setBrokerProfile] = useState<{ clientId: string; userName: string }>({ clientId: "N/A", userName: "N/A" });
   // Save Confirmation Dialog State
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const [saveConfirmationData, setSaveConfirmationData] = useState<any>(null);
@@ -4398,15 +4397,6 @@ ${
         })
         .finally(() => setFetchingBrokerOrders(false));
     }
-      fetch("/api/broker/zerodha/profile", {
-        headers: { "Authorization": `Bearer ${zerodhaAccessToken}` }
-      })
-        .then(res => res.json())
-        .then(data => {
-          setBrokerProfile({ clientId: data.clientId || "N/A", userName: data.userName || "N/A" });
-          console.log("✅ [PROFILE] Fetched:", data.clientId, data.userName);
-        })
-        .catch(err => console.error("❌ [PROFILE] Error:", err));
   }, [showOrderModal, zerodhaAccessToken]);
   // PAPER TRADING (DEMO TRADING) STATE - Like TradingView Practice Account
   // ============================================
@@ -18910,7 +18900,12 @@ ${
                   })()}
                 </div>
               </div>
-            </div>
+            )}
+
+          </div>
+        </main>
+
+        {/* Trade History Modal with Orders & Positions */}
         <Dialog open={showOrderModal} onOpenChange={setShowOrderModal}>
           <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto custom-thin-scrollbar p-0">
             {/* Compact Header */}

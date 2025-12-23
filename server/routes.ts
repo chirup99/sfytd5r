@@ -20146,47 +20146,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Fetch Zerodha user profile (client ID and user name)
-  app.get("/api/broker/zerodha/profile", async (req, res) => {
-    const accessToken = req.headers.authorization?.split(" ")[1];
-    
-    if (!accessToken) {
-      return res.status(401).json({ 
-        error: "Unauthorized",
-        profile: null
-      });
-    }
-
-    try {
-      // Call Zerodha profile API
-      const response = await axios.get("https://api.kite.trade/user/profile", {
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "X-Kite-Version": "3"
-        }
-      });
-
-      const profile = response.data.data || {};
-      
-      console.log("✅ [ZERODHA] Fetched profile:", profile.client_id, profile.user_name);
-      
-      res.json({ 
-        success: true,
-        clientId: profile.client_id || "N/A",
-        userName: profile.user_name || "N/A",
-        profile
-      });
-    } catch (error) {
-      console.error("❌ [ZERODHA] Error fetching profile:", error);
-      res.json({ 
-        success: false,
-        clientId: "N/A",
-        userName: "N/A",
-        message: "Failed to fetch profile"
-      });
-    }
-  });
-
 
   return httpServer;
 }
