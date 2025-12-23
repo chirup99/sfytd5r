@@ -3752,6 +3752,11 @@ ${
       setZerodhaAccessToken(savedToken);
       setZerodhaIsConnected(true);
       console.log('✅ [ZERODHA] Connection restored from localStorage');
+      const savedClientId = localStorage.getItem('zerodha_client_id');
+      if (savedClientId) {
+        setZerodhaClientId(savedClientId);
+        console.log('✅ [ZERODHA] Client ID restored from localStorage');
+      }
     } else {
       console.log('⚠️ [ZERODHA] No saved token in localStorage');
     }
@@ -3772,6 +3777,7 @@ ${
           if (response.ok) {
             const data = await response.json();
             if (data.data && data.data.user_id) {
+              localStorage.setItem('zerodha_client_id', data.data.user_id);
               setZerodhaClientId(data.data.user_id);
               console.log('✅ [ZERODHA] Client ID fetched:', data.data.user_id);
             }
