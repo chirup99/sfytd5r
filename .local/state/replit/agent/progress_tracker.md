@@ -121,7 +121,7 @@ Trigger Heatmap Refresh to display daily P&L
 ✅ Paper Trading Record button: Fully functional  
 ✅ **Broker Orders Record button: Implemented and ready to test**  
 
-## Auto-Tap Feature Implementation (Turn 16-19) - COMPLETE ✨
+## Auto-Tap Feature Implementation (Turn 16-18) - COMPLETE ✨
 
 **Auto-Tap with Global Polling (No Dialog Required):**
 - Added `previousBrokerOrdersLengthRef` useRef to track previous broker order count
@@ -134,24 +134,15 @@ Trigger Heatmap Refresh to display daily P&L
 - Console logs: `🤖 [AUTO-TAP] Detected {count} orders, auto-recording...`
 - Updates ref with current length to track next increment
 
-**ONLY RECORDS FILLED ORDERS (Turn 19):**
-- Modified `recordAllBrokerOrders()` to filter orders by status
-- Only imports orders with status === "Filled" or "filled"
-- Pending orders are automatically excluded
-- Toast message shows: "Recorded X filled orders to today's summary"
-- Error message shows count of pending orders if any: "X pending orders found. Only filled orders can be recorded."
-- Console logs show: "✅ Recorded X filled orders (Y pending excluded)"
-
 **How Auto-Tap Works (Global):**
 1. ✅ Broker orders polled GLOBALLY every 1 second (not dialog-dependent)
 2. ✅ When new orders arrive, polling detects them immediately
 3. ✅ useEffect hook compares current count with previous count
 4. ✅ If count increased, auto-calls recordAllBrokerOrders()
-5. ✅ **Filters to ONLY FILLED orders before importing**
-6. ✅ Updates trade history, AWS heatmap, and localStorage automatically
-7. ✅ Shows toast confirmation with count of filled orders
-8. ✅ **NO NEED TO OPEN DIALOG - works in background!**
-9. ✅ Ref updates for next detection cycle
+5. ✅ Updates trade history, AWS heatmap, and localStorage automatically
+6. ✅ Shows toast confirmation with order count
+7. ✅ **NO NEED TO OPEN DIALOG - works in background!**
+8. ✅ Ref updates for next detection cycle
 
 ## Import Status: COMPLETE ✅
 

@@ -5409,22 +5409,16 @@ ${
     console.log("✅ Paper trades recorded to journal summary and heatmap");
 
     // 🔄 Trigger PersonalHeatmap refresh to immediately display colors after save
+    setPersonalHeatmapRevision(prev => prev + 1);
   };
 
 
   // 🔴 NEW: Record all broker orders to journal (same flow as paper trading)
   const recordAllBrokerOrders = () => {
-    // Filter to only include FILLED orders
-    const filledOrders = brokerOrders.filter((trade: any) => 
-      trade.status === "Filled" || trade.status === "filled"
-    );
-
-    if (filledOrders.length === 0) {
+    if (brokerOrders.length === 0) {
       toast({
-        title: "No Filled Orders",
-        description: brokerOrders.length > 0 
-          ? `${brokerOrders.length} pending orders found. Only filled orders can be recorded.`
-          : "No broker orders to record",
+        title: "No Orders",
+        description: "No broker orders to record",
         variant: "destructive"
       });
       return;
@@ -5437,7 +5431,7 @@ ${
 
     console.log("📊 Converting broker orders to journal format...");
 
-    const convertedTrades = filledOrders.map((trade: any) => ({
+    const convertedTrades = brokerOrders.map((trade: any) => ({
       time: trade.time,
       order: trade.order,
       symbol: trade.symbol,
@@ -5456,7 +5450,7 @@ ${
     const existingData = tradingDataByDate[todayKey] || {};
     const existingTrades = existingData.tradeHistory || [];
 
-    const heatmapTrades = filledOrders.map((trade: any) => ({
+    const heatmapTrades = brokerOrders.map((trade: any) => ({
       symbol: trade.symbol,
       type: trade.type || 'MIS',
       action: trade.order,
@@ -5490,11 +5484,14 @@ ${
 
     toast({
       title: "Orders Recorded",
-      description: `Recorded ${convertedTrades.length} filled orders to today's summary and personal tradebook`
+      description: `Recorded ${convertedTrades.length} broker orders to today's summary and personal tradebook`
     });
 
-    console.log(`✅ Recorded ${convertedTrades.length} filled broker orders (${brokerOrders.length - convertedTrades.length} pending excluded)`);
+    console.log("✅ Broker orders recorded to journal summary and heatmap");
+    setPersonalHeatmapRevision(prev => prev + 1);
   };
+
+  // Exit all open positions at once
 
   // Auto-tap: Automatically record broker orders when new orders are added
   useEffect(() => {
