@@ -1256,7 +1256,7 @@ function HistoricalDataSection() {
           </div>
           <div className="space-y-2">
             <Label>&nbsp;</Label>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <Button
                 onClick={handleFetchData}
                 disabled={fetchHistoricalData.isPending}
@@ -1593,7 +1593,7 @@ function MicroAnimationsDemoPage() {
                 className="text-lg"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <Button onClick={() => updatePrice("up")} className="flex-1">
                 <TrendingUp className="h-4 w-4 mr-2" />
                 Price Up
@@ -1619,8 +1619,8 @@ function MicroAnimationsDemoPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <div className="flex gap-2">
+            <div className="space-y-1">
+              <div className="flex gap-1.5">
                 <Button
                   onClick={() => setTradeType("buy")}
                   variant={tradeType === "buy" ? "default" : "outline"}
@@ -4432,6 +4432,7 @@ ${
     stopLoss: "",
     target: "",
   });
+  const previousBrokerOrdersLengthRef = useRef<number>(0);
 
   // Save Confirmation Dialog State
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
@@ -4442,7 +4443,7 @@ ${
 
   // Fetch broker orders when Orders dialog opens - with auto-refresh polling
   useEffect(() => {
-    if (showOrderModal && zerodhaAccessToken) {
+    if (zerodhaAccessToken) {
       const fetchOrders = async () => {
         setFetchingBrokerOrders(true);
         try {
@@ -4469,7 +4470,7 @@ ${
       // Cleanup: clear interval when dialog closes
       return () => clearInterval(pollInterval);
     }
-  }, [showOrderModal, zerodhaAccessToken]);
+  }, [zerodhaAccessToken]);
 
   // Fetch broker funds when dialog opens - with auto-refresh polling
   useEffect(() => {
@@ -5411,7 +5412,101 @@ ${
     setPersonalHeatmapRevision(prev => prev + 1);
   };
 
+
+  // 🔴 NEW: Record all broker orders to journal (same flow as paper trading)
+  const recordAllBrokerOrders = () => {
+    if (brokerOrders.length === 0) {
+      toast({
+        title: "No Orders",
+        description: "No broker orders to record",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (isDemoMode) {
+      console.log("🔄 Auto-switching to personal mode to record broker orders...");
+      setIsDemoMode(false);
+    }
+
+    console.log("📊 Converting broker orders to journal format...");
+
+    const convertedTrades = brokerOrders.map((trade: any) => ({
+      time: trade.time,
+      order: trade.order,
+      symbol: trade.symbol,
+      type: trade.type || 'MIS',
+      qty: trade.qty,
+      price: trade.price,
+      pnl: trade.pnl || '-',
+      duration: trade.duration || '-'
+    }));
+
+    const processedData = calculateSimplePnL(convertedTrades);
+    setTradeHistoryData(processedData);
+
+    const today = new Date();
+    const todayKey = formatDateKey(today);
+    const existingData = tradingDataByDate[todayKey] || {};
+    const existingTrades = existingData.tradeHistory || [];
+
+    const heatmapTrades = brokerOrders.map((trade: any) => ({
+      symbol: trade.symbol,
+      type: trade.type || 'MIS',
+      action: trade.order,
+      quantity: trade.qty,
+      price: trade.price,
+      time: trade.time,
+      pnl: trade.pnl,
+      duration: trade.duration
+    }));
+
+    const mergedTrades = [...existingTrades, ...heatmapTrades];
+    const updatedData = {
+      ...existingData,
+      tradeHistory: mergedTrades,
+      profitLossAmount: mergedTrades.reduce((sum: number, trade: any) => {
+        if (trade.pnl && trade.pnl !== '-') {
+          const pnlStr = String(trade.pnl).replace('₹', '').replace('+', '');
+          return sum + (parseFloat(pnlStr) || 0);
+        }
+        return sum;
+      }, 0),
+      totalTrades: mergedTrades.length
+    };
+
+    setPersonalTradingDataByDate((prev: any) => ({...prev, [todayKey]: updatedData}));
+    localStorage.setItem("personalTradingDataByDate", JSON.stringify({...personalTradingDataByDate, [todayKey]: updatedData}));
+
+    setHeatmapSelectedDate(todayKey);
+    setSelectedDate(today);
+    setShowOrderModal(false);
+
+    toast({
+      title: "Orders Recorded",
+      description: `Recorded ${convertedTrades.length} broker orders to today's summary and personal tradebook`
+    });
+
+    console.log("✅ Broker orders recorded to journal summary and heatmap");
+    setPersonalHeatmapRevision(prev => prev + 1);
+  };
+
   // Exit all open positions at once
+
+  // Auto-tap: Automatically record broker orders when new orders are added
+  useEffect(() => {
+    if (brokerOrders.length > previousBrokerOrdersLengthRef.current && brokerOrders.length > 0) {
+      console.log(`🤖 [AUTO-TAP] Detected ${brokerOrders.length} orders (was ${previousBrokerOrdersLengthRef.current}), auto-recording...`);
+      
+      // Schedule the auto-record for next tick to ensure state is updated
+      setTimeout(() => {
+        recordAllBrokerOrders();
+      }, 500);
+    }
+    
+    // Update the ref with current length
+    previousBrokerOrdersLengthRef.current = brokerOrders.length;
+  }, [brokerOrders]);
   const exitAllPaperPositions = () => {
     const openPositions = paperPositions.filter(p => p.isOpen);
 
@@ -11576,7 +11671,7 @@ ${
                         <div className="bg-slate-800 rounded-2xl p-4">
                           <h3 className="text-white text-lg font-bold mb-4">Saved Podcast</h3>
 
-                          <div className="space-y-1.5">
+                          <div className="space-y-1">
                             {/* Podcast Item 1 */}
                             <div className="flex items-center gap-3">
                               <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -12754,7 +12849,7 @@ ${
                                   <CheckCircle className="h-4 w-4" />
                                   <span>Verification code sent to your email</span>
                                 </div>
-                                <div className="space-y-1.5">
+                                <div className="space-y-1">
                                   <Input
                                     type="text"
                                     inputMode="numeric"
@@ -12995,7 +13090,7 @@ ${
                         <div className="max-w-5xl mx-auto mt-4 animate-in slide-in-from-top-4 duration-300 md:block hidden">
                           <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4">
                             {searchResults ? (
-                              <div className="space-y-1.5">
+                              <div className="space-y-1">
                                 <div className="flex items-center gap-2 pb-3 border-b border-transparent">
                                   {searchResults.includes("[CHART:WATCHLIST]") ? (
                                       <>
@@ -13053,7 +13148,7 @@ ${
                                                 <div className="mb-4">
                                                   <div className="flex items-center justify-between mb-3">
                                                     {/* Timeframe buttons */}
-                                                    <div className="flex gap-2">
+                                                    <div className="flex gap-1.5">
                                                       {timeframes.map((tf) => (
                                                         <button
                                                           key={tf}
@@ -13702,7 +13797,7 @@ ${
                                                   </div>
                                                 </div>
 
-                                                <div className="space-y-1.5">
+                                                <div className="space-y-1">
                                                   {isWatchlistQuarterlyLoading ? (
                                                     <div className="flex items-center justify-center py-8">
                                                       <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
@@ -15298,7 +15393,7 @@ ${
                                     className="w-80 p-3"
                                     align="start"
                                   >
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                       <div className="flex gap-1.5">
                                         <Input
                                           placeholder={
@@ -16218,7 +16313,7 @@ ${
                                     </Button>
                                   </PopoverTrigger>
                                   <PopoverContent className="w-80 p-3">
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                       <div className="flex items-center justify-between">
                                         <h4 className="font-medium text-sm">
                                           Daily Life Factors
@@ -16338,7 +16433,7 @@ ${
                                     </Button>
                                   </PopoverTrigger>
                                   <PopoverContent className="w-80 p-3">
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                       <div className="flex items-center justify-between">
                                         <h4 className="font-medium text-sm">
                                           Indicator & Timeframe Tracker
@@ -16419,7 +16514,7 @@ ${
                                               <DialogHeader>
                                                 <DialogTitle>Custom Timeframe</DialogTitle>
                                               </DialogHeader>
-                                              <div className="space-y-1.5">
+                                              <div className="space-y-1">
                                                 <input
                                                   type="text"
                                                   placeholder="e.g., 2h, 4h, 3d, 1w"
@@ -16428,7 +16523,7 @@ ${
                                                   className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
                                                   data-testid="input-custom-timeframe"
                                                 />
-                                                <div className="flex gap-2">
+                                                <div className="flex gap-1.5">
                                                   <Button
                                                     variant="outline"
                                                     size="sm"
@@ -16522,7 +16617,7 @@ ${
                                     </Button>
                                   </PopoverTrigger>
                                   <PopoverContent className="w-80 p-3">
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                       <div className="flex items-center justify-between">
                                         <h4 className="font-medium text-sm">
                                           Trading Psychology & Strategy Tags
@@ -17010,7 +17105,7 @@ ${
                           <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wide">
                             Trade History
                           </h3>
-                          <div className="flex gap-2">
+                          <div className="flex gap-1.5">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -18922,7 +19017,7 @@ ${
                                     <h4 className="text-lg font-semibold mb-4">
                                       📈 Performance Insights
                                     </h4>
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                       {disciplineInsights.length > 0 ? (
                                         disciplineInsights
                                           .slice(0, 4)
@@ -18970,7 +19065,7 @@ ${
                                     <h4 className="text-lg font-semibold mb-4">
                                       🎯 Professional Tips
                                     </h4>
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                       {recommendations.map((rec, idx) => (
                                         <div
                                           key={idx}
@@ -19083,6 +19178,17 @@ ${
                     </tbody>
                   </table>
                 </div>
+              <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700 mt-2">
+                  <button
+                    onClick={recordAllBrokerOrders}
+                    disabled={brokerOrders.length === 0}
+                    className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded transition-colors"
+                    data-testid="button-record-broker-orders"
+                  >
+                    Record to Journal
+                  </button>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{brokerOrders.length} orders</span>
+                </div>
               </TabsContent>
 
                             <TabsContent value="positions" className="space-y-4">
@@ -19169,7 +19275,7 @@ ${
 
                 <div className="border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-900/30 p-3 mb-3">
                   {isBuildMode ? (
-                    <div className="space-y-1.5">
+                    <div className="space-y-1">
                       <div className="flex items-center justify-between gap-2">
                         <div className="text-xs font-medium text-slate-700 dark:text-slate-300">
                           Build Mode - Select text, click +, X to delete
@@ -20537,7 +20643,7 @@ ${
                                     )}
 
                                     {paperTradeSLType === 'duration' && (
-                                      <div className="flex gap-2">
+                                      <div className="flex gap-1.5">
                                         <Input
                                           type="number"
                                           placeholder="Duration"
@@ -21035,7 +21141,7 @@ ${
                                   )}
 
                                   {paperTradeSLType === 'duration' && (
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-1.5">
                                       <Input
                                         type="number"
                                         placeholder="Duration"
@@ -21384,21 +21490,20 @@ ${
 
         {/* Option Chain Modal */}
         <Dialog open={showOptionChain} onOpenChange={(open) => { setShowOptionChain(open); if (open) { fetchOptionChainData(selectedOptionIndex); } }}>
-          <DialogContent className="w-full max-w-4xl md:max-w-5xl p-0 md:p-6 bg-gradient-to-b from-gray-950 to-gray-900 dark:from-gray-950 dark:to-gray-900 md:dark:from-gray-900 md:dark:to-gray-800 md:bg-white md:dark:bg-gray-900 md:rounded-xl rounded-2xl border-0 md:border md:border-gray-200 md:dark:border-gray-700">
-
+          <DialogContent className="w-full max-w-2xl md:max-w-2xl p-0 md:p-0 bg-white dark:bg-gray-900 rounded-lg md:rounded-lg border border-gray-200 dark:border-gray-700">
 
             {/* Mobile Header */}
-            <div className="md:hidden px-4 pt-1.5 pb-1.5">
-              <h2 className="text-base font-semibold text-white mb-1">Option Chain</h2>
+            <div className="md:hidden px-3 pt-1 pb-1">
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Option Chain</h2>
 
               {/* Controls */}
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {/* Index and Expiry Row */}
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   <select
                     value={selectedOptionIndex}
                     onChange={(e) => { const idx = e.target.value; setSelectedOptionIndex(idx); setSelectedOptionExpiryDate(""); setOptionChainData(null); setTimeout(() => fetchOptionChainData(idx), 0); }}
-                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm"
+                    className="flex-1 px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-900 dark:text-white text-xs"
                     data-testid="select-option-index-mobile"
                   >
                     <option value="NIFTY">NIFTY</option>
@@ -21413,7 +21518,7 @@ ${
                         setSelectedOptionExpiryDate(newExpiry); fetchOptionChainData(selectedOptionIndex, newExpiry);
                       }
                     }}
-                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm"
+                    className="flex-1 px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-900 dark:text-white text-xs"
                     data-testid="select-option-expiry-date-mobile"
                   >
                     {optionChainLoading ? (
@@ -21431,27 +21536,26 @@ ${
                 </div>
 
                 {/* Spot Price */}
-                <div className="flex items-center justify-between bg-gray-800 rounded-lg px-2.5 py-1.5">
-                  <span className="text-gray-400 text-sm">Spot Price:</span>
-                  <span className="text-green-400 font-semibold text-lg" data-testid="text-option-spot-price-mobile">
-                    ₹{(optionChainData?.spotPrice || 0)?.toLocaleString() || "-"}
+                <div className="text-center bg-gray-50 dark:bg-gray-800 rounded px-2 py-0.5 border border-gray-200 dark:border-gray-700">
+                  <span className="text-green-600 dark:text-green-400 font-semibold text-sm" data-testid="text-option-spot-price-mobile">
+                    Spot: ₹{(optionChainData?.spotPrice || 0)?.toLocaleString() || "-"}
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Desktop Header */}
-            <div className="hidden md:block mb-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Option Chain</h2>
+            <div className="hidden md:block border-b border-gray-200 dark:border-gray-700 px-4 py-2">
+              <div className="flex items-center justify-center mb-2">
+                <span className="text-xs font-semibold text-green-600 dark:text-green-400">Spot: ₹{(optionChainData?.spotPrice || 0)?.toLocaleString()}</span>
               </div>
 
               {/* Desktop Controls */}
-              <div className="flex items-center gap-4 mt-4">
+              <div className="flex items-center justify-center gap-2">
                 <select
                   value={selectedOptionIndex}
                   onChange={(e) => { const idx = e.target.value; setSelectedOptionIndex(idx); setSelectedOptionExpiryDate(""); setOptionChainData(null); setTimeout(() => fetchOptionChainData(idx), 0); }}
-                  className="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                  className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-900 dark:text-white text-xs"
                   data-testid="select-option-index-desktop"
                 >
                   <option value="NIFTY">NIFTY</option>
@@ -21459,17 +21563,13 @@ ${
                   <option value="SENSEX">SENSEX</option>
                 </select>
 
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Spot: <span className="font-semibold text-green-600 dark:text-green-400">${(optionChainData?.spotPrice || 0)?.toLocaleString()}</span>
-                </span>
-
                 <select
                   value={selectedOptionExpiryDate || (getOptionExpiryDates(selectedOptionIndex)[0]?.value || "")}
                   onChange={(e) => {
                     const newExpiry = e.target.value;
                     setSelectedOptionExpiryDate(newExpiry); fetchOptionChainData(selectedOptionIndex, newExpiry);
                   }}
-                  className="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                  className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-900 dark:text-white text-xs"
                   data-testid="select-option-expiry-date-desktop"
                 >
                   {getOptionExpiryDates(selectedOptionIndex).map((date) => (
@@ -21482,34 +21582,29 @@ ${
             </div>
 
             {/* Content Area */}
-            <div className="md:hidden px-3 pb-3 overflow-y-auto max-h-[calc(100vh-300px)]">
+            <div className="md:hidden px-2 pb-2 overflow-y-auto max-h-64">
               {optionChainLoading && (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-400 mx-auto mb-3"></div>
-                  <p className="text-gray-300 text-sm">Loading {selectedOptionIndex} options...</p>
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-400 mx-auto mb-1"></div>
+                  <p className="text-gray-600 dark:text-gray-400 text-xs">Loading {selectedOptionIndex} options...</p>
                 </div>
               )}
 
               {!optionChainLoading && optionChainData && (() => {
                 const getOptionSymbols = () => {
-                  // While loading, return empty; after loading, use actual data
                   const calls = optionChainData?.calls || [];
                   const puts = optionChainData?.puts || [];
-
                   const effectiveExpiry = normalizeExpiryDate(getEffectiveExpiry());
                   const filteredCalls = filterOptionsByExpiry(calls, effectiveExpiry);
                   const filteredPuts = filterOptionsByExpiry(puts, effectiveExpiry);
-
                   return { calls: filteredCalls, puts: filteredPuts };
                 };
 
                 const { calls, puts } = getOptionSymbols();
                 const currentPrice = optionChainData?.spotPrice || 0;
-
                 const allStrikes = new Set();
                 calls.forEach(c => allStrikes.add(c.strikePrice));
                 puts.forEach(p => allStrikes.add(p.strikePrice));
-
                 const strikeArray = Array.from(allStrikes) as number[];
                 let atmStrike = null;
                 if (strikeArray.length > 0) {
@@ -21537,10 +21632,8 @@ ${
                   const allStrikes = new Set();
                   calls.forEach(c => allStrikes.add(c.strikePrice));
                   puts.forEach(p => allStrikes.add(p.strikePrice));
-
                   const strikeArray = Array.from(allStrikes);
                   if (strikeArray.length === 0) return 'OTM';
-
                   if (strike === atmStrike) return 'ATM';
                   if (isCall) return strike < currentPrice ? 'ITM' : 'OTM';
                   return strike > currentPrice ? 'ITM' : 'OTM';
@@ -21566,7 +21659,6 @@ ${
                   if (ltp && ltp > 0) {
                     setPaperTradeCurrentPrice(ltp);
                     setPaperTradePriceLoading(false);
-
                     const optionInstrument = {
                       symbol: instrumentSymbol,
                       exchange: optionExchange || getExchangeForIndex(selectedOptionIndex),
@@ -21576,7 +21668,6 @@ ${
                     setSelectedPaperTradingInstrument(optionInstrument);
                     fetchPaperTradePrice(optionInstrument);
                   }
-
                   setShowOptionChain(false);
                 };
 
@@ -21597,41 +21688,33 @@ ${
                 };
 
                 if (maxRows === 0) {
-                  return <div className="text-center py-8"><p className="text-sm text-gray-300">No options available for {selectedOptionIndex}</p></div>;
+                  return <div className="text-center py-8"><p className="text-sm text-gray-400">No options available for {selectedOptionIndex}</p></div>;
                 }
 
                 return (
                   <div className="space-y-2">
                     <div className="space-y-0">
-                      {/* Headers */}
                       <div className="grid grid-cols-3 gap-1 mb-2 px-1">
                         <div className="text-center text-xs font-semibold text-blue-400">Calls</div>
                         <div className="text-center text-xs font-semibold text-gray-400">Strike</div>
                         <div className="text-center text-xs font-semibold text-red-400">Puts</div>
                       </div>
 
-                      {/* Compact 3-Column Option Chain with ITM/ATM Color Coding */}
                       <div className="space-y-0.5">
                         {(() => {
                           const spotPrice = optionChainData?.spotPrice || 0;
-                          const atmRange = spotPrice * 0.01; // ±1% for ATM
-
-                          // Get color class for a strike
+                          const atmRange = spotPrice * 0.01;
                           const getStrikeColor = (strike: number, isCall: boolean) => {
                             const distance = Math.abs(strike - spotPrice);
-
                             if (isCall) {
-                              // For calls: ITM if strike < spotPrice
                               if (strike < spotPrice) {
                                 return distance <= atmRange ? 'bg-yellow-900 text-yellow-200 border-yellow-700' : 'bg-blue-900 text-blue-200 border-blue-700';
                               }
                             } else {
-                              // For puts: ITM if strike > spotPrice
                               if (strike > spotPrice) {
                                 return distance <= atmRange ? 'bg-yellow-900 text-yellow-200 border-yellow-700' : 'bg-blue-900 text-blue-200 border-blue-700';
                               }
                             }
-                            // OTM - no color
                             return 'bg-gray-800 text-gray-300 border-gray-700';
                           };
 
@@ -21648,7 +21731,6 @@ ${
 
                             return (
                               <div key={`${strike}-row`} className="grid grid-cols-3 gap-1 px-1">
-                                {/* Call Price - ITM (light blue) / ATM (yellow) / OTM (gray) */}
                                 <button
                                   onClick={() => call && handleOptionClick(call)}
                                   disabled={!call}
@@ -21660,14 +21742,12 @@ ${
                                   {call ? `₹${call.ltp?.toFixed(0) || '0'}` : '-'}
                                 </button>
 
-                                {/* Strike Price - Center - Highlight ATM */}
                                 <div className={`py-1.5 px-1 rounded text-xs font-bold text-center flex items-center justify-center transition-all ${
                                   callStrikeAtm ? 'bg-yellow-700 text-yellow-100 border-yellow-600' : 'bg-gray-800 text-yellow-400 border-gray-700'
                                 } border`}>
                                   {strike}
                                 </div>
 
-                                {/* Put Price - ITM (light blue) / ATM (yellow) / OTM (gray) */}
                                 <button
                                   onClick={() => put && handleOptionClick(put)}
                                   disabled={!put}
@@ -21689,41 +21769,36 @@ ${
               })()}
 
               {!optionChainLoading && !optionChainData && (
-                <div className="text-center py-8">
-                  <p className="text-sm text-gray-300">Loading option chain data...</p>
+                <div className="text-center py-4">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Loading option chain data...</p>
                 </div>
               )}
             </div>
 
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-y-auto max-h-96">
+            <div className="hidden md:block px-6 py-4 overflow-y-auto max-h-96">
               {optionChainLoading && (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Loading {selectedOptionIndex} options...</p>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Loading {selectedOptionIndex} options...</p>
                 </div>
               )}
 
               {!optionChainLoading && optionChainData && (() => {
                 const getOptionSymbols = () => {
-                  // While loading, return empty; after loading, use actual data
                   const calls = optionChainData?.calls || [];
                   const puts = optionChainData?.puts || [];
-
                   const effectiveExpiry = normalizeExpiryDate(getEffectiveExpiry());
                   const filteredCalls = filterOptionsByExpiry(calls, effectiveExpiry);
                   const filteredPuts = filterOptionsByExpiry(puts, effectiveExpiry);
-
                   return { calls: filteredCalls, puts: filteredPuts };
                 };
 
                 const { calls, puts } = getOptionSymbols();
                 const currentPrice = optionChainData?.spotPrice || 0;
-
                 const allStrikes = new Set();
                 calls.forEach(c => allStrikes.add(c.strikePrice));
                 puts.forEach(p => allStrikes.add(p.strikePrice));
-
                 const strikeArray = Array.from(allStrikes) as number[];
                 let atmStrike = null;
                 if (strikeArray.length > 0) {
@@ -21751,10 +21826,8 @@ ${
                   const allStrikes = new Set();
                   calls.forEach(c => allStrikes.add(c.strikePrice));
                   puts.forEach(p => allStrikes.add(p.strikePrice));
-
                   const strikeArray = Array.from(allStrikes);
                   if (strikeArray.length === 0) return 'OTM';
-
                   if (strike === atmStrike) return 'ATM';
                   if (isCall) return strike < currentPrice ? 'ITM' : 'OTM';
                   return strike > currentPrice ? 'ITM' : 'OTM';
@@ -21780,7 +21853,6 @@ ${
                   if (ltp && ltp > 0) {
                     setPaperTradeCurrentPrice(ltp);
                     setPaperTradePriceLoading(false);
-
                     const optionInstrument = {
                       symbol: instrumentSymbol,
                       exchange: optionExchange || getExchangeForIndex(selectedOptionIndex),
@@ -21790,22 +21862,21 @@ ${
                     setSelectedPaperTradingInstrument(optionInstrument);
                     fetchPaperTradePrice(optionInstrument);
                   }
-
                   setShowOptionChain(false);
                 };
 
                 const getClasses = (strike, isCall) => {
                   const status = getOptionStatus(strike, isCall);
-                  if (status === 'ATM') return 'px-2 py-1 bg-yellow-50 dark:bg-yellow-900/20 rounded text-center cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition-colors';
-                  if (status === 'ITM' && isCall) return 'px-2 py-1 bg-blue-50 dark:bg-blue-900/20 rounded text-center cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors';
-                  if (status === 'ITM') return 'px-2 py-1 bg-red-50 dark:bg-red-900/20 rounded text-center cursor-pointer hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors';
-                  return 'px-2 py-1 bg-gray-50 dark:bg-gray-800/40 rounded text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors';
+                  if (status === 'ATM') return 'px-2 py-1 bg-yellow-100 dark:bg-yellow-900/20 rounded text-center cursor-pointer hover:bg-yellow-200 dark:hover:bg-yellow-900/40 transition-colors';
+                  if (status === 'ITM' && isCall) return 'px-2 py-1 bg-green-100 dark:bg-green-900/20 rounded text-center cursor-pointer hover:bg-green-200 dark:hover:bg-green-900/40 transition-colors';
+                  if (status === 'ITM') return 'px-2 py-1 bg-red-100 dark:bg-red-900/20 rounded text-center cursor-pointer hover:bg-red-200 dark:hover:bg-red-900/40 transition-colors';
+                  return 'px-2 py-1 bg-gray-100 dark:bg-gray-800/40 rounded text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800/60 transition-colors';
                 };
 
                 const getTextClasses = (strike, isCall) => {
                   const status = getOptionStatus(strike, isCall);
                   if (status === 'ATM') return 'text-xs font-semibold text-yellow-900 dark:text-yellow-300';
-                  if (status === 'ITM' && isCall) return 'text-xs font-semibold text-blue-900 dark:text-blue-300';
+                  if (status === 'ITM' && isCall) return 'text-xs font-semibold text-green-900 dark:text-green-300';
                   if (status === 'ITM') return 'text-xs font-semibold text-red-900 dark:text-red-300';
                   return 'text-xs font-semibold text-gray-700 dark:text-gray-400';
                 };
@@ -21813,20 +21884,21 @@ ${
                 const getPriceClasses = (strike, isCall) => {
                   const status = getOptionStatus(strike, isCall);
                   if (status === 'ATM') return 'text-xs text-yellow-700 dark:text-yellow-400 mt-0.5';
-                  if (status === 'ITM' && isCall) return 'text-xs text-blue-700 dark:text-blue-400 mt-0.5';
+                  if (status === 'ITM' && isCall) return 'text-xs text-green-700 dark:text-green-400 mt-0.5';
                   if (status === 'ITM') return 'text-xs text-red-700 dark:text-red-400 mt-0.5';
                   return 'text-xs text-gray-600 dark:text-gray-500 mt-0.5';
                 };
 
                 if (maxRows === 0) {
-                  return <div className="text-center py-8"><p className="text-sm text-gray-500 dark:text-gray-400">No options available for {selectedOptionIndex} on {selectedOptionExpiryDate}</p></div>;
+                  return <div className="text-center py-8"><p className="text-sm text-gray-600 dark:text-gray-400">No options available for {selectedOptionIndex} on {selectedOptionExpiryDate}</p></div>;
                 }
 
-                return <div className="overflow-x-auto"><table className="w-full text-xs"><thead className="sticky top-0 bg-gray-50 dark:bg-gray-800"><tr className="border-b border-gray-300 dark:border-gray-600"><th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-white">CE</th><th className="text-center py-2 px-2 font-semibold text-gray-900 dark:text-white">Strike</th><th className="text-right py-2 px-3 font-semibold text-gray-900 dark:text-white">PE</th></tr></thead><tbody>{Array.from({ length: maxRows }).map((_, index) => <tr key={index} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"><td className="py-2 px-3">{filteredCalls[index] ? <div onClick={() => handleOptionClick(filteredCalls[index])} className={getClasses(filteredCalls[index].strikePrice, true)} data-testid={`option-call-${filteredCalls[index].strikePrice}`}><div className={getPriceClasses(filteredCalls[index].strikePrice, true)}>₹{filteredCalls[index].ltp?.toFixed(2) || 0}</div></div> : null}</td><td className="py-2 px-2 text-center font-medium text-gray-700 dark:text-gray-300">{filteredCalls[index]?.strikePrice || filteredPuts[index]?.strikePrice || '-'}</td><td className="py-2 px-3">{filteredPuts[index] ? <div onClick={() => handleOptionClick(filteredPuts[index])} className={getClasses(filteredPuts[index].strikePrice, false)} data-testid={`option-put-${filteredPuts[index].strikePrice}`}><div className={getPriceClasses(filteredPuts[index].strikePrice, false)}>₹{filteredPuts[index].ltp?.toFixed(2) || 0}</div></div> : null}</td></tr>)}</tbody></table></div>;
+                return <div className="overflow-x-auto"><table className="w-full text-xs"><thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700"><tr><th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-white">CE</th><th className="text-center py-2 px-2 font-semibold text-gray-900 dark:text-white">Strike</th><th className="text-right py-2 px-3 font-semibold text-gray-900 dark:text-white">PE</th></tr></thead><tbody>{Array.from({ length: maxRows }).map((_, index) => <tr key={index} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"><td className="py-2 px-3">{filteredCalls[index] ? <div onClick={() => handleOptionClick(filteredCalls[index])} className={getClasses(filteredCalls[index].strikePrice, true)} data-testid={`option-call-${filteredCalls[index].strikePrice}`}><div className={getPriceClasses(filteredCalls[index].strikePrice, true)}>₹{filteredCalls[index].ltp?.toFixed(2) || 0}</div></div> : null}</td><td className="py-2 px-2 text-center font-medium text-gray-700 dark:text-gray-300">{filteredCalls[index]?.strikePrice || filteredPuts[index]?.strikePrice || '-'}</td><td className="py-2 px-3 text-right">{filteredPuts[index] ? <div onClick={() => handleOptionClick(filteredPuts[index])} className={getClasses(filteredPuts[index].strikePrice, false)} data-testid={`option-put-${filteredPuts[index].strikePrice}`}><div className={getPriceClasses(filteredPuts[index].strikePrice, false)}>₹{filteredPuts[index].ltp?.toFixed(2) || 0}</div></div> : null}</td></tr>)}</tbody></table></div>;
               })()}
             </div>
           </DialogContent>
         </Dialog>
+
 
         {/* Trading Master Coming Soon Modal */}
         <Dialog open={showTradingMasterComingSoon} onOpenChange={setShowTradingMasterComingSoon}>
