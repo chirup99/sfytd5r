@@ -20247,6 +20247,190 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // UPSTOX OAUTH 2.0 INTEGRATION
+  // ========================================
+  // Upstox OAuth flow: Generate URL → User Logs In → Callback with Code → Exchange for Token
+
+  // STEP 1: Generate Upstox login URL
+  app.get('/api/broker/upstox/login-url', (req, res) => {
+    const clientId = process.env.UPSTOX_API_KEY;
+    
+    if (!clientId) {
+      return res.status(500).json({ 
+        error: 'Upstox API key not configured',
+        message: 'UPSTOX_API_KEY environment variable not set'
+      });
+    }
+
+    const callbackUrl = `${req.protocol}://${req.get('host')}/api/broker/upstox/callback`;
+    const loginUrl = `https://api.upstox.com/v2/login/authorization/dialog?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(callbackUrl)}&state=${Math.random().toString(36).substring(7)}`;
+    
+    console.log('🔗 [Upstox] Login URL:', loginUrl);
+    console.log('📝 [Upstox] Expected callback URL:', callbackUrl);
+    
+    res.json({ 
+      loginUrl,
+      callbackUrl,
+      setupRequired: 'Ensure callback URL is registered in Upstox Developer Dashboard'
+    });
+  });
+
+  // STEP 2: Handle Upstox callback - exchange code for access token
+  app.get('/api/broker/upstox/callback', async (req, res) => {
+    const authCode = req.query.code as string;
+    
+    if (!authCode) {
+      console.error('❌ [Upstox] Missing authorization code in callback');
+      return res.status(400).json({ 
+        error: 'No authorization code received',
+        message: 'Callback may not be registered in Upstox Developer Dashboard'
+      });
+    }
+
+    try {
+      const clientId = process.env.UPSTOX_API_KEY;
+      const clientSecret = process.env.UPSTOX_API_SECRET;
+
+      if (!clientId || !clientSecret) {
+        throw new Error('Upstox credentials not configured');
+      }
+
+      const callbackUrl = `${req.protocol}://${req.get('host')}/api/broker/upstox/callback`;
+
+      console.log('🔐 [Upstox] Exchanging authorization code for access token...');
+
+      // Exchange auth code for access token
+      const tokenResponse = await axios.post('https://api.upstox.com/v2/login/authorization/token',
+        new URLSearchParams({
+          code: authCode,
+          client_id: clientId,
+          client_secret: clientSecret,
+          redirect_uri: callbackUrl,
+          grant_type: 'authorization_code'
+        }),
+        {
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }
+      );
+
+      const accessToken = tokenResponse.data.access_token;
+
+      if (!accessToken) {
+        throw new Error('No access token in response');
+      }
+
+      console.log('✅ [Upstox] Token exchange successful');
+
+      // Return HTML that communicates token to parent window
+      const callbackHtml = '<!DOCTYPE html><html><head><title>Auth</title><script>var t="' + accessToken + '";if(window.opener){window.opener.postMessage({type:"UPSTOX_TOKEN",token:t},"*");setTimeout(function(){window.close()},500);}else{window.location.href="/?upstox_token="+encodeURIComponent(t);}</script></head><body><p>Connecting...</p></body></html>';
+      
+      res.type('text/html');
+      res.status(200);
+      res.send(callbackHtml);
+
+    } catch (error) {
+      console.error('❌ [Upstox] Error:', error instanceof Error ? error.message : error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      
+      const errorHtml = '<!DOCTYPE html><html><head><title>Error</title><script>var e="' + errorMsg.replace(/"/g, '\"') + '";if(window.opener){window.opener.postMessage({type:"UPSTOX_ERROR",error:e},"*");window.close();}else{window.location.href="/?upstox_error="+encodeURIComponent(e);}</script></head><body><p>Error</p></body></html>';
+      
+      res.type('text/html');
+      res.status(200);
+      res.send(errorHtml);
+    }
+  });
+
+  // STEP 3: Fetch trades from Upstox
+  app.get('/api/broker/upstox/trades', async (req, res) => {
+    const accessToken = req.headers.authorization?.split(' ')[1];
+    
+    if (!accessToken) {
+      return res.status(401).json({ 
+        error: 'Unauthorized',
+        trades: [] 
+      });
+    }
+
+    try {
+      // Call Upstox API to get orders
+      const response = await axios.get('https://api.upstox.com/v2/order/retrieve-all', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'accept': 'application/json'
+        }
+      });
+
+      const orders = response.data.data || [];
+      
+      // Transform Upstox orders to our format
+      const trades = orders.map((order: any) => ({
+        time: order.order_timestamp ? new Date(order.order_timestamp).toLocaleTimeString() : '-',
+        order: order.transaction_type === 'BUY' ? 'BUY' : 'SELL',
+        symbol: order.tradingsymbol || order.symbol,
+        qty: order.quantity,
+        price: order.average_price || order.price || 0,
+        pnl: order.pnl ? `₹${order.pnl.toFixed(2)}` : '-',
+        type: order.order_type,
+        duration: order.status === 'COMPLETE' ? 'Filled' : 'Pending'
+      }));
+
+      console.log('✅ [UPSTOX] Fetched', trades.length, 'trades from API');
+      
+      res.json({ 
+        trades,
+        success: true
+      });
+    } catch (error) {
+      console.error('❌ [UPSTOX] Error fetching trades:', error);
+      
+      // Fallback to demo trades if API fails
+      const demoTrades = [
+        { 
+          time: '2:45:30 PM',
+          order: 'BUY', 
+          symbol: 'RELIANCE-EQ', 
+          qty: 10, 
+          price: 2845.50, 
+          pnl: '-',
+          type: 'MIS',
+          duration: '0s'
+        },
+        { 
+          time: '3:00:15 PM',
+          order: 'SELL', 
+          symbol: 'RELIANCE-EQ', 
+          qty: 10, 
+          price: 2850.75, 
+          pnl: '₹525.00',
+          type: 'MIS',
+          duration: '14m 45s'
+        }
+      ];
+      
+      res.json({ 
+        trades: demoTrades,
+        success: false,
+        message: 'Using demo data - Upstox API call failed'
+      });
+    }
+  });
+
+  // DEBUG: Show what data Upstox is fetching
+  app.get('/api/broker/upstox/debug', (req, res) => {
+    res.json({
+      status: 'Upstox Integration Active',
+      endpoints: {
+        'GET /api/broker/upstox/login-url': 'Generates Upstox OAuth login URL',
+        'GET /api/broker/upstox/callback': 'Handles OAuth callback and exchanges code for token',
+        'GET /api/broker/upstox/trades': 'Fetches orders from Upstox API'
+      }
+    });
+  });
+
   // DEBUG: Show what data Zerodha is fetching
   app.get('/api/broker/zerodha/debug', (req, res) => {
     res.json({
