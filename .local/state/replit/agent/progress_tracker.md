@@ -85,3 +85,49 @@
 [x]       - Can access at: GET /api/broker/zerodha/debug (shows structure)
 [x]
 [x]    📊 STATUS: ALL ZERODHA DATA ENDPOINTS ACTIVELY SENDING LIVE DATA
+
+[x] 160. CRITICAL DISCOVERY - WHY REAL DATA NOT FETCHED (December 23, 2025, 9:07 AM)
+[x]    🔴 ROOT CAUSE IDENTIFIED:
+[x]       
+[x]       BACKEND:
+[x]       ✅ Has `/api/broker/zerodha/profile` endpoint (line 20150 in server/routes.ts)
+[x]       ✅ It WILL call https://api.kite.trade/user/profile with Bearer token
+[x]       ✅ It WILL return real userId, email, username, phone, account type
+[x]       ✅ Ready to send REAL DATA
+[x]
+[x]       FRONTEND:
+[x]       ❌ NEVER CALLS THE PROFILE ENDPOINT!
+[x]       ❌ Only calls /api/broker/zerodha/trades (line 3926 in home.tsx)
+[x]       ❌ handleFetchZerodhaTrades() exists but NO profile fetch function
+[x]       ❌ Profile component shows dummy data, never queries backend
+[x]
+[x]    🔍 OAUTH FLOW ANALYSIS:
+[x]       
+[x]       1. User clicks "Connect Zerodha" → handleZerodhaConnect() (line 3877)
+[x]       2. Frontend calls: GET /api/broker/zerodha/login-url
+[x]       3. Backend returns: loginUrl to kite.zerodha.com
+[x]       4. Popup opens, user logs in and grants permissions
+[x]       5. Zerodha redirects popup to callback with request_token
+[x]       6. Backend (routes.ts:20027) exchanges token:
+[x]          - POST https://api.kite.trade/session/token
+[x]          - Uses SHA256(api_key + request_token + api_secret) checksum
+[x]          - Gets accessToken back
+[x]       7. Backend sends token via postMessage to parent window
+[x]       8. Frontend receives token and stores in localStorage
+[x]       
+[x]       ⚠️ WHAT HAPPENS NEXT IN CURRENT CODE:
+[x]       - Nothing! Frontend never uses the token
+[x]       - User must MANUALLY click "Fetch Trades" button
+[x]       - Profile data is NEVER fetched (endpoint doesn't exist on frontend)
+[x]
+[x]    📋 WHAT SHOULD HAPPEN:
+[x]       After successful OAuth login:
+[x]       1. Frontend should automatically call /api/broker/zerodha/profile
+[x]       2. Show real userId, email, username to user
+[x]       3. Validate connection is working (prove it's real data)
+[x]       4. Then show "Fetch Trades" button
+[x]
+[x]    ✅ SOLUTION READY:
+[x]       - Backend profile endpoint exists and works
+[x]       - Just need to call it from frontend after OAuth callback
+[x]       - Display real user data to prove connection is live
