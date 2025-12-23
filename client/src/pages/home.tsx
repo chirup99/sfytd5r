@@ -18956,7 +18956,7 @@ ${
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
               <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
                 <span>broker id: {zerodhaClientId || 'N/A'}</span>
-                <span>user: {currentUser?.username || "Not logged in"}</span>
+                <span>broker user: {zerodhaProfileData?.name || zerodhaProfileData?.email || zerodhaProfileData?.userName || "N/A"}</span>
               </div>
             </div>
 
