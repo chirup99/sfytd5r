@@ -4471,30 +4471,34 @@ ${
     }
   }, [showOrderModal, zerodhaAccessToken]);
 
-  // Fetch broker funds when dialog opens
+  // Fetch broker funds when dialog opens - with auto-refresh polling
   useEffect(() => {
     if (showOrderModal && zerodhaAccessToken) {
       const fetchBrokerFunds = async () => {
         try {
-          const response = await fetch('https://api.kite.trade/user/margins', {
-            headers: {
-              'Authorization': `Bearer ${zerodhaAccessToken}`,
-              'X-Kite-Version': '3'
-            }
+          const response = await fetch('/api/broker/zerodha/margins', {
+            headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
           });
-          if (response.ok) {
-            const data = await response.json();
-            // Get available cash balance
-            const equity = data.data?.equity || {};
-            const availableCash = equity.available_balance || 0;
-            setBrokerFunds(availableCash);
-            console.log('✅ [BROKER] Fetched available funds:', availableCash);
+          const data = await response.json();
+          if (data.success && data.availableCash !== undefined) {
+            setBrokerFunds(data.availableCash);
+            console.log('✅ [BROKER] Fetched available funds:', data.availableCash);
+          } else {
+            console.error('❌ [BROKER] Invalid response:', data);
           }
         } catch (error) {
           console.error('❌ [BROKER] Failed to fetch funds:', error);
         }
       };
+      
+      // Fetch funds immediately when dialog opens
       fetchBrokerFunds();
+      
+      // Set up polling to refresh every 2 seconds while dialog is open
+      const pollInterval = setInterval(fetchBrokerFunds, 2000);
+      
+      // Cleanup: clear interval when dialog closes
+      return () => clearInterval(pollInterval);
     }
   }, [showOrderModal, zerodhaAccessToken]);
   // PAPER TRADING (DEMO TRADING) STATE - Like TradingView Practice Account

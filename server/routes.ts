@@ -20149,6 +20149,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // STEP 4: Fetch Zerodha profile details
+
+  // Get Zerodha broker margins (available funds)
+  app.get('/api/broker/zerodha/margins', async (req, res) => {
+    const accessToken = req.headers.authorization?.split('Bearer ')[1];
+    if (!accessToken) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+      const response = await fetch('https://api.kite.trade/user/margins', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'X-Kite-Version': '3'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Zerodha API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const equity = data.data?.equity || {};
+      const availableCash = equity.available_balance || 0;
+
+      console.log('✅ [ZERODHA] Fetched available balance:', availableCash);
+
+      res.json({
+        success: true,
+        availableCash,
+        equity: data.data?.equity || {}
+      });
+    } catch (error) {
+      console.error('❌ [ZERODHA] Error fetching margins:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch broker margins'
+      });
+    }
+  });
+
   app.get('/api/broker/zerodha/profile', async (req, res) => {
     const accessToken = req.headers.authorization?.split(' ')[1];
     const apiKey = process.env.ZERODHA_API_KEY;
