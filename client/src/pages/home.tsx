@@ -18909,8 +18909,12 @@ ${
         <Dialog open={showOrderModal} onOpenChange={setShowOrderModal}>
           <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto custom-thin-scrollbar p-0">
             {/* Compact Header */}
-            <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
+            <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between gap-4">
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
+              <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
+                <span>userid: {currentUser?.userId || 'N/A'}</span>
+                <span>user name: {currentUser?.userName || 'N/A'}</span>
+              </div>
             </div>
 
             <div className="p-4">

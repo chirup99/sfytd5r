@@ -39,3 +39,12 @@
 [x]    ✅ Gemini AI routes configured
 [x]    ✅ Trading AI Agent endpoint ready
 [x]    📊 Status: IMPORT COMPLETE & OPERATIONAL
+
+[x] 154. ORDERS & POSITIONS DIALOG - ADD USERID & USERNAME (December 23, 2025, 8:00 AM)
+[x]    ✅ Updated dialog header with flex layout (justify-between)
+[x]    ✅ Added userid display on right side: "userid: {currentUser?.userId || 'N/A'}"
+[x]    ✅ Added username display on right side: "user name: {currentUser?.userName || 'N/A'}"
+[x]    ✅ Styled with consistent colors (text-slate-600 dark:text-slate-400)
+[x]    ✅ Gap spacing maintained for readability
+[x]    ✅ Workflow restarted successfully
+[x]    📊 Status: DIALOG HEADER UPDATED & OPERATIONAL
