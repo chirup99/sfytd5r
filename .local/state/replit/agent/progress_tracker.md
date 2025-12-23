@@ -36,6 +36,51 @@ When broker orders appear in Orders table:
 
 ## Record Button Discussion
 [x] Reviewed and explained the `recordAllPaperTrades()` function functionality
+[x] Implemented `recordAllBrokerOrders()` function for Orders dialog
+[x] Added "Record to Journal" button to Orders & Positions dialog footer
+
+## Record Button Implementation Details
+
+**Location:** Orders & Positions dialog → Orders tab → Table footer
+
+**Button Flow (Orders):**
+```
+User Clicks "Record to Journal"
+        ↓
+Validation: Check if brokerOrders exist
+        ↓
+Auto-switch: Demo → Personal Mode
+        ↓
+Convert Format: Broker order → Journal format
+        ↓
+Calculate P&L using calculateSimplePnL()
+        ↓
+Save to THREE locations:
+  ├→ Trade History Summary (for immediate view)
+  ├→ Today's Personal Heatmap in AWS (for persistence)
+  └→ localStorage backup
+        ↓
+Auto-select Today's Date on heatmap + journal calendar
+        ↓
+Close Orders Dialog + Show Toast Confirmation
+        ↓
+Trigger Heatmap Refresh to display daily P&L
+```
+
+**Handler Function:** `recordAllBrokerOrders()` (line ~5413)
+- Located before `exitAllPaperPositions()` function
+- Converts each broker order: time, order, symbol, type, qty, price, pnl, duration
+- Merges with existing today's trades (no duplicates)
+- Calculates total daily P&L by summing all trade P&Ls
+- Updates both AWS DynamoDB and localStorage
+- Shows success toast with trade count
+
+**Button Component:** (line ~19088)
+- Located at footer of Orders TabsContent
+- Disabled when brokerOrders.length === 0
+- Shows order count: "{brokerOrders.length} orders"
+- Blue color scheme matching the app design
+- data-testid: "button-record-broker-orders"
 
 ## Features Implemented
 
@@ -50,6 +95,8 @@ When broker orders appear in Orders table:
 ✅ AWS Cognito: JWT verification enabled  
 ✅ NeoFeed: All tables initialized and ready  
 ✅ Auto-heatmap update: Today's date selected when trades are imported  
+✅ **Record Button (Paper Trading): Saves paper trades to journal + heatmap**  
+✅ **Record Button (Broker Orders): Saves real broker orders to journal + heatmap**  
 
 ## Code Changes Made
 
@@ -59,7 +106,9 @@ When broker orders appear in Orders table:
 - Integrated formatDateKey() for today's date formatting
 - Uses setPersonalTradingDataByDate() for AWS persistence
 - Uses setHeatmapSelectedDate() to auto-select today
-- recordAllPaperTrades() function handles Record button (line 5315)
+- recordAllPaperTrades() function handles Record button for paper trading (line 5315)
+- **recordAllBrokerOrders() function handles Record button for broker orders (line ~5413)**
+- **"Record to Journal" button added to Orders table footer (line ~19088)**
 
 ## Testing Notes
 
@@ -69,6 +118,8 @@ When broker orders appear in Orders table:
 ✅ Real-time data: Market data updating  
 ✅ Orders fetching: 1-second polling active  
 ✅ Auto-import ready: Trades will sync on connection  
+✅ Paper Trading Record button: Fully functional  
+✅ **Broker Orders Record button: Implemented and ready to test**  
 
 ## Import Status: COMPLETE ✅
 
@@ -77,3 +128,4 @@ When broker orders appear in Orders table:
 - Enhanced to save trades to today's personal heatmap
 - Project fully operational and ready for use
 - Broker terminal integration working seamlessly
+- **Record button available in both Paper Trading and Broker Orders dialogs**

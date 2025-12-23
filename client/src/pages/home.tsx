@@ -5411,6 +5411,85 @@ ${
     setPersonalHeatmapRevision(prev => prev + 1);
   };
 
+
+  // 🔴 NEW: Record all broker orders to journal (same flow as paper trading)
+  const recordAllBrokerOrders = () => {
+    if (brokerOrders.length === 0) {
+      toast({
+        title: "No Orders",
+        description: "No broker orders to record",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (isDemoMode) {
+      console.log("🔄 Auto-switching to personal mode to record broker orders...");
+      setIsDemoMode(false);
+    }
+
+    console.log("📊 Converting broker orders to journal format...");
+
+    const convertedTrades = brokerOrders.map((trade: any) => ({
+      time: trade.time,
+      order: trade.order,
+      symbol: trade.symbol,
+      type: trade.type || 'MIS',
+      qty: trade.qty,
+      price: trade.price,
+      pnl: trade.pnl || '-',
+      duration: trade.duration || '-'
+    }));
+
+    const processedData = calculateSimplePnL(convertedTrades);
+    setTradeHistoryData(processedData);
+
+    const today = new Date();
+    const todayKey = formatDateKey(today);
+    const existingData = tradingDataByDate[todayKey] || {};
+    const existingTrades = existingData.tradeHistory || [];
+
+    const heatmapTrades = brokerOrders.map((trade: any) => ({
+      symbol: trade.symbol,
+      type: trade.type || 'MIS',
+      action: trade.order,
+      quantity: trade.qty,
+      price: trade.price,
+      time: trade.time,
+      pnl: trade.pnl,
+      duration: trade.duration
+    }));
+
+    const mergedTrades = [...existingTrades, ...heatmapTrades];
+    const updatedData = {
+      ...existingData,
+      tradeHistory: mergedTrades,
+      profitLossAmount: mergedTrades.reduce((sum: number, trade: any) => {
+        if (trade.pnl && trade.pnl !== '-') {
+          const pnlStr = String(trade.pnl).replace('₹', '').replace('+', '');
+          return sum + (parseFloat(pnlStr) || 0);
+        }
+        return sum;
+      }, 0),
+      totalTrades: mergedTrades.length
+    };
+
+    setPersonalTradingDataByDate((prev: any) => ({...prev, [todayKey]: updatedData}));
+    localStorage.setItem("personalTradingDataByDate", JSON.stringify({...personalTradingDataByDate, [todayKey]: updatedData}));
+
+    setHeatmapSelectedDate(todayKey);
+    setSelectedDate(today);
+    setShowOrderModal(false);
+
+    toast({
+      title: "Orders Recorded",
+      description: `Recorded ${convertedTrades.length} broker orders to today's summary and personal tradebook`
+    });
+
+    console.log("✅ Broker orders recorded to journal summary and heatmap");
+    setPersonalHeatmapRevision(prev => prev + 1);
+  };
+
   // Exit all open positions at once
   const exitAllPaperPositions = () => {
     const openPositions = paperPositions.filter(p => p.isOpen);
@@ -19082,6 +19161,17 @@ ${
                       )}
                     </tbody>
                   </table>
+                </div>
+              <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700 mt-2">
+                  <button
+                    onClick={recordAllBrokerOrders}
+                    disabled={brokerOrders.length === 0}
+                    className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded transition-colors"
+                    data-testid="button-record-broker-orders"
+                  >
+                    Record to Journal
+                  </button>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{brokerOrders.length} orders</span>
                 </div>
               </TabsContent>
 
