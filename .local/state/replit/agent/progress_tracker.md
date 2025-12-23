@@ -34,6 +34,9 @@ When broker orders appear in Orders table:
 5. ✅ P&L automatically calculated for today
 6. ✅ Console logs show auto-import status
 
+## Record Button Discussion
+[x] Reviewed and explained the `recordAllPaperTrades()` function functionality
+
 ## Features Implemented
 
 ✅ Orders & Positions table: Real-time 1-second polling  
@@ -56,6 +59,7 @@ When broker orders appear in Orders table:
 - Integrated formatDateKey() for today's date formatting
 - Uses setPersonalTradingDataByDate() for AWS persistence
 - Uses setHeatmapSelectedDate() to auto-select today
+- recordAllPaperTrades() function handles Record button (line 5315)
 
 ## Testing Notes
 
