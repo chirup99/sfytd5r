@@ -40,7 +40,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAngelOneAutoconnect } from "@/hooks/useAngelOneAutoconnect";
 import { cognitoSignOut, getCognitoToken, sendEmailVerificationCode, confirmEmailVerification, checkEmailVerified } from "@/cognito";
 import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickSeries, LineSeries, HistogramSeries, IPriceLine, createSeriesMarkers } from 'lightweight-charts';
-import { ArrowLeft, Banknote, Clock, ExternalLink, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award } from "lucide-react";
+import { ArrowLeft, Banknote, Building2, Clock, ExternalLink, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award } from "lucide-react";
 import { parseBrokerTrades, ParseError } from "@/utils/trade-parser";
 
 // Global window type declaration for audio control
@@ -18955,7 +18955,7 @@ ${
             <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between gap-4">
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
               <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
-                <span>broker id: {zerodhaClientId || 'N/A'}</span>
+                <span className="flex items-center gap-1"><Building2 className="w-3 h-3" /> id: {zerodhaClientId || 'N/A'}</span>
               </div>
             </div>
 
