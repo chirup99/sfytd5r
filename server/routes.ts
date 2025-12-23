@@ -20074,8 +20074,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // STEP 3: Fetch trades from Zerodha
   app.get('/api/broker/zerodha/trades', async (req, res) => {
     const accessToken = req.headers.authorization?.split(' ')[1];
+    const apiKey = process.env.ZERODHA_API_KEY;
     
-    if (!accessToken) {
+    if (!accessToken || !apiKey) {
       return res.status(401).json({ 
         error: 'Unauthorized',
         trades: [] 
@@ -20084,9 +20085,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       // Call real Zerodha API with access token
+      // CORRECT FORMAT: token api_key:access_token
       const response = await axios.get('https://api.kite.trade/orders', {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': `token ${apiKey}:${accessToken}`,
           'X-Kite-Version': '3'
         }
       });
@@ -20149,8 +20151,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // STEP 4: Fetch Zerodha profile details
   app.get('/api/broker/zerodha/profile', async (req, res) => {
     const accessToken = req.headers.authorization?.split(' ')[1];
+    const apiKey = process.env.ZERODHA_API_KEY;
     
-    if (!accessToken) {
+    if (!accessToken || !apiKey) {
       return res.status(401).json({ 
         error: 'Unauthorized',
         profile: null 
@@ -20161,9 +20164,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📊 [ZERODHA] Fetching user profile from https://api.kite.trade/user/profile');
       
       // Fetch user profile from Zerodha API
+      // CORRECT FORMAT: token api_key:access_token
       const response = await axios.get('https://api.kite.trade/user/profile', {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': `token ${apiKey}:${accessToken}`,
           'X-Kite-Version': '3'
         }
       });
