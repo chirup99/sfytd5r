@@ -16901,14 +16901,17 @@ ${
                               className="h-7 px-2 text-xs"
                               onClick={() => setShowOrderModal(true)}
                               data-testid="button-broker-orders"
-                              title="View Orders & Positions"
+                              title={zerodhaIsConnected ? "View Orders & Positions" : "Connect a broker to view orders"}
+                              disabled={!zerodhaIsConnected}
                             >
-                              {zerodhaIsConnected && (
+                              {zerodhaIsConnected ? (
                                 <img 
                                   src="https://zerodha.com/static/images/products/kite-logo.svg" 
                                   alt="Zerodha" 
                                   className="h-4 w-4"
                                 />
+                              ) : (
+                                <span className="text-xs text-gray-400 dark:text-gray-500">Orders</span>
                               )}
                             </Button>
                             <Button
