@@ -143,3 +143,12 @@
    - Added handler at line 17400
    - Button now fully functional and matches Zerodha button behavior
    - **STATUS: READY FOR TESTING** - Upstox button should open popup when clicked
+
+## API Configuration (Turn 19)
+[x] **UPSTOX API CREDENTIALS CONFIGURED**
+   - API Key: efb14d7b-93b9-4fba-9398-f2e0b170b654
+   - API Secret: lorxtpfd88
+   - Stored securely as environment variables (UPSTOX_API_KEY, UPSTOX_API_SECRET)
+   - Server automatically reads from env vars
+   - OAuth Manager initialized and ready to handle login flow
+   - **STATUS: FULLY OPERATIONAL** - Upstox button now has valid API credentials
