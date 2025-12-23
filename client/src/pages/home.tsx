@@ -18955,7 +18955,7 @@ ${
             <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between gap-4">
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
               <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
-                <span className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1"><img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3 translate-y-[-1px]" /> id: {zerodhaClientId || 'N/A'}</span>
+                <span className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1"><img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3" /> id: {zerodhaClientId || 'N/A'}</span>
               </div>
             </div>
 
