@@ -4452,7 +4452,7 @@ ${
       fetchOrders();
 
       // Set up polling to refresh every 3 seconds while dialog is open
-      const pollInterval = setInterval(fetchOrders, 3000);
+      const pollInterval = setInterval(fetchOrders, 1000);
 
       // Cleanup: clear interval when dialog closes
       return () => clearInterval(pollInterval);
