@@ -4471,6 +4471,57 @@ ${
     }
   }, [showOrderModal, zerodhaAccessToken]);
 
+  // 🤖 AUTO-IMPORT: Automatically import broker orders to Trade History (except Status column)
+  const importedOrdersRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (brokerOrders.length > 0) {
+      // Convert broker orders to trade history format
+      const newTrades = brokerOrders
+        .filter(trade => {
+          // Create a unique ID for each trade (symbol + time + order type)
+          const tradeId = `${trade.symbol}-${trade.time}-${trade.order}`;
+          // Skip if already imported
+          if (importedOrdersRef.current.has(tradeId)) {
+            return false;
+          }
+          // Mark as imported
+          importedOrdersRef.current.add(tradeId);
+          return true;
+        })
+        .map((trade) => ({
+          time: trade.time,
+          order: trade.order,
+          symbol: trade.symbol,
+          type: trade.type || "MKT",
+          qty: trade.qty,
+          price: trade.price,
+          pnl: trade.pnl ? `₹${trade.pnl}` : "-",
+          duration: trade.duration || "-",
+          // NOTE: Status column is excluded per user request
+        }));
+
+      // Auto-import new trades to Trade History
+      if (newTrades.length > 0) {
+        setTradeHistoryData((prev) => {
+          // Remove duplicates by checking existing trades
+          const existingIds = new Set(
+            prev.map(t => `${t.symbol}-${t.time}-${t.order}`)
+          );
+          const uniqueNewTrades = newTrades.filter(
+            t => !existingIds.has(`${t.symbol}-${t.time}-${t.order}`)
+          );
+          if (uniqueNewTrades.length > 0) {
+            console.log(`✅ Auto-imported ${uniqueNewTrades.length} orders to Trade History`);
+            return [...uniqueNewTrades, ...prev];
+          }
+          return prev;
+        });
+      }
+    }
+  }, [brokerOrders]);
+
+
   // Fetch broker funds when dialog opens - with auto-refresh polling
   useEffect(() => {
     if (showOrderModal && zerodhaAccessToken) {
