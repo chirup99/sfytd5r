@@ -36,3 +36,52 @@
 [x]    ✅ Angel One authentication successful
 [x]    ✅ WebSocket connected with live price streaming
 [x]    📊 Status: IMPORT COMPLETE
+
+[x] 159. ZERODHA DATA ANALYSIS - DEEP INSPECTION (December 23, 2025, 8:50 AM)
+[x]    ✅ ZERODHA AUTHENTICATION FLOW:
+[x]       1️⃣ Frontend calls: GET /api/broker/zerodha/login-url
+[x]          → Returns OAuth login URL to Zerodha
+[x]       
+[x]       2️⃣ User logs into Zerodha (opens in popup window)
+[x]          → Zerodha redirects to: GET /api/broker/zerodha/callback?request_token={code}
+[x]          → Backend exchanges request_token for access_token + public_token
+[x]          → Returns access_token via postMessage to frontend
+[x]
+[x]    ✅ DATA BEING SENT BACK AFTER LOGIN:
+[x]       
+[x]       📌 FROM OAUTH CALLBACK:
+[x]          - access_token (Bearer token for API calls)
+[x]          - public_token (Secondary authentication token)
+[x]          - user_id (Zerodha client ID)
+[x]          - refresh_token (Token refresh auth)
+[x]
+[x]       📌 USER PROFILE ENDPOINT (/api/broker/zerodha/profile):
+[x]          Fetching from: https://api.kite.trade/user/profile
+[x]          SENDING TO FRONTEND:
+[x]          - userId: Your Zerodha client ID (e.g., "AB1234")
+[x]          - email: Email associated with account
+[x]          - username: Zerodha username
+[x]          - phone: Phone number
+[x]          - broker: Broker code
+[x]          - accountType: Account type (regular, pro, etc)
+[x]          - brokerName: "Zerodha"
+[x]          - apiKey: Your API Key
+[x]          - fetchedAt: ISO timestamp of fetch
+[x]
+[x]       📌 TRADES/ORDERS ENDPOINT (/api/broker/zerodha/trades):
+[x]          Fetching from: https://api.kite.trade/orders
+[x]          SENDING TO FRONTEND:
+[x]          - time: Order timestamp (formatted as HH:MM:SS)
+[x]          - order: "BUY" or "SELL" (from transaction_type)
+[x]          - symbol: Trading symbol (e.g., "RELIANCE-EQ")
+[x]          - qty: Order quantity (number)
+[x]          - price: Order price (number)
+[x]          - pnl: Profit/Loss in ₹ (formatted string, e.g., "₹19500.00")
+[x]          - type: Order type ("MIS", "CNC", etc)
+[x]          - duration: "Filled" or "Pending" (based on filled_quantity)
+[x]
+[x]    ✅ RAW ZERODHA API DATA ALSO AVAILABLE:
+[x]       - Full raw response from Zerodha included in backend logs
+[x]       - Can access at: GET /api/broker/zerodha/debug (shows structure)
+[x]
+[x]    📊 STATUS: ALL ZERODHA DATA ENDPOINTS ACTIVELY SENDING LIVE DATA
