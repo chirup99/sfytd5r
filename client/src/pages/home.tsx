@@ -1256,7 +1256,7 @@ function HistoricalDataSection() {
           </div>
           <div className="space-y-2">
             <Label>&nbsp;</Label>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <Button
                 onClick={handleFetchData}
                 disabled={fetchHistoricalData.isPending}
@@ -1593,7 +1593,7 @@ function MicroAnimationsDemoPage() {
                 className="text-lg"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <Button onClick={() => updatePrice("up")} className="flex-1">
                 <TrendingUp className="h-4 w-4 mr-2" />
                 Price Up
@@ -1619,8 +1619,8 @@ function MicroAnimationsDemoPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <div className="flex gap-2">
+            <div className="space-y-1">
+              <div className="flex gap-1.5">
                 <Button
                   onClick={() => setTradeType("buy")}
                   variant={tradeType === "buy" ? "default" : "outline"}
@@ -11671,7 +11671,7 @@ ${
                         <div className="bg-slate-800 rounded-2xl p-4">
                           <h3 className="text-white text-lg font-bold mb-4">Saved Podcast</h3>
 
-                          <div className="space-y-1.5">
+                          <div className="space-y-1">
                             {/* Podcast Item 1 */}
                             <div className="flex items-center gap-3">
                               <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -12849,7 +12849,7 @@ ${
                                   <CheckCircle className="h-4 w-4" />
                                   <span>Verification code sent to your email</span>
                                 </div>
-                                <div className="space-y-1.5">
+                                <div className="space-y-1">
                                   <Input
                                     type="text"
                                     inputMode="numeric"
@@ -13090,7 +13090,7 @@ ${
                         <div className="max-w-5xl mx-auto mt-4 animate-in slide-in-from-top-4 duration-300 md:block hidden">
                           <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4">
                             {searchResults ? (
-                              <div className="space-y-1.5">
+                              <div className="space-y-1">
                                 <div className="flex items-center gap-2 pb-3 border-b border-transparent">
                                   {searchResults.includes("[CHART:WATCHLIST]") ? (
                                       <>
@@ -13148,7 +13148,7 @@ ${
                                                 <div className="mb-4">
                                                   <div className="flex items-center justify-between mb-3">
                                                     {/* Timeframe buttons */}
-                                                    <div className="flex gap-2">
+                                                    <div className="flex gap-1.5">
                                                       {timeframes.map((tf) => (
                                                         <button
                                                           key={tf}
@@ -13797,7 +13797,7 @@ ${
                                                   </div>
                                                 </div>
 
-                                                <div className="space-y-1.5">
+                                                <div className="space-y-1">
                                                   {isWatchlistQuarterlyLoading ? (
                                                     <div className="flex items-center justify-center py-8">
                                                       <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
@@ -15393,7 +15393,7 @@ ${
                                     className="w-80 p-3"
                                     align="start"
                                   >
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                       <div className="flex gap-1.5">
                                         <Input
                                           placeholder={
@@ -16313,7 +16313,7 @@ ${
                                     </Button>
                                   </PopoverTrigger>
                                   <PopoverContent className="w-80 p-3">
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                       <div className="flex items-center justify-between">
                                         <h4 className="font-medium text-sm">
                                           Daily Life Factors
@@ -16433,7 +16433,7 @@ ${
                                     </Button>
                                   </PopoverTrigger>
                                   <PopoverContent className="w-80 p-3">
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                       <div className="flex items-center justify-between">
                                         <h4 className="font-medium text-sm">
                                           Indicator & Timeframe Tracker
@@ -16514,7 +16514,7 @@ ${
                                               <DialogHeader>
                                                 <DialogTitle>Custom Timeframe</DialogTitle>
                                               </DialogHeader>
-                                              <div className="space-y-1.5">
+                                              <div className="space-y-1">
                                                 <input
                                                   type="text"
                                                   placeholder="e.g., 2h, 4h, 3d, 1w"
@@ -16523,7 +16523,7 @@ ${
                                                   className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
                                                   data-testid="input-custom-timeframe"
                                                 />
-                                                <div className="flex gap-2">
+                                                <div className="flex gap-1.5">
                                                   <Button
                                                     variant="outline"
                                                     size="sm"
@@ -16617,7 +16617,7 @@ ${
                                     </Button>
                                   </PopoverTrigger>
                                   <PopoverContent className="w-80 p-3">
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                       <div className="flex items-center justify-between">
                                         <h4 className="font-medium text-sm">
                                           Trading Psychology & Strategy Tags
@@ -17105,7 +17105,7 @@ ${
                           <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wide">
                             Trade History
                           </h3>
-                          <div className="flex gap-2">
+                          <div className="flex gap-1.5">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -19017,7 +19017,7 @@ ${
                                     <h4 className="text-lg font-semibold mb-4">
                                       📈 Performance Insights
                                     </h4>
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                       {disciplineInsights.length > 0 ? (
                                         disciplineInsights
                                           .slice(0, 4)
@@ -19065,7 +19065,7 @@ ${
                                     <h4 className="text-lg font-semibold mb-4">
                                       🎯 Professional Tips
                                     </h4>
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                       {recommendations.map((rec, idx) => (
                                         <div
                                           key={idx}
@@ -19275,7 +19275,7 @@ ${
 
                 <div className="border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-900/30 p-3 mb-3">
                   {isBuildMode ? (
-                    <div className="space-y-1.5">
+                    <div className="space-y-1">
                       <div className="flex items-center justify-between gap-2">
                         <div className="text-xs font-medium text-slate-700 dark:text-slate-300">
                           Build Mode - Select text, click +, X to delete
@@ -20643,7 +20643,7 @@ ${
                                     )}
 
                                     {paperTradeSLType === 'duration' && (
-                                      <div className="flex gap-2">
+                                      <div className="flex gap-1.5">
                                         <Input
                                           type="number"
                                           placeholder="Duration"
@@ -21141,7 +21141,7 @@ ${
                                   )}
 
                                   {paperTradeSLType === 'duration' && (
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-1.5">
                                       <Input
                                         type="number"
                                         placeholder="Duration"
@@ -21490,20 +21490,20 @@ ${
 
         {/* Option Chain Modal */}
         <Dialog open={showOptionChain} onOpenChange={(open) => { setShowOptionChain(open); if (open) { fetchOptionChainData(selectedOptionIndex); } }}>
-          <DialogContent className="w-full max-w-4xl md:max-w-5xl p-0 md:p-0 bg-white dark:bg-gray-900 rounded-lg md:rounded-lg border border-gray-200 dark:border-gray-700">
+          <DialogContent className="w-full max-w-2xl md:max-w-2xl p-0 md:p-0 bg-white dark:bg-gray-900 rounded-lg md:rounded-lg border border-gray-200 dark:border-gray-700">
 
             {/* Mobile Header */}
-            <div className="md:hidden px-4 pt-1.5 pb-1.5">
-              <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Option Chain</h2>
+            <div className="md:hidden px-3 pt-1 pb-1">
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Option Chain</h2>
 
               {/* Controls */}
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {/* Index and Expiry Row */}
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   <select
                     value={selectedOptionIndex}
                     onChange={(e) => { const idx = e.target.value; setSelectedOptionIndex(idx); setSelectedOptionExpiryDate(""); setOptionChainData(null); setTimeout(() => fetchOptionChainData(idx), 0); }}
-                    className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm"
+                    className="flex-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-xs"
                     data-testid="select-option-index-mobile"
                   >
                     <option value="NIFTY">NIFTY</option>
@@ -21518,7 +21518,7 @@ ${
                         setSelectedOptionExpiryDate(newExpiry); fetchOptionChainData(selectedOptionIndex, newExpiry);
                       }
                     }}
-                    className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm"
+                    className="flex-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-xs"
                     data-testid="select-option-expiry-date-mobile"
                   >
                     {optionChainLoading ? (
@@ -21536,28 +21536,26 @@ ${
                 </div>
 
                 {/* Spot Price */}
-                <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-lg px-2.5 py-1.5 border border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400 text-sm">Spot Price:</span>
-                  <span className="text-green-600 dark:text-green-400 font-semibold text-lg" data-testid="text-option-spot-price-mobile">
-                    ₹{(optionChainData?.spotPrice || 0)?.toLocaleString() || "-"}
+                <div className="text-center bg-gray-50 dark:bg-gray-800 rounded px-2 py-1 border border-gray-200 dark:border-gray-700">
+                  <span className="text-green-600 dark:text-green-400 font-semibold text-sm" data-testid="text-option-spot-price-mobile">
+                    Spot: ₹{(optionChainData?.spotPrice || 0)?.toLocaleString() || "-"}
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Desktop Header */}
-            <div className="hidden md:block border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-semibold text-gray-900 dark:text-white">Option Chain</h2>
-                <span className="text-sm font-semibold text-green-600 dark:text-green-400">Spot: ₹{(optionChainData?.spotPrice || 0)?.toLocaleString()}</span>
+            <div className="hidden md:block border-b border-gray-200 dark:border-gray-700 px-4 py-2">
+              <div className="flex items-center justify-center mb-2">
+                <span className="text-xs font-semibold text-green-600 dark:text-green-400">Spot: ₹{(optionChainData?.spotPrice || 0)?.toLocaleString()}</span>
               </div>
 
               {/* Desktop Controls */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center gap-2">
                 <select
                   value={selectedOptionIndex}
                   onChange={(e) => { const idx = e.target.value; setSelectedOptionIndex(idx); setSelectedOptionExpiryDate(""); setOptionChainData(null); setTimeout(() => fetchOptionChainData(idx), 0); }}
-                  className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+                  className="px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-xs"
                   data-testid="select-option-index-desktop"
                 >
                   <option value="NIFTY">NIFTY</option>
@@ -21571,7 +21569,7 @@ ${
                     const newExpiry = e.target.value;
                     setSelectedOptionExpiryDate(newExpiry); fetchOptionChainData(selectedOptionIndex, newExpiry);
                   }}
-                  className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+                  className="px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-xs"
                   data-testid="select-option-expiry-date-desktop"
                 >
                   {getOptionExpiryDates(selectedOptionIndex).map((date) => (
