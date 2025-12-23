@@ -20101,7 +20101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         order: order.transaction_type === 'BUY' ? 'BUY' : 'SELL',
         symbol: order.tradingsymbol,
         qty: order.quantity,
-        price: order.price,
+        price: order.average_price && order.average_price > 0 ? order.average_price : (order.price && order.price > 0 ? order.price : 0),
         pnl: order.pnl ? `₹${order.pnl.toFixed(2)}` : '-',
         type: order.order_type,
         duration: order.filled_quantity > 0 ? 'Filled' : 'Pending'

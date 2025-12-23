@@ -13,6 +13,14 @@
 [x] 6. Add broker icon and rename broker ID to ID with Building2 icon
 [x] 7. Replace Building2 icon with Zerodha broker logo image
 
+## Bug Fixes
+
+[x] 8. Fixed Zerodha trade prices showing ₹0 for market orders
+   - Issue: price field was 0 for market/pending orders
+   - Solution: Updated fetch logic to use average_price (actual execution price) instead of price
+   - File Modified: server/routes.ts (line 20107)
+   - Change: `price: order.price` → `price: order.average_price && order.average_price > 0 ? order.average_price : (order.price && order.price > 0 ? order.price : 0)`
+
 ## Import Summary
 
 - **Date**: December 23, 2025
@@ -27,7 +35,8 @@
   - World map with global market indicators (USA, Canada, India, Hong Kong, Tokyo)
   - Search functionality working
   - Feature cards displaying properly (Social Feed, Trading Master, Journal)
-  - Zerodha broker integration working (6 trades fetched)
+  - Zerodha broker integration working (7 trades fetched)
+  - **NEW**: Zerodha trade prices now displaying correctly with average_price fallback
 
 ## Latest Changes
 
@@ -52,3 +61,10 @@
 - Workflow restarted successfully
 - Server running on port 5000
 - Screenshot verified application is working correctly
+
+**Turn 5-8 (Current):**
+- Fixed: Zerodha trade prices showing ₹0 for market/pending orders
+- Root Cause: Using `order.price` (0 for market orders) instead of `order.average_price` (actual execution price)
+- Solution: Updated fetch logic with priority: average_price > price > 0
+- File: server/routes.ts (line 20107)
+- Status: Workflow restarted, fix deployed and verified
