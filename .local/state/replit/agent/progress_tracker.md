@@ -12,21 +12,22 @@
 - Added: Auto-refresh polling (1 second)
 - Orders table now updates instantly
 
-**Turn 6 (Current): Client ID Persistence Fix**
-- Issue: Zerodha client ID showing "N/A" after page restart
-- Root Cause: Client ID not properly persisting to localStorage
-- Solution:
-  - Enhanced useEffect to check localStorage first before fetching
-  - Added fallback to fetch from API if localStorage is empty
-  - Improved persistence with redundant checks
-  - Changed dependency array to just [zerodhaAccessToken]
-- File Modified: client/src/pages/home.tsx (lines 3768-3791)
-- Result: Client ID now persists across page refreshes
+**Turn 6: Client ID Persistence Fix**
+- Fixed: Client ID showing "N/A" after restart
+- Enhanced: localStorage persistence with fallback fetch
 
-## Current Status
+**Turn 7 (Current): Centered Broker Funds Display**
+- Added: `brokerFunds` state for available funds
+- Added: useEffect to fetch funds from Zerodha API (`/user/margins` endpoint)
+- Updated: Orders & Positions dialog header
+- Layout: Title (left) | Funds centered | Client ID (right)
+- Display: Shows "Available Funds" with rupee amount fetched in real-time
+- File Modified: client/src/pages/home.tsx
 
-✅ Orders & Positions table: Real-time updates every 1 second
-✅ Trade History table: Duration column displays correctly
-✅ Zerodha integration: Status header correct, prices fixed
-✅ Client ID persistence: Now survives page restart
-✅ All UI fixes and polling working perfectly
+## Current Features
+
+✅ Orders & Positions table: Real-time 1-second polling
+✅ Trade History: Duration column correct
+✅ Client ID: Persists across restarts
+✅ Broker Funds: Centered display in dialog header, auto-fetched from Zerodha
+✅ All integrations: Zerodha connection working perfectly

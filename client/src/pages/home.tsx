@@ -3735,6 +3735,7 @@ ${
   const [zerodhaAccessToken, setZerodhaAccessToken] = useState<string | null>(null);
   const [zerodhaIsConnected, setZerodhaIsConnected] = useState(false);
   const [zerodhaClientId, setZerodhaClientId] = useState<string | null>(null);
+  const [brokerFunds, setBrokerFunds] = useState<number | null>(null);
   const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [zerodhaTradesLoading, setZerodhaTradesLoading] = useState(false);
   const [zerodhaTradesData, setZerodhaTradesData] = useState<any[]>([]);
@@ -4467,6 +4468,33 @@ ${
 
       // Cleanup: clear interval when dialog closes
       return () => clearInterval(pollInterval);
+    }
+  }, [showOrderModal, zerodhaAccessToken]);
+
+  // Fetch broker funds when dialog opens
+  useEffect(() => {
+    if (showOrderModal && zerodhaAccessToken) {
+      const fetchBrokerFunds = async () => {
+        try {
+          const response = await fetch('https://api.kite.trade/user/margins', {
+            headers: {
+              'Authorization': `Bearer ${zerodhaAccessToken}`,
+              'X-Kite-Version': '3'
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            // Get available cash balance
+            const equity = data.data?.equity || {};
+            const availableCash = equity.available_balance || 0;
+            setBrokerFunds(availableCash);
+            console.log('✅ [BROKER] Fetched available funds:', availableCash);
+          }
+        } catch (error) {
+          console.error('❌ [BROKER] Failed to fetch funds:', error);
+        }
+      };
+      fetchBrokerFunds();
     }
   }, [showOrderModal, zerodhaAccessToken]);
   // PAPER TRADING (DEMO TRADING) STATE - Like TradingView Practice Account
@@ -18982,6 +19010,16 @@ ${
             {/* Compact Header */}
             <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between gap-4">
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
+              <div className="flex-1 flex items-center justify-center">
+                {brokerFunds !== null ? (
+                  <div className="text-center">
+                    <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Available Funds</div>
+                    <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">₹{brokerFunds.toLocaleString('en-IN', {maximumFractionDigits: 2})}</div>
+                  </div>
+                ) : (
+                  <div className="text-xs text-slate-400 dark:text-slate-500">Loading funds...</div>
+                )}
+              </div>
               <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
                 <span className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1"><img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3" /> id: {zerodhaClientId || 'N/A'}</span>
               </div>
