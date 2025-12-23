@@ -50,8 +50,9 @@ class UpstoxOAuthManager {
     this.apiSecret = apiSecret || process.env.UPSTOX_API_SECRET || '';
     
     // Set redirect URI based on environment
-    const baseUrl = process.env.REPLIT_DOMAIN 
-      ? `https://${process.env.REPLIT_DOMAIN}`
+    // Set redirect URI based on environment
+    const baseUrl = (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS)
+      ? `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS}`
       : `http://localhost:5000`;
     this.redirectUri = `${baseUrl}/api/upstox/callback`;
 

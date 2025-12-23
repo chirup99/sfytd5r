@@ -144,11 +144,17 @@
    - Button now fully functional and matches Zerodha button behavior
    - **STATUS: READY FOR TESTING** - Upstox button should open popup when clicked
 
-## API Configuration (Turn 19)
+## API Configuration (Turn 19-20)
 [x] **UPSTOX API CREDENTIALS CONFIGURED**
    - API Key: efb14d7b-93b9-4fba-9398-f2e0b170b654
    - API Secret: lorxtpfd88
    - Stored securely as environment variables (UPSTOX_API_KEY, UPSTOX_API_SECRET)
    - Server automatically reads from env vars
    - OAuth Manager initialized and ready to handle login flow
-   - **STATUS: FULLY OPERATIONAL** - Upstox button now has valid API credentials
+
+[x] **UPSTOX REDIRECT URI FIXED**
+   - Issue: Code was checking for `REPLIT_DOMAIN` but env has `REPLIT_DEV_DOMAIN`
+   - Fixed: Updated server/upstox-oauth.ts to use correct environment variable
+   - Old redirect URI: `http://localhost:5000/api/upstox/callback` (rejected by Upstox)
+   - New redirect URI: `https://634a0949-5aa8-4b3a-866f-03c979f0ee5e-00-39ko7x3oark55.worf.replit.dev/api/upstox/callback` ✅
+   - **STATUS: FULLY OPERATIONAL** - Upstox OAuth ready to accept logins
