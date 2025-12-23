@@ -18983,14 +18983,13 @@ ${
                         <th className="px-2 py-2 text-left font-medium">Type</th>
                         <th className="px-2 py-2 text-left font-medium">Qty</th>
                         <th className="px-2 py-2 text-left font-medium">Price</th>
-                        <th className="px-2 py-2 text-left font-medium">P&L</th>
                         <th className="px-2 py-2 text-left font-medium">Duration</th>
                       </tr>
                     </thead>
                     <tbody>
                       {brokerOrders.length === 0 ? (
                         <tr>
-                          <td colSpan={8} className="px-2 py-4 text-center text-gray-500">
+                          <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
                             {fetchingBrokerOrders ? 'Loading orders...' : zerodhaAccessToken ? 'No orders found' : 'Connect to broker to view orders'}
                           </td>
                         </tr>
@@ -19011,17 +19010,6 @@ ${
                             <td className="px-2 py-2">{trade.type}</td>
                             <td className="px-2 py-2">{trade.qty}</td>
                             <td className="px-2 py-2">₹{trade.price}</td>
-                            <td className="px-2 py-2 font-medium">
-                              <span className={
-                                trade.pnl === "-"
-                                  ? "text-gray-500"
-                                  : trade.pnl && parseFloat((trade.pnl || "").replace(/[₹,]/g, "")) > 0
-                                    ? "text-green-600"
-                                    : "text-red-600"
-                              }>
-                                {trade.pnl}
-                              </span>
-                            </td>
                             <td className="px-2 py-2">{trade.duration || "-"}</td>
                           </tr>
                         ))
