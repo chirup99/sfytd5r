@@ -18,3 +18,6 @@
   - WebSocket live data streaming active (BANKNIFTY, SENSEX, GOLD)
   - Frontend rendering correctly with all UI components
   - Market data fetching operational
+  - World map with global market indicators (USA, Canada, India, Hong Kong, Tokyo)
+  - Search functionality working
+  - Feature cards displaying properly (Social Feed, Trading Master, Journal)
