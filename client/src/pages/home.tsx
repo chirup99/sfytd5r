@@ -19020,8 +19020,10 @@ ${
                     <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Available Funds</div>
                     <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">₹{brokerFunds.toLocaleString('en-IN', {maximumFractionDigits: 2})}</div>
                   </div>
-                ) : (
+                ) : zerodhaAccessToken ? (
                   <div className="text-xs text-slate-400 dark:text-slate-500">Loading funds...</div>
+                ) : (
+                  <div className="text-xs text-slate-500 dark:text-slate-400">Demo Mode</div>
                 )}
               </div>
               <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
