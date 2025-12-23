@@ -40,6 +40,7 @@ import SharedReport from "@/pages/shared-report";
 import TradingJournalDemo from "@/pages/trading-journal-demo";
 import MarketNews from "@/pages/market-news";
 import NeoFeedSocialFeed from "@/components/neofeed-social-feed";
+import ZerodhaDebug from "@/pages/zerodha-debug";
 import { AngelOneGlobalAutoConnect } from "@/components/auth-button-angelone";
 import { getCognitoToken, getCognitoUser, initializeCognito } from "@/cognito";
 
@@ -438,6 +439,7 @@ function Router() {
       <Route path="/share/heatmap/:userId" component={PublicHeatmap} />
       <Route path="/shared/:reportId" component={SharedReport} />
       <Route path="/market-news" component={MarketNews} />
+      <Route path="/zerodha-debug" component={ZerodhaDebug} />
       <Route component={NotFound} />
     </Switch>
   );
