@@ -4443,7 +4443,7 @@ ${
 
   // Fetch broker orders when Orders dialog opens - with auto-refresh polling
   useEffect(() => {
-    if (showOrderModal && zerodhaAccessToken) {
+    if (zerodhaAccessToken) {
       const fetchOrders = async () => {
         setFetchingBrokerOrders(true);
         try {
@@ -4470,7 +4470,7 @@ ${
       // Cleanup: clear interval when dialog closes
       return () => clearInterval(pollInterval);
     }
-  }, [showOrderModal, zerodhaAccessToken]);
+  }, [zerodhaAccessToken]);
 
   // Fetch broker funds when dialog opens - with auto-refresh polling
   useEffect(() => {
