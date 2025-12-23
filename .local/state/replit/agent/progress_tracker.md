@@ -10,6 +10,8 @@
 ## Additional Work
 
 [x] 5. Remove "broker user" display from Orders & Positions header
+[x] 6. Add broker icon and rename broker ID to ID with Building2 icon
+[x] 7. Replace Building2 icon with Zerodha broker logo image
 
 ## Import Summary
 
@@ -29,6 +31,18 @@
 
 ## Latest Changes
 
-- **Removed**: "broker user: N/A" span from Orders & Positions section
-- **File Modified**: client/src/pages/home.tsx (line 18959)
-- **Status**: Successfully deployed with HMR update confirmation in logs
+**Turn 1:**
+- Removed: "broker user: N/A" span from Orders & Positions section
+- File Modified: client/src/pages/home.tsx (line 18959)
+
+**Turn 2:**
+- Added: Zerodha broker icon before ID text
+- Changed: "broker id:" to "id:" with Building2 icon
+- Files Modified: client/src/pages/home.tsx (lines 43, 18958)
+
+**Turn 3:**
+- Replaced: Building2 icon with actual Zerodha broker logo image
+- Image Source: https://zerodha.com/static/images/products/kite-logo.svg
+- Removed: Building2 from lucide-react import
+- Files Modified: client/src/pages/home.tsx (lines 43, 18958)
+- Status: HMR update confirmed in logs
