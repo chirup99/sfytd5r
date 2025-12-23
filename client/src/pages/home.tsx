@@ -21566,7 +21566,7 @@ ${
                 </select>
 
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Spot: <span className="font-semibold text-green-600 dark:text-green-400">${(optionChainData?.spotPrice || 0)?.toLocaleString()}</span>
+                  Spot: <span className="font-semibold text-green-600 dark:text-green-400">₹{(optionChainData?.spotPrice || 0)?.toLocaleString()}</span>
                 </span>
 
                 <select
