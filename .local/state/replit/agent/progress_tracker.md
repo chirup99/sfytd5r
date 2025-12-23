@@ -121,6 +121,26 @@ Trigger Heatmap Refresh to display daily P&L
 ✅ Paper Trading Record button: Fully functional  
 ✅ **Broker Orders Record button: Implemented and ready to test**  
 
+## Auto-Tap Feature Implementation (Turn 16+)
+
+**Auto-Tap with Order Count Logic:**
+- Added `previousBrokerOrdersLengthRef` useRef to track previous broker order count
+- Implemented useEffect hook that watches `brokerOrders` dependency
+- Auto-calls `recordAllBrokerOrders()` when new orders are detected
+- Logic: Triggers only when `brokerOrders.length > previousBrokerOrdersLengthRef.current`
+- Includes 500ms delay to ensure state is properly updated before recording
+- Console logs: `🤖 [AUTO-TAP] Detected {count} orders, auto-recording...`
+- Updates ref with current length to track next increment
+
+**How Auto-Tap Works:**
+1. When new orders appear in broker table (count increases)
+2. useEffect detects the increment
+3. Automatically calls recordAllBrokerOrders() function
+4. Bypasses manual "Record to Journal" button click
+5. Updates trade history, AWS heatmap, and localStorage automatically
+6. Shows toast confirmation with order count
+7. Ref updates for next detection
+
 ## Import Status: COMPLETE ✅
 
 - All migration steps completed
@@ -129,3 +149,4 @@ Trigger Heatmap Refresh to display daily P&L
 - Project fully operational and ready for use
 - Broker terminal integration working seamlessly
 - **Record button available in both Paper Trading and Broker Orders dialogs**
+- **✨ AUTO-TAP FEATURE: New broker orders now auto-record with count increment logic**

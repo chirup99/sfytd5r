@@ -4432,6 +4432,7 @@ ${
     stopLoss: "",
     target: "",
   });
+  const previousBrokerOrdersLengthRef = useRef<number>(0);
 
   // Save Confirmation Dialog State
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
@@ -5491,6 +5492,21 @@ ${
   };
 
   // Exit all open positions at once
+
+  // Auto-tap: Automatically record broker orders when new orders are added
+  useEffect(() => {
+    if (brokerOrders.length > previousBrokerOrdersLengthRef.current && brokerOrders.length > 0) {
+      console.log(`🤖 [AUTO-TAP] Detected ${brokerOrders.length} orders (was ${previousBrokerOrdersLengthRef.current}), auto-recording...`);
+      
+      // Schedule the auto-record for next tick to ensure state is updated
+      setTimeout(() => {
+        recordAllBrokerOrders();
+      }, 500);
+    }
+    
+    // Update the ref with current length
+    previousBrokerOrdersLengthRef.current = brokerOrders.length;
+  }, [brokerOrders]);
   const exitAllPaperPositions = () => {
     const openPositions = paperPositions.filter(p => p.isOpen);
 
