@@ -3752,6 +3752,11 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [importData, setImportData] = useState("");
   const [importError, setImportError] = useState("");
   const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
+  const [upstoxAccessToken, setUpstoxAccessToken] = useState<string | null>(null);
+  const [angelOneAccessToken, setAngelOneAccessToken] = useState<string | null>(null);
+  const [angelOneIsConnected, setAngelOneIsConnected] = useState(false);
+  const [dhanAccessToken, setDhanAccessToken] = useState<string | null>(null);
+  const [dhanIsConnected, setDhanIsConnected] = useState(false);
   // Zerodha OAuth Handlers
   // Check localStorage on mount to restore connection state
   useEffect(() => {
