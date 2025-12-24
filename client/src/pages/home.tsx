@@ -17597,8 +17597,13 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             <Button
                               onClick={handleZerodhaConnect}
                               variant="outline"
-                              className="w-full h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700"
+                              className={`w-full h-10 ${
+                                (upstoxIsConnected || angelOneIsConnected || dhanIsConnected)
+                                  ? 'bg-slate-100 dark:bg-slate-900 text-slate-400 dark:text-slate-600 border-slate-300 dark:border-slate-700 cursor-not-allowed opacity-50'
+                                  : 'bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700'
+                              }`}
                               data-testid="button-zerodha-dialog"
+                              disabled={upstoxIsConnected || angelOneIsConnected || dhanIsConnected}
                             >
                               <img 
                                 src="https://zerodha.com/static/images/products/kite-logo.svg" 
@@ -17608,33 +17613,115 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                               Zerodha
                             </Button>
                           )}
-                          <Button
-                            variant="outline"
-                            className="w-full h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700"
-                            data-testid="button-upstox-dialog"
-                            onClick={handleUpstoxConnect}
-                          >
-                            <img src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" alt="Upstox" className="h-4 mr-2" />
-                            Upstox
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="w-full h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700"
-                            data-testid="button-angelone-dialog"
-                            onClick={handleAngelOneConnect}
-                          >
-                            <img src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw?v=1701" alt="Angel One" className="h-4 mr-2" />
-                            Angel One
-                          </Button>
-                          <Button
-                            onClick={handleDhanConnect}
-                            variant="outline"
-                            className="w-full h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700"
-                            data-testid="button-dhan-dialog"
-                          >
-                            <img src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw?v=1701" alt="Dhan" className="h-4 mr-2" />
-                            Dhan
-                          </Button>
+                          {upstoxIsConnected ? (
+                            <div className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800 border border-green-500 rounded h-10">
+                              <div className="flex items-center">
+                                <img src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" alt="Upstox" className="h-4 mr-2" />
+                                <span className="text-black dark:text-white font-medium">Upstox</span>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-10 w-10 border border-slate-200 hover:border-red-100"
+                                onClick={() => {
+                                  localStorage.removeItem("upstox_token");
+                                  setUpstoxAccessToken(null);
+                                  setUpstoxIsConnected(false);
+                                }}
+                                title="Disconnect Upstox"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              className={`w-full h-10 ${
+                                (zerodhaIsConnected || angelOneIsConnected || dhanIsConnected)
+                                  ? 'bg-slate-100 dark:bg-slate-900 text-slate-400 dark:text-slate-600 border-slate-300 dark:border-slate-700 cursor-not-allowed opacity-50'
+                                  : 'bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700'
+                              }`}
+                              data-testid="button-upstox-dialog"
+                              onClick={handleUpstoxConnect}
+                              disabled={zerodhaIsConnected || angelOneIsConnected || dhanIsConnected}
+                            >
+                              <img src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" alt="Upstox" className="h-4 mr-2" />
+                              Upstox
+                            </Button>
+                          )}
+                          {angelOneIsConnected ? (
+                            <div className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800 border border-green-500 rounded h-10">
+                              <div className="flex items-center">
+                                <img src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw?v=1701" alt="Angel One" className="h-4 mr-2" />
+                                <span className="text-black dark:text-white font-medium">Angel One</span>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-10 w-10 border border-slate-200 hover:border-red-100"
+                                onClick={() => {
+                                  localStorage.removeItem("angel_one_token");
+                                  setAngelOneAccessToken(null);
+                                  setAngelOneIsConnected(false);
+                                }}
+                                title="Disconnect Angel One"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              className={`w-full h-10 ${
+                                (zerodhaIsConnected || upstoxIsConnected || dhanIsConnected)
+                                  ? 'bg-slate-100 dark:bg-slate-900 text-slate-400 dark:text-slate-600 border-slate-300 dark:border-slate-700 cursor-not-allowed opacity-50'
+                                  : 'bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700'
+                              }`}
+                              data-testid="button-angelone-dialog"
+                              onClick={handleAngelOneConnect}
+                              disabled={zerodhaIsConnected || upstoxIsConnected || dhanIsConnected}
+                            >
+                              <img src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw?v=1701" alt="Angel One" className="h-4 mr-2" />
+                              Angel One
+                            </Button>
+                          )}
+                          {dhanIsConnected ? (
+                            <div className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800 border border-green-500 rounded h-10">
+                              <div className="flex items-center">
+                                <img src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw?v=1701" alt="Dhan" className="h-4 mr-2" />
+                                <span className="text-black dark:text-white font-medium">Dhan</span>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-10 w-10 border border-slate-200 hover:border-red-100"
+                                onClick={() => {
+                                  localStorage.removeItem("dhan_token");
+                                  setDhanAccessToken(null);
+                                  setDhanIsConnected(false);
+                                }}
+                                title="Disconnect Dhan"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              onClick={handleDhanConnect}
+                              variant="outline"
+                              className={`w-full h-10 ${
+                                (zerodhaIsConnected || upstoxIsConnected || angelOneIsConnected)
+                                  ? 'bg-slate-100 dark:bg-slate-900 text-slate-400 dark:text-slate-600 border-slate-300 dark:border-slate-700 cursor-not-allowed opacity-50'
+                                  : 'bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700'
+                              }`}
+                              data-testid="button-dhan-dialog"
+                              disabled={zerodhaIsConnected || upstoxIsConnected || angelOneIsConnected}
+                            >
+                              <img src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw?v=1701" alt="Dhan" className="h-4 mr-2" />
+                              Dhan
+                            </Button>
+                          )}
+
                           <p className="text-xs text-center text-muted-foreground mt-4">
                             Connect your broker account to auto-import trades
                           </p>

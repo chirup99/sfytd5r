@@ -48,6 +48,21 @@ dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 dark:border-slate-700
 
 ---
 
+## Broker Connection Status Update - NEWLY COMPLETED
+
+**Broker Button Dialog Enhancement:**
+✅ When one broker is connected, remaining brokers are disabled
+✅ Disabled brokers show deactivated styling:
+   - Background: `bg-slate-100 dark:bg-slate-900`
+   - Text: `text-slate-400 dark:text-slate-600`
+   - Border: `border-slate-300 dark:border-slate-700`
+   - Opacity: 50% with cursor-not-allowed
+✅ Connected brokers show green border with disconnect button
+✅ All four broker buttons (Zerodha, Upstox, Angel One, Dhan) updated
+✅ Proper disabled state prevents selecting multiple brokers
+
+---
+
 ## Final Checklist ✅
 
 [x] Broker button text visible in light mode
@@ -61,16 +76,19 @@ dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 dark:border-slate-700
 [x] Live market data streaming verified
 [x] Auto-import orders working correctly
 [x] All services operational
+[x] Broker connection status dialog disabled non-connected brokers
+[x] Deactivated styling applied to disabled broker buttons
 
-**Status: COMPLETE - Dark Mode Implementation Finished**
+**Status: COMPLETE - All Features Implemented** ✅
 
-All broker buttons and connected status indicators now display perfectly in both light and dark themes with proper contrast and visibility.
+All broker buttons and connected status indicators now display perfectly in both light and dark themes with proper contrast, visibility, and connection status handling.
 
 ---
 
-## Import Progress Tracker
+## Import Progress Tracker - COMPLETED
 
 [x] 1. Install the required packages
 [x] 2. Restart the workflow to see if the project is working
 [x] 3. Verify the project is working using the feedback tool
 [x] 4. Inform user the import is completed and they can start building, mark the import as completed using the complete_project_import tool
+[x] 5. Update broker buttons dialog to disable non-connected brokers with deactivated styling
