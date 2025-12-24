@@ -20156,19 +20156,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get Zerodha broker margins (available funds)
   app.get('/api/broker/zerodha/margins', async (req, res) => {
     const accessToken = req.headers.authorization?.split(' ')[1];
+    const apiKey = process.env.ZERODHA_API_KEY;
     
-    if (!accessToken) {
+    if (!accessToken || !apiKey) {
       return res.status(401).json({ success: false, availableCash: 0, error: 'Unauthorized' });
     }
 
     try {
+      console.log('📊 [ZERODHA] Fetching margins with auth: token ' + apiKey.substring(0, 4) + '***:' + accessToken.substring(0, 10) + '***');
+      
       const response = await fetch('https://api.kite.trade/user/margins', {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': `token ${apiKey}:${accessToken}`,
           'X-Kite-Version': '3'
         }
       });
 
+      console.log('📊 [ZERODHA] Margins API response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
         const equity = data.data?.equity || {};
@@ -20182,8 +20187,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // API call failed
-      console.error('❌ [ZERODHA] Margins API returned status:', response.status);
+      // API call failed - log the response body for debugging
+      const errorText = await response.text();
+      console.error('❌ [ZERODHA] Margins API returned status:', response.status, 'Body:', errorText.substring(0, 200));
       return res.status(response.status).json({ 
         success: false, 
         availableCash: 0, 
