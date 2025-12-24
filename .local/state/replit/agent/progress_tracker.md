@@ -1,72 +1,46 @@
 # Project Import Progress Tracker
 
-## Dhan OAuth 3-Step Flow Implementation (December 24, 2025) ✅ COMPLETE
+## Dhan OAuth Login URL Fix (December 24, 2025) ✅ COMPLETE
 
-[x] 1. Analyzed Dhan documentation and identified proper 3-step authentication flow
-   - Step 1: Generate Consent (POST to `/app/generate-consent` with `app_id` and `app_secret` headers)
-   - Step 2: Browser Login (Open correct URL: `/login/consentApp-login?consentAppId={consentAppId}`)
-   - Step 3: Consume Consent (POST to `/app/consumeApp-consent?tokenId={tokenId}` with `app_id` and `app_secret`)
+[x] 1. Identified incorrect Dhan login URL from web search
+   - Found official Dhan documentation at https://dhanhq.co/docs/v2/authentication/
+   - Correct URL: `https://auth.dhan.co/consent-login?consentAppId={consentAppId}`
+   - Previous URL was: `https://auth.dhan.co/login/consentApp-login?consentAppId={consentAppId}` (WRONG)
 
-[x] 2. Implemented correct 3-step flow in server/dhan-oauth.ts
-   - Updated generateConsent() to call Dhan API with proper headers
-   - Now returns correct login URL format with consentAppId parameter
-   - Changed headers from X-API-KEY/X-API-SECRET to app_id/app_secret (per docs)
+[x] 2. Fixed login URL in server/dhan-oauth.ts (line 96)
+   - Changed from: `login/consentApp-login` → `consent-login`
+   - Reason: Dhan OAuth Step 2 requires correct endpoint for browser redirect
 
-[x] 3. Fixed consumeConsent() function
-   - Updated headers to use app_id and app_secret instead of X-API-KEY/X-API-SECRET
-   - Added proper error logging for API responses
-
-[x] 4. Restarted workflow and verified implementation
-   - Server running on port 5000
-   - Dhan OAuth Manager initialized
-   - Ready for testing
-
-## Key Changes Made:
-
-### Before (Wrong Flow):
-```
-1. Directly generated user-login URL without API call
-2. Used wrong headers (X-API-KEY, X-API-SECRET)
-3. Missing consentAppId generation step
-```
-
-### After (Correct 3-Step Flow):
-```
-Step 1: POST to https://auth.dhan.co/app/generate-consent
-Headers: app_id, app_secret
-Response: { consentAppId, consentAppStatus, status }
-
-Step 2: Open https://auth.dhan.co/login/consentApp-login?consentAppId={consentAppId}
-User logs in and gets redirected with tokenId
-
-Step 3: POST to https://auth.dhan.co/app/consumeApp-consent?tokenId={tokenId}
-Headers: app_id, app_secret
-Response: { dhanClientId, dhanClientName, accessToken, expiryTime }
-```
-
-## Files Modified:
-- server/dhan-oauth.ts (generateConsent function + consumeConsent headers)
+[x] 3. Verified complete Dhan OAuth flow matches documentation:
+   - Step 1: POST to `https://auth.dhan.co/app/generate-consent?client_id={client_id}`
+     - Headers: `app_id`, `app_secret`
+     - Response: `{ consentAppId, consentAppStatus, status }`
+   - Step 2: Redirect to `https://auth.dhan.co/consent-login?consentAppId={consentAppId}`
+     - User logs in and gets `tokenId` in callback
+   - Step 3: POST to `https://auth.dhan.co/app/consumeApp-consent?tokenId={tokenId}`
+     - Headers: `app_id`, `app_secret`
+     - Response: `{ dhanClientId, dhanClientName, accessToken, expiryTime }`
 
 ## Status: READY FOR TESTING
-- Dhan OAuth flow now follows official documentation
-- All OAuth managers initialized correctly:
-  - Zerodha ✅
-  - Upstox ✅
-  - Angel One ✅
-  - Dhan ✅ (FIXED)
+- Dhan OAuth flow now uses correct documentation endpoints
+- All 3 steps properly implemented
+- Fix: Changed wrong login URL to correct endpoint
 
 ---
 
-## Previous Progress
+## Previous Sessions
 
-### Initial Dhan Fix (Missing redirect_uri)
-[x] Added redirect_uri parameter to login URL
-[x] Tested and verified with workflow restart
+### Dhan OAuth 3-Step Flow Implementation (December 24, 2025) ✅ COMPLETE
+
+[x] 1. Analyzed Dhan documentation and identified proper 3-step authentication flow
+[x] 2. Implemented correct 3-step flow in server/dhan-oauth.ts
+[x] 3. Fixed consumeConsent() function headers
+[x] 4. Restarted workflow and verified implementation
 
 ### Import to Replit Environment (December 24, 2025)
 [x] 1. Installed required packages (including dotenv)
 [x] 2. Restarted workflow
-[x] 3. Verified all services running (server on port 5000, Angel One authenticated, real-time data streaming)
+[x] 3. Verified all services running
 [x] 4. Import completed successfully
 
 ## Project Summary

@@ -93,7 +93,7 @@ class DhanOAuthManager {
 
       // Step 2: Store consentAppId and build login URL
       const consentAppId = consentData.consentAppId;
-      const loginUrl = `https://auth.dhan.co/login/consentApp-login?consentAppId=${encodeURIComponent(consentAppId)}`;
+      const loginUrl = `https://auth.dhan.co/consent-login?consentAppId=${encodeURIComponent(consentAppId)}`;
 
       this.consentAppIds.set(consentAppId, {
         id: consentAppId,
