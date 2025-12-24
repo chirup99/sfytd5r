@@ -76,4 +76,22 @@ To enable: Add `DHAN_PARTNER_ID` and `DHAN_PARTNER_SECRET` to Secrets tab.
 [x] Real-time price data streaming (BANKNIFTY, SENSEX, GOLD)
 [x] All services initialized successfully
 [x] Broker profile persistence fix deployed and verified
-[x] Migration import completed successfully
+
+## Orders & Positions Funds Loading - REMOVED (Dec 24, 2025 12:13)
+
+**Problem:** The Orders & Positions dialog was displaying "Loading funds..." text while fetching broker available funds from Zerodha.
+
+**What was removed:**
+[x] Removed `brokerFunds` state variable (was storing available funds value)
+[x] Removed useEffect that fetched funds on dialog open (with 2-second polling)
+[x] Removed useEffect that restored funds from localStorage
+[x] Removed funds display section from dialog header (was showing "Loading funds..." or the funds value)
+[x] Workflow restarted successfully - no errors
+
+**Why removed:**
+- The funds fetch was causing unnecessary polling (every 2 seconds) while dialog was open
+- The loading state was displaying indefinitely in many cases
+- Backend endpoint already available at `/api/broker/zerodha/margins` (uses Zerodha API: https://api.kite.trade/user/margins)
+- Can be re-added later if needed with proper error handling
+
+**Status:** ✅ COMPLETE. "Loading funds..." display removed from Orders & Positions dialog header. The dialog header now shows only the sidebar toggle and broker profile info.
