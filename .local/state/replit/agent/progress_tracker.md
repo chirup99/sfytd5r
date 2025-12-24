@@ -70,7 +70,6 @@
 [x] Updated both `convertedTrades` and `heatmapTrades` to use `completeOrders` instead of `brokerOrders`
 [x] Added validation check: if no COMPLETE orders found, shows error toast
 [x] Updated console logging to report: `✅ Importing ${completeOrders.length} COMPLETE orders (skipped ${brokerOrders.length - completeOrders.length} non-complete orders)`
-[x] Updated toast message to display count of COMPLETE orders imported vs skipped
 [x] Workflow restarted and verified - code compiles without errors
 [x] Angel One auto-connected with live WebSocket data streaming
 
@@ -79,7 +78,22 @@
 - ✖️ REJECTED orders: Skipped
 - ✖️ CANCELLED orders: Skipped
 - ✖️ PENDING orders: Skipped
-- Toast shows: "Recorded X COMPLETE orders to today's summary (Y non-complete orders skipped)"
+
+---
+
+## Toast Message Simplification - COMPLETED (Dec 24, 2025 5:53 PM)
+
+**User Request:** Simplify the journal recording toast - display only the order count, remove verbose text
+
+**Changes Applied:**
+[x] Simplified toast message from: `"Recorded 3 COMPLETE orders to today's summary and personal tradebook (11 non-complete orders skipped)"`
+[x] New simplified message: `"Recorded 3 orders"` (clean and concise)
+[x] Removed "today's summary", "personal tradebook", and skipped order count from display
+[x] Workflow restarted and verified working correctly
+[x] Browser logs confirm auto-recording with 3 COMPLETE orders successfully imported
+[x] Toast notification now displays clean, minimal message
+
+**Result:** Users see a simple "Recorded X orders" message instead of the lengthy verbose format
 
 ---
 
@@ -91,8 +105,9 @@
 - ✅ Real-time price data streaming (BANKNIFTY, SENSEX, GOLD)
 - ✅ Orders fetching from Zerodha API with correct status mapping
 - ✅ Profile persistence across page reloads
-- ✅ Record to Journal button now ONLY imports COMPLETE orders (successful orders only)
-- ✅ All non-COMPLETE orders (REJECTED, CANCELLED, PENDING) are automatically filtered and skipped
+- ✅ Record to Journal button ONLY imports COMPLETE orders (successful orders only)
+- ✅ All non-COMPLETE orders (REJECTED, CANCELLED, PENDING) automatically filtered and skipped
+- ✅ Simplified toast message shows clean "Recorded X orders" notification
 - ✅ All services initialized successfully
 
-**Latest Status:** Dec 24, 2025, 5:50 PM - All systems operational. Record to Journal filter implemented successfully.
+**Latest Status:** Dec 24, 2025, 5:53 PM - All systems operational. Project fully configured and ready for use.

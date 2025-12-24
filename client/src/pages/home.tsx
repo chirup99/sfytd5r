@@ -5743,7 +5743,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
     toast({
       title: "Orders Recorded",
-      description: `Recorded ${completeOrders.length} COMPLETE orders to today's summary and personal tradebook (${brokerOrders.length - completeOrders.length} non-complete orders skipped)`
+      description: `Recorded ${completeOrders.length} orders`
     });
 
     console.log("✅ Broker orders recorded to journal summary and heatmap");
