@@ -4581,8 +4581,27 @@ ${
   // Order Modal State
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [orderTab, setOrderTab] = useState("history");
+
+  // Fetch Zerodha positions when tab changes
+  useEffect(() => {
+    if (zerodhaAccessToken && orderTab === "positions") {
+      setFetchingBrokerPositions(true);
+      fetch("/api/broker/zerodha/positions", {
+        headers: { "Authorization": `Bearer ${zerodhaAccessToken}` }
+      })
+        .then(r => r.json())
+        .then(data => setBrokerPositions(data.positions || []))
+        .catch(err => {
+          console.error("❌ Positions fetch failed:", err);
+          setBrokerPositions([]);
+        })
+        .finally(() => setFetchingBrokerPositions(false));
+    }
+  }, [zerodhaAccessToken, orderTab]);
   const [brokerOrders, setBrokerOrders] = useState<any[]>([]);
   const [fetchingBrokerOrders, setFetchingBrokerOrders] = useState(false);
+  const [brokerPositions, setBrokerPositions] = useState<any[]>([]);
+  const [fetchingBrokerPositions, setFetchingBrokerPositions] = useState(false);
   const [orderData, setOrderData] = useState({
     symbol: "",
     action: "Buy",
@@ -19369,13 +19388,34 @@ ${
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
-                          No open positions
-                        </td>
-                      </tr>
+                      {brokerPositions.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
+                            {fetchingBrokerPositions ? 'Loading positions...' : zerodhaAccessToken ? 'No open positions' : 'Connect to broker to view positions'}
+                          </td>
+                        </tr>
+                      ) : (
+                        brokerPositions.map((pos, index) => (
+                          <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td className="px-2 py-2 font-medium">{pos.symbol}</td>
+                            <td className="px-2 py-2">₹{pos.entryPrice || pos.entry_price}</td>
+                            <td className="px-2 py-2">₹{pos.currentPrice || pos.current_price}</td>
+                            <td className="px-2 py-2">{pos.qty || pos.quantity}</td>
+                            <td className={`px-2 py-2 font-medium ${(pos.unrealizedPnl || pos.unrealized_pnl || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                              ₹{pos.unrealizedPnl || pos.unrealized_pnl || 0}
+                            </td>
+                            <td className={`px-2 py-2 ${(pos.returnPercent || pos.return_percent || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                              {(pos.returnPercent || pos.return_percent || 0).toFixed(2)}%
+                            </td>
+                            <td className="px-2 py-2">{pos.status || 'Open'}</td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
+                </div>
+                <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700 mt-2">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{brokerPositions.length} open positions</span>
                 </div>
               </TabsContent>
 
