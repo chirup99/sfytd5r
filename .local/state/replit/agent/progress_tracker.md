@@ -76,3 +76,4 @@ To enable: Add `DHAN_PARTNER_ID` and `DHAN_PARTNER_SECRET` to Secrets tab.
 [x] Real-time price data streaming (BANKNIFTY, SENSEX, GOLD)
 [x] All services initialized successfully
 [x] Broker profile persistence fix deployed and verified
+[x] Migration import completed successfully
