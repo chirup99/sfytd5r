@@ -3878,7 +3878,7 @@ ${
               if (data.profile) {
                 setZerodhaProfileData(data.profile);
                 setZerodhaClientId(data.profile.userId);
-                setZerodhaUserName(data.profile.user_name || data.profile.userName);
+                setZerodhaUserName(data.profile.userName);
                 console.log('✅ [ZERODHA] Profile fetched:', data.profile.email);
               }
             })

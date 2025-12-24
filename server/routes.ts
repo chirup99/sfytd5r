@@ -20228,7 +20228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const profile = {
         userId: userData.user_id,
         email: userData.email,
-        username: userData.user_name,
+        userName: userData.user_name,
         phone: userData.phone,
         broker: userData.broker,
         accountType: userData.account_type,
