@@ -17486,7 +17486,6 @@ ${
                               >
                                 <X className="h-4 w-4" />
                               </Button>
-                            onClick={handleUpstoxConnect}
                             </div>
                           ) : (
                             <Button
