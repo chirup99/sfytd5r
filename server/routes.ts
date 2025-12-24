@@ -20107,7 +20107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         price: order.average_price && order.average_price > 0 ? order.average_price : (order.price && order.price > 0 ? order.price : 0),
         pnl: order.pnl ? `₹${order.pnl.toFixed(2)}` : '-',
         type: order.order_type,
-        duration: order.filled_quantity > 0 ? 'Filled' : 'Pending'
+        status: order.status || 'PENDING'
       }));
 
       console.log('✅ [ZERODHA] Fetched', trades.length, 'trades from API');
@@ -20129,7 +20129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           price: 143.9, 
           pnl: '-',
           type: 'MIS',
-          duration: '0s'
+          status: 'PENDING'
         },
         { 
           time: '3:19:37 PM',
@@ -20139,7 +20139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           price: 146.5, 
           pnl: '₹19500.00',
           type: 'MIS',
-          duration: '2m 50s'
+          status: 'COMPLETE'
         }
       ];
       

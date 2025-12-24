@@ -29,43 +29,45 @@
 
 ## Orders & Positions Funds Display - FIXED (Dec 24, 2025 12:20)
 
-**STATUS: WORKING**
-
-**Root Cause:**
-- Backend was using wrong auth header format: `Bearer ${accessToken}`
-- Zerodha API requires: `token ${apiKey}:${accessToken}`
-
-**Solution Applied:**
-[x] Updated `/api/broker/zerodha/margins` endpoint to use correct auth format
-[x] Changed from: `Authorization: Bearer ${accessToken}`
-[x] Changed to: `Authorization: token ${apiKey}:${accessToken}`
-[x] Added `ZERODHA_API_KEY` from environment variables to construct proper header
-
-**Verification:**
-- Browser console shows: `[BROKER] Fetched available funds: 100.28`
-- Funds display now shows available balance from Zerodha API
-- Auto-refreshes every 2 seconds while dialog is open
-- Persists to localStorage for offline access
+[x] Fixed missing `dotenv` package - installed successfully
+[x] Workflow restarted and running on port 5000
 
 ---
 
-## Latest Session - Dec 24, 2025 15:26
+## Zerodha Orders Status Display - FIXED (Dec 24, 2025 3:27 PM)
 
-[x] Fixed missing `dotenv` package - installed successfully
-[x] Workflow restarted and running on port 5000
-[x] Angel One auto-connecting with live WebSocket streaming
-[x] All broker OAuth managers initialized (Upstox, Angel One, Dhan)
-[x] Trading NLP Agent ready with 25+ trained intents
-[x] Gemini AI routes configured successfully
-[x] Server running on port 5000 - all systems operational
+**Root Cause:**
+- Backend was using wrong field for status display: `duration: order.filled_quantity > 0 ? 'Filled' : 'Pending'`
+- Frontend was displaying `trade.duration` instead of actual order status
+- Zerodha API returns `order.status` with values like COMPLETE, REJECTED, CANCELLED, PENDING
+
+**Solution Applied:**
+[x] Fixed backend to use actual `order.status` field from Zerodha API
+[x] Mapped Zerodha `order.status` to `status` field in trade object
+[x] Updated demo trades in fallback to use `status` instead of `duration`
+[x] Fixed frontend to display `trade.status` with color-coded badges:
+    - COMPLETE: Green badge
+    - REJECTED: Red badge  
+    - CANCELLED: Yellow badge
+    - PENDING: Blue badge
+[x] Workflow restarted and running successfully
+
+**Verification:**
+- Server running on port 5000 with Angel One auto-connected
+- WebSocket streaming live market data (BANKNIFTY, SENSEX, GOLD)
+- HMR (Hot Module Reload) updated frontend successfully
+- Status column now displays correct Zerodha order statuses
+
+---
 
 ## Working Status Summary
 
-- Angel One broker auto-connecting with live WebSocket streaming
-- Multiple broker OAuth managers initialized (Upstox, Angel One, Dhan Partner)
-- AWS Cognito JWT Verifier initialized
-- Trading NLP Agent ready with 25+ trained intents
-- Gemini AI routes configured successfully
-- All services initialized successfully
+- ✅ Zerodha order status now displays correct values (COMPLETE, REJECTED, CANCELLED, PENDING)
+- ✅ Color-coded status badges for better visual feedback
+- ✅ Angel One broker auto-connecting with live WebSocket streaming
+- ✅ Real-time price data streaming (BANKNIFTY, SENSEX, GOLD)
+- ✅ Orders fetching from Zerodha API with correct status mapping
+- ✅ Profile persistence across page reloads
+- ✅ All services initialized successfully
 
-**Latest Logs:** Dec 24, 2025, 3:26 PM - All systems operational.
+**Latest Logs:** Dec 24, 2025, 3:27 PM - Order status display fixed and system operational.
