@@ -1,13 +1,20 @@
-# Project Import Progress Tracker - Dhan Partner OAuth Fix
+# Project Import Progress Tracker
 
-## Dhan OAuth Implementation - FIXED ✅
+## Import Workflow Status
+
+[x] 1. Install the required packages
+[x] 2. Restart the workflow to see if the project is working
+[x] 3. Verify the project is working using the feedback tool
+[x] 4. Inform user the import is completed and they can start building, mark the import as completed using the complete_project_import tool
+
+## Dhan OAuth Implementation - FIXED
 
 ### Previous Issue:
 - Was using **App-level OAuth** endpoint `/app/generate-consent` with `app_id` and `app_secret` headers
 - Documentation showed this was for **App integrations**, not **Partners**
 
 ### Solution Applied:
-✅ **Updated to Partner-level OAuth** as per official documentation:
+**Updated to Partner-level OAuth** as per official documentation:
 - **Endpoint:** `POST https://auth.dhan.co/partner/generate-consent` (not `/app/generate-consent`)
 - **Headers:** `partner_id` and `partner_secret` (not `app_id` and `app_secret`)
 - **Response field:** `consentId` (not `consentAppId`)
@@ -48,8 +55,8 @@ Set these in your Replit Secrets tab:
 - Returns: `accessToken`, `dhanClientId`, and other user data
 
 ### Current Status:
-✅ Code implementation complete and correct per official Dhan documentation
-🔄 Waiting for user to provide correct `DHAN_PARTNER_ID` and `DHAN_PARTNER_SECRET` in environment variables
+- Code implementation complete and correct per official Dhan documentation
+- Waiting for user to provide correct `DHAN_PARTNER_ID` and `DHAN_PARTNER_SECRET` in environment variables
 
 ### Key Differences from App OAuth:
 | Aspect | Partner OAuth | App OAuth |
