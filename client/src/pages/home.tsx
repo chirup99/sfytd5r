@@ -3746,7 +3746,6 @@ ${
   const [zerodhaUserName, setZerodhaUserName] = useState<string | null>(null);
 const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [showUserId, setShowUserId] = useState(true);
-  const [showFunds, setShowFunds] = useState(true);
   const [zerodhaTradesLoading, setZerodhaTradesLoading] = useState(false);
   const [zerodhaTradesData, setZerodhaTradesData] = useState<any[]>([]);
   const [zerodhaProfileData, setZerodhaProfileData] = useState<any>(null);
@@ -19364,17 +19363,12 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                   brokerFunds !== null ? (
                     <div className="text-center">
                       <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Available Funds</div>
-                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{showFunds ? `₹${brokerFunds.toLocaleString('en-IN', {maximumFractionDigits: 2})}` : "***"}</div>
+                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{showUserId ? `₹${brokerFunds.toLocaleString('en-IN', {maximumFractionDigits: 2})}` : "***"}</div>
                     </div>
                   ) : (
                     <div className="text-xs text-slate-400 dark:text-slate-500">Loading funds...</div>
                   )
                 ) : null}
-                {zerodhaAccessToken && brokerFunds !== null && (
-                  <button onClick={() => setShowFunds(!showFunds)} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" data-testid="button-toggle-funds" title={showFunds ? "Hide funds" : "Show funds"}>
-                    {showFunds ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  </button>
-                )}
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
                 <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1">
