@@ -60,6 +60,22 @@
 
 ---
 
+## Record to Journal Button - Order Status Documentation (Dec 24, 2025 5:44 PM)
+
+[x] Verified order statuses being imported via "Record to Journal" button
+[x] Identified status mapping in broker orders section:
+    - COMPLETE: Green badge - indicates fully executed orders
+    - REJECTED: Red badge - orders rejected by broker
+    - CANCELLED: Yellow badge - user-cancelled orders
+    - PENDING: Blue badge - orders awaiting execution
+[x] Button displays all order statuses with color-coding for visual distinction
+[x] Button state: enabled when `brokerOrders.length > 0`, disabled otherwise
+[x] Function: `recordAllBrokerOrders()` - records all broker orders to trading journal
+[x] Workflow verified: Angel One auto-connected, live data streaming active
+[x] Fixed missing `dotenv` package - reinstalled and workflow restarted
+
+---
+
 ## Working Status Summary
 
 - ✅ Zerodha order status now displays correct values (COMPLETE, REJECTED, CANCELLED, PENDING)
@@ -69,5 +85,6 @@
 - ✅ Orders fetching from Zerodha API with correct status mapping
 - ✅ Profile persistence across page reloads
 - ✅ All services initialized successfully
+- ✅ Record to Journal button fully functional with all order statuses
 
-**Latest Logs:** Dec 24, 2025, 5:42 PM - Import completed, all systems operational.
+**Latest Status:** Dec 24, 2025, 5:44 PM - All systems operational, project fully migrated and verified.
