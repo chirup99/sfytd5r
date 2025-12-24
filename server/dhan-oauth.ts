@@ -72,7 +72,7 @@ class DhanOAuthManager {
 
       // Step 1: Call Dhan API to generate consent
       const response = await axios.post(
-        `https://auth.dhan.co/app/generate-consent?client_id=${encodeURIComponent(this.apiKey)}`,
+        `https://auth.dhan.co/app/generate-consent`,
         {},
         {
           headers: {
