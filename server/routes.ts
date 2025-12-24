@@ -20172,7 +20172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (response.ok) {
         const data = await response.json();
         const equity = data.data?.equity || {};
-        const availableCash = equity.available?.live_balance || 0;
+        const availableCash = equity.available?.cash || 0;
         
         console.log('✅ [ZERODHA] Fetched available balance:', availableCash);
         return res.json({
