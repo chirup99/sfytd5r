@@ -3736,6 +3736,7 @@ ${
   const [zerodhaAccessToken, setZerodhaAccessToken] = useState<string | null>(null);
   const [zerodhaIsConnected, setZerodhaIsConnected] = useState(false);
   const [zerodhaClientId, setZerodhaClientId] = useState<string | null>(null);
+  const [zerodhaUserName, setZerodhaUserName] = useState<string | null>(null);
   const [brokerFunds, setBrokerFunds] = useState<number | null>(null);
   const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [zerodhaTradesLoading, setZerodhaTradesLoading] = useState(false);
@@ -3877,6 +3878,7 @@ ${
               if (data.profile) {
                 setZerodhaProfileData(data.profile);
                 setZerodhaClientId(data.profile.userId);
+                setZerodhaUserName(data.profile.user_name || data.profile.userName);
                 console.log('✅ [ZERODHA] Profile fetched:', data.profile.email);
               }
             })
@@ -19305,7 +19307,7 @@ ${
                 ) : null}
               </div>
               <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
-                <span className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1"><img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3" /> id: {zerodhaClientId || 'N/A'}</span>
+                <span className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1"><img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3" /> id: {zerodhaClientId || "N/A"} | name: {zerodhaUserName || "N/A"}</span>
               </div>
             </div>
 

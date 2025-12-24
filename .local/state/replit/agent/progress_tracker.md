@@ -63,4 +63,28 @@ To enable the Dhan OAuth button, add these environment variables to your Replit 
 
 ---
 
-**Status:** ✅ All code is fixed and ready. Waiting for you to add DHAN_PARTNER_ID and DHAN_PARTNER_SECRET in Secrets.
+## Zerodha Profile Update - COMPLETED
+
+[x] Removed hardcoded client ID display that was always resetting
+[x] Added zerodhaUserName state to store user's actual name from API
+[x] Updated profile fetch to capture both user_id and user_name from Zerodha API
+[x] Updated display to show "id: {user_id} | name: {user_name}" instead of just static ID
+[x] Workflow restarted to apply changes
+
+### Changes Made:
+
+1. **client/src/pages/home.tsx line 3739**: Added `const [zerodhaUserName, setZerodhaUserName] = useState<string | null>(null);`
+2. **client/src/pages/home.tsx line 3881**: Updated profile fetch to set both userId and userName: `setZerodhaUserName(data.profile.user_name || data.profile.userName);`
+3. **client/src/pages/home.tsx line 19310**: Updated display span to show both values: `id: {zerodhaClientId || "N/A"} | name: {zerodhaUserName || "N/A"}`
+4. **Backend already returns both userId and username** from https://api.kite.trade/user/profile (server/routes.ts line 20228-20238)
+
+### How It Works Now:
+
+When user connects to Zerodha broker:
+- Frontend fetches `/api/broker/zerodha/profile` with access token
+- Backend calls Zerodha API with proper authorization: `token api_key:access_token`
+- Response includes user_id and user_name (extracted from https://api.kite.trade/user/profile)
+- Frontend displays both dynamic values instead of hardcoded/resetting ID
+- User sees: "id: AB1234 | name: AxAx Bxx" (actual data from their Zerodha account)
+
+**Status:** ✅ All code is fixed and workflow restarted. User ID and name now display correctly from live API data.
