@@ -72,17 +72,19 @@ class DhanOAuthManager {
       console.log(`🔵 [DHAN] Using credentials - app_id: ${this.apiKey ? 'YES' : 'NO'}, app_secret: ${this.apiSecret ? 'YES' : 'NO'}`);
 
       // Step 1: Call Dhan API to generate consent
-      // Dhan requires credentials in BOTH headers AND body for consent generation
+      // Dhan requires app_id and app_secret in body along with redirect_url
+      console.log(`🔵 [DHAN] Redirect URI being sent: ${this.redirectUri}`);
+      console.log(`🔵 [DHAN] API Key: ${this.apiKey}, Secret: ${this.apiSecret ? 'SET' : 'NOT SET'}`);
+      
       const response = await axios.post(
         `https://auth.dhan.co/app/generate-consent`,
         {
           'app_id': this.apiKey,
           'app_secret': this.apiSecret,
+          'redirect_url': this.redirectUri,
         },
         {
           headers: {
-            'app_id': this.apiKey,
-            'app_secret': this.apiSecret,
             'Content-Type': 'application/json',
           },
           timeout: 10000,
@@ -132,12 +134,14 @@ class DhanOAuthManager {
       console.log('🔵 [DHAN] Step 3: Consuming consent with tokenId...');
 
       const response = await axios.post(
-        `https://auth.dhan.co/app/consumeApp-consent?tokenId=${tokenId}`,
-        {},
+        `https://auth.dhan.co/app/consumeApp-consent`,
+        {
+          'tokenId': tokenId,
+          'app_id': this.apiKey,
+          'app_secret': this.apiSecret,
+        },
         {
           headers: {
-            'app_id': this.apiKey,
-            'app_secret': this.apiSecret,
             'Content-Type': 'application/json',
           },
           timeout: 10000,
