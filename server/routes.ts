@@ -20182,22 +20182,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // API call failed, return demo data
-      console.log('⚠️ [ZERODHA] Margins API returned status:', response.status, '- using demo funds');
-      res.json({
-        success: true,
-        availableCash: 125000,
-        equity: { available: { live_balance: 125000 } },
-        isDemo: true
+      // API call failed
+      console.error('❌ [ZERODHA] Margins API returned status:', response.status);
+      return res.status(response.status).json({ 
+        success: false, 
+        availableCash: 0, 
+        error: 'Failed to fetch from Zerodha API' 
       });
     } catch (error) {
       console.error('❌ [ZERODHA] Error fetching margins:', error);
-      // Return demo data on error so funds display gracefully
-      res.json({
-        success: true,
-        availableCash: 125000,
-        equity: { available: { live_balance: 125000 } },
-        isDemo: true
+      return res.status(500).json({ 
+        success: false, 
+        availableCash: 0, 
+        error: 'Server error fetching broker funds' 
       });
     }
   });
