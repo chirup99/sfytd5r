@@ -4062,7 +4062,7 @@ ${
       const data = await response.json();
       
       if (data.error) {
-        alert('Setup Error:\n' + data.message);
+        alert('Setup Error:\n' + data.error);
         return;
       }
       
