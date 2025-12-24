@@ -20657,31 +20657,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // DHAN OAUTH IMPLEMENTATION
   // ========================================
 
-  // Get authorization URL for Dhan OAuth flow
-  app.get('/api/broker/dhan/login-url', (req, res) => {
+  // Get authorization URL for Dhan OAuth flow (Step 1 & 2: Generate consent and get login URL)
+  app.get('/api/broker/dhan/login-url', async (req, res) => {
     try {
-      const { url, requestToken } = dhanOAuthManager.generateAuthorizationUrl();
-      res.json({ loginUrl: url, requestToken });
+      const result = await dhanOAuthManager.generateAuthorizationUrl();
+      
+      if (!result) {
+        console.error('🔴 [DHAN] Failed to generate authorization URL');
+        return res.status(500).json({ 
+          error: 'Failed to generate authorization URL. Please check your OAuth credentials in Dhan portal.',
+          message: 'Make sure you have registered an OAuth app and have valid Client ID and Client Secret.'
+        });
+      }
+
+      const { url, consentToken } = result;
+      console.log('✅ [DHAN] Sending login URL to frontend');
+      res.json({ loginUrl: url, consentToken });
     } catch (error: any) {
       console.error('🔴 [DHAN] Error generating login URL:', error.message);
-      res.status(500).json({ error: 'Failed to generate authorization URL' });
+      res.status(500).json({ 
+        error: 'Failed to generate authorization URL',
+        details: error.message 
+      });
     }
   });
 
-  // Handle Dhan OAuth callback
+  // Handle Dhan OAuth callback (Step 3: after user logs in)
   app.get('/api/broker/dhan/callback', async (req, res) => {
     try {
-      const code = req.query.code as string;
-      const state = req.query.state as string;
+      const tokenId = req.query.tokenid as string;
+      const consentId = req.query.consentid as string;
 
-      if (!code || !state) {
-        console.error('🔴 [DHAN] Missing code or state in callback');
-        return res.status(400).json({ error: 'Missing authorization code or state' });
+      if (!tokenId || !consentId) {
+        console.error('🔴 [DHAN] Missing tokenid or consentid in callback');
+        return res.send(`
+          <html>
+            <head>
+              <title>Dhan Connection Failed</title>
+              <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
+                .error { color: #f44336; font-size: 20px; }
+              </style>
+            </head>
+            <body>
+              <div class="error">❌ Missing authorization parameters</div>
+              <p>Token ID or Consent ID missing from callback.</p>
+              <script>
+                window.setTimeout(() => {
+                  window.close();
+                }, 3000);
+              </script>
+            </body>
+          </html>
+        `);
       }
 
-      console.log('🔵 [DHAN] Processing OAuth callback...');
+      console.log('🔵 [DHAN] Processing OAuth callback with token...');
 
-      const success = await dhanOAuthManager.exchangeCodeForToken(code, state);
+      const success = await dhanOAuthManager.exchangeTokenForAccessToken(tokenId, consentId);
 
       if (success) {
         console.log('✅ [DHAN] Successfully authenticated');
@@ -20717,7 +20750,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             </head>
             <body>
               <div class="error">❌ Dhan Connection Failed</div>
-              <p>Please try again or contact support if the issue persists.</p>
+              <p>Failed to exchange token. Please try again or contact support if the issue persists.</p>
               <script>
                 window.setTimeout(() => {
                   window.close();
@@ -20729,7 +20762,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error: any) {
       console.error('🔴 [DHAN] Callback error:', error.message);
-      res.status(500).json({ error: 'OAuth callback failed' });
+      res.send(`
+        <html>
+          <head>
+            <title>Dhan Connection Error</title>
+            <style>
+              body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
+              .error { color: #f44336; font-size: 20px; }
+            </style>
+          </head>
+          <body>
+            <div class="error">❌ Connection Error</div>
+            <p>${error.message}</p>
+            <script>
+              window.setTimeout(() => {
+                window.close();
+              }, 3000);
+            </script>
+          </body>
+        </html>
+      `);
     }
   });
 
