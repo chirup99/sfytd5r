@@ -60,7 +60,7 @@ class DhanOAuthManager {
     console.log(`🔵 [DHAN] API Key configured: ${this.apiKey ? 'YES' : 'NO'}`);
   }
 
-  // Step 1: Generate Consent (Use API key as consentid - direct approach)
+  // Step 1: Generate Consent (Call API to get consentAppId)
   async generateConsent(): Promise<{ consentAppId: string; url: string } | null> {
     try {
       if (!this.apiKey || !this.apiSecret) {
@@ -68,28 +68,56 @@ class DhanOAuthManager {
         return null;
       }
 
-      console.log('🔵 [DHAN] Step 1: Building consent login URL...');
-      console.log(`🔵 [DHAN] Using API Key as consentid`);
+      console.log('🔵 [DHAN] Step 1: Calling generate-consent API...');
+      console.log(`🔵 [DHAN] Using API Key: ${this.apiKey.substring(0, 4)}...`);
 
-      // Use API key as the consentid (direct approach like OI Pulse)
-      // Dhan auth uses: https://auth.dhan.o/consent-login?consentid=<API_KEY>
-      const consentAppId = this.apiKey;
-      const loginUrl = `https://auth.dhan.o/consent-login?consentid=${encodeURIComponent(consentAppId)}&redirect_url=${encodeURIComponent(this.redirectUri)}`;
+      // Call Dhan API to generate consent - per official documentation
+      // POST to https://auth.dhan.co/app/generate-consent?client_id=<CLIENT_ID>
+      // Headers: app_id, app_secret
+      const response = await axios.post(
+        `https://auth.dhan.co/app/generate-consent?client_id=${this.apiKey}`,
+        {},
+        {
+          headers: {
+            'app_id': this.apiKey,
+            'app_secret': this.apiSecret,
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000,
+        }
+      );
+
+      const consentData: DhanConsentResponse = response.data;
+      
+      if (!consentData.consentAppId) {
+        console.error('🔴 [DHAN] No consentAppId in response:', consentData);
+        return null;
+      }
+
+      // Step 2: Build login URL using the consentAppId
+      const consentAppId = consentData.consentAppId;
+      const loginUrl = `https://auth.dhan.co/consent-login?consentAppId=${encodeURIComponent(consentAppId)}`;
 
       this.consentAppIds.set(consentAppId, {
         id: consentAppId,
         createdAt: new Date(),
       });
 
-      console.log('✅ [DHAN] Consent URL created with API Key');
-      console.log('✅ [DHAN] Login URL:', loginUrl);
+      console.log('✅ [DHAN] Consent generated with ID:', consentAppId);
+      console.log('✅ [DHAN] Login URL created:', loginUrl);
       
       return {
         consentAppId: consentAppId,
         url: loginUrl,
       };
     } catch (error: any) {
-      console.error('🔴 [DHAN] Error generating consent URL:', error.message);
+      console.error('🔴 [DHAN] Error generating consent:', error.message);
+      if (error.response?.status === 400) {
+        console.error('🔴 [DHAN] HTTP 400 Error - Check API credentials and request format');
+      }
+      if (error.response?.data) {
+        console.error('🔴 [DHAN] API Response:', error.response.data);
+      }
       return null;
     }
   }
