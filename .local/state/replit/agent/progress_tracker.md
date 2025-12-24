@@ -21,10 +21,22 @@
      - Headers: `app_id`, `app_secret`
      - Response: `{ dhanClientId, dhanClientName, accessToken, expiryTime }`
 
-## Status: READY FOR TESTING
-- Dhan OAuth flow now uses correct documentation endpoints
-- All 3 steps properly implemented
-- Fix: Changed wrong login URL to correct endpoint
+[x] 4. Updated Dhan API credentials (December 24, 2025)
+   - API Key: f5cede1e
+   - API Secret: e9fc5dad-57cd-4773-8765-f4b75b4620bc
+   - Status: CREDENTIALS UPDATED IN ENV VARS ✅
+
+## Current Issue: Dhan API 400 Bad Request
+🔴 **Status**: Generate consent endpoint returning HTTP 400
+- Error Log: `Request failed with status code 400 at /app/generate-consent`
+- Root Cause: API request format may be missing required parameters
+- Action Needed: Verify Dhan API request format in documentation
+
+**NEXT STEPS FOR USER**:
+1. Verify the Dhan API credentials are active and valid at https://dhanhq.co
+2. Check Dhan API documentation for exact request body format for generate-consent
+3. The API may require additional parameters like `redirect_url` or `client_id` query parameter
+4. Current code sends credentials in headers + body - verify this is correct format
 
 ---
 
