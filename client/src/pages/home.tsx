@@ -3901,6 +3901,19 @@ ${
       } else if (event.data.type === 'ZERODHA_ERROR') {
         console.error('❌ [ZERODHA] Error from callback:', event.data.error);
         alert('Zerodha error: ' + event.data.error);
+      } else if (event.data.type === 'DHAN_TOKEN' && event.data.token) {
+        const token = event.data.token;
+        console.log('🔵 [DHAN] Token received from popup:', token.substring(0, 20) + '...');
+        
+        localStorage.setItem("dhan_token", token);
+        document.cookie = `dhan_token=${token}; path=/; SameSite=Lax; Secure`;
+        setDhanAccessToken(token);
+        setDhanIsConnected(true);
+        setShowConnectDialog(false);
+        console.log('✅ [DHAN] Connection established and saved to localStorage');
+      } else if (event.data.type === 'DHAN_ERROR') {
+        console.error('❌ [DHAN] Error from callback:', event.data.error);
+        alert('Dhan error: ' + event.data.error);
       }
     };
     

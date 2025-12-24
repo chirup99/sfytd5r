@@ -28,7 +28,7 @@
 [x] 4. Verified Dhan API Credentials are Set
 [x] 5. Workflow restarted successfully
 
-## Dhan OAuth 401 Error Fix (Current Turn - December 24, 2025)
+## Dhan OAuth 401 Error Fix (Previous Turn - December 24, 2025)
 [x] 1. DEEP ANALYSIS: Identified the 401 Unauthorized error root cause
    - Issue: Wrong HTTP header names for authentication
    - Was using: 'app_id' and 'app_secret' headers
@@ -99,3 +99,35 @@
 [x] 3. Verified server is running successfully
 [x] 4. All services initialized (OAuth managers, NLP Agent, WebSocket, etc.)
 [x] 5. Import migration complete and ready for use
+
+## Dhan Popup Button Fix (Turn 28 - December 24, 2025) ✅ COMPLETE
+[x] 1. IDENTIFIED ROOT CAUSE: Dhan callback wasn't sending postMessage back to parent window
+   - Zerodha callback sends: `window.opener.postMessage({type:"ZERODHA_TOKEN", token}, "*")`
+   - Dhan callback was just: Showing HTML message and closing window (no message sent)
+
+[x] 2. FIXED Dhan callback in server/routes.ts (/api/broker/dhan/callback)
+   - Updated to send postMessage with DHAN_TOKEN when successful
+   - Updated to send postMessage with DHAN_ERROR on failure
+   - Now matches Zerodha's popup communication pattern
+
+[x] 3. ADDED Dhan state variables to client/src/pages/home.tsx
+   - Added: const [dhanAccessToken, setDhanAccessToken] = useState<string | null>(null)
+   - Added: const [dhanIsConnected, setDhanIsConnected] = useState(false)
+
+[x] 4. UPDATED message event listener in home.tsx
+   - Added DHAN_TOKEN handler to capture token from popup
+   - Added DHAN_ERROR handler to show error alerts
+   - Both handlers mirror Zerodha's implementation
+
+[x] 5. RESTARTED workflow and verified all services running
+   - Server running on port 5000 successfully
+   - All OAuth managers initialized (Zerodha, Upstox, Angel One, Dhan)
+   - WebSocket streaming active with live market data
+   - Frontend displaying correctly
+
+## STATUS: DHAN BUTTON NOW OPENS POPUP WINDOW AND HANDLES LOGIN ✅
+- Popup window opens when user clicks Dhan button
+- OAuth callback sends token back via postMessage
+- Frontend receives message and stores Dhan token in localStorage
+- Connection status updated (dhanIsConnected = true)
+- Workflow running successfully - ready for user to test

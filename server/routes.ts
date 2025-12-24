@@ -20685,7 +20685,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!tokenId) {
         console.error('🔴 [DHAN] Missing tokenId in callback');
-        return res.status(400).json({ error: 'Missing token ID' });
+        const errorHtml = '<!DOCTYPE html><html><head><title>Error</title><script>var e="Missing token ID";if(window.opener){window.opener.postMessage({type:"DHAN_ERROR",error:e},"*");window.close();}else{window.location.href="/?dhan_error="+encodeURIComponent(e);}</script></head><body><p>Error</p></body></html>';
+        res.type('text/html');
+        res.status(200);
+        return res.send(errorHtml);
       }
 
       console.log('🔵 [DHAN] Processing OAuth callback with tokenId...');
@@ -20694,51 +20697,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (success) {
         console.log('✅ [DHAN] Successfully authenticated');
-        res.send(`
-          <html>
-            <head>
-              <title>Dhan Connected</title>
-              <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
-                .success { color: #4CAF50; font-size: 24px; }
-              </style>
-            </head>
-            <body>
-              <div class="success">✅ Dhan Connected Successfully!</div>
-              <p>You can now close this window and return to the trading app.</p>
-              <script>
-                window.setTimeout(() => {
-                  window.close();
-                }, 2500);
-              </script>
-            </body>
-          </html>
-        `);
+        const callbackHtml = '<!DOCTYPE html><html><head><title>Auth</title><script>var t="' + tokenId + '";if(window.opener){window.opener.postMessage({type:"DHAN_TOKEN",token:t},"*");setTimeout(function(){window.close()},500);}else{window.location.href="/?dhan_token="+encodeURIComponent(t);}</script></head><body><p>Connecting...</p></body></html>';
+        res.type('text/html');
+        res.status(200);
+        res.send(callbackHtml);
       } else {
-        res.send(`
-          <html>
-            <head>
-              <title>Dhan Connection Failed</title>
-              <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
-                .error { color: #f44336; font-size: 20px; }
-              </style>
-            </head>
-            <body>
-              <div class="error">❌ Dhan Connection Failed</div>
-              <p>Please try again or contact support if the issue persists.</p>
-              <script>
-                window.setTimeout(() => {
-                  window.close();
-                }, 3000);
-              </script>
-            </body>
-          </html>
-        `);
+        const errorMsg = 'Authentication failed';
+        console.error('❌ [DHAN] ' + errorMsg);
+        const errorHtml = '<!DOCTYPE html><html><head><title>Error</title><script>var e="' + errorMsg.replace(/"/g, '\"') + '";if(window.opener){window.opener.postMessage({type:"DHAN_ERROR",error:e},"*");window.close();}else{window.location.href="/?dhan_error="+encodeURIComponent(e);}</script></head><body><p>Error</p></body></html>';
+        res.type('text/html');
+        res.status(200);
+        res.send(errorHtml);
       }
     } catch (error: any) {
       console.error('🔴 [DHAN] Callback error:', error.message);
-      res.status(500).json({ error: 'OAuth callback failed' });
+      const errorMsg = error.message || 'OAuth callback failed';
+      const errorHtml = '<!DOCTYPE html><html><head><title>Error</title><script>var e="' + errorMsg.replace(/"/g, '\"') + '";if(window.opener){window.opener.postMessage({type:"DHAN_ERROR",error:e},"*");window.close();}else{window.location.href="/?dhan_error="+encodeURIComponent(e);}</script></head><body><p>Error</p></body></html>';
+      res.type('text/html');
+      res.status(200);
+      res.send(errorHtml);
     }
   });
 
