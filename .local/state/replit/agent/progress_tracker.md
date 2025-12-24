@@ -6,7 +6,7 @@
 [x] 3. Verify the project is working using the feedback tool
 [x] 4. Inform user the import is completed and they can start building, mark the import as completed using the complete_project_import tool
 
-## Angel One OAuth Integration (Turn 21 - COMPLETE ✅)
+## Angel One OAuth Integration (Turn 21 - COMPLETE)
 
 [x] 1. Analyzed Zerodha and Upstox OAuth implementations
    - Zerodha uses Kite.js with request_token flow
@@ -67,14 +67,14 @@
 - Automatic session management with token expiry
 - User profile fetching for connection status
 
-## Status: INTEGRATION COMPLETE ✅
+## Status: INTEGRATION COMPLETE
 Angel One OAuth integration fully implemented and ready for use.
 
 ## Recent Updates (Previous Turns)
 [x] Fixed light theme display issues
 [x] Redesigned desktop option chain to match paper trading dialog style
 [x] Mobile dropdown positioning fixed with Radix UI Select
-[x] Option Chain Spot Price displays rupee symbol (₹)
+[x] Option Chain Spot Price displays rupee symbol
 [x] Unified Option Chain design across desktop and mobile
 [x] Upstox OAuth 2.0 integrated with secure token management
 [x] Upstox button fully functional with popup flow
