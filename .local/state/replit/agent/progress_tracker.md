@@ -16,7 +16,7 @@
 
 ## Orders & Positions Funds Display - FIXED (Dec 24, 2025 12:20)
 
-✅ **STATUS: WORKING**
+**STATUS: WORKING**
 
 **Root Cause:**
 - Backend was using wrong auth header format: `Bearer ${accessToken}`
@@ -29,57 +29,28 @@
 [x] Added `ZERODHA_API_KEY` from environment variables to construct proper header
 
 **Verification:**
-- Browser console shows: `✅ [BROKER] Fetched available funds: 100.28`
+- Browser console shows: `[BROKER] Fetched available funds: 100.28`
 - Funds display now shows available balance from Zerodha API
 - Auto-refreshes every 2 seconds while dialog is open
 - Persists to localStorage for offline access
 
-**Backend Implementation (server/routes.ts line 20160):**
-```typescript
-app.get('/api/broker/zerodha/margins', async (req, res) => {
-  const accessToken = req.headers.authorization?.split(' ')[1];
-  const apiKey = process.env.ZERODHA_API_KEY;
-  
-  const response = await fetch('https://api.kite.trade/user/margins', {
-    headers: {
-      'Authorization': `token ${apiKey}:${accessToken}`,  // ✅ Correct format
-      'X-Kite-Version': '3'
-    }
-  });
-  
-  const data = await response.json();
-  const availableCash = data.data?.equity?.net || 0;  // Using .net field
-  return res.json({ success: true, availableCash });
-});
-```
-
-**Zerodha API Response Format:**
-```json
-{
-  "status": "success",
-  "data": {
-    "equity": {
-      "net": 100.28  // This is the available funds
-    }
-  }
-}
-```
-
-**Frontend Display (client/src/pages/home.tsx):**
-- Shows "Available Funds" label in Orders & Positions dialog header
-- Displays formatted amount: ₹100.28
-- Auto-fetches when dialog opens with 2-second polling
-- Persists value to localStorage as "zerodha_broker_funds"
-
 ---
+
+## Latest Session - Dec 24, 2025 15:03
+
+[x] Fixed missing `dotenv` package - installed successfully
+[x] Workflow restarted and running
+[x] Angel One auto-connected with live WebSocket streaming
+[x] Real-time price data streaming (BANKNIFTY, SENSEX, GOLD)
+[x] Server running on port 5000 - all systems operational
 
 ## Working Status Summary
 
-✅ Angel One broker auto-connected with live WebSocket streaming
-✅ Real-time price data (BANKNIFTY, SENSEX, GOLD)  
-✅ Orders fetching from Zerodha (11 trades displayed)
-✅ **Funds display working with net available margin**
-✅ Profile persistence across page reloads
-✅ All services initialized successfully
+- Angel One broker auto-connected with live WebSocket streaming
+- Real-time price data (BANKNIFTY, SENSEX, GOLD)  
+- Orders fetching from Zerodha (11 trades displayed)
+- Funds display working with net available margin
+- Profile persistence across page reloads
+- All services initialized successfully
 
-**Latest Logs:** Dec 24, 2025, 12:20 PM - All systems operational.
+**Latest Logs:** Dec 24, 2025, 3:03 PM - All systems operational.
