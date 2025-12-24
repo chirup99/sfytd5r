@@ -17597,7 +17597,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             <Button
                               onClick={handleZerodhaConnect}
                               variant="outline"
-                              className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
+                              className="w-full h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700"
                               data-testid="button-zerodha-dialog"
                             >
                               <img 
@@ -17610,7 +17610,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                           )}
                           <Button
                             variant="outline"
-                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
+                            className="w-full h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700"
                             data-testid="button-upstox-dialog"
                             onClick={handleUpstoxConnect}
                           >
@@ -17619,7 +17619,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                           </Button>
                           <Button
                             variant="outline"
-                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
+                            className="w-full h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700"
                             data-testid="button-angelone-dialog"
                             onClick={handleAngelOneConnect}
                           >
@@ -17629,7 +17629,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                           <Button
                             onClick={handleDhanConnect}
                             variant="outline"
-                            className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
+                            className="w-full h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700"
                             data-testid="button-dhan-dialog"
                           >
                             <img src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw?v=1701" alt="Dhan" className="h-4 mr-2" />
