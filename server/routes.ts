@@ -20573,20 +20573,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Handle Angel One OAuth callback
+  // Handle Angel One Publisher Login callback
+  // Angel One redirects with: ?auth_token={TOKEN}&feed_token={FEED_TOKEN}&state={STATE}
   app.get('/api/angel-one/callback', async (req, res) => {
     try {
-      const code = req.query.code as string;
+      const authToken = req.query.auth_token as string;
+      const feedToken = req.query.feed_token as string;
       const state = req.query.state as string;
+      const error = req.query.error as string;
 
-      if (!code || !state) {
-        console.error('🔴 [ANGEL ONE] Missing code or state in callback');
-        return res.status(400).json({ error: 'Missing authorization code or state' });
+      if (error) {
+        console.error('🔴 [ANGEL ONE] Publisher Login error:', error);
+        return res.status(400).json({ error: `Angel One error: ${error}` });
       }
 
-      console.log('🔶 [ANGEL ONE] Processing OAuth callback...');
+      if (!authToken || !feedToken || !state) {
+        console.error('🔴 [ANGEL ONE] Missing auth_token, feed_token, or state in callback');
+        return res.status(400).json({ error: 'Missing required callback parameters' });
+      }
 
-      const success = await angelOneOAuthManager.exchangeCodeForToken(code, state);
+      console.log('🔶 [ANGEL ONE] Processing Publisher Login callback...');
+
+      const success = await angelOneOAuthManager.handleCallback(authToken, feedToken, state);
 
       if (success) {
         console.log('✅ [ANGEL ONE] Successfully authenticated');
@@ -20609,7 +20617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error: any) {
       console.error('🔴 [ANGEL ONE] Callback error:', error.message);
-      res.status(500).json({ error: 'OAuth callback failed' });
+      res.status(500).json({ error: 'Publisher Login callback failed' });
     }
   });
 
