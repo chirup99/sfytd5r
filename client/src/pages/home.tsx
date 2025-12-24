@@ -17509,6 +17509,7 @@ ${
                             Angel One
                           </Button>
                           <Button
+                            onClick={handleDhanConnect}
                             variant="outline"
                             className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-dhan-dialog"
