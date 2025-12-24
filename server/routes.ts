@@ -20657,31 +20657,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // DHAN OAUTH IMPLEMENTATION
   // ========================================
 
-  // Get authorization URL for Dhan OAuth flow
-  app.get('/api/broker/dhan/login-url', (req, res) => {
+  // Step 1: Get authorization URL for Dhan OAuth flow
+  app.get('/api/broker/dhan/login-url', async (req, res) => {
     try {
-      const { url, requestToken } = dhanOAuthManager.generateAuthorizationUrl();
-      res.json({ loginUrl: url, requestToken });
+      const consentData = await dhanOAuthManager.generateConsent();
+      
+      if (!consentData) {
+        console.error('🔴 [DHAN] Failed to generate consent');
+        return res.status(500).json({ error: 'Failed to generate consent' });
+      }
+
+      console.log('✅ [DHAN] Consent generated, returning login URL');
+      res.json({ 
+        loginUrl: consentData.url,
+        consentAppId: consentData.consentAppId 
+      });
     } catch (error: any) {
       console.error('🔴 [DHAN] Error generating login URL:', error.message);
       res.status(500).json({ error: 'Failed to generate authorization URL' });
     }
   });
 
-  // Handle Dhan OAuth callback
+  // Step 3: Handle Dhan OAuth callback (receives tokenId from Step 2)
   app.get('/api/broker/dhan/callback', async (req, res) => {
     try {
-      const code = req.query.code as string;
-      const state = req.query.state as string;
+      const tokenId = req.query.tokenId as string;
 
-      if (!code || !state) {
-        console.error('🔴 [DHAN] Missing code or state in callback');
-        return res.status(400).json({ error: 'Missing authorization code or state' });
+      if (!tokenId) {
+        console.error('🔴 [DHAN] Missing tokenId in callback');
+        return res.status(400).json({ error: 'Missing token ID' });
       }
 
-      console.log('🔵 [DHAN] Processing OAuth callback...');
+      console.log('🔵 [DHAN] Processing OAuth callback with tokenId...');
 
-      const success = await dhanOAuthManager.exchangeCodeForToken(code, state);
+      const success = await dhanOAuthManager.consumeConsent(tokenId);
 
       if (success) {
         console.log('✅ [DHAN] Successfully authenticated');

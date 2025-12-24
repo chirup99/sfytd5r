@@ -1,4 +1,4 @@
-// Dhan OAuth Implementation - Request Token Flow
+// Dhan OAuth Implementation - 3-Step OAuth Flow (Fixed)
 import axios from 'axios';
 import crypto from 'crypto';
 
@@ -10,17 +10,22 @@ interface DhanOAuthState {
   isAuthenticated: boolean;
   tokenExpiry: Date | null;
   lastRefresh: Date | null;
-  requestToken: string | null;
+  refreshToken: string | null;
+}
+
+interface DhanConsentResponse {
+  consentAppId?: string;
+  consentAppStatus?: string;
+  status?: string;
 }
 
 interface DhanTokenResponse {
-  status: boolean;
-  data?: {
-    authToken: string;
-    refreshToken: string;
-    userId: string;
-  };
-  message?: string;
+  dhanClientId?: string;
+  dhanClientName?: string;
+  dhanClientUcc?: string;
+  accessToken?: string;
+  expiryTime?: string;
+  status?: string;
 }
 
 class DhanOAuthManager {
@@ -32,13 +37,13 @@ class DhanOAuthManager {
     isAuthenticated: false,
     tokenExpiry: null,
     lastRefresh: null,
-    requestToken: null,
+    refreshToken: null,
   };
 
   private apiKey: string;
   private apiSecret: string;
   private redirectUri: string;
-  private requestTokens: Map<string, { token: string; createdAt: Date }> = new Map();
+  private consentAppIds: Map<string, { id: string; createdAt: Date }> = new Map();
 
   constructor(apiKey?: string, apiSecret?: string) {
     this.apiKey = apiKey || process.env.DHAN_API_KEY || '';
@@ -55,92 +60,113 @@ class DhanOAuthManager {
     console.log(`🔵 [DHAN] API Key configured: ${this.apiKey ? 'YES' : 'NO'}`);
   }
 
-  // Generate login URL using Dhan's OAuth flow
-  generateAuthorizationUrl(): { url: string; requestToken: string } {
-    const requestToken = crypto.randomBytes(32).toString('hex');
-    
-    // Store request token for verification
-    this.requestTokens.set(requestToken, { token: requestToken, createdAt: new Date() });
-    
-    // Clean up old tokens (older than 15 minutes)
-    const now = new Date();
-    const keysToDelete: string[] = [];
-    for (const [key, value] of this.requestTokens.entries()) {
-      if (now.getTime() - value.createdAt.getTime() > 15 * 60 * 1000) {
-        keysToDelete.push(key);
+  // Step 1: Generate Consent (server-side)
+  async generateConsent(): Promise<{ consentAppId: string; url: string } | null> {
+    try {
+      if (!this.apiKey || !this.apiSecret) {
+        console.error('🔴 [DHAN] API Key or Secret not configured');
+        return null;
       }
+
+      console.log('🔵 [DHAN] Generating consent...');
+
+      const response = await axios.post(
+        'https://auth.dhan.co/app/generate-consent?client_id=' + this.apiKey,
+        {},
+        {
+          headers: {
+            'app_id': this.apiKey,
+            'app_secret': this.apiSecret,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000,
+        }
+      );
+
+      const data: DhanConsentResponse = response.data;
+      
+      if (data.consentAppId) {
+        // Store consent app ID for verification later
+        this.consentAppIds.set(data.consentAppId, {
+          id: data.consentAppId,
+          createdAt: new Date(),
+        });
+
+        // Clean up old consent IDs (older than 10 minutes)
+        const now = new Date();
+        const keysToDelete: string[] = [];
+        for (const [key, value] of this.consentAppIds.entries()) {
+          if (now.getTime() - value.createdAt.getTime() > 10 * 60 * 1000) {
+            keysToDelete.push(key);
+          }
+        }
+        keysToDelete.forEach(key => this.consentAppIds.delete(key));
+
+        // Build login URL for Step 2
+        const loginUrl = `https://auth.dhan.co/login/consentApp-login?consentAppId=${data.consentAppId}`;
+
+        console.log('✅ [DHAN] Consent generated successfully');
+        console.log(`✅ [DHAN] Consent App ID: ${data.consentAppId.substring(0, 8)}...`);
+
+        return {
+          consentAppId: data.consentAppId,
+          url: loginUrl,
+        };
+      }
+
+      console.error('🔴 [DHAN] Failed to generate consent');
+      console.error('🔴 [DHAN] Response:', data);
+      return null;
+    } catch (error: any) {
+      console.error('🔴 [DHAN] Consent generation error:', error.message);
+      if (error.response?.data) {
+        console.error('🔴 [DHAN] Response:', error.response.data);
+      }
+      return null;
     }
-    keysToDelete.forEach(key => this.requestTokens.delete(key));
-
-    // Build Dhan login URL - Using direct Dhan login with redirect
-    // Dhan's standard OAuth endpoint
-    const params = new URLSearchParams({
-      client_id: this.apiKey,
-      redirect_uri: this.redirectUri,
-      response_type: 'code',
-      state: requestToken,
-      scope: 'default',
-    });
-
-    // Use Dhan's web login endpoint
-    const authUrl = `https://www.dhan.co/oauth/authorize?${params.toString()}`;
-    
-    console.log(`🔵 [DHAN] Generated authorization URL`);
-    console.log(`🔵 [DHAN] Client ID: ${this.apiKey.substring(0, 4)}...`);
-    console.log(`🔵 [DHAN] Redirect URI: ${this.redirectUri}`);
-    return { url: authUrl, requestToken };
   }
 
-  // Exchange authorization code for access token
-  async exchangeCodeForToken(code: string, state: string): Promise<boolean> {
+  // Step 3: Consume Consent (server-side, after user logs in and gets tokenId)
+  async consumeConsent(tokenId: string): Promise<boolean> {
     try {
-      // Verify request token exists
-      const storedToken = this.requestTokens.get(state);
-      if (!storedToken) {
-        console.error('🔴 [DHAN] Invalid state parameter');
+      if (!this.apiKey || !this.apiSecret) {
+        console.error('🔴 [DHAN] API Key or Secret not configured');
         return false;
       }
-      this.requestTokens.delete(state);
 
-      console.log('🔵 [DHAN] Exchanging authorization code for token...');
+      console.log('🔵 [DHAN] Consuming consent with tokenId...');
 
-      // Use Dhan's token exchange endpoint
-      const tokenUrl = 'https://api.dhan.co/oauth/token';
-      
-      const payload = {
-        grant_type: 'authorization_code',
-        code: code,
-        client_id: this.apiKey,
-        client_secret: this.apiSecret,
-        redirect_uri: this.redirectUri,
-      };
-
-      const response = await axios.post(tokenUrl, payload, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        timeout: 10000,
-      });
+      const response = await axios.post(
+        `https://auth.dhan.co/app/consumeApp-consent?tokenId=${tokenId}`,
+        {},
+        {
+          headers: {
+            'app_id': this.apiKey,
+            'app_secret': this.apiSecret,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000,
+        }
+      );
 
       const tokenData: DhanTokenResponse = response.data;
       
-      if (tokenData.data?.authToken) {
-        // Token expires in 24 hours (86400 seconds)
-        const expiryTime = new Date(Date.now() + 86400 * 1000);
+      if (tokenData.accessToken) {
+        // Parse expiry time
+        const expiryTime = tokenData.expiryTime ? new Date(tokenData.expiryTime) : new Date(Date.now() + 86400 * 1000);
         
-        this.state.accessToken = tokenData.data.authToken;
-        this.state.requestToken = state;
+        this.state.accessToken = tokenData.accessToken;
+        this.state.clientId = tokenData.dhanClientId || '';
+        this.state.userName = tokenData.dhanClientName || '';
         this.state.tokenExpiry = expiryTime;
         this.state.isAuthenticated = true;
         this.state.lastRefresh = new Date();
-        this.state.clientId = tokenData.data.userId || '';
 
         console.log('✅ [DHAN] Access token obtained successfully');
+        console.log(`✅ [DHAN] Client ID: ${this.state.clientId}`);
         console.log(`⏰ [DHAN] Token expires at: ${expiryTime.toISOString()}`);
-
-        // Fetch user profile
-        await this.fetchUserProfile();
         
         return true;
       }
@@ -149,46 +175,11 @@ class DhanOAuthManager {
       console.error('🔴 [DHAN] Response:', tokenData);
       return false;
     } catch (error: any) {
-      console.error('🔴 [DHAN] Token exchange error:', error.message);
+      console.error('🔴 [DHAN] Token consumption error:', error.message);
       if (error.response?.data) {
         console.error('🔴 [DHAN] Response:', error.response.data);
       }
       return false;
-    }
-  }
-
-  // Fetch user profile using access token
-  private async fetchUserProfile(): Promise<void> {
-    try {
-      if (!this.state.accessToken) {
-        console.error('🔴 [DHAN] No access token available for profile fetch');
-        return;
-      }
-
-      console.log('🔵 [DHAN] Fetching user profile...');
-
-      const response = await axios.get(
-        'https://api.dhan.co/user/profile',
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${this.state.accessToken}`,
-          },
-          timeout: 10000,
-        }
-      );
-
-      const profileData = response.data;
-      
-      if (profileData.data) {
-        this.state.userEmail = profileData.data.email || '';
-        this.state.userName = profileData.data.name || '';
-
-        console.log(`✅ [DHAN] User profile fetched: ${this.state.userName} (${this.state.userEmail})`);
-      }
-    } catch (error: any) {
-      console.error('🔴 [DHAN] Profile fetch error:', error.message);
-      // Non-fatal error - continue even if profile fetch fails
     }
   }
 
@@ -219,9 +210,9 @@ class DhanOAuthManager {
       isAuthenticated: false,
       tokenExpiry: null,
       lastRefresh: null,
-      requestToken: null,
+      refreshToken: null,
     };
-    this.requestTokens.clear();
+    this.consentAppIds.clear();
     console.log('🔵 [DHAN] Session disconnected');
   }
 

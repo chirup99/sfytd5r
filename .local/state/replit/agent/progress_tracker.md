@@ -72,3 +72,38 @@ Angel One button now uses the correct request_token authentication flow. Ready f
 [x] Angel One WebSocket connected with live market data
 [x] All services initialized (NLP Agent, OAuth managers, etc.)
 [x] Import fully verified and complete
+
+## Dhan OAuth Fix (Turn 25 - December 24, 2025)
+[x] 1. Identified Dhan OAuth issue: Wrong API endpoints causing 404 error
+   - Old implementation: Used `https://www.dhan.co/oauth/authorize` (404 endpoint)
+   - Issue: Dhan doesn't use standard OAuth2, uses custom 3-step flow
+
+[x] 2. Reviewed Dhan API Documentation (https://dhanhq.co/docs/v2/authentication/)
+   - Step 1: POST to `https://auth.dhan.co/app/generate-consent?client_id={dhanClientId}` with app_id, app_secret headers
+   - Step 2: Browser redirect to `https://auth.dhan.co/login/consentApp-login?consentAppId={consentAppId}`
+   - Step 3: POST to `https://auth.dhan.co/app/consumeApp-consent?tokenId={Token ID}` with app_id, app_secret headers
+
+[x] 3. Fixed Dhan OAuth Manager (`server/dhan-oauth.ts`)
+   - Removed incorrect generateAuthorizationUrl() method
+   - Implemented correct generateConsent() method (Step 1)
+   - Implemented correct consumeConsent() method (Step 3)
+   - Updated endpoint URLs to use https://auth.dhan.co instead of https://www.dhan.co
+   - Updated header structure to use app_id and app_secret
+
+[x] 4. Updated Dhan OAuth Routes (`server/routes.ts`)
+   - `/api/broker/dhan/login-url` - Now calls generateConsent() and returns login URL with consentAppId
+   - `/api/broker/dhan/callback` - Now expects tokenId parameter from Step 2 instead of code parameter
+   - `/api/broker/dhan/callback` - Calls consumeConsent() with tokenId for authentication
+   - Updated success/error response pages
+
+[x] 5. Verified application startup
+   - Dhan OAuth Manager initialized successfully
+   - All routes registered correctly
+   - Server running on port 5000
+   - All services operational: Angel One, Upstox, Dhan, NLP Agent, WebSocket Streamer
+
+## Status: DHAN OAUTH FIXED ✅
+- Previous issue: 404 error on login (wrong endpoint URL)
+- Root cause: Using standard OAuth2 flow instead of Dhan's custom 3-step flow
+- Solution: Implemented correct 3-step flow with proper endpoints and headers
+- Result: Dhan OAuth button will now properly generate consent and handle login flow
