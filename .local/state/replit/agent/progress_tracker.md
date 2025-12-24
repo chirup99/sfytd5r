@@ -77,21 +77,27 @@ To enable: Add `DHAN_PARTNER_ID` and `DHAN_PARTNER_SECRET` to Secrets tab.
 [x] All services initialized successfully
 [x] Broker profile persistence fix deployed and verified
 
-## Orders & Positions Funds Loading - REMOVED (Dec 24, 2025 12:13)
+## Orders & Positions Funds Display - UPDATED (Dec 24, 2025 12:15)
 
-**Problem:** The Orders & Positions dialog was displaying "Loading funds..." text while fetching broker available funds from Zerodha.
+**Changes Made:**
+[x] Restored brokerFunds state variable to Orders & Positions dialog
+[x] Re-added useEffect for restoring funds from localStorage on component mount
+[x] Re-added useEffect for fetching funds when dialog opens (with 2-second polling)
+[x] Restored funds display in dialog header showing "Available Funds" with amount
+[x] Updated backend `/api/broker/zerodha/margins` to use `.net` field instead of `available.cash`
 
-**What was removed:**
-[x] Removed `brokerFunds` state variable (was storing available funds value)
-[x] Removed useEffect that fetched funds on dialog open (with 2-second polling)
-[x] Removed useEffect that restored funds from localStorage
-[x] Removed funds display section from dialog header (was showing "Loading funds..." or the funds value)
-[x] Workflow restarted successfully - no errors
+**Backend Update (server/routes.ts line 20169):**
+- Changed from: `const availableCash = equity.available?.cash || 0;`
+- Changed to: `const availableCash = equity.net || 0;`
+- Now properly extracts the `.net` field from Zerodha API response at `data.equity.net`
+- Zerodha API endpoint: `https://api.kite.trade/user/margins`
+- Response format: `{ "data": { "equity": { "net": 99725.05 } } }`
 
-**Why removed:**
-- The funds fetch was causing unnecessary polling (every 2 seconds) while dialog was open
-- The loading state was displaying indefinitely in many cases
-- Backend endpoint already available at `/api/broker/zerodha/margins` (uses Zerodha API: https://api.kite.trade/user/margins)
-- Can be re-added later if needed with proper error handling
+**Frontend Display:**
+- Shows "Available Funds" label with formatted amount in dialog header
+- Loading state shows "Loading funds..." while fetching
+- Auto-refreshes every 2 seconds while dialog is open
+- Persists value to localStorage for offline access
+- Displays formatted as: ₹{amount} in en-IN locale
 
-**Status:** ✅ COMPLETE. "Loading funds..." display removed from Orders & Positions dialog header. The dialog header now shows only the sidebar toggle and broker profile info.
+**Status:** ✅ COMPLETE. Funds display now properly shows net available margin from Zerodha API using the `.net` field value. Workflow restarted successfully with no errors.

@@ -3736,6 +3736,13 @@ ${
   const [zerodhaAccessToken, setZerodhaAccessToken] = useState<string | null>(null);
   const [zerodhaIsConnected, setZerodhaIsConnected] = useState(false);
   const [zerodhaClientId, setZerodhaClientId] = useState<string | null>(null);
+  const [brokerFunds, setBrokerFunds] = useState<number | null>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("zerodha_broker_funds");
+      return saved ? parseFloat(saved) : null;
+    }
+    return null;
+  });
   const [zerodhaUserName, setZerodhaUserName] = useState<string | null>(null);
 const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [zerodhaTradesLoading, setZerodhaTradesLoading] = useState(false);
@@ -4696,6 +4703,50 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       return () => clearInterval(pollInterval);
     }
   }, [showOrderModal, zerodhaAccessToken]);
+
+  // Restore broker funds from localStorage on mount when Zerodha connected
+  useEffect(() => {
+    if (zerodhaAccessToken && !brokerFunds) {
+      const saved = localStorage.getItem("zerodha_broker_funds");
+      if (saved) {
+        setBrokerFunds(parseFloat(saved));
+      }
+    }
+  }, [zerodhaAccessToken, brokerFunds]);
+
+  // Fetch broker funds when dialog opens - with auto-refresh polling
+  useEffect(() => {
+    if (showOrderModal && zerodhaAccessToken) {
+      const fetchBrokerFunds = async () => {
+        try {
+          const response = await fetch('/api/broker/zerodha/margins', {
+            headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
+          });
+          const data = await response.json();
+          if (response.ok && data.success && data.availableCash !== undefined) {
+            setBrokerFunds(data.availableCash);
+            localStorage.setItem("zerodha_broker_funds", data.availableCash.toString());
+            console.log('✅ [BROKER] Fetched available funds:', data.availableCash);
+          } else {
+            console.error('❌ [BROKER] Failed to fetch funds:', data.error || 'Invalid response');
+            setBrokerFunds(null);
+          }
+        } catch (error) {
+          console.error('❌ [BROKER] Failed to fetch funds:', error);
+        }
+      };
+      
+      // Fetch funds immediately when dialog opens
+      fetchBrokerFunds();
+      
+      // Set up polling to refresh every 2 seconds while dialog is open
+      const pollInterval = setInterval(fetchBrokerFunds, 2000);
+      
+      // Cleanup: clear interval when dialog closes
+      return () => clearInterval(pollInterval);
+    }
+  }, [showOrderModal, zerodhaAccessToken]);
+
   // PAPER TRADING (DEMO TRADING) STATE - Like TradingView Practice Account
   // ============================================
   const [showPaperTradingModal, setShowPaperTradingModal] = useState(false);
@@ -19306,7 +19357,18 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
             {/* Compact Header */}
             <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between gap-4">
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
-              <div className="flex-1 flex items-center justify-center" />
+              <div className="flex-1 flex items-center justify-center">
+                {zerodhaAccessToken ? (
+                  brokerFunds !== null ? (
+                    <div className="text-center">
+                      <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Available Funds</div>
+                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">₹{brokerFunds.toLocaleString('en-IN', {maximumFractionDigits: 2})}</div>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-slate-400 dark:text-slate-500">Loading funds...</div>
+                  )
+                ) : null}
+              </div>
               <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
                 <span className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1"><img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3" /> id: {zerodhaClientId || "N/A"} | {zerodhaUserName || "N/A"}</span>
               </div>
