@@ -3737,7 +3737,13 @@ ${
   const [zerodhaIsConnected, setZerodhaIsConnected] = useState(false);
   const [zerodhaClientId, setZerodhaClientId] = useState<string | null>(null);
   const [zerodhaUserName, setZerodhaUserName] = useState<string | null>(null);
-  const [brokerFunds, setBrokerFunds] = useState<number | null>(null);
+  const [brokerFunds, setBrokerFunds] = useState<number | null>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("zerodha_broker_funds");
+      return saved ? parseFloat(saved) : null;
+    }
+    return null;
+  });
   const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [zerodhaTradesLoading, setZerodhaTradesLoading] = useState(false);
   const [zerodhaTradesData, setZerodhaTradesData] = useState<any[]>([]);
@@ -4665,6 +4671,16 @@ ${
     }
   }, [zerodhaAccessToken]);
 
+  // Restore broker funds from localStorage on mount when Zerodha connected
+  useEffect(() => {
+    if (zerodhaAccessToken && !brokerFunds) {
+      const saved = localStorage.getItem("zerodha_broker_funds");
+      if (saved) {
+        setBrokerFunds(parseFloat(saved));
+      }
+    }
+  }, [zerodhaAccessToken, brokerFunds]);
+
   // Fetch broker funds when dialog opens - with auto-refresh polling
   useEffect(() => {
     if (showOrderModal && zerodhaAccessToken) {
@@ -4676,6 +4692,7 @@ ${
           const data = await response.json();
           if (response.ok && data.success && data.availableCash !== undefined) {
             setBrokerFunds(data.availableCash);
+            localStorage.setItem("zerodha_broker_funds", data.availableCash.toString());
             console.log('✅ [BROKER] Fetched available funds:', data.availableCash);
           } else {
             console.error('❌ [BROKER] Failed to fetch funds:', data.error || 'Invalid response');
