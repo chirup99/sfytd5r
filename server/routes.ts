@@ -20573,39 +20573,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Handle Angel One OAuth callback
+  // Handle Angel One OAuth callback (request_token flow)
   app.get('/api/angel-one/callback', async (req, res) => {
     try {
-      const code = req.query.code as string;
-      const state = req.query.state as string;
+      const requestToken = req.query.request_token as string;
 
-      if (!code || !state) {
-        console.error('🔴 [ANGEL ONE] Missing code or state in callback');
-        return res.status(400).json({ error: 'Missing authorization code or state' });
+      if (!requestToken) {
+        console.error('🔴 [ANGEL ONE] Missing request_token in callback');
+        return res.status(400).json({ error: 'Missing request token in callback' });
       }
 
-      console.log('🔶 [ANGEL ONE] Processing OAuth callback...');
+      console.log('🔶 [ANGEL ONE] Processing callback with request token...');
 
-      const success = await angelOneOAuthManager.exchangeCodeForToken(code, state);
+      const success = await angelOneOAuthManager.exchangeTokenForJWT(requestToken);
 
       if (success) {
         console.log('✅ [ANGEL ONE] Successfully authenticated');
         // Redirect to a success page or close the window
         res.send(`
           <html>
+            <head>
+              <title>Angel One Connected</title>
+              <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
+                .success { color: #4CAF50; font-size: 24px; }
+              </style>
+            </head>
             <body>
-              <h1>✅ Angel One Connected Successfully!</h1>
+              <div class="success">✅ Angel One Connected Successfully!</div>
               <p>You can now close this window and return to the trading app.</p>
               <script>
                 window.setTimeout(() => {
                   window.close();
-                }, 2000);
+                }, 2500);
               </script>
             </body>
           </html>
         `);
       } else {
-        res.status(400).json({ error: 'Failed to authenticate with Angel One' });
+        res.send(`
+          <html>
+            <head>
+              <title>Angel One Connection Failed</title>
+              <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
+                .error { color: #f44336; font-size: 20px; }
+              </style>
+            </head>
+            <body>
+              <div class="error">❌ Angel One Connection Failed</div>
+              <p>Please try again or contact support if the issue persists.</p>
+              <script>
+                window.setTimeout(() => {
+                  window.close();
+                }, 3000);
+              </script>
+            </body>
+          </html>
+        `);
       }
     } catch (error: any) {
       console.error('🔴 [ANGEL ONE] Callback error:', error.message);

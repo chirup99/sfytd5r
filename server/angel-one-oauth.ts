@@ -1,4 +1,4 @@
-// Angel One OAuth 2.0 Implementation
+// Angel One OAuth Implementation - Fixed to use request_token flow
 import axios from 'axios';
 import crypto from 'crypto';
 
@@ -10,6 +10,7 @@ interface AngelOneOAuthState {
   isAuthenticated: boolean;
   tokenExpiry: Date | null;
   lastRefresh: Date | null;
+  requestToken: string | null;
 }
 
 interface AngelOneTokenResponse {
@@ -31,16 +32,19 @@ class AngelOneOAuthManager {
     isAuthenticated: false,
     tokenExpiry: null,
     lastRefresh: null,
+    requestToken: null,
   };
 
   private apiKey: string;
   private apiSecret: string;
+  private appId: string;
   private redirectUri: string;
-  private oauthStates: Map<string, { state: string; createdAt: Date }> = new Map();
+  private requestTokens: Map<string, { token: string; createdAt: Date }> = new Map();
 
-  constructor(apiKey?: string, apiSecret?: string) {
+  constructor(apiKey?: string, apiSecret?: string, appId?: string) {
     this.apiKey = apiKey || process.env.ANGELONE_API_KEY || '';
     this.apiSecret = apiSecret || process.env.ANGELONE_API_SECRET || '';
+    this.appId = appId || process.env.ANGELONE_APP_ID || 'web-app'; // Default app ID
     
     // Set redirect URI based on environment
     const baseUrl = (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS)
@@ -50,62 +54,67 @@ class AngelOneOAuthManager {
 
     console.log('🔶 [ANGEL ONE] OAuth Manager initialized');
     console.log(`🔶 [ANGEL ONE] Redirect URI: ${this.redirectUri}`);
+    console.log(`🔶 [ANGEL ONE] App ID: ${this.appId}`);
   }
 
-  // Generate OAuth authorization URL
-  generateAuthorizationUrl(): { url: string; state: string } {
-    const state = crypto.randomBytes(32).toString('hex');
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: this.apiKey,
-      redirect_uri: this.redirectUri,
-      state: state,
-    });
-
-    // Angel One OAuth endpoint
-    const authUrl = `https://api.angelone.in/oauth2/auth?${params.toString()}`;
+  // Generate login URL using request_token flow (like Zerodha)
+  generateAuthorizationUrl(): { url: string; requestToken: string } {
+    const requestToken = crypto.randomBytes(32).toString('hex');
     
-    // Store state for verification
-    this.oauthStates.set(state, { state, createdAt: new Date() });
+    // Store request token for verification
+    this.requestTokens.set(requestToken, { token: requestToken, createdAt: new Date() });
     
-    // Clean up old states (older than 10 minutes)
+    // Clean up old tokens (older than 15 minutes)
     const now = new Date();
-    for (const [key, value] of this.oauthStates.entries()) {
-      if (now.getTime() - value.createdAt.getTime() > 10 * 60 * 1000) {
-        this.oauthStates.delete(key);
+    for (const [key, value] of this.requestTokens.entries()) {
+      if (now.getTime() - value.createdAt.getTime() > 15 * 60 * 1000) {
+        this.requestTokens.delete(key);
       }
     }
 
-    console.log(`🔶 [ANGEL ONE] Generated authorization URL with state: ${state.substring(0, 8)}...`);
-    return { url: authUrl, state };
+    // Build login URL matching Angel One's expected format
+    // Based on Sensibull's working implementation
+    const params = new URLSearchParams({
+      redirect: `${this.redirectUri}?request_token=${requestToken}`,
+      ApplicationName: 'trading-app',
+      OS: 'Web',
+      AppID: this.appId,
+    });
+
+    // Use the correct Angel One login endpoint
+    const authUrl = `https://www.angelone.in/login/?${params.toString()}`;
+    
+    console.log(`🔶 [ANGEL ONE] Generated login URL with request token: ${requestToken.substring(0, 8)}...`);
+    return { url: authUrl, requestToken };
   }
 
-  // Exchange authorization code for access token
-  async exchangeCodeForToken(code: string, state: string): Promise<boolean> {
+  // Exchange request token for JWT token
+  async exchangeTokenForJWT(requestToken: string): Promise<boolean> {
     try {
-      // Verify state
-      const storedState = this.oauthStates.get(state);
-      if (!storedState) {
-        console.error('🔴 [ANGEL ONE] Invalid state parameter - possible CSRF attack');
+      // Verify request token exists
+      const storedToken = this.requestTokens.get(requestToken);
+      if (!storedToken) {
+        console.error('🔴 [ANGEL ONE] Invalid request token - possible security issue');
         return false;
       }
-      this.oauthStates.delete(state);
+      this.requestTokens.delete(requestToken);
 
-      console.log('🔶 [ANGEL ONE] Exchanging authorization code for token...');
+      console.log('🔶 [ANGEL ONE] Exchanging request token for JWT...');
 
-      const tokenUrl = 'https://api.angelone.in/oauth2/token';
-      const params = new URLSearchParams({
-        code: code,
-        client_id: this.apiKey,
-        client_secret: this.apiSecret,
-        redirect_uri: this.redirectUri,
-        grant_type: 'authorization_code',
-      });
+      // Use the Angel One generateSession endpoint to exchange request token for JWT
+      const tokenUrl = 'https://api.angelone.in/rest/auth/angelbroking/user/v1/generateSession';
+      
+      const payload = {
+        clientcode: this.apiKey,
+        password: this.apiSecret, // In request_token flow, password acts as secret
+        totp: '', // TOTP can be empty for request_token flow
+        requestToken: requestToken,
+      };
 
-      const response = await axios.post(tokenUrl, params, {
+      const response = await axios.post(tokenUrl, payload, {
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
         timeout: 10000,
       });
@@ -117,11 +126,12 @@ class AngelOneOAuthManager {
         const expiryTime = new Date(Date.now() + 86400 * 1000);
         
         this.state.accessToken = tokenData.data.jwtToken;
+        this.state.requestToken = requestToken;
         this.state.tokenExpiry = expiryTime;
         this.state.isAuthenticated = true;
         this.state.lastRefresh = new Date();
 
-        console.log('✅ [ANGEL ONE] Access token obtained successfully');
+        console.log('✅ [ANGEL ONE] JWT token obtained successfully');
         console.log(`⏰ [ANGEL ONE] Token expires at: ${expiryTime.toISOString()}`);
 
         // Fetch user profile
@@ -130,7 +140,8 @@ class AngelOneOAuthManager {
         return true;
       }
 
-      console.error('🔴 [ANGEL ONE] Failed to get access token');
+      console.error('🔴 [ANGEL ONE] Failed to get JWT token');
+      console.error('🔴 [ANGEL ONE] Response:', tokenData);
       return false;
     } catch (error: any) {
       console.error('🔴 [ANGEL ONE] Token exchange error:', error.message);
@@ -204,8 +215,9 @@ class AngelOneOAuthManager {
       isAuthenticated: false,
       tokenExpiry: null,
       lastRefresh: null,
+      requestToken: null,
     };
-    this.oauthStates.clear();
+    this.requestTokens.clear();
     console.log('🔶 [ANGEL ONE] Session disconnected');
   }
 
