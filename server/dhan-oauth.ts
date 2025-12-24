@@ -63,26 +63,27 @@ class DhanOAuthManager {
   // Step 1: Generate Consent (server-side)
   async generateConsent(): Promise<{ consentAppId: string; url: string } | null> {
     try {
+      console.log('🔵 [DHAN] generateConsent called');
+      console.log('🔵 [DHAN] API Key length:', this.apiKey?.length || 0);
+      console.log('🔵 [DHAN] API Secret length:', this.apiSecret?.length || 0);
+      
       if (!this.apiKey || !this.apiSecret) {
-        console.error('🔴 [DHAN] API Key or Secret not configured');
+        console.error('🔴 [DHAN] Credentials missing - API Key configured:', !!this.apiKey, 'API Secret configured:', !!this.apiSecret);
         return null;
       }
 
       console.log('🔵 [DHAN] Generating consent...');
-
-      console.log('🔵 [DHAN] Request URL: https://auth.dhan.co/app/generate-consent?client_id=' + this.apiKey);
-      console.log('🔵 [DHAN] Request Headers:', {
-        'X-API-KEY': this.apiKey ? '***' : 'MISSING',
-        'X-API-SECRET': this.apiSecret ? '***' : 'MISSING',
-      });
+      
+      // Try with credentials as query parameters (Dhan might expect this)
+      const url = `https://auth.dhan.co/app/generate-consent?client_id=${encodeURIComponent(this.apiKey)}&api_secret=${encodeURIComponent(this.apiSecret)}`;
+      
+      console.log('🔵 [DHAN] Request URL (no secrets shown): https://auth.dhan.co/app/generate-consent?...');
 
       const response = await axios.post(
-        'https://auth.dhan.co/app/generate-consent?client_id=' + this.apiKey,
+        url,
         {},
         {
           headers: {
-            'X-API-KEY': this.apiKey,
-            'X-API-SECRET': this.apiSecret,
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
@@ -91,7 +92,8 @@ class DhanOAuthManager {
       );
 
       console.log('🔵 [DHAN] Response status:', response.status);
-      console.log('🔵 [DHAN] Response data:', response.data);
+      console.log('🔵 [DHAN] Response data keys:', Object.keys(response.data));
+      console.log('🔵 [DHAN] Full response:', JSON.stringify(response.data).substring(0, 500));
 
       const data: DhanConsentResponse = response.data;
       
@@ -125,19 +127,19 @@ class DhanOAuthManager {
       }
 
       console.error('🔴 [DHAN] Failed to generate consent - no consentAppId in response');
-      console.error('🔴 [DHAN] Response:', data);
+      console.error('🔴 [DHAN] Response keys:', Object.keys(data));
+      console.error('🔴 [DHAN] Response:', JSON.stringify(data).substring(0, 500));
       return null;
     } catch (error: any) {
       console.error('🔴 [DHAN] Consent generation error:', error.message);
       if (error.response?.status) {
         console.error('🔴 [DHAN] HTTP Status:', error.response.status);
-        console.error('🔴 [DHAN] Response Data:', error.response.data);
-        console.error('🔴 [DHAN] Response Headers:', error.response.headers);
+        console.error('🔴 [DHAN] Response Data:', JSON.stringify(error.response.data).substring(0, 500));
+        console.error('🔴 [DHAN] Response Headers:', JSON.stringify(error.response.headers).substring(0, 300));
       } else if (error.request) {
-        console.error('🔴 [DHAN] No response received - request error');
-        console.error('🔴 [DHAN] Request:', error.request);
+        console.error('🔴 [DHAN] No response received from Dhan API');
       } else {
-        console.error('🔴 [DHAN] Error details:', error);
+        console.error('🔴 [DHAN] Error object:', error);
       }
       return null;
     }
