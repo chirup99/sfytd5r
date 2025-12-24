@@ -60,7 +60,7 @@ class DhanOAuthManager {
     console.log(`🔵 [DHAN] API Key configured: ${this.apiKey ? 'YES' : 'NO'}`);
   }
 
-  // Step 1: Generate Login URL (server-side)
+  // Step 1: Generate Consent (Call API to get consentAppId)
   async generateConsent(): Promise<{ consentAppId: string; url: string } | null> {
     try {
       if (!this.apiKey || !this.apiSecret) {
@@ -68,21 +68,50 @@ class DhanOAuthManager {
         return null;
       }
 
-      const consentAppId = this.apiKey;
-      const loginUrl = `https://auth.dhan.co/user-login?client_id=${encodeURIComponent(this.apiKey)}&redirect_uri=${encodeURIComponent(this.redirectUri)}`;
+      console.log('🔵 [DHAN] Step 1: Calling generate-consent API...');
+
+      // Step 1: Call Dhan API to generate consent
+      const response = await axios.post(
+        `https://auth.dhan.co/app/generate-consent?client_id=${encodeURIComponent(this.apiKey)}`,
+        {},
+        {
+          headers: {
+            'app_id': this.apiKey,
+            'app_secret': this.apiSecret,
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000,
+        }
+      );
+
+      const consentData: DhanConsentResponse = response.data;
+      
+      if (!consentData.consentAppId) {
+        console.error('🔴 [DHAN] No consentAppId in response:', consentData);
+        return null;
+      }
+
+      // Step 2: Store consentAppId and build login URL
+      const consentAppId = consentData.consentAppId;
+      const loginUrl = `https://auth.dhan.co/login/consentApp-login?consentAppId=${encodeURIComponent(consentAppId)}`;
 
       this.consentAppIds.set(consentAppId, {
         id: consentAppId,
         createdAt: new Date(),
       });
 
-      console.log('✅ [DHAN] Login URL generated:', loginUrl);
+      console.log('✅ [DHAN] Consent generated with ID:', consentAppId);
+      console.log('✅ [DHAN] Login URL created:', loginUrl);
+      
       return {
         consentAppId: consentAppId,
         url: loginUrl,
       };
     } catch (error: any) {
-      console.error('🔴 [DHAN] Error generating login URL:', error.message);
+      console.error('🔴 [DHAN] Error generating consent:', error.message);
+      if (error.response?.data) {
+        console.error('🔴 [DHAN] Response:', error.response.data);
+      }
       return null;
     }
   }
@@ -95,16 +124,15 @@ class DhanOAuthManager {
         return false;
       }
 
-      console.log('🔵 [DHAN] Consuming consent with tokenId...');
+      console.log('🔵 [DHAN] Step 3: Consuming consent with tokenId...');
 
       const response = await axios.post(
         `https://auth.dhan.co/app/consumeApp-consent?tokenId=${tokenId}`,
         {},
         {
           headers: {
-            'X-API-KEY': this.apiKey,
-            'X-API-SECRET': this.apiSecret,
-            'Accept': 'application/json',
+            'app_id': this.apiKey,
+            'app_secret': this.apiSecret,
             'Content-Type': 'application/json',
           },
           timeout: 10000,
