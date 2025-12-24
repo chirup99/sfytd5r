@@ -20098,19 +20098,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const orders = response.data.data || [];
       
+      // Debug: Log first order to see available fields
+      if (orders.length > 0) {
+        console.log('🔍 [ZERODHA] First order structure:', JSON.stringify(orders[0], null, 2));
+      }
+      
       // Transform Zerodha orders to our format
-      const trades = orders.map((order: any) => ({
-        time: order.order_timestamp ? new Date(order.order_timestamp).toLocaleTimeString() : '-',
-        order: order.transaction_type === 'BUY' ? 'BUY' : 'SELL',
-        symbol: order.tradingsymbol,
-        qty: order.quantity,
-        price: order.average_price && order.average_price > 0 ? order.average_price : (order.price && order.price > 0 ? order.price : 0),
-        pnl: order.pnl ? `₹${order.pnl.toFixed(2)}` : '-',
-        type: order.order_type,
-        status: order.status || 'PENDING'
-      }));
+      const trades = orders.map((order: any, index: number) => {
+        // Try multiple field names for status (Zerodha might use different names)
+        let status = order.status || order.state || order.order_status || 'PENDING';
+        
+        // Log first few orders to debug
+        if (index < 2) {
+          console.log(`📋 [ZERODHA] Order ${index}:`, {
+            symbol: order.tradingsymbol,
+            status: status,
+            filled: order.filled_quantity,
+            qty: order.quantity,
+            all_fields: Object.keys(order)
+          });
+        }
+        
+        // Map Zerodha status values (case-insensitive) to our format
+        const statusStr = String(status).toUpperCase();
+        let mappedStatus = 'PENDING';
+        
+        if (statusStr === 'COMPLETE' || statusStr === 'EXECUTED') {
+          mappedStatus = 'COMPLETE';
+        } else if (statusStr === 'REJECTED') {
+          mappedStatus = 'REJECTED';
+        } else if (statusStr === 'CANCELLED') {
+          mappedStatus = 'CANCELLED';
+        } else if (statusStr === 'PENDING') {
+          mappedStatus = 'PENDING';
+        } else {
+          // Fallback: derive from quantities
+          if (order.filled_quantity === 0 && order.cancelled_quantity > 0) {
+            mappedStatus = 'CANCELLED';
+          } else if (order.filled_quantity === 0 && order.rejected_quantity > 0) {
+            mappedStatus = 'REJECTED';
+          } else if (order.filled_quantity > 0 && order.filled_quantity === order.quantity) {
+            mappedStatus = 'COMPLETE';
+          } else {
+            mappedStatus = statusStr || 'PENDING';
+          }
+        }
+        
+        return {
+          time: order.order_timestamp ? new Date(order.order_timestamp).toLocaleTimeString() : '-',
+          order: order.transaction_type === 'BUY' ? 'BUY' : 'SELL',
+          symbol: order.tradingsymbol,
+          qty: order.quantity,
+          price: order.average_price && order.average_price > 0 ? order.average_price : (order.price && order.price > 0 ? order.price : 0),
+          pnl: order.pnl ? `₹${order.pnl.toFixed(2)}` : '-',
+          type: order.order_type,
+          status: mappedStatus
+        };
+      });
 
       console.log('✅ [ZERODHA] Fetched', trades.length, 'trades from API');
+      if (trades.length > 0) {
+        console.log('📊 [ZERODHA] Sample trade:', trades[0]);
+      }
       
       res.json({ 
         trades,
