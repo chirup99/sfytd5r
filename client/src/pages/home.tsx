@@ -19370,7 +19370,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                   )
                 ) : null}
               </div>
-              <div className="flex flex-col items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
+              <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
                 <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1">
                   <img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3" />
                   <span>id: {showUserId ? (zerodhaClientId || "N/A") : "••••••"} | {showUserId ? (zerodhaUserName || "N/A") : "•••••"}</span>
