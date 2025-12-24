@@ -1,17 +1,16 @@
 # Project Import Progress Tracker - Complete Dark Mode Support
 
-## ✅ ALL FIXES COMPLETED - APP FULLY OPERATIONAL (Dec 24, 2025 7:04 PM)
+## ✅ PERFORMANCE TREND FIX COMPLETED - APP FULLY OPERATIONAL (Dec 24, 2025 7:09 PM)
 
-### Recent Fix: Broker Connection Dialog State Variables
-**Issue:** Preview was not loading - `angelOneIsConnected` and `dhanIsConnected` were undefined
-**Solution:** Added missing state variable declarations for all brokers:
-- `const [angelOneAccessToken, setAngelOneAccessToken]`
-- `const [angelOneIsConnected, setAngelOneIsConnected]`
-- `const [dhanAccessToken, setDhanAccessToken]`
-- `const [dhanIsConnected, setDhanIsConnected]`
-- `const [upstoxAccessToken, setUpstoxAccessToken]`
+### Latest Fix: Performance Trend Initial Load Data Fetching
+**Issue:** Performance Trend chart was not fetching data on initial page load. Only worked after toggling between demo and personal heatmap modes.
+**Root Cause:** AWS data loading was gated behind `activeTab === 'journal'` condition, but Performance Trend is on the `'trading-home'` tab
+**Solution:** Updated the useEffect dependency to also load data when `activeTab === 'trading-home'`
+- Changed: `if (activeTab === 'journal')` → `if (activeTab === 'journal' || activeTab === 'trading-home')`
+- Now AWS data loads on initial page mount for both tabs
+- Performance Trend chart displays data immediately without requiring user interaction
 
-**Result:** ✅ App now loading successfully with full preview
+**Result:** ✅ Performance Trend now loads and displays data on initial page load
 
 ---
 
@@ -37,9 +36,9 @@
 
 ---
 
-## System Status - FULLY OPERATIONAL (Dec 24, 2025 7:04 PM)
+## System Status - FULLY OPERATIONAL (Dec 24, 2025 7:09 PM)
 
-✅ **Frontend Preview:** Loading successfully
+✅ **Frontend Preview:** Loading successfully with all data visible
 ✅ **Backend Server:** Running on port 5000
 ✅ **Angel One:** Auto-connected (Client P176266)
 ✅ **Live WebSocket Streaming:**
@@ -47,7 +46,8 @@
    - SENSEX: LTP=85408.7
    - GOLD: LTP=37911.06
 ✅ **Market Indices:** Real-time data from Yahoo Finance (5/5 regions)
-✅ **Zerodha Integration:** 17 trades synced
+✅ **Performance Trend:** Now fetches data on initial load (51 demo dates loaded)
+✅ **AWS Data Loading:** Integrated for both trading-home and journal tabs
 ✅ **All Services:** Operational and synced
 ✅ **Dark Mode:** Perfect in both light and dark themes
 
@@ -70,10 +70,13 @@
 [x] App preview loading without errors
 [x] All state variables properly declared
 [x] No React hook errors
+[x] Performance Trend fetches data on initial load
+[x] AWS data loading integrated for trading-home tab
+[x] 51 demo journal entries successfully loaded and displayed
 
 **Status: COMPLETE - ALL FEATURES FULLY OPERATIONAL** ✅
 
-The app is fully functional with all broker buttons displaying correctly in both light and dark themes, proper connection status handling, and seamless integration with all services.
+The app is fully functional with all broker buttons displaying correctly in both light and dark themes, performance trend data loading on initial page load, proper connection status handling, and seamless integration with all services.
 
 ---
 
@@ -87,3 +90,6 @@ The app is fully functional with all broker buttons displaying correctly in both
 [x] 6. Fix broker state variables (angelOneIsConnected, dhanIsConnected)
 [x] 7. Verify app is loading and preview is working
 [x] 8. Complete project import
+[x] 9. Fix Performance Trend chart not fetching data on initial load
+[x] 10. Update useEffect to load AWS data for both trading-home and journal tabs
+[x] 11. Verify Performance Trend displays data on initial page load

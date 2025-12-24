@@ -9824,7 +9824,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   // ✅ INSTANT AUTO-LOAD: Load heatmap data immediately when journal tab opens
   // No delays, no complex logic - just instant data loading
   useEffect(() => {
-    if (activeTab === 'journal') {
+    if (activeTab === 'journal' || activeTab === 'trading-home') {
       if (!isDemoMode) {
         // Personal mode - load personal data instantly
         const userId = getUserId();
