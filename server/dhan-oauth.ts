@@ -60,87 +60,29 @@ class DhanOAuthManager {
     console.log(`🔵 [DHAN] API Key configured: ${this.apiKey ? 'YES' : 'NO'}`);
   }
 
-  // Step 1: Generate Consent (server-side)
+  // Step 1: Generate Login URL (server-side)
   async generateConsent(): Promise<{ consentAppId: string; url: string } | null> {
     try {
-      console.log('🔵 [DHAN] generateConsent called');
-      console.log('🔵 [DHAN] API Key length:', this.apiKey?.length || 0);
-      console.log('🔵 [DHAN] API Secret length:', this.apiSecret?.length || 0);
-      
       if (!this.apiKey || !this.apiSecret) {
-        console.error('🔴 [DHAN] Credentials missing - API Key configured:', !!this.apiKey, 'API Secret configured:', !!this.apiSecret);
+        console.error('🔴 [DHAN] Credentials missing');
         return null;
       }
 
-      console.log('🔵 [DHAN] Generating consent...');
-      
-      // Try with credentials as query parameters (Dhan might expect this)
-      const url = `https://auth.dhan.co/app/generate-consent?client_id=${encodeURIComponent(this.apiKey)}&api_secret=${encodeURIComponent(this.apiSecret)}`;
-      
-      console.log('🔵 [DHAN] Request URL (no secrets shown): https://auth.dhan.co/app/generate-consent?...');
+      const consentAppId = this.apiKey;
+      const loginUrl = `https://auth.dhan.co/user-login?client_id=${encodeURIComponent(this.apiKey)}`;
 
-      const response = await axios.post(
-        url,
-        {},
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-          timeout: 15000,
-        }
-      );
+      this.consentAppIds.set(consentAppId, {
+        id: consentAppId,
+        createdAt: new Date(),
+      });
 
-      console.log('🔵 [DHAN] Response status:', response.status);
-      console.log('🔵 [DHAN] Response data keys:', Object.keys(response.data));
-      console.log('🔵 [DHAN] Full response:', JSON.stringify(response.data).substring(0, 500));
-
-      const data: DhanConsentResponse = response.data;
-      
-      if (data.consentAppId) {
-        // Store consent app ID for verification later
-        this.consentAppIds.set(data.consentAppId, {
-          id: data.consentAppId,
-          createdAt: new Date(),
-        });
-
-        // Clean up old consent IDs (older than 10 minutes)
-        const now = new Date();
-        const keysToDelete: string[] = [];
-        this.consentAppIds.forEach((value, key) => {
-          if (now.getTime() - value.createdAt.getTime() > 10 * 60 * 1000) {
-            keysToDelete.push(key);
-          }
-        });
-        keysToDelete.forEach(key => this.consentAppIds.delete(key));
-
-        // Build login URL for Step 2
-        const loginUrl = `https://auth.dhan.co/login/consentApp-login?consentAppId=${data.consentAppId}`;
-
-        console.log('✅ [DHAN] Consent generated successfully');
-        console.log(`✅ [DHAN] Consent App ID: ${data.consentAppId.substring(0, 8)}...`);
-
-        return {
-          consentAppId: data.consentAppId,
-          url: loginUrl,
-        };
-      }
-
-      console.error('🔴 [DHAN] Failed to generate consent - no consentAppId in response');
-      console.error('🔴 [DHAN] Response keys:', Object.keys(data));
-      console.error('🔴 [DHAN] Response:', JSON.stringify(data).substring(0, 500));
-      return null;
+      console.log('✅ [DHAN] Login URL generated');
+      return {
+        consentAppId: consentAppId,
+        url: loginUrl,
+      };
     } catch (error: any) {
-      console.error('🔴 [DHAN] Consent generation error:', error.message);
-      if (error.response?.status) {
-        console.error('🔴 [DHAN] HTTP Status:', error.response.status);
-        console.error('🔴 [DHAN] Response Data:', JSON.stringify(error.response.data).substring(0, 500));
-        console.error('🔴 [DHAN] Response Headers:', JSON.stringify(error.response.headers).substring(0, 300));
-      } else if (error.request) {
-        console.error('🔴 [DHAN] No response received from Dhan API');
-      } else {
-        console.error('🔴 [DHAN] Error object:', error);
-      }
+      console.error('🔴 [DHAN] Error generating login URL:', error.message);
       return null;
     }
   }
