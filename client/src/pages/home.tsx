@@ -4660,9 +4660,9 @@ ${
             headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
           });
           const data = await response.json();
-          if (data.success && data.available?.live_balance !== undefined) {
-            setBrokerFunds(data.available.live_balance);
-            console.log('✅ [BROKER] Fetched available funds:', data.available.live_balance);
+          if (data.success && data.availableCash !== undefined) {
+            setBrokerFunds(data.availableCash);
+            console.log('✅ [BROKER] Fetched available funds:', data.availableCash);
           } else {
             console.error('❌ [BROKER] Invalid response:', data);
           }
