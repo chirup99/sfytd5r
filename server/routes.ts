@@ -20670,7 +20670,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('✅ [DHAN] Consent generated, returning login URL');
       res.json({ 
         loginUrl: consentData.url,
-        consentAppId: consentData.consentAppId 
+        consentId: consentData.consentId 
       });
     } catch (error: any) {
       console.error('🔴 [DHAN] Error generating login URL:', error.message);

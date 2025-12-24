@@ -209,7 +209,7 @@ class DhanOAuthManager {
       lastRefresh: null,
       refreshToken: null,
     };
-    this.consentAppIds.clear();
+    this.consentIds.clear();
     console.log('🔵 [DHAN] Session disconnected');
   }
 
