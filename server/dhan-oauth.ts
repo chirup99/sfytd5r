@@ -69,14 +69,14 @@ class DhanOAuthManager {
       }
 
       const consentAppId = this.apiKey;
-      const loginUrl = `https://auth.dhan.co/user-login?client_id=${encodeURIComponent(this.apiKey)}`;
+      const loginUrl = `https://auth.dhan.co/user-login?client_id=${encodeURIComponent(this.apiKey)}&redirect_uri=${encodeURIComponent(this.redirectUri)}`;
 
       this.consentAppIds.set(consentAppId, {
         id: consentAppId,
         createdAt: new Date(),
       });
 
-      console.log('✅ [DHAN] Login URL generated');
+      console.log('✅ [DHAN] Login URL generated:', loginUrl);
       return {
         consentAppId: consentAppId,
         url: loginUrl,
