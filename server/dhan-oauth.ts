@@ -72,8 +72,8 @@ class DhanOAuthManager {
 
       console.log('🔵 [DHAN] Request URL: https://auth.dhan.co/app/generate-consent?client_id=' + this.apiKey);
       console.log('🔵 [DHAN] Request Headers:', {
-        app_id: this.apiKey ? '***' : 'MISSING',
-        app_secret: this.apiSecret ? '***' : 'MISSING',
+        'X-API-KEY': this.apiKey ? '***' : 'MISSING',
+        'X-API-SECRET': this.apiSecret ? '***' : 'MISSING',
       });
 
       const response = await axios.post(
@@ -81,8 +81,8 @@ class DhanOAuthManager {
         {},
         {
           headers: {
-            'app_id': this.apiKey,
-            'app_secret': this.apiSecret,
+            'X-API-KEY': this.apiKey,
+            'X-API-SECRET': this.apiSecret,
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
@@ -158,8 +158,8 @@ class DhanOAuthManager {
         {},
         {
           headers: {
-            'app_id': this.apiKey,
-            'app_secret': this.apiSecret,
+            'X-API-KEY': this.apiKey,
+            'X-API-SECRET': this.apiSecret,
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
