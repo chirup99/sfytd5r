@@ -1,4 +1,4 @@
-// Dhan OAuth Implementation - 3-Step OAuth Flow (Fixed)
+// Dhan OAuth Implementation - 3-Step Partner OAuth Flow
 import axios from 'axios';
 import crypto from 'crypto';
 
@@ -14,8 +14,8 @@ interface DhanOAuthState {
 }
 
 interface DhanConsentResponse {
-  consentAppId?: string;
-  consentAppStatus?: string;
+  consentId?: string;
+  consentStatus?: string;
   status?: string;
 }
 
@@ -40,14 +40,15 @@ class DhanOAuthManager {
     refreshToken: null,
   };
 
-  private apiKey: string;
-  private apiSecret: string;
+  private partnerId: string;
+  private partnerSecret: string;
   private redirectUri: string;
-  private consentAppIds: Map<string, { id: string; createdAt: Date }> = new Map();
+  private consentIds: Map<string, { id: string; createdAt: Date }> = new Map();
 
-  constructor(apiKey?: string, apiSecret?: string) {
-    this.apiKey = apiKey || process.env.DHAN_API_KEY || '';
-    this.apiSecret = apiSecret || process.env.DHAN_API_SECRET || '';
+  constructor(partnerId?: string, partnerSecret?: string) {
+    // For Partner-level authentication (recommended for partners)
+    this.partnerId = partnerId || process.env.DHAN_PARTNER_ID || '';
+    this.partnerSecret = partnerSecret || process.env.DHAN_PARTNER_SECRET || '';
     
     // Set redirect URI based on environment
     const baseUrl = (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS)
@@ -55,32 +56,32 @@ class DhanOAuthManager {
       : `http://localhost:5000`;
     this.redirectUri = `${baseUrl}/api/broker/dhan/callback`;
 
-    console.log('🔵 [DHAN] OAuth Manager initialized');
+    console.log('🔵 [DHAN] Partner OAuth Manager initialized');
     console.log(`🔵 [DHAN] Redirect URI: ${this.redirectUri}`);
-    console.log(`🔵 [DHAN] API Key configured: ${this.apiKey ? 'YES' : 'NO'}`);
+    console.log(`🔵 [DHAN] Partner ID configured: ${this.partnerId ? 'YES' : 'NO'}`);
   }
 
-  // Step 1: Generate Consent (Call API to get consentAppId)
-  async generateConsent(): Promise<{ consentAppId: string; url: string } | null> {
+  // Step 1: Generate Consent (Call Partner API to get consentId)
+  async generateConsent(): Promise<{ consentId: string; url: string } | null> {
     try {
-      if (!this.apiKey || !this.apiSecret) {
-        console.error('🔴 [DHAN] Credentials missing');
+      if (!this.partnerId || !this.partnerSecret) {
+        console.error('🔴 [DHAN] Partner credentials missing');
         return null;
       }
 
-      console.log('🔵 [DHAN] Step 1: Calling generate-consent API...');
-      console.log(`🔵 [DHAN] Using API Key: ${this.apiKey.substring(0, 4)}...`);
+      console.log('🔵 [DHAN] Step 1: Calling partner/generate-consent API...');
+      console.log(`🔵 [DHAN] Using Partner ID: ${this.partnerId.substring(0, 4)}...`);
 
-      // Call Dhan API to generate consent - per official documentation
-      // POST to https://auth.dhan.co/app/generate-consent?client_id=<CLIENT_ID>
-      // Headers: app_id, app_secret
+      // Call Dhan Partner API to generate consent - per official documentation
+      // POST to https://auth.dhan.co/partner/generate-consent
+      // Headers: partner_id, partner_secret
       const response = await axios.post(
-        `https://auth.dhan.co/app/generate-consent?client_id=${this.apiKey}`,
+        'https://auth.dhan.co/partner/generate-consent',
         {},
         {
           headers: {
-            'app_id': this.apiKey,
-            'app_secret': this.apiSecret,
+            'partner_id': this.partnerId,
+            'partner_secret': this.partnerSecret,
             'Content-Type': 'application/json',
           },
           timeout: 10000,
@@ -89,31 +90,32 @@ class DhanOAuthManager {
 
       const consentData: DhanConsentResponse = response.data;
       
-      if (!consentData.consentAppId) {
-        console.error('🔴 [DHAN] No consentAppId in response:', consentData);
+      if (!consentData.consentId) {
+        console.error('🔴 [DHAN] No consentId in response:', consentData);
         return null;
       }
 
-      // Step 2: Build login URL using the consentAppId
-      const consentAppId = consentData.consentAppId;
-      const loginUrl = `https://auth.dhan.co/consent-login?consentAppId=${encodeURIComponent(consentAppId)}`;
+      // Step 2: Build login URL using the consentId
+      const consentId = consentData.consentId;
+      const loginUrl = `https://auth.dhan.co/partner-login?consentId=${encodeURIComponent(consentId)}&redirect_url=${encodeURIComponent(this.redirectUri)}`;
 
-      this.consentAppIds.set(consentAppId, {
-        id: consentAppId,
+      this.consentIds.set(consentId, {
+        id: consentId,
         createdAt: new Date(),
       });
 
-      console.log('✅ [DHAN] Consent generated with ID:', consentAppId);
+      console.log('✅ [DHAN] Consent generated with ID:', consentId);
+      console.log('✅ [DHAN] Consent Status:', consentData.consentStatus);
       console.log('✅ [DHAN] Login URL created:', loginUrl);
       
       return {
-        consentAppId: consentAppId,
+        consentId: consentId,
         url: loginUrl,
       };
     } catch (error: any) {
       console.error('🔴 [DHAN] Error generating consent:', error.message);
       if (error.response?.status === 400) {
-        console.error('🔴 [DHAN] HTTP 400 Error - Check API credentials and request format');
+        console.error('🔴 [DHAN] HTTP 400 Error - Check partner credentials and request format');
       }
       if (error.response?.data) {
         console.error('🔴 [DHAN] API Response:', error.response.data);
@@ -125,20 +127,22 @@ class DhanOAuthManager {
   // Step 3: Consume Consent (server-side, after user logs in and gets tokenId)
   async consumeConsent(tokenId: string): Promise<boolean> {
     try {
-      if (!this.apiKey || !this.apiSecret) {
-        console.error('🔴 [DHAN] API Key or Secret not configured');
+      if (!this.partnerId || !this.partnerSecret) {
+        console.error('🔴 [DHAN] Partner credentials not configured');
         return false;
       }
 
       console.log('🔵 [DHAN] Step 3: Consuming consent with tokenId...');
 
+      // Call Dhan Partner API to consume consent
+      // POST to https://auth.dhan.co/partner/consumePartner-consent?tokenId=<TOKEN_ID>
       const response = await axios.post(
-        `https://auth.dhan.co/app/consumeApp-consent?tokenId=${tokenId}`,
+        `https://auth.dhan.co/partner/consumePartner-consent?tokenId=${tokenId}`,
         {},
         {
           headers: {
-            'app_id': this.apiKey,
-            'app_secret': this.apiSecret,
+            'partner_id': this.partnerId,
+            'partner_secret': this.partnerSecret,
           },
           timeout: 10000,
         }
@@ -226,4 +230,5 @@ class DhanOAuthManager {
 }
 
 // Singleton instance
+// Initialize with Partner credentials (DHAN_PARTNER_ID and DHAN_PARTNER_SECRET)
 export const dhanOAuthManager = new DhanOAuthManager();
