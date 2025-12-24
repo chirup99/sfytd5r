@@ -97,16 +97,50 @@
 
 ---
 
-## Final Import Verification - COMPLETED (Dec 24, 2025 6:04 PM)
+## AUTO-TRIGGER Logic Refactor - COMPLETED (Dec 24, 2025 6:13 PM)
+
+**User Request:** Change auto-trigger to ONLY fire when NEW COMPLETE orders arrive, NOT on total order count increase
+
+**Problem - Previous Logic:**
+- Auto-triggered whenever ANY order was added (COMPLETE, REJECTED, CANCELLED, PENDING)
+- Counted total `brokerOrders.length` - included all order types
+- Example: 5 orders → 8 orders = AUTO-TRIGGER (even if only 1 COMPLETE, 2 REJECTED, 1 PENDING)
+
+**Solution Applied:**
+[x] Added new ref: `previousCompleteOrdersLengthRef` to track ONLY COMPLETE orders
+[x] Modified useEffect to filter ONLY COMPLETE orders: `brokerOrders.filter((order) => order.status === 'COMPLETE')`
+[x] Auto-trigger NOW based on COMPLETE count increase ONLY
+[x] Updated console message: `🤖 [AUTO-TAP] Detected ${completeOrdersCount} COMPLETE orders (was ${previousCompleteOrdersLengthRef.current}), auto-recording only success orders...`
+[x] Non-COMPLETE orders NO LONGER trigger auto-record
+[x] Remaining orders (REJECTED, CANCELLED, PENDING) = IGNORED for trigger detection
+[x] Workflow restarted successfully - no compilation errors
+
+**New Behavior:**
+```
+Before: 5 orders total
++ New order arrives (REJECTED) = 6 total → AUTO-TRIGGER ❌
++ New order arrives (PENDING) = 7 total → AUTO-TRIGGER ❌
+
+After: 2 COMPLETE orders
++ New COMPLETE order arrives = 3 COMPLETE → AUTO-TRIGGER ✅
++ New REJECTED order arrives = 2 COMPLETE (1 REJECTED total) → NO TRIGGER ✅
++ New PENDING order arrives = 2 COMPLETE (1 REJECTED, 1 PENDING total) → NO TRIGGER ✅
+```
+
+**Result:** Only successful COMPLETE orders trigger auto-recording. Failed/pending/cancelled orders are ignored for trigger detection but still skipped during import.
+
+---
+
+## Final Import Verification - COMPLETED (Dec 24, 2025 6:13 PM)
 
 [x] Installed missing `dotenv` package
 [x] Workflow restarted successfully
 [x] Server running on port 5000
 [x] Angel One auto-connected with client P176266
 [x] WebSocket streaming live market data:
-    - BANKNIFTY: LTP=59183.6
-    - SENSEX: LTP=85408.7
-    - GOLD: LTP=37880.88
+    - BANKNIFTY: Live quotes received
+    - SENSEX: Live quotes received
+    - GOLD: Live quotes received
 [x] All broker OAuth managers initialized (Upstox, Angel One, Dhan)
 [x] AWS Cognito JWT Verifier initialized
 [x] Gemini AI routes configured
@@ -125,6 +159,8 @@
 - ✅ Record to Journal button ONLY imports COMPLETE orders (successful orders only)
 - ✅ All non-COMPLETE orders (REJECTED, CANCELLED, PENDING) automatically filtered and skipped
 - ✅ Simplified toast message shows clean "Recorded X orders" notification
+- ✅ AUTO-TRIGGER NOW tracks COMPLETE orders only - ignores REJECTED/CANCELLED/PENDING
+- ✅ Only NEW COMPLETE orders trigger auto-recording
 - ✅ All services initialized successfully
 
-**Latest Status:** Dec 24, 2025, 6:04 PM - All systems operational. Project fully configured and ready for use.
+**Latest Status:** Dec 24, 2025, 6:13 PM - All systems operational. AUTO-TRIGGER refactored to COMPLETE orders only. Project ready for use.

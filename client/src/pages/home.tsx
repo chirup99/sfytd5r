@@ -4633,6 +4633,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     target: "",
   });
   const previousBrokerOrdersLengthRef = useRef<number>(0);
+  const previousCompleteOrdersLengthRef = useRef<number>(0);
 
   // Save Confirmation Dialog State
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
@@ -5752,10 +5753,15 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
   // Exit all open positions at once
 
-  // Auto-tap: Automatically record broker orders when new orders are added
+  // Auto-tap: Automatically record broker orders when NEW COMPLETE orders are added
   useEffect(() => {
-    if (brokerOrders.length > previousBrokerOrdersLengthRef.current && brokerOrders.length > 0) {
-      console.log(`🤖 [AUTO-TAP] Detected ${brokerOrders.length} orders (was ${previousBrokerOrdersLengthRef.current}), auto-recording...`);
+    // Count only COMPLETE orders
+    const completeOrders = brokerOrders.filter((order: any) => order.status === 'COMPLETE');
+    const completeOrdersCount = completeOrders.length;
+    
+    // Only auto-trigger if COMPLETE count increased (new success orders added)
+    if (completeOrdersCount > previousCompleteOrdersLengthRef.current && completeOrdersCount > 0) {
+      console.log(`🤖 [AUTO-TAP] Detected ${completeOrdersCount} COMPLETE orders (was ${previousCompleteOrdersLengthRef.current}), auto-recording only success orders...`);
       
       // Schedule the auto-record for next tick to ensure state is updated
       setTimeout(() => {
@@ -5763,12 +5769,13 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       }, 500);
     }
     
-    // Update the ref with current length
+    // Update the ref with current COMPLETE orders count
+    previousCompleteOrdersLengthRef.current = completeOrdersCount;
+    
+    // Keep tracking total for reference (but don't use for trigger)
     previousBrokerOrdersLengthRef.current = brokerOrders.length;
   }, [brokerOrders]);
   const exitAllPaperPositions = () => {
-    const openPositions = paperPositions.filter(p => p.isOpen);
-
     if (openPositions.length === 0) {
       toast({
         title: "No Positions",
