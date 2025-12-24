@@ -3763,36 +3763,46 @@ ${
     } else {
       console.log('⚠️ [ZERODHA] No saved token in localStorage');
     }
+      const savedUserName = localStorage.getItem("zerodha_user_name");
+      if (savedUserName) {
+        setZerodhaUserName(savedUserName);
+        console.log("✅ [ZERODHA] User Name restored from localStorage");
+      }
   }, []);
 
 
-  // Fetch Zerodha profile to get client ID - with persistence
+  // Fetch Zerodha profile to get both userId and userName - with persistence
   useEffect(() => {
     if (zerodhaAccessToken) {
-      // Check if we already have it in localStorage
+      // Check if we already have profile in localStorage
       const savedId = localStorage.getItem('zerodha_client_id');
-      if (savedId && !zerodhaClientId) {
+      const savedName = localStorage.getItem('zerodha_user_name');
+      
+      if (savedId && savedName && !zerodhaClientId) {
         setZerodhaClientId(savedId);
-        console.log('✅ [ZERODHA] Client ID restored from cache');
+        setZerodhaUserName(savedName);
+        console.log('✅ [ZERODHA] Profile restored from cache');
         return;
       }
       
-      // If not in cache or state, fetch it from API
-      if (!zerodhaClientId) {
+      // If not in cache or state, fetch it from backend
+      if (!zerodhaClientId || !zerodhaUserName) {
         const fetchZerodhaProfile = async () => {
           try {
-            const response = await fetch('https://api.kite.trade/user/profile', {
+            const response = await fetch('/api/broker/zerodha/profile', {
               headers: {
-                'Authorization': `Bearer ${zerodhaAccessToken}`,
-                'X-Kite-Version': '3'
+                'Authorization': `Bearer ${zerodhaAccessToken}`
               }
             });
             if (response.ok) {
               const data = await response.json();
-              if (data.data && data.data.user_id) {
-                localStorage.setItem('zerodha_client_id', data.data.user_id);
-                setZerodhaClientId(data.data.user_id);
-                console.log('✅ [ZERODHA] Client ID fetched and saved:', data.data.user_id);
+              if (data.profile && data.profile.userId && data.profile.userName) {
+                localStorage.setItem('zerodha_client_id', data.profile.userId);
+                localStorage.setItem('zerodha_user_name', data.profile.userName);
+                setZerodhaClientId(data.profile.userId);
+                setZerodhaUserName(data.profile.userName);
+                setZerodhaProfileData(data.profile);
+                console.log('✅ [ZERODHA] Profile fetched and saved:', data.profile.userId);
               }
             }
           } catch (error) {
@@ -3879,6 +3889,8 @@ ${
                 setZerodhaProfileData(data.profile);
                 setZerodhaClientId(data.profile.userId);
                 setZerodhaUserName(data.profile.userName);
+                localStorage.setItem("zerodha_client_id", data.profile.userId);
+                localStorage.setItem("zerodha_user_name", data.profile.userName);
                 console.log('✅ [ZERODHA] Profile fetched:', data.profile.email);
               }
             })
@@ -19307,7 +19319,7 @@ ${
                 ) : null}
               </div>
               <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
-                <span className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1"><img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3" /> id: {zerodhaClientId || "N/A"} | name: {zerodhaUserName || "N/A"}</span>
+                <span className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1"><img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3" /> id: {zerodhaClientId || "N/A"} | {zerodhaUserName || "N/A"}</span>
               </div>
             </div>
 

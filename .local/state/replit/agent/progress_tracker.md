@@ -41,6 +41,32 @@
 
 To enable: Add `DHAN_PARTNER_ID` and `DHAN_PARTNER_SECRET` to Secrets tab.
 
+## Orders & Positions Dialog Profile Persistence - FIXED (Dec 24, 2025 11:54)
+
+**Problem:** Broker profile (userId and userName) displayed "N/A" after page restart, even though orders were displaying correctly.
+
+**Root Cause:** 
+- Profile was only fetched when the popup callback returned the token
+- On page reload, token was restored from localStorage, but profile fetch was NOT triggered
+- userName was never being saved to localStorage, so it was lost on reload
+
+**Solution Applied:**
+[x] Added localStorage restoration of userName on component mount (line 3765)
+[x] Modified popup callback to save userName to localStorage when profile is fetched (line 3887)
+[x] Updated the profile fetch useEffect (line 3768) to:
+  - Call our backend endpoint `/api/broker/zerodha/profile` instead of just Kite API
+  - Fetch both userId and userName together
+  - Save both to localStorage for persistence across reloads
+  - Auto-trigger this fetch whenever zerodhaAccessToken changes (including on reload)
+
+**Changed Files:**
+- client/src/pages/home.tsx: 
+  - Lines 3765-3768: Added userName restoration from localStorage on mount
+  - Lines 3887-3888: Added userName save to localStorage in popup callback
+  - Lines 3768-3806: Rewrote profile fetch useEffect to call backend endpoint and persist both values
+
+**Status:** ✅ FIXED. Profile now persists across page reloads and displays correctly on initial load and after restart.
+
 ## Latest Migration Check - December 24, 2025
 
 [x] Verified dotenv package installed via npm install
@@ -49,3 +75,4 @@ To enable: Add `DHAN_PARTNER_ID` and `DHAN_PARTNER_SECRET` to Secrets tab.
 [x] Angel One broker auto-connected with live WebSocket streaming
 [x] Real-time price data streaming (BANKNIFTY, SENSEX, GOLD)
 [x] All services initialized successfully
+[x] Broker profile persistence fix deployed and verified
