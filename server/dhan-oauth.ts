@@ -69,11 +69,16 @@ class DhanOAuthManager {
       }
 
       console.log('🔵 [DHAN] Step 1: Calling generate-consent API...');
+      console.log(`🔵 [DHAN] Using credentials - app_id: ${this.apiKey ? 'YES' : 'NO'}, app_secret: ${this.apiSecret ? 'YES' : 'NO'}`);
 
       // Step 1: Call Dhan API to generate consent
+      // Dhan requires credentials in BOTH headers AND body for consent generation
       const response = await axios.post(
         `https://auth.dhan.co/app/generate-consent`,
-        {},
+        {
+          'app_id': this.apiKey,
+          'app_secret': this.apiSecret,
+        },
         {
           headers: {
             'app_id': this.apiKey,
