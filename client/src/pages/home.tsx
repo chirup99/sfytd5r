@@ -17569,7 +17569,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             <div className="flex items-center gap-2">
                               <Button
                                 variant="outline"
-                                className="flex-1 h-10 bg-white text-black hover:bg-slate-50 border-slate-200 cursor-default"
+                                className="flex-1 h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 cursor-default"
                                 data-testid="button-zerodha-connected-display"
                               >
                                 <img 
