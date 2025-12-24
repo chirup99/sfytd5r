@@ -4006,6 +4006,54 @@ ${
       alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect to Upstox'));
     }
   };
+  const handleAngelOneConnect = async () => {
+    try {
+      console.log('🔶 Starting Angel One OAuth flow...');
+      const response = await fetch('/api/angel-one/auth-url');
+      const data = await response.json();
+      
+      if (!data.authUrl) {
+        alert('Error: Could not generate Angel One authorization URL');
+        return;
+      }
+      
+      console.log('🔗 Angel One auth URL:', data.authUrl);
+      
+      const popup = window.open(
+        data.authUrl,
+        'angel_one_oauth',
+        'width=600,height=800,resizable=yes,scrollbars=yes'
+      );
+      
+      if (!popup) {
+        console.warn('❌ Popup blocked');
+        alert('Popup blocked. Please enable popups and try again.');
+        return;
+      }
+      
+      console.log('✅ Angel One popup opened, waiting for OAuth callback...');
+      
+      let checkCount = 0;
+      const monitorPopup = setInterval(() => {
+        checkCount++;
+        if (popup.closed) {
+          clearInterval(monitorPopup);
+          console.log('⚠️ Angel One popup closed');
+          return;
+        }
+        if (checkCount > 300) {
+          clearInterval(monitorPopup);
+          popup.close();
+          console.log('⚠️ Angel One popup timeout');
+        }
+      }, 1000);
+      
+    } catch (error) {
+      console.error('❌ Angel One error:', error);
+      alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect'));
+    }
+  };
+
 
   const handleRevokeZerodha = () => {
     localStorage.removeItem("zerodha_token"); document.cookie = "zerodha_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
@@ -17406,6 +17454,7 @@ ${
                             variant="outline"
                             className="w-full h-10 bg-white text-black hover:bg-slate-50 border-slate-200"
                             data-testid="button-angelone-dialog"
+                            onClick={handleAngelOneConnect}
                           >
                             <img src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw?v=1701" alt="Angel One" className="h-4 mr-2" />
                             Angel One

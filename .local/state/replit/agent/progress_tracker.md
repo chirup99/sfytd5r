@@ -6,155 +6,77 @@
 [x] 3. Verify the project is working using the feedback tool
 [x] 4. Inform user the import is completed and they can start building, mark the import as completed using the complete_project_import tool
 
-## Desktop & Mobile Option Chain Redesign (Turn 11-14)
-[x] Fixed light theme display issues
-[x] Redesigned desktop option chain to match paper trading dialog style
-[x] Minimalist design: clean white/dark backgrounds (no gradients)
-[x] Proper light theme support with gray-100/gray-900 backgrounds
-[x] Simplified header with controls in single row
-[x] Clean table styling matching paper trading dialog
-[x] Fixed hover states for light theme
-[x] Made option chain dialog tiny (max-w-2xl)
-[x] Centered spot price display
-[x] Reduced padding and spacing throughout
-[x] Reduced font sizes for compact look
-[x] **Applied same tiny design to mobile**
-[x] **Mobile and desktop now have consistent design**
-[x] **Fixed mobile dropdown positioning issue**
-[x] **Replaced native HTML select with Radix UI Select components**
+## Angel One OAuth Integration (Turn 21 - COMPLETE ✅)
 
-## Recent Updates (Turn 15 - Final)
-[x] **Mobile dropdown fix**: Replaced native `<select>` elements with Radix UI Select components
-[x] **Proper positioning**: Radix UI Select handles dropdown positioning automatically on mobile
-[x] **Minimalist styling**: White backgrounds with subtle gray borders (`border-gray-200 dark:border-gray-700`)
-[x] **Unified component**: Both index and expiry dropdowns now use Radix UI Select
-[x] **Mobile-friendly**: Dropdowns now display correctly within the dialog on all screen sizes
-
-## Design Changes:
-- Native HTML select → Radix UI Select components
-- Automatic dropdown positioning (no more off-screen issues on mobile)
-- Minimalist styling: `bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700`
-- Consistent look across mobile and desktop
-- DialogContent: Removed gradient, uses `bg-white dark:bg-gray-900`
-- Spot Price: Centered display
-- Padding: Compact spacing
-- Option Chain: Unified table design on all devices
-- Dropdowns: Proper Radix UI Select positioning
-
-## Features Implemented
-
-✅ Orders & Positions table: Real-time 1-second polling  
-✅ Trade History: Auto-import from Orders table (Status column excluded)  
-✅ Auto-import to Today's Personal Heatmap: Saves trades to AWS with today's date  
-✅ Client ID: Persists across restarts  
-✅ Broker Funds: Display logic fixed - shows "Demo Mode" when not connected  
-✅ All integrations: Angel One connection working perfectly  
-✅ Market data: Real-time price streaming via WebSocket  
-✅ AWS DynamoDB: Connected and operational  
-✅ AWS Cognito: JWT verification enabled  
-✅ NeoFeed: All tables initialized and ready  
-✅ Auto-heatmap update: Today's date selected when trades are imported  
-✅ **Record Button (Paper Trading): Saves paper trades to journal + heatmap**  
-✅ **Record Button (Broker Orders): Saves real broker orders to journal + heatmap**  
-✅ **Option Chain Spot Price: Displays rupee symbol (₹) instead of dollar ($)**
-✅ **Desktop Option Chain: Minimalist redesign matching paper trading dialog**
-✅ **Light Theme: Fixed option chain display for light mode**
-✅ **Tiny Option Chain Dialog: Compact size with centered spot price**
-✅ **Mobile Option Chain: Unified with desktop - same table design across all devices**
-✅ **Minimalist Dropdowns: Clean white backgrounds with subtle borders**
-✅ **Fixed Mobile Dropdown Positioning: Radix UI Select replaces native select elements**
-
-## Code Changes Made
-
-**File: client/src/pages/home.tsx**
-- Added auto-import useEffect (line 4473)
-- Enhanced with personal heatmap saving functionality
-- Integrated formatDateKey() for today's date formatting
-- Uses setPersonalTradingDataByDate() for AWS persistence
-- Uses setHeatmapSelectedDate() to auto-select today
-- recordAllPaperTrades() function handles Record button for paper trading (line 5315)
-- recordAllBrokerOrders() function handles Record button for broker orders (line ~5413)
-- "Record to Journal" button added to Orders table footer (line ~19088)
-- **Redesigned desktop option chain dialog - tiny and minimalist**
-- **Updated mobile option chain to use same desktop table design - removed separate grid layout**
-- **Applied minimalist dropdown styling to all select elements (4 dropdowns total)**
-- **Replaced native HTML select with Radix UI Select components for proper mobile positioning (lines 21502-21530)**
-
-## Upstox OAuth Integration (Turn 14 - COMPLETE ✅)
-
-[x] 1. Implemented Upstox OAuth 2.0 Manager (`server/upstox-oauth.ts`)
-   - Full OAuth state management
-   - Authorization URL generation with CSRF protection
+[x] 1. Analyzed Zerodha and Upstox OAuth implementations
+   - Zerodha uses Kite.js with request_token flow
+   - Upstox uses OAuth 2.0 with CSRF state management
+   
+[x] 2. Implemented Angel One OAuth 2.0 Manager (`server/angel-one-oauth.ts`)
+   - OAuth state management with CSRF protection
+   - Authorization URL generation
    - Token exchange and validation
    - User profile fetching
    - Token expiry handling
    
-[x] 2. Created Upstox Auth Button Component (`client/src/components/auth-button-upstox.tsx`)
-   - Connect/disconnect UI
-   - Status monitoring
-   - Loading and error states
-   - User profile display
+[x] 3. Added Angel One OAuth Routes in `server/routes.ts`
+   - GET `/api/angel-one/auth-url` - Generate authorization URL
+   - GET `/api/angel-one/callback` - Handle OAuth callback
+   - GET `/api/angel-one/status` - Get connection status
+   - POST `/api/angel-one/disconnect` - Disconnect session
    
-[x] 3. Added Upstox OAuth Routes in `server/routes.ts`
-   - GET `/api/upstox/auth-url` - Generate authorization URL
-   - GET `/api/upstox/callback` - Handle OAuth callback
-   - GET `/api/upstox/status` - Get connection status
-   - POST `/api/upstox/disconnect` - Disconnect session
+[x] 4. Created handleAngelOneConnect function in `client/src/pages/home.tsx`
+   - Generates authorization URL from backend
+   - Opens OAuth popup (600x800)
+   - Monitors popup closing
+   - Handles popup blocking gracefully
    
-[x] 4. Updated `client/src/pages/home.tsx`
-   - Imported AuthButtonUpstox component
-   - Integrated into broker connection dialog
-   
-[x] 5. Secured API Credentials
-   - Stored UPSTOX_API_KEY in secrets
-   - Stored UPSTOX_API_SECRET in secrets
-   - Environment variables properly configured
+[x] 5. Wired Angel One button to handler
+   - Updated button at line 17408 to call `handleAngelOneConnect`
+   - Matches Zerodha and Upstox button implementation pattern
 
-## Import Status: COMPLETE ✅
+## Deep Analysis - OAuth Integration Pattern
 
-- All migration steps completed
-- Auto-import feature fully implemented and tested
-- Enhanced to save trades to today's personal heatmap
-- Project fully operational and ready for use
-- Broker terminal integration working seamlessly
-- **Record button available in both Paper Trading and Broker Orders dialogs**
-- **✨ AUTO-TAP FEATURE: New broker orders now auto-record with count increment logic**
-- **✨ Option Chain Spot Price: Displays rupee symbol (₹) instead of dollar ($)**
-- **✨ Unified Option Chain: Same desktop table design on mobile and desktop**
-- **✨ Light Theme: Option chain displays correctly on all devices**
-- **✨ Minimalist Design: Clean dropdowns and consistent UI across the app**
-- **✨ Mobile Dropdown Fix: Radix UI Select components for proper positioning on all screen sizes**
-- **✨ UPSTOX OAUTH: Complete OAuth 2.0 integration with secure token management**
+### Zerodha Flow:
+1. Backend generates login URL: `https://kite.zerodha.com/connect/login?v=3&api_key={key}`
+2. Frontend opens popup
+3. User logs in and grants permissions
+4. Zerodha redirects to callback with `request_token`
+5. Backend exchanges for `access_token` using API secret
 
-## Recent Fixes (Turn 17-19)
-[x] **UPSTOX BUTTON FIX - PART 1**: Connected Upstox dialog button to actual OAuth flow
-   - Added `handleUpstoxConnect` function to home.tsx (line 3961)
-   - Initial `onClick` handler attempt
-   
-[x] **UPSTOX BUTTON FIX - PART 2**: Fixed popup implementation
-   - Changed from `window.location.href` (full page redirect) to `window.open()` (popup)
-   - Now opens OAuth popup in new window like Zerodha button does
-   - Added popup monitoring to detect when user completes login
-   - Handles popup blocking with user-friendly error message
-   - Popup size: 600x800 with scrollbars enabled
+### Upstox Flow:
+1. Backend generates OAuth URL with CSRF state
+2. Frontend opens popup
+3. User logs in and grants permissions
+4. Upstox redirects to callback with `code` and `state`
+5. Backend verifies state and exchanges code for `access_token`
 
-[x] **UPSTOX BUTTON FIX - PART 3**: Added missing onClick handler
-   - Fixed: Upstox button was missing the `onClick={handleUpstoxConnect}` handler
-   - Added handler at line 17400
-   - Button now fully functional and matches Zerodha button behavior
-   - **STATUS: READY FOR TESTING** - Upstox button should open popup when clicked
+### Angel One Flow (Implemented):
+1. Backend generates OAuth URL with CSRF state
+2. Frontend opens popup
+3. User logs in and grants permissions
+4. Angel One redirects to callback with `code` and `state`
+5. Backend verifies state and exchanges code for JWT token
+6. Backend fetches user profile using token
+7. Token stored with 24-hour expiry
 
-## API Configuration (Turn 19-20)
-[x] **UPSTOX API CREDENTIALS CONFIGURED**
-   - API Key: efb14d7b-93b9-4fba-9398-f2e0b170b654
-   - API Secret: lorxtpfd88
-   - Stored securely as environment variables (UPSTOX_API_KEY, UPSTOX_API_SECRET)
-   - Server automatically reads from env vars
-   - OAuth Manager initialized and ready to handle login flow
+## Architecture
+- All three brokers now follow OAuth 2.0 or similar patterns
+- Popup-based authentication for consistent UX
+- CSRF protection via state tokens
+- Automatic session management with token expiry
+- User profile fetching for connection status
 
-[x] **UPSTOX REDIRECT URI FIXED**
-   - Issue: Code was checking for `REPLIT_DOMAIN` but env has `REPLIT_DEV_DOMAIN`
-   - Fixed: Updated server/upstox-oauth.ts to use correct environment variable
-   - Old redirect URI: `http://localhost:5000/api/upstox/callback` (rejected by Upstox)
-   - New redirect URI: `https://634a0949-5aa8-4b3a-866f-03c979f0ee5e-00-39ko7x3oark55.worf.replit.dev/api/upstox/callback` ✅
-   - **STATUS: FULLY OPERATIONAL** - Upstox OAuth ready to accept logins
+## Status: INTEGRATION COMPLETE ✅
+Angel One OAuth integration fully implemented and ready for use.
+
+## Recent Updates (Previous Turns)
+[x] Fixed light theme display issues
+[x] Redesigned desktop option chain to match paper trading dialog style
+[x] Mobile dropdown positioning fixed with Radix UI Select
+[x] Option Chain Spot Price displays rupee symbol (₹)
+[x] Unified Option Chain design across desktop and mobile
+[x] Upstox OAuth 2.0 integrated with secure token management
+[x] Upstox button fully functional with popup flow
+[x] Auto-import feature implemented for trades
+[x] Personal heatmap integration working

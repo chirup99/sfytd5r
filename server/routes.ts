@@ -69,6 +69,7 @@ import { tradingNLPAgent } from './nlp-trading-agent';
 import { nlpDataRouter } from './nlp-data-router';
 import { tradingChallengeService } from './trading-challenge-service';
 import { upstoxOAuthManager } from './upstox-oauth';
+import { angelOneOAuthManager } from './angel-one-oauth';
 
 // 🔶 Angel One Stock Token Mappings for historical data
 const ANGEL_ONE_STOCK_TOKENS: { [key: string]: { token: string; exchange: string; tradingSymbol: string } } = {
@@ -20553,6 +20554,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: 'Disconnected from Upstox' });
     } catch (error: any) {
       console.error('🔴 [UPSTOX] Error disconnecting:', error.message);
+      res.status(500).json({ success: false, error: 'Failed to disconnect' });
+    }
+  });
+
+  // ========================================
+  // ANGEL ONE OAUTH 2.0 IMPLEMENTATION
+  // ========================================
+
+  // Get authorization URL for Angel One OAuth flow
+  app.get('/api/angel-one/auth-url', (req, res) => {
+    try {
+      const { url, state } = angelOneOAuthManager.generateAuthorizationUrl();
+      res.json({ authUrl: url, state });
+    } catch (error: any) {
+      console.error('🔴 [ANGEL ONE] Error generating auth URL:', error.message);
+      res.status(500).json({ error: 'Failed to generate authorization URL' });
+    }
+  });
+
+  // Handle Angel One OAuth callback
+  app.get('/api/angel-one/callback', async (req, res) => {
+    try {
+      const code = req.query.code as string;
+      const state = req.query.state as string;
+
+      if (!code || !state) {
+        console.error('🔴 [ANGEL ONE] Missing code or state in callback');
+        return res.status(400).json({ error: 'Missing authorization code or state' });
+      }
+
+      console.log('🔶 [ANGEL ONE] Processing OAuth callback...');
+
+      const success = await angelOneOAuthManager.exchangeCodeForToken(code, state);
+
+      if (success) {
+        console.log('✅ [ANGEL ONE] Successfully authenticated');
+        // Redirect to a success page or close the window
+        res.send(`
+          <html>
+            <body>
+              <h1>✅ Angel One Connected Successfully!</h1>
+              <p>You can now close this window and return to the trading app.</p>
+              <script>
+                window.setTimeout(() => {
+                  window.close();
+                }, 2000);
+              </script>
+            </body>
+          </html>
+        `);
+      } else {
+        res.status(400).json({ error: 'Failed to authenticate with Angel One' });
+      }
+    } catch (error: any) {
+      console.error('🔴 [ANGEL ONE] Callback error:', error.message);
+      res.status(500).json({ error: 'OAuth callback failed' });
+    }
+  });
+
+  // Get Angel One connection status
+  app.get('/api/angel-one/status', (req, res) => {
+    try {
+      const status = angelOneOAuthManager.getStatus();
+      res.json({
+        success: true,
+        ...status,
+      });
+    } catch (error: any) {
+      console.error('🔴 [ANGEL ONE] Error getting status:', error.message);
+      res.status(500).json({ success: false, error: 'Failed to get status' });
+    }
+  });
+
+  // Disconnect from Angel One
+  app.post('/api/angel-one/disconnect', (req, res) => {
+    try {
+      angelOneOAuthManager.disconnect();
+      res.json({ success: true, message: 'Disconnected from Angel One' });
+    } catch (error: any) {
+      console.error('🔴 [ANGEL ONE] Error disconnecting:', error.message);
       res.status(500).json({ success: false, error: 'Failed to disconnect' });
     }
   });
