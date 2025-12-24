@@ -52,9 +52,10 @@ class DhanOAuthManager {
 
     console.log('🔵 [DHAN] OAuth Manager initialized');
     console.log(`🔵 [DHAN] Redirect URI: ${this.redirectUri}`);
+    console.log(`🔵 [DHAN] API Key configured: ${this.apiKey ? 'YES' : 'NO'}`);
   }
 
-  // Generate login URL using request_token flow
+  // Generate login URL using Dhan's OAuth flow
   generateAuthorizationUrl(): { url: string; requestToken: string } {
     const requestToken = crypto.randomBytes(32).toString('hex');
     
@@ -63,24 +64,30 @@ class DhanOAuthManager {
     
     // Clean up old tokens (older than 15 minutes)
     const now = new Date();
+    const keysToDelete: string[] = [];
     for (const [key, value] of this.requestTokens.entries()) {
       if (now.getTime() - value.createdAt.getTime() > 15 * 60 * 1000) {
-        this.requestTokens.delete(key);
+        keysToDelete.push(key);
       }
     }
+    keysToDelete.forEach(key => this.requestTokens.delete(key));
 
-    // Build Dhan login URL
+    // Build Dhan login URL - Using direct Dhan login with redirect
+    // Dhan's standard OAuth endpoint
     const params = new URLSearchParams({
       client_id: this.apiKey,
       redirect_uri: this.redirectUri,
       response_type: 'code',
       state: requestToken,
+      scope: 'default',
     });
 
-    // Dhan OAuth endpoint
-    const authUrl = `https://api.dhan.co/oauth/authorize?${params.toString()}`;
+    // Use Dhan's web login endpoint
+    const authUrl = `https://www.dhan.co/oauth/authorize?${params.toString()}`;
     
-    console.log(`🔵 [DHAN] Generated login URL with request token: ${requestToken.substring(0, 8)}...`);
+    console.log(`🔵 [DHAN] Generated authorization URL`);
+    console.log(`🔵 [DHAN] Client ID: ${this.apiKey.substring(0, 4)}...`);
+    console.log(`🔵 [DHAN] Redirect URI: ${this.redirectUri}`);
     return { url: authUrl, requestToken };
   }
 
