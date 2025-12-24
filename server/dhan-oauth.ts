@@ -70,6 +70,12 @@ class DhanOAuthManager {
 
       console.log('🔵 [DHAN] Generating consent...');
 
+      console.log('🔵 [DHAN] Request URL: https://auth.dhan.co/app/generate-consent?client_id=' + this.apiKey);
+      console.log('🔵 [DHAN] Request Headers:', {
+        app_id: this.apiKey ? '***' : 'MISSING',
+        app_secret: this.apiSecret ? '***' : 'MISSING',
+      });
+
       const response = await axios.post(
         'https://auth.dhan.co/app/generate-consent?client_id=' + this.apiKey,
         {},
@@ -80,9 +86,12 @@ class DhanOAuthManager {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
-          timeout: 10000,
+          timeout: 15000,
         }
       );
+
+      console.log('🔵 [DHAN] Response status:', response.status);
+      console.log('🔵 [DHAN] Response data:', response.data);
 
       const data: DhanConsentResponse = response.data;
       
@@ -96,11 +105,11 @@ class DhanOAuthManager {
         // Clean up old consent IDs (older than 10 minutes)
         const now = new Date();
         const keysToDelete: string[] = [];
-        for (const [key, value] of this.consentAppIds.entries()) {
+        this.consentAppIds.forEach((value, key) => {
           if (now.getTime() - value.createdAt.getTime() > 10 * 60 * 1000) {
             keysToDelete.push(key);
           }
-        }
+        });
         keysToDelete.forEach(key => this.consentAppIds.delete(key));
 
         // Build login URL for Step 2
@@ -115,13 +124,20 @@ class DhanOAuthManager {
         };
       }
 
-      console.error('🔴 [DHAN] Failed to generate consent');
+      console.error('🔴 [DHAN] Failed to generate consent - no consentAppId in response');
       console.error('🔴 [DHAN] Response:', data);
       return null;
     } catch (error: any) {
       console.error('🔴 [DHAN] Consent generation error:', error.message);
-      if (error.response?.data) {
-        console.error('🔴 [DHAN] Response:', error.response.data);
+      if (error.response?.status) {
+        console.error('🔴 [DHAN] HTTP Status:', error.response.status);
+        console.error('🔴 [DHAN] Response Data:', error.response.data);
+        console.error('🔴 [DHAN] Response Headers:', error.response.headers);
+      } else if (error.request) {
+        console.error('🔴 [DHAN] No response received - request error');
+        console.error('🔴 [DHAN] Request:', error.request);
+      } else {
+        console.error('🔴 [DHAN] Error details:', error);
       }
       return null;
     }
