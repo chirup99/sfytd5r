@@ -60,31 +60,39 @@
 
 ---
 
-## Record to Journal Button - Order Status Documentation (Dec 24, 2025 5:44 PM)
+## Record to Journal - COMPLETE Orders Only Filter - IMPLEMENTED (Dec 24, 2025 5:50 PM)
 
-[x] Verified order statuses being imported via "Record to Journal" button
-[x] Identified status mapping in broker orders section:
-    - COMPLETE: Green badge - indicates fully executed orders
-    - REJECTED: Red badge - orders rejected by broker
-    - CANCELLED: Yellow badge - user-cancelled orders
-    - PENDING: Blue badge - orders awaiting execution
-[x] Button displays all order statuses with color-coding for visual distinction
-[x] Button state: enabled when `brokerOrders.length > 0`, disabled otherwise
-[x] Function: `recordAllBrokerOrders()` - records all broker orders to trading journal
-[x] Workflow verified: Angel One auto-connected, live data streaming active
-[x] Fixed missing `dotenv` package - reinstalled and workflow restarted
+**User Request:** Import only COMPLETE orders, skip REJECTED, CANCELLED, and PENDING orders
+
+**Changes Applied:**
+[x] Modified `recordAllBrokerOrders()` function in client/src/pages/home.tsx
+[x] Added filter: `const completeOrders = brokerOrders.filter((order: any) => order.status === 'COMPLETE')`
+[x] Updated both `convertedTrades` and `heatmapTrades` to use `completeOrders` instead of `brokerOrders`
+[x] Added validation check: if no COMPLETE orders found, shows error toast
+[x] Updated console logging to report: `✅ Importing ${completeOrders.length} COMPLETE orders (skipped ${brokerOrders.length - completeOrders.length} non-complete orders)`
+[x] Updated toast message to display count of COMPLETE orders imported vs skipped
+[x] Workflow restarted and verified - code compiles without errors
+[x] Angel One auto-connected with live WebSocket data streaming
+
+**Import Logic:**
+- ✅ COMPLETE orders: Imported to personal trading journal
+- ✖️ REJECTED orders: Skipped
+- ✖️ CANCELLED orders: Skipped
+- ✖️ PENDING orders: Skipped
+- Toast shows: "Recorded X COMPLETE orders to today's summary (Y non-complete orders skipped)"
 
 ---
 
 ## Working Status Summary
 
-- ✅ Zerodha order status now displays correct values (COMPLETE, REJECTED, CANCELLED, PENDING)
-- ✅ Color-coded status badges for better visual feedback
+- ✅ Zerodha order status displays correct values (COMPLETE, REJECTED, CANCELLED, PENDING)
+- ✅ Color-coded status badges for visual feedback
 - ✅ Angel One broker auto-connecting with live WebSocket streaming
 - ✅ Real-time price data streaming (BANKNIFTY, SENSEX, GOLD)
 - ✅ Orders fetching from Zerodha API with correct status mapping
 - ✅ Profile persistence across page reloads
+- ✅ Record to Journal button now ONLY imports COMPLETE orders (successful orders only)
+- ✅ All non-COMPLETE orders (REJECTED, CANCELLED, PENDING) are automatically filtered and skipped
 - ✅ All services initialized successfully
-- ✅ Record to Journal button fully functional with all order statuses
 
-**Latest Status:** Dec 24, 2025, 5:44 PM - All systems operational, project fully migrated and verified.
+**Latest Status:** Dec 24, 2025, 5:50 PM - All systems operational. Record to Journal filter implemented successfully.

@@ -5670,14 +5670,27 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       return;
     }
 
+    // Filter to only COMPLETE orders (successful orders only)
+    const completeOrders = brokerOrders.filter((order: any) => order.status === 'COMPLETE');
+    
+    if (completeOrders.length === 0) {
+      toast({
+        title: "No Complete Orders",
+        description: "Only COMPLETE orders are imported. Skipping REJECTED, CANCELLED, and PENDING orders.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (isDemoMode) {
       console.log("🔄 Auto-switching to personal mode to record broker orders...");
       setIsDemoMode(false);
     }
 
-    console.log("📊 Converting broker orders to journal format...");
+    console.log("📊 Converting broker orders to journal format (COMPLETE orders only)...");
+    console.log(`✅ Importing ${completeOrders.length} COMPLETE orders (skipped ${brokerOrders.length - completeOrders.length} non-complete orders)`);
 
-    const convertedTrades = brokerOrders.map((trade: any) => ({
+    const convertedTrades = completeOrders.map((trade: any) => ({
       time: trade.time,
       order: trade.order,
       symbol: trade.symbol,
@@ -5696,7 +5709,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     const existingData = tradingDataByDate[todayKey] || {};
     const existingTrades = existingData.tradeHistory || [];
 
-    const heatmapTrades = brokerOrders.map((trade: any) => ({
+    const heatmapTrades = completeOrders.map((trade: any) => ({
       symbol: trade.symbol,
       type: trade.type || 'MIS',
       action: trade.order,
@@ -5730,7 +5743,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
     toast({
       title: "Orders Recorded",
-      description: `Recorded ${convertedTrades.length} broker orders to today's summary and personal tradebook`
+      description: `Recorded ${completeOrders.length} COMPLETE orders to today's summary and personal tradebook (${brokerOrders.length - completeOrders.length} non-complete orders skipped)`
     });
 
     console.log("✅ Broker orders recorded to journal summary and heatmap");
