@@ -62,6 +62,15 @@ dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 dark:border-slate-700
 [x] Auto-import orders working correctly
 [x] All services operational
 
-**Status: COMPLETE - Dark Mode Implementation Finished** 🎉
+**Status: COMPLETE - Dark Mode Implementation Finished**
 
 All broker buttons and connected status indicators now display perfectly in both light and dark themes with proper contrast and visibility.
+
+---
+
+## Import Progress Tracker
+
+[x] 1. Install the required packages
+[x] 2. Restart the workflow to see if the project is working
+[x] 3. Verify the project is working using the feedback tool
+[x] 4. Inform user the import is completed and they can start building, mark the import as completed using the complete_project_import tool
