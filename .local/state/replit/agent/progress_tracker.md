@@ -7,14 +7,16 @@
 [x] 3. Verify the project is working using the feedback tool  
 [x] 4. Inform user the import is completed and they can start building
 
-## Eye Icon Toggle for User ID - COMPLETED (Dec 24, 2025 3:09 PM)
+## Eye Icon Toggle for User ID & Funds - COMPLETED (Dec 24, 2025 3:11 PM)
 
-[x] Added `showUserId` state variable to manage visibility toggle
-[x] Modified Orders & Positions dialog header with eye icon button
-[x] Eye icon toggles between showing/hiding user ID (displays • characters when hidden)
-[x] Workflow restarted and verified working correctly
-[x] Angel One WebSocket connection established - live price data streaming
-[x] Browser console shows broker functions operational ✅
+[x] Added `showUserId` state variable to manage user ID visibility toggle
+[x] Added `showFunds` state variable to manage funds visibility toggle
+[x] Modified Orders & Positions dialog header with eye icon buttons for both sections
+[x] User ID: Eye icon toggles between showing/hiding user ID (displays • characters when hidden)
+[x] Funds: Eye icon toggles between showing/hiding available funds (displays *** when hidden)
+[x] Fixed JSX structure and closing tags
+[x] Workflow restarted and verified - NO compilation errors
+[x] Angel One WebSocket connection established - live price data streaming active ✅
 
 ## Zerodha Profile Fetch - COMPLETED
 
