@@ -5661,50 +5661,44 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
   // 🔴 NEW: Record all broker orders to journal (same flow as paper trading)
   const recordAllBrokerOrders = () => {
-    const completeOrders = brokerOrders.filter((trade: any) => String(trade.status || "").toUpperCase().trim() === "COMPLETE");
-    
-    if (completeOrders.length === 0) {
-      const rejectedCount = brokerOrders.filter((trade: any) => String(trade.status || "").toUpperCase().trim() === "REJECTED").length;
-      const cancelledCount = brokerOrders.filter((trade: any) => String(trade.status || "").toUpperCase().trim() === "CANCELLED").length;
+    if (brokerOrders.length === 0) {
       toast({
-        title: "No Complete Orders",
-        description: rejectedCount > 0 || cancelledCount > 0
-          ? `Skipped: ${rejectedCount} rejected, ${cancelledCount} cancelled. Only COMPLETE orders can be recorded.`
-          : "No broker orders to record",
+        title: "No Orders",
+        description: "No broker orders to record",
         variant: "destructive"
       });
       return;
     }
-    
+
     if (isDemoMode) {
       console.log("🔄 Auto-switching to personal mode to record broker orders...");
       setIsDemoMode(false);
     }
-    
+
     console.log("📊 Converting broker orders to journal format...");
-    
-    const convertedTrades = completeOrders.map((trade: any) => ({
+
+    const convertedTrades = brokerOrders.map((trade: any) => ({
       time: trade.time,
       order: trade.order,
       symbol: trade.symbol,
-      type: trade.type || "MIS",
+      type: trade.type || 'MIS',
       qty: trade.qty,
       price: trade.price,
-      pnl: trade.pnl || "-",
-      duration: trade.duration || "-"
+      pnl: trade.pnl || '-',
+      duration: trade.duration || '-'
     }));
-    
+
     const processedData = calculateSimplePnL(convertedTrades);
     setTradeHistoryData(processedData);
-    
+
     const today = new Date();
     const todayKey = formatDateKey(today);
     const existingData = tradingDataByDate[todayKey] || {};
     const existingTrades = existingData.tradeHistory || [];
-    
-    const heatmapTrades = completeOrders.map((trade: any) => ({
+
+    const heatmapTrades = brokerOrders.map((trade: any) => ({
       symbol: trade.symbol,
-      type: trade.type || "MIS",
+      type: trade.type || 'MIS',
       action: trade.order,
       quantity: trade.qty,
       price: trade.price,
@@ -5712,34 +5706,34 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       pnl: trade.pnl,
       duration: trade.duration
     }));
-    
+
     const mergedTrades = [...existingTrades, ...heatmapTrades];
     const updatedData = {
       ...existingData,
       tradeHistory: mergedTrades,
       profitLossAmount: mergedTrades.reduce((sum: number, trade: any) => {
-        if (trade.pnl && trade.pnl !== "-") {
-          const pnlStr = String(trade.pnl).replace("₹", "").replace("+", "");
+        if (trade.pnl && trade.pnl !== '-') {
+          const pnlStr = String(trade.pnl).replace('₹', '').replace('+', '');
           return sum + (parseFloat(pnlStr) || 0);
         }
         return sum;
       }, 0),
       totalTrades: mergedTrades.length
     };
-    
+
     setPersonalTradingDataByDate((prev: any) => ({...prev, [todayKey]: updatedData}));
     localStorage.setItem("personalTradingDataByDate", JSON.stringify({...personalTradingDataByDate, [todayKey]: updatedData}));
-    
+
     setHeatmapSelectedDate(todayKey);
     setSelectedDate(today);
     setShowOrderModal(false);
-    
+
     toast({
       title: "Orders Recorded",
-      description: `Recorded ${completeOrders.length} COMPLETE orders to today summary`
+      description: `Recorded ${convertedTrades.length} broker orders to today's summary and personal tradebook`
     });
-    
-    console.log("✅ COMPLETE orders recorded to journal summary and heatmap");
+
+    console.log("✅ Broker orders recorded to journal summary and heatmap");
     setPersonalHeatmapRevision(prev => prev + 1);
   };
 
@@ -5750,12 +5744,35 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     if (brokerOrders.length > previousBrokerOrdersLengthRef.current && brokerOrders.length > 0) {
       console.log(`🤖 [AUTO-TAP] Detected ${brokerOrders.length} orders (was ${previousBrokerOrdersLengthRef.current}), auto-recording...`);
       
+      // Schedule the auto-record for next tick to ensure state is updated
       setTimeout(() => {
         recordAllBrokerOrders();
       }, 500);
     }
+    
+    // Update the ref with current length
     previousBrokerOrdersLengthRef.current = brokerOrders.length;
   }, [brokerOrders]);
+  const exitAllPaperPositions = () => {
+    const openPositions = paperPositions.filter(p => p.isOpen);
+
+    if (openPositions.length === 0) {
+      toast({
+        title: "No Positions",
+        description: "No open positions to exit",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    let totalPnl = 0;
+    let newCapital = paperTradingCapital;
+    const newHistoryEntries: PaperTrade[] = [];
+    const exitTime = new Date().toLocaleTimeString();
+
+    // Close all positions and calculate total P&L
+    const updatedPositions = paperPositions.map(p => {
+      if (!p.isOpen) return p;
 
       // Calculate P&L for this position
       const pnl = (p.currentPrice - p.entryPrice) * p.quantity;
