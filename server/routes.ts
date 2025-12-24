@@ -70,6 +70,7 @@ import { nlpDataRouter } from './nlp-data-router';
 import { tradingChallengeService } from './trading-challenge-service';
 import { upstoxOAuthManager } from './upstox-oauth';
 import { angelOneOAuthManager } from './angel-one-oauth';
+import { dhanOAuthManager } from './dhan-oauth';
 
 // 🔶 Angel One Stock Token Mappings for historical data
 const ANGEL_ONE_STOCK_TOKENS: { [key: string]: { token: string; exchange: string; tradingSymbol: string } } = {
@@ -20648,6 +20649,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error('🔴 [ANGEL ONE] Error getting status:', error.message);
+      res.status(500).json({ success: false, error: 'Failed to get status' });
+    }
+  });
+
+  // ========================================
+  // DHAN OAUTH IMPLEMENTATION
+  // ========================================
+
+  // Get authorization URL for Dhan OAuth flow
+  app.get('/api/broker/dhan/login-url', (req, res) => {
+    try {
+      const { url, requestToken } = dhanOAuthManager.generateAuthorizationUrl();
+      res.json({ loginUrl: url, requestToken });
+    } catch (error: any) {
+      console.error('🔴 [DHAN] Error generating login URL:', error.message);
+      res.status(500).json({ error: 'Failed to generate authorization URL' });
+    }
+  });
+
+  // Handle Dhan OAuth callback
+  app.get('/api/broker/dhan/callback', async (req, res) => {
+    try {
+      const code = req.query.code as string;
+      const state = req.query.state as string;
+
+      if (!code || !state) {
+        console.error('🔴 [DHAN] Missing code or state in callback');
+        return res.status(400).json({ error: 'Missing authorization code or state' });
+      }
+
+      console.log('🔵 [DHAN] Processing OAuth callback...');
+
+      const success = await dhanOAuthManager.exchangeCodeForToken(code, state);
+
+      if (success) {
+        console.log('✅ [DHAN] Successfully authenticated');
+        res.send(`
+          <html>
+            <head>
+              <title>Dhan Connected</title>
+              <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
+                .success { color: #4CAF50; font-size: 24px; }
+              </style>
+            </head>
+            <body>
+              <div class="success">✅ Dhan Connected Successfully!</div>
+              <p>You can now close this window and return to the trading app.</p>
+              <script>
+                window.setTimeout(() => {
+                  window.close();
+                }, 2500);
+              </script>
+            </body>
+          </html>
+        `);
+      } else {
+        res.send(`
+          <html>
+            <head>
+              <title>Dhan Connection Failed</title>
+              <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
+                .error { color: #f44336; font-size: 20px; }
+              </style>
+            </head>
+            <body>
+              <div class="error">❌ Dhan Connection Failed</div>
+              <p>Please try again or contact support if the issue persists.</p>
+              <script>
+                window.setTimeout(() => {
+                  window.close();
+                }, 3000);
+              </script>
+            </body>
+          </html>
+        `);
+      }
+    } catch (error: any) {
+      console.error('🔴 [DHAN] Callback error:', error.message);
+      res.status(500).json({ error: 'OAuth callback failed' });
+    }
+  });
+
+  // Get Dhan connection status
+  app.get('/api/broker/dhan/status', (req, res) => {
+    try {
+      const status = dhanOAuthManager.getStatus();
+      res.json({
+        success: true,
+        ...status,
+      });
+    } catch (error: any) {
+      console.error('🔴 [DHAN] Error getting status:', error.message);
       res.status(500).json({ success: false, error: 'Failed to get status' });
     }
   });

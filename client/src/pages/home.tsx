@@ -4055,6 +4055,55 @@ ${
   };
 
 
+  const handleDhanConnect = async () => {
+    try {
+      console.log('🔵 Starting Dhan OAuth flow...');
+      const response = await fetch('/api/broker/dhan/login-url');
+      const data = await response.json();
+      
+      if (data.error) {
+        alert('Setup Error:\n' + data.message);
+        return;
+      }
+      
+      const { loginUrl } = data;
+      console.log('🔗 Dhan login URL:', loginUrl);
+      
+      const popup = window.open(
+        loginUrl,
+        'dhan_oauth',
+        'width=600,height=800,resizable=yes,scrollbars=yes'
+      );
+      
+      if (!popup) {
+        console.warn('❌ Popup blocked');
+        alert('Popup blocked. Please enable popups and try again.');
+        return;
+      }
+      
+      console.log('✅ Popup opened, waiting for OAuth callback...');
+      
+      let checkCount = 0;
+      const monitorPopup = setInterval(() => {
+        checkCount++;
+        if (popup.closed) {
+          clearInterval(monitorPopup);
+          console.log('⚠️ Dhan popup closed');
+          return;
+        }
+        if (checkCount > 300) {
+          clearInterval(monitorPopup);
+          popup.close();
+          console.log('⚠️ Dhan popup timeout');
+        }
+      }, 1000);
+      
+    } catch (error) {
+      console.error('❌ Dhan error:', error);
+      alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect'));
+    }
+  };
+
   const handleRevokeZerodha = () => {
     localStorage.removeItem("zerodha_token"); document.cookie = "zerodha_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     setZerodhaAccessToken(null);
