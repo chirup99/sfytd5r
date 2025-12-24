@@ -19410,7 +19410,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                           </td>
                         </tr>
                       ) : (
-                        brokerOrders.map((trade, index) => (
+                        [...brokerOrders].sort((a, b) => { const statusOrder = { "COMPLETE": 0, "PENDING": 1, "REJECTED": 2, "CANCELLED": 2 }; return (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3); }).map((trade, index) => (
                           <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td className="px-2 py-2 font-medium">{trade.time}</td>
                             <td className="px-2 py-2">
@@ -19477,7 +19477,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                           </td>
                         </tr>
                       ) : (
-                        brokerPositions.map((pos, index) => (
+                        [...brokerPositions].sort((a, b) => { const statusOrder = { "Open": 0, "Closed": 1 }; return (statusOrder[a.status] || 0) - (statusOrder[b.status] || 0); }).map((pos, index) => (
                           <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td className="px-2 py-2 font-medium">{pos.symbol}</td>
                             <td className="px-2 py-2">₹{pos.entryPrice || pos.entry_price}</td>
