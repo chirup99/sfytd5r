@@ -1,0 +1,174 @@
+Generate Token
+Generate token helps to obtain the token after the login flow. After successful login, you get a JWT token and a Refresh token. You can use JWT token to make any transaction.
+
+Generate Token Request
+{
+"refreshToken":"eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE1OTk0OD..."
+}
+Generate Token Response
+{
+"status":true,
+"message":"SUCCESS",
+"errorcode":"",
+"data":{
+"jwtToken":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIi...",
+"refreshToken":"eyJhbGciOiJIUzUxMiJ9.e...",
+"feedToken":"eyJhbGciOiJIUzUxMiJ9.eyJ1c2Vy…"
+  }
+}
+
+var axios = require('axios');
+var data = JSON.stringify({
+    "refreshToken":"REFRESH_TOKEN"
+});
+
+var config = {
+  method: 'post',
+  url: 'https://apiconnect.angelone.in/
+  rest/auth/angelbroking/jwt/
+  v1/generateTokens',
+
+  headers: {
+    'Authorization': 'Bearer AUTHORIZATION_TOKEN',
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-UserType': 'USER',
+    'X-SourceID': 'WEB',
+    'X-ClientLocalIP': 'CLIENT_LOCAL_IP',
+    'X-ClientPublicIP': 'CLIENT_PUBLIC_IP',
+    'X-MACAddress': 'MAC_ADDRESS',
+    'X-PrivateKey': 'API_KEY'
+  }
+  data : data
+};
+
+axios(config)
+.then(function (response) {
+  console.log(JSON.stringify(response.data));
+})
+.catch(function (error) {
+  console.log(error);
+});
+Get Profile
+This allows to fetch the complete information of the user who is logged in.
+
+Get Profile Response
+{
+"status":true,
+"message":"SUCCESS",
+"errorcode":"",
+"data":{
+"clientcode":"YOUR_CLIENT_CODE",
+"name":"YOUR_NAME",
+"email":"",
+"mobileno":"",
+"exchanges":"[ "NSE", "BSE", "MCX", "CDS", "NCDEX", "NFO" ]",
+"products":"[ "DELIVERY", "INTRADAY", "MARGIN"]",
+"lastlogintime":"",
+"brokerid":"B2C",
+  }
+}
+
+var axios = require('axios');
+
+var config = {
+  method: 'get',
+  url: 'https://apiconnect.angelone.in/
+  rest/secure/angelbroking/user/
+  v1/getProfile',
+
+  headers : {
+    'Authorization': 'Bearer AUTHORIZATION_TOKEN',
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-UserType': 'USER',
+    'X-SourceID': 'WEB',
+    'X-ClientLocalIP': 'CLIENT_LOCAL_IP',
+    'X-ClientPublicIP': 'CLIENT_PUBLIC_IP',
+    'X-MACAddress': 'MAC_ADDRESS',
+    'X-PrivateKey': 'API_KEY'
+  }
+};
+
+axios(config)
+.then(function (response) {
+  console.log(JSON.stringify(response.data));
+})
+.catch(function (error) {
+  console.log(error);
+});
+Funds and Margins
+The GET Request to RMS returns fund, cash and margin information of the user for equity and commodity segments.
+
+Request Type	APIs	Endpoint	Description
+GET	Get RMS Limit	https://apiconnect.angelone.in/rest/secure/angelbroking/user/v1/getRMS	To retrieve RMS limit
+RMS (Risk Management System)
+The RMS Limit defines margin rules to ensure that traders don't default on payments & delivery of their orders.
+
+Get RMS Limit Response
+{
+"status":true,
+"message":"SUCCESS",
+"errorcode":"",
+"data":{
+"net":"9999999999999",
+"availablecash":"9999999999999",
+"availableintradaypayin":"0",
+"availablelimitmargin":"0",
+"collateral":"0",
+"m2munrealized":"0",
+"m2mrealized":"0",
+"utiliseddebits":"0",
+"utilisedspan":"0",
+"utilisedoptionpremium":"0",
+"utilisedholdingsales":"0",
+"utilisedexposure":"0",
+"utilisedturnover":"0",
+"utilisedpayout":"0",
+ }
+}
+
+var axios = require('axios');
+
+var config = {
+  method: 'get',
+  url: 'https://apiconnect.angelone.in/
+  rest/secure/angelbroking/user/
+  v1/getRMS',
+
+  headers : {
+    'Authorization': 'Bearer AUTHORIZATION_TOKEN',
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-UserType': 'USER',
+    'X-SourceID': 'WEB',
+    'X-ClientLocalIP': 'CLIENT_LOCAL_IP',
+    'X-ClientPublicIP': 'CLIENT_PUBLIC_IP',
+    'X-MACAddress': 'MAC_ADDRESS',
+    'X-PrivateKey': 'API_KEY'
+  }
+};
+
+axios(config)
+.then(function (response) {
+  console.log(JSON.stringify(response.data));
+})
+.catch(function (error) {
+  console.log(error);
+});
+Logout
+The API session is destroyed by this call and it invalidates the access_token. The user will be sent through a new login flow after this. User is not logged out of the official SmartAPI web.
+
+Request Type	APIs	Endpoint	Description
+POST	Logout	https://apiconnect.angelone.in/rest/secure/angelbroking/user/v1/logout	To logout
+Logout Request
+{
+     "clientcode": "CLIENT_CODE"
+}
+Logout Response
+{
+     "status": true,
+     "message": "SUCCESS",
+     "errorcode": "",
+     "data": ""
+}
