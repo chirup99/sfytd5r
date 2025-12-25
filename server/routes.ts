@@ -20946,16 +20946,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // SmartAPI Configuration Endpoint
   app.get('/api/smartapi/config', (_req, res) => {
+
+  // SmartAPI Configuration Endpoint
+  app.get('/api/smartapi/config', (_req, res) => {
     try {
       const config = smartAPIManager.getConfiguration();
       smartAPIManager.logConfiguration();
-      res.json({
-        success: true,
-        config: config,
-        message: 'SmartAPI OAuth Configuration - Use these values in SmartAPI Dashboard'
-      });
+      res.json({ success: true, config: config, message: 'SmartAPI OAuth Configuration' });
     } catch (error: any) {
-      console.error('🔴 [SMART API] Config error:', error.message);
-      res.status(500).json({ success: false, error: 'Failed to get config' });
+      res.status(500).json({ success: false, error: error.message });
     }
   });
+
+
+  // SmartAPI Configuration Endpoint
+  app.get('/api/smartapi/config', (_req, res) => {
+    try {
+      const config = smartAPIManager.getConfiguration();
+      res.json({ success: true, config });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  return httpServer;
+}
