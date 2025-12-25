@@ -20638,26 +20638,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Handle Angel One OAuth callback (request_token flow)
   app.get('/api/angel-one/callback', async (req, res) => {
+    console.log('🔶 [ANGEL ONE CALLBACK] Received request - Query params:', req.query);
+    
     try {
       const requestToken = req.query.request_token as string;
 
       if (!requestToken) {
         console.error('🔴 [ANGEL ONE] Missing request_token in callback');
-        return res.status(400).json({ error: 'Missing request token in callback' });
+        const errorMsg = 'No request token received';
+        const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>console.log('Angel One callback error: No request_token');var e="${errorMsg.replace(/"/g, '\\"')}";if(window.opener){console.log('Posting error to opener');window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");setTimeout(function(){window.close()},1000);}else{window.location.href="/?angel_one_error="+encodeURIComponent(e);}</script></head><body><p>Error: ${errorMsg}</p></body></html>`;
+        res.type('text/html');
+        res.status(200);
+        res.send(errorHtml);
+        return;
       }
 
-      console.log('🔶 [ANGEL ONE] Processing callback with request token...');
+      console.log('🔶 [ANGEL ONE] Processing callback with request token:', requestToken.substring(0, 8) + '...');
 
       const success = await angelOneOAuthManager.exchangeTokenForJWT(requestToken);
+      console.log('🔶 [ANGEL ONE] Exchange result:', success);
 
       if (success) {
         console.log('✅ [ANGEL ONE] Successfully authenticated');
         const accessToken = angelOneOAuthManager.getAccessToken();
+        console.log('🔶 [ANGEL ONE] Retrieved token:', accessToken ? accessToken.substring(0, 30) + '...' : 'NULL');
         
         if (!accessToken) {
           console.error('❌ [ANGEL ONE] Token is null after exchange - state issue');
           const errorMsg = 'Token retrieval failed after authentication';
-          const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>var e="${errorMsg.replace(/"/g, '\\"')}";if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");window.close();}else{window.location.href="/?angel_one_error="+encodeURIComponent(e);}</script></head><body><p>Error</p></body></html>`;
+          const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>console.log('Angel One token is null');var e="${errorMsg.replace(/"/g, '\\"')}";if(window.opener){console.log('Posting error to opener');window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");setTimeout(function(){window.close()},1000);}else{window.location.href="/?angel_one_error="+encodeURIComponent(e);}</script></head><body><p>Error: ${errorMsg}</p></body></html>`;
           res.type('text/html');
           res.status(200);
           res.send(errorHtml);
@@ -20665,21 +20674,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         console.log('📤 [ANGEL ONE] Sending token to popup:', accessToken.substring(0, 30) + '...');
-        const callbackHtml = '<!DOCTYPE html><html><head><title>Connected</title><script>var t="' + accessToken + '";if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_TOKEN",token:t},"*");setTimeout(function(){window.close()},500);}else{window.location.href="/?angel_one_token="+encodeURIComponent(t);}</script></head><body><p>Connected...</p></body></html>';
+        const callbackHtml = '<!DOCTYPE html><html><head><title>Connected</title><script>console.log("Angel One callback HTML executing"); var t="' + accessToken + '"; console.log("Token length: " + t.length); if(window.opener){console.log("window.opener exists, posting message"); window.opener.postMessage({type:"ANGEL_ONE_TOKEN",token:t},"*"); console.log("Message posted, closing in 500ms"); setTimeout(function(){window.close()},500);}else{console.log("No opener, redirecting"); window.location.href="/?angel_one_token="+encodeURIComponent(t);}</script></head><body><p>Authenticating...</p></body></html>';
         res.type('text/html');
         res.status(200);
         res.send(callbackHtml);
       } else {
         const errorMsg = 'Angel One authentication failed';
         console.error('❌ [ANGEL ONE] ' + errorMsg);
-        const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>var e="${errorMsg.replace(/"/g, '\\"')}";if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");window.close();}else{window.location.href="/?angel_one_error="+encodeURIComponent(e);}</script></head><body><p>Error</p></body></html>`;
+        const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>console.log('Angel One auth failed');var e="${errorMsg.replace(/"/g, '\\"')}";if(window.opener){console.log('Posting error to opener');window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");setTimeout(function(){window.close()},1000);}else{window.location.href="/?angel_one_error="+encodeURIComponent(e);}</script></head><body><p>Error: ${errorMsg}</p></body></html>`;
         res.type('text/html');
         res.status(200);
         res.send(errorHtml);
       }
     } catch (error: any) {
       console.error('🔴 [ANGEL ONE] Callback error:', error.message);
-      res.status(500).json({ error: 'OAuth callback failed' });
+      const errorMsg = error.message || 'OAuth callback failed';
+      const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>console.log('Angel One callback exception: ${errorMsg}');var e="${errorMsg.replace(/"/g, '\\"')}";if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");setTimeout(function(){window.close()},1000);}else{window.location.href="/?angel_one_error="+encodeURIComponent(e);}</script></head><body><p>Error</p></body></html>`;
+      res.type('text/html');
+      res.status(200);
+      res.send(errorHtml);
     }
   });
 

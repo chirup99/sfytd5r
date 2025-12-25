@@ -72,10 +72,12 @@ class AngelOneOAuthManager {
       }
     }
 
-    // Build login URL matching Angel One's expected format
-    // Based on Sensibull's working implementation
+    // Build login URL with properly encoded redirect parameter
+    const redirectUrl = `${this.redirectUri}?request_token=${encodeURIComponent(requestToken)}`;
+    console.log(`🔶 [ANGEL ONE] Redirect URL: ${redirectUrl}`);
+    
     const params = new URLSearchParams({
-      redirect: `${this.redirectUri}?request_token=${requestToken}`,
+      redirect: redirectUrl,
       ApplicationName: 'trading-app',
       OS: 'Web',
       AppID: this.appId,
@@ -85,6 +87,7 @@ class AngelOneOAuthManager {
     const authUrl = `https://www.angelone.in/login/?${params.toString()}`;
     
     console.log(`🔶 [ANGEL ONE] Generated login URL with request token: ${requestToken.substring(0, 8)}...`);
+    console.log(`🔶 [ANGEL ONE] Full auth URL: ${authUrl}`);
     return { url: authUrl, requestToken };
   }
 
