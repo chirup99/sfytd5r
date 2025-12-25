@@ -27,6 +27,46 @@ class AngelOneOAuthManager {
     console.log(`   Client Code: ${this.clientCode}`);
   }
 
+  // Get authorization URL for redirect-based login
+  getAuthorizationUrl(state?: string): string {
+    const baseUrl = "https://smartapi.angelone.in/publisher-login";
+    const stateVar = state || "live";
+    return `${baseUrl}?api_key=${this.apiKey}&state=${stateVar}`;
+  }
+
+  // Handle callback from Angel One
+  async handleCallback(authToken: string, feedToken: string): Promise<{
+    success: boolean;
+    token?: string;
+    feedToken?: string;
+    clientCode?: string;
+    message?: string;
+  }> {
+    try {
+      console.log("🔶 [ANGEL ONE] Handling OAuth callback...");
+      
+      this.session.accessToken = authToken;
+      this.session.clientCode = this.clientCode; // Use default if not provided by callback
+      this.session.isAuthenticated = true;
+      this.session.userName = this.clientCode;
+
+      console.log("✅ [ANGEL ONE] Successfully authenticated via callback!");
+
+      return {
+        success: true,
+        token: authToken,
+        feedToken: feedToken,
+        clientCode: this.clientCode,
+      };
+    } catch (error: any) {
+      console.error("🔴 [ANGEL ONE] Callback handling error:", error.message);
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
+  }
+
   // Authenticate with Angel One using credentials and TOTP
   async authenticateWithTotp(totp: string, password: string): Promise<{ 
     success: boolean; 
