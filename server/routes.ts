@@ -4300,14 +4300,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/angelone/auth-url", (req, res) => {
     try {
       const state = (req.query.state as string) || "live";
-      // Build redirect URI from request origin
-      const protocol = req.protocol || "https";
-      const host = req.get("host") || "localhost:5000";
-      const redirectUri = `${protocol}://${host}/api/broker/angelone/callback`;
-      const authUrl = angelOneOAuthManager.getAuthorizationUrl(state, redirectUri);
+      // Redirect URI is pre-configured in Angel One MyApps - do NOT pass as parameter
+      const authUrl = angelOneOAuthManager.getAuthorizationUrl(state);
       console.log("🔶 [ANGEL ONE] Auth URL generated:");
-      console.log(`   Redirect URI: ${redirectUri}`);
       console.log(`   Auth URL: ${authUrl}`);
+      console.log(`   Note: Redirect URI is pre-configured in Angel One MyApps`);
       res.json({ success: true, authUrl });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
