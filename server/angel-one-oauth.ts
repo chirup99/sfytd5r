@@ -57,7 +57,7 @@ class AngelOneOAuthManager {
     console.log(`🔶 [ANGEL ONE] App ID: ${this.appId}`);
   }
 
-  // Generate login URL using request_token flow (like Zerodha)
+  // Generate login URL using request_token flow (like Sensibull)
   generateAuthorizationUrl(): { url: string; requestToken: string } {
     const requestToken = crypto.randomBytes(32).toString('hex');
     
@@ -72,22 +72,24 @@ class AngelOneOAuthManager {
       }
     }
 
-    // Build login URL with properly encoded redirect parameter
+    // Build login URL with properly encoded redirect parameter (Sensibull-style)
     const redirectUrl = `${this.redirectUri}?request_token=${encodeURIComponent(requestToken)}`;
     console.log(`🔶 [ANGEL ONE] Redirect URL: ${redirectUrl}`);
     
+    // Use URL parameters matching Sensibull's successful implementation
     const params = new URLSearchParams({
       redirect: redirectUrl,
-      ApplicationName: 'trading-app',
-      OS: 'Web',
+      ApplicationName: process.env.ANGELONE_APP_NAME || 'web-app',
+      OS: 'Windows',
       AppID: this.appId,
+      app: 'web', // Additional parameter for compatibility
     });
 
     // Use the correct Angel One login endpoint
     const authUrl = `https://www.angelone.in/login/?${params.toString()}`;
     
     console.log(`🔶 [ANGEL ONE] Generated login URL with request token: ${requestToken.substring(0, 8)}...`);
-    console.log(`🔶 [ANGEL ONE] Full auth URL: ${authUrl}`);
+    console.log(`🔶 [ANGEL ONE] Full auth URL (sanitized): https://www.angelone.in/login/?redirect=[...]&ApplicationName=${params.get('ApplicationName')}&OS=${params.get('OS')}&AppID=${params.get('AppID')}&app=${params.get('app')}`);
     return { url: authUrl, requestToken };
   }
 
