@@ -71,6 +71,7 @@ import { tradingChallengeService } from './trading-challenge-service';
 import { upstoxOAuthManager } from './upstox-oauth';
 import { angelOneOAuthManager } from './angel-one-oauth';
 import { dhanOAuthManager } from './dhan-oauth';
+import { smartAPIManager } from './smartapi-oauth';
 
 // 🔶 Angel One Stock Token Mappings for historical data
 const ANGEL_ONE_STOCK_TOKENS: { [key: string]: { token: string; exchange: string; tradingSymbol: string } } = {
@@ -20942,3 +20943,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   return httpServer;
 }
+
+  // SmartAPI Configuration Endpoint
+  app.get('/api/smartapi/config', (_req, res) => {
+    try {
+      const config = smartAPIManager.getConfiguration();
+      smartAPIManager.logConfiguration();
+      res.json({
+        success: true,
+        config: config,
+        message: 'SmartAPI OAuth Configuration - Use these values in SmartAPI Dashboard'
+      });
+    } catch (error: any) {
+      console.error('🔴 [SMART API] Config error:', error.message);
+      res.status(500).json({ success: false, error: 'Failed to get config' });
+    }
+  });
