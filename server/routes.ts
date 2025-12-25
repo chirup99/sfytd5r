@@ -20628,15 +20628,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get authorization URL for Angel One OAuth flow
   app.get('/api/angel-one/auth-url', (req, res) => {
     try {
-      const { url, state } = angelOneOAuthManager.generateAuthorizationUrl();
-      res.json({ authUrl: url, state });
+      const loginUrl = angelOneOAuthManager.getLoginPageUrl();
+      res.json({ authUrl: loginUrl });
     } catch (error: any) {
       console.error('🔴 [ANGEL ONE] Error generating auth URL:', error.message);
       res.status(500).json({ error: 'Failed to generate authorization URL' });
     }
   });
 
-  // Handle Angel One OAuth callback (request_token flow)
+  // Poll for Angel One authentication status (after user logs in)
+  app.get('/api/angel-one/poll-auth', async (req, res) => {
+    console.log('🔶 [ANGEL ONE POLL] Checking authentication status...');
+    
+    try {
+      const status = angelOneOAuthManager.getStatus();
+      
+      if (status.authenticated && status.accessToken) {
+        console.log('✅ [ANGEL ONE POLL] User is authenticated, sending token to popup');
+        const token = status.accessToken;
+        const escapedToken = token.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+        
+        const successHtml = `<!DOCTYPE html><html><head><title>Connected</title><script>
+console.log('🔶 Angel One authenticated, sending token');
+var t="${escapedToken}";
+if(window.opener && window.opener !== window){
+  console.log('Sending token to parent window');
+  try {
+    window.opener.postMessage({type:"ANGEL_ONE_TOKEN",token:t},"*");
+    console.log('Token sent, closing popup');
+    setTimeout(function(){window.close()},300);
+  } catch(err) {
+    console.error('Error:', err);
+    window.close();
+  }
+} else {
+  console.log('No opener, redirecting to home with token');
+  window.location.href="/?angel_one_token="+encodeURIComponent(t);
+}
+</script></head><body><p>Authenticated! Closing...</p></body></html>`;
+        res.type('text/html').send(successHtml);
+      } else {
+        console.log('⏳ [ANGEL ONE POLL] Not yet authenticated, redirecting to login');
+        // Redirect to Angel One login so user can log in
+        res.redirect(`https://www.angelone.in/login/?ApplicationName=${encodeURIComponent(process.env.ANGELONE_APP_NAME || 'web-app')}&OS=Windows&AppID=${encodeURIComponent(process.env.ANGELONE_APP_ID || 'web-app')}&app=web`);
+      }
+    } catch (error: any) {
+      console.error('🔴 [ANGEL ONE POLL] Error:', error.message);
+      const errorMsg = 'Authentication check failed';
+      const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>
+var e="${errorMsg.replace(/"/g, '\\"')}";
+if(window.opener){
+  window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");
+  setTimeout(function(){window.close()},1000);
+} else {
+  window.location.href="/?angel_one_error="+encodeURIComponent(e);
+}
+</script></head><body><p>Error: ${errorMsg}</p></body></html>`;
+      res.type('text/html').send(errorHtml);
+    }
+  });
+
+  // Handle Angel One OAuth callback (request_token flow) - kept for legacy
   app.get('/api/angel-one/callback', async (req, res) => {
     console.log('🔶 [ANGEL ONE CALLBACK] Received request - Query params:', req.query);
     
