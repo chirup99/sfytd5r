@@ -4100,9 +4100,21 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           const status = await statusResponse.json();
           
           if (status.authenticated && status.accessToken) {
-            console.log('✅ [ANGEL ONE] Authenticated - closing popup');
+            console.log('✅ [ANGEL ONE] Authenticated! Token received:', status.accessToken.substring(0, 20) + '...');
             clearInterval(pollAuthStatus);
+            
+            // STORE TOKEN AND UPDATE STATE
+            localStorage.setItem('angel_one_token', status.accessToken);
+            localStorage.setItem('angel_one_client_code', status.clientCode || 'P176266');
+            document.cookie = `angel_one_token=${status.accessToken}; path=/; max-age=86400`;
+            
+            setAngelOneAccessToken(status.accessToken);
+            setAngelOneIsConnected(true);
+            
+            console.log('💾 Stored Angel One token in localStorage and cookies');
+            
             popup.close();
+            setConnectDialogOpen(false);
             return;
           }
         } catch (err) {

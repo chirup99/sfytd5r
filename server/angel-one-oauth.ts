@@ -275,7 +275,7 @@ class AngelOneOAuthManager {
       OS: "Windows",
       AppID: this.appId,
       app: "web",
-      redirect: `${baseUrl}/api/angel-one/poll-auth`,
+      redirect: `${baseUrl}/api/angel-one/callback`,
     });
     
     return `https://www.angelone.in/login/?${params.toString()}`;
