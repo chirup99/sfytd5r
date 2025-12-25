@@ -4358,50 +4358,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log('🔑 [STARTUP] Checking for valid token in database...');
   try {
     const apiStatus = await storage.getApiStatus();
-  app.get("/api/broker/angelone/callback", async (req, res) => {
-    try {
-      const { auth_token, feed_token } = req.query;
-      
-      if (!auth_token) {
-        return res.send(`
-          <script>
-            window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "No auth token received" }, "*");
-            window.close();
-          </script>
-        `);
-      }
-
-      const result = await angelOneOAuthManager.handleCallback(auth_token as string, feed_token as string);
-
-      if (result.success) {
-        res.send(`
-          <script>
-            window.opener.postMessage({ 
-              type: "ANGELONE_AUTH_SUCCESS", 
-              token: "${result.token}",
-              feedToken: "${result.feedToken}",
-              clientCode: "${result.clientCode}"
-            }, "*");
-            window.close();
-          </script>
-        `);
-      } else {
-        res.send(`
-          <script>
-            window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "${result.message}" }, "*");
-            window.close();
-          </script>
-        `);
-      }
-    } catch (error: any) {
-      res.status(500).send(`
-        <script>
-          window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "${error.message}" }, "*");
-          window.close();
-        </script>
-      `);
-    }
-  });
     if (apiStatus?.accessToken && apiStatus?.tokenExpiry) {
       const tokenExpiryDate = new Date(apiStatus.tokenExpiry);
       const now = new Date();
