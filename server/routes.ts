@@ -20663,15 +20663,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // STEP 3: Fetch trades
+  // Get Angel One status
+  app.get('/api/broker/angel-one/status', (req, res) => {
+    try {
+      const session = angelOneOAuthManager.getSession();
+      res.json({
+        success: true,
+        authenticated: session.authenticated,
+        accessToken: session.accessToken ? 'set' : null,
+        clientCode: session.clientCode,
+        userName: session.userName
+      });
+    } catch (error) {
+      console.error('🔴 [Angel One] Status error:', error);
+      res.status(500).json({ success: false });
+    }
+  });
+
+  // Disconnect from Angel One
+  app.post('/api/broker/angel-one/disconnect', (req, res) => {
+    try {
+      angelOneOAuthManager.disconnect();
+      res.json({ success: true, message: 'Disconnected from Angel One' });
+    } catch (error: any) {
+      console.error('🔴 [Angel One] Disconnect error:', error.message);
+      res.status(500).json({ success: false, error: 'Failed to disconnect' });
+    }
+  });
+
+  // Fetch trades from Angel One
   app.get('/api/broker/angel-one/trades', async (req, res) => {
     try {
-      const accessToken = angelOneOAuthManager.getAccessToken();
-      if (!accessToken) return res.status(401).json({ error: 'Unauthorized' });
+      const session = angelOneOAuthManager.getSession();
+      if (!session.authenticated) return res.status(401).json({ error: 'Unauthorized' });
 
       const response = await axios.get('https://api.angelone.in/rest/secure/angelbroking/order/v1/getOrderList', {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${session.accessToken}`,
           'Accept': 'application/json',
           'X-UserType': 'USER',
           'X-SourceID': 'WEB',
@@ -20696,16 +20724,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // STEP 4: Fetch profile
+  // Fetch profile from Angel One
   app.get('/api/broker/angel-one/profile', async (req, res) => {
     try {
-      const status = angelOneOAuthManager.getStatus();
-      if (!status.authenticated) return res.status(401).json({ error: 'Unauthorized' });
+      const session = angelOneOAuthManager.getSession();
+      if (!session.authenticated) return res.status(401).json({ error: 'Unauthorized' });
 
       res.json({
         profile: {
-          userId: status.clientId,
-          userName: status.userName || status.clientId,
+          userId: session.clientCode,
+          userName: session.userName || session.clientCode,
           broker: 'Angel One'
         },
         success: true
