@@ -71,7 +71,6 @@ import { tradingChallengeService } from './trading-challenge-service';
 import { upstoxOAuthManager } from './upstox-oauth';
 import { angelOneOAuthManager } from './angel-one-oauth';
 import { dhanOAuthManager } from './dhan-oauth';
-import { smartAPIManager } from './smartapi-oauth';
 
 // 🔶 Angel One Stock Token Mappings for historical data
 const ANGEL_ONE_STOCK_TOKENS: { [key: string]: { token: string; exchange: string; tradingSymbol: string } } = {
@@ -20938,34 +20937,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('🔴 [ANGEL ONE] Error disconnecting:', error.message);
       res.status(500).json({ success: false, error: 'Failed to disconnect' });
-    }
-  });
-
-  return httpServer;
-}
-
-  // SmartAPI Configuration Endpoint
-  app.get('/api/smartapi/config', (_req, res) => {
-
-  // SmartAPI Configuration Endpoint
-  app.get('/api/smartapi/config', (_req, res) => {
-    try {
-      const config = smartAPIManager.getConfiguration();
-      smartAPIManager.logConfiguration();
-      res.json({ success: true, config: config, message: 'SmartAPI OAuth Configuration' });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
-    }
-  });
-
-
-  // SmartAPI Configuration Endpoint
-  app.get('/api/smartapi/config', (_req, res) => {
-    try {
-      const config = smartAPIManager.getConfiguration();
-      res.json({ success: true, config });
-    } catch (error: any) {
-      res.status(500).json({ success: false, error: error.message });
     }
   });
 
