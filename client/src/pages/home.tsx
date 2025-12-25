@@ -4037,17 +4037,47 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       
       console.log('✅ Upstox popup opened, waiting for OAuth callback...');
       
-      // Monitor popup closing
+      // Listen for messages from the OAuth callback popup
+      const messageListener = (event: MessageEvent) => {
+        if (event.data.type === "UPSTOX_AUTH_SUCCESS") {
+          console.log("✅ Upstox authentication successful!");
+          localStorage.setItem("upstox_token", event.data.token);
+          localStorage.setItem("upstox_user_id", event.data.userId || "");
+          localStorage.setItem("upstox_user_email", event.data.userEmail || "");
+          localStorage.setItem("upstox_user_name", event.data.userName || "");
+          setUpstoxAccessToken(event.data.token);
+          setUpstoxIsConnected(true);
+          window.removeEventListener("message", messageListener);
+          toast({
+            title: "Success",
+            description: "Upstox connected successfully!",
+          });
+        } else if (event.data.type === "UPSTOX_AUTH_ERROR") {
+          console.error("❌ Upstox authentication failed:", event.data.error);
+          window.removeEventListener("message", messageListener);
+          toast({
+            title: "Error",
+            description: event.data.error || "Failed to authenticate with Upstox",
+            variant: "destructive",
+          });
+        }
+      };
+
+      window.addEventListener("message", messageListener);
+      
+      // Monitor popup closing and cleanup
       let checkCount = 0;
       const monitorPopup = setInterval(() => {
         checkCount++;
         if (popup.closed) {
           clearInterval(monitorPopup);
+          window.removeEventListener("message", messageListener);
           console.log('⚠️ Upstox popup closed');
           return;
         }
         if (checkCount > 300) {
           clearInterval(monitorPopup);
+          window.removeEventListener("message", messageListener);
           popup.close();
           console.log('⚠️ Upstox popup timeout');
         }

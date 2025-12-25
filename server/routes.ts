@@ -20617,7 +20617,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!code || !state) {
         console.error('🔴 [UPSTOX] Missing code or state in callback');
-        return res.status(400).json({ error: 'Missing authorization code or state' });
+        return res.send(`
+          <script>
+            window.opener.postMessage({ type: "UPSTOX_AUTH_ERROR", error: "Missing authorization code or state" }, "*");
+            window.close();
+          </script>
+        `);
       }
 
       console.log('🔵 [UPSTOX] Processing OAuth callback...');
@@ -20626,26 +20631,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (success) {
         console.log('✅ [UPSTOX] Successfully authenticated');
-        // Redirect to a success page or close the window
+        const status = upstoxOAuthManager.getStatus();
+        
         res.send(`
-          <html>
-            <body>
-              <h1>✅ Upstox Connected Successfully!</h1>
-              <p>You can now close this window and return to the trading app.</p>
-              <script>
-                window.setTimeout(() => {
-                  window.close();
-                }, 2000);
-              </script>
-            </body>
-          </html>
+          <script>
+            window.opener.postMessage({ 
+              type: "UPSTOX_AUTH_SUCCESS", 
+              token: "${status.accessToken}",
+              userId: "${status.userId}",
+              userEmail: "${status.userEmail}",
+              userName: "${status.userName}"
+            }, "*");
+            window.close();
+          </script>
         `);
       } else {
-        res.status(400).json({ error: 'Failed to authenticate with Upstox' });
+        console.error('🔴 [UPSTOX] Token exchange failed');
+        res.send(`
+          <script>
+            window.opener.postMessage({ type: "UPSTOX_AUTH_ERROR", error: "Failed to authenticate with Upstox" }, "*");
+            window.close();
+          </script>
+        `);
       }
     } catch (error: any) {
       console.error('🔴 [UPSTOX] Callback error:', error.message);
-      res.status(500).json({ error: 'OAuth callback failed' });
+      res.send(`
+        <script>
+          window.opener.postMessage({ type: "UPSTOX_AUTH_ERROR", error: "${error.message}" }, "*");
+          window.close();
+        </script>
+      `);
     }
   });
 
