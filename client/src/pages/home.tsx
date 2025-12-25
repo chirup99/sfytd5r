@@ -4083,7 +4083,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         return;
       }
       
-      console.log('✅ Angel One popup opened, waiting for OAuth callback...');
+      console.log('✅ Angel One popup opened, polling for authentication...');
       
       let checkCount = 0;
       const pollAuthStatus = setInterval(async () => {
@@ -4113,19 +4113,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           clearInterval(pollAuthStatus);
           popup.close();
           console.log('⚠️ Angel One timeout');
-      } catch (error) {
-        console.error('❌ Angel One error:', error);
-        alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect'));
-      }
-          alert('Angel One login timeout. Try again.');
-        }
-      }, 1000);
-        checkCount++;
-        if (popup.closed) {
-          return;
-        }
-        if (checkCount > 300) {
-          popup.close();
+          alert('Angel One login timeout. Please try again.');
         }
       }, 1000);
       
@@ -4134,7 +4122,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect'));
     }
   };
-
 
   const handleDhanConnect = async () => {
     try {
