@@ -20622,62 +20622,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ========================================
-  // ANGEL ONE OAUTH 2.0 IMPLEMENTATION
+  // ANGEL ONE OAUTH - CREDENTIAL BASED (SIMPLE)
   // ========================================
 
-  // STEP 1: Generate login URL
-  app.get('/api/broker/angel-one/login-url', (req, res) => {
-    const appId = process.env.ANGELONE_APP_ID || 'web-app';
-    const appName = process.env.ANGELONE_APP_NAME || 'web-app';
-    
-    // Get the base URL for the redirect
-    const baseUrl =
-      process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS
-        ? `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS}`
-        : `http://localhost:5000`;
-    
-    // Construct Angel One login URL with redirect parameter (CRITICAL FIX)
-    const params = new URLSearchParams({
-      ApplicationName: appName,
-      OS: 'Windows',
-      AppID: appId,
-      app: 'web',
-      redirect: `${baseUrl}/api/broker/angel-one/callback`,
-    });
-    const loginUrl = `https://www.angelone.in/login/?${params.toString()}`;
-    
-    console.log('🔗 [Angel One] Login URL with redirect:', loginUrl);
-    res.json({ loginUrl });
-  });
-
-  // STEP 2: Handle Angel One callback
-  app.get('/api/broker/angel-one/callback', async (req, res) => {
-    const requestToken = req.query.request_token as string;
-    
-    if (!requestToken) {
-      console.error('❌ [Angel One] Missing request_token in callback');
-      const errorHtml = '<!DOCTYPE html><html><head><title>Error</title><script>if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:"No token received"},"*");window.close();}else{window.location.href="/?angel_one_error=no_token";}</script></head><body><p>Error</p></body></html>';
-      return res.type('text/html').send(errorHtml);
-    }
-
+  // Authenticate with Angel One using password + TOTP
+  app.post('/api/broker/angel-one/authenticate', async (req, res) => {
     try {
-      console.log('🔐 [Angel One] Exchanging token...');
-      const success = await angelOneOAuthManager.exchangeTokenForJWT(requestToken);
+      const { password, totp } = req.body;
       
-      if (success) {
-        const accessToken = angelOneOAuthManager.getAccessToken();
-        const clientCode = angelOneOAuthManager.getStatus().clientId;
-        
-        console.log('✅ [Angel One] Token exchange successful');
-        const callbackHtml = `<!DOCTYPE html><html><head><title>Connected</title><script>var t="${accessToken}";var c="${clientCode}";if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_TOKEN",token:t,clientCode:c},"*");setTimeout(function(){window.close()},500);}else{window.location.href="/?angel_one_token="+encodeURIComponent(t)+"&angel_one_client="+encodeURIComponent(c);}</script></head><body><p>Connecting...</p></body></html>`;
-        res.type('text/html').send(callbackHtml);
-      } else {
-        throw new Error('Exchange failed');
+      if (!password || !totp) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Password and TOTP required' 
+        });
       }
-    } catch (error) {
-      console.error('❌ [Angel One] Error:', error);
-      const errorHtml = '<!DOCTYPE html><html><head><title>Error</title><script>if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:"Auth failed"},"*");window.close();}else{window.location.href="/?angel_one_error=failed";}</script></head><body><p>Error</p></body></html>';
-      res.type('text/html').send(errorHtml);
+
+      console.log('🔶 [Angel One] Authenticating with credentials...');
+      const result = await angelOneOAuthManager.authenticateWithTotp(totp, password);
+      
+      if (result.success) {
+        console.log('✅ [Angel One] Authentication successful');
+        res.json({
+          success: true,
+          token: result.token,
+          clientCode: result.clientCode,
+          message: 'Authenticated successfully'
+        });
+      } else {
+        res.status(401).json({
+          success: false,
+          message: result.message || 'Authentication failed'
+        });
+      }
+    } catch (error: any) {
+      console.error('🔴 [Angel One] Auth error:', error.message);
+      res.status(500).json({
+        success: false,
+        message: 'Authentication error'
+      });
     }
   });
 
