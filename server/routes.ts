@@ -20630,10 +20630,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const appId = process.env.ANGELONE_APP_ID || 'web-app';
     const appName = process.env.ANGELONE_APP_NAME || 'web-app';
     
-    // Construct the standard Angel One login URL
-    const loginUrl = `https://www.angelone.in/login/?ApplicationName=${encodeURIComponent(appName)}&OS=Windows&AppID=${encodeURIComponent(appId)}&app=web`;
+    // Get the base URL for the redirect
+    const baseUrl =
+      process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS
+        ? `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS}`
+        : `http://localhost:5000`;
     
-    console.log('🔗 [Angel One] Login URL:', loginUrl);
+    // Construct Angel One login URL with redirect parameter (CRITICAL FIX)
+    const params = new URLSearchParams({
+      ApplicationName: appName,
+      OS: 'Windows',
+      AppID: appId,
+      app: 'web',
+      redirect: `${baseUrl}/api/broker/angel-one/callback`,
+    });
+    const loginUrl = `https://www.angelone.in/login/?${params.toString()}`;
+    
+    console.log('🔗 [Angel One] Login URL with redirect:', loginUrl);
     res.json({ loginUrl });
   });
 

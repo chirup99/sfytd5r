@@ -52,7 +52,7 @@ class AngelOneOAuthManager {
       process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS
         ? `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS}`
         : `http://localhost:5000`;
-    this.redirectUri = `${baseUrl}/api/angel-one/callback`;
+    this.redirectUri = `${baseUrl}/api/broker/angel-one/callback`;
 
     console.log("🔶 [ANGEL ONE] OAuth Manager initialized");
     console.log(`🔶 [ANGEL ONE] Redirect URI: ${this.redirectUri}`);
@@ -275,7 +275,7 @@ class AngelOneOAuthManager {
       OS: "Windows",
       AppID: this.appId,
       app: "web",
-      redirect: `${baseUrl}/api/angel-one/callback`,
+      redirect: `${baseUrl}/api/broker/angel-one/callback`,
     });
     
     return `https://www.angelone.in/login/?${params.toString()}`;
