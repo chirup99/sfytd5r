@@ -99,6 +99,9 @@ class UpstoxOAuthManager {
       this.oauthStates.delete(state);
 
       console.log('🔵 [UPSTOX] Exchanging authorization code for token...');
+      console.log(`🔵 [UPSTOX] Code: ${code.substring(0, 20)}...`);
+      console.log(`🔵 [UPSTOX] Client ID: ${this.apiKey.substring(0, 10)}...`);
+      console.log(`🔵 [UPSTOX] Redirect URI: ${this.redirectUri}`);
 
       const tokenUrl = 'https://api.upstox.com/v2/login/authorization/token';
       const params = new URLSearchParams({
@@ -109,7 +112,8 @@ class UpstoxOAuthManager {
         grant_type: 'authorization_code',
       });
 
-      const response = await axios.post(tokenUrl, params, {
+      console.log('🔵 [UPSTOX] Sending token exchange request...');
+      const response = await axios.post(tokenUrl, params.toString(), {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -117,6 +121,7 @@ class UpstoxOAuthManager {
         timeout: 10000,
       });
 
+      console.log('🔵 [UPSTOX] Token response received:', response.status);
       const tokenData: UpstoxTokenResponse = response.data;
       
       if (tokenData.access_token) {
@@ -137,12 +142,16 @@ class UpstoxOAuthManager {
         return true;
       }
 
-      console.error('🔴 [UPSTOX] Failed to get access token');
+      console.error('🔴 [UPSTOX] Failed to get access token - no token in response');
+      console.error('🔴 [UPSTOX] Response data:', JSON.stringify(tokenData));
       return false;
     } catch (error: any) {
       console.error('🔴 [UPSTOX] Token exchange error:', error.message);
+      if (error.response?.status) {
+        console.error('🔴 [UPSTOX] HTTP Status:', error.response.status);
+      }
       if (error.response?.data) {
-        console.error('🔴 [UPSTOX] Response:', error.response.data);
+        console.error('🔴 [UPSTOX] Response:', JSON.stringify(error.response.data));
       }
       return false;
     }
