@@ -4060,6 +4060,63 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   };
   const handleAngelOneConnect = async () => {
     try {
+      console.log('🔶 Starting Angel One OAuth flow (Zerodha model)...');
+      const response = await fetch('/api/broker/angel-one/login-url');
+      const data = await response.json();
+      
+      if (!data.loginUrl) {
+        alert('Error: Could not generate Angel One login URL');
+        return;
+      }
+      
+      const popup = window.open(
+        data.loginUrl,
+        'angel_one_oauth',
+        'width=600,height=800,resizable=yes,scrollbars=yes'
+      );
+      
+      if (!popup) {
+        alert('Popup blocked. Please enable popups and try again.');
+        return;
+      }
+      
+      const handleMessage = (event: MessageEvent) => {
+        if (event.data.type === 'ANGEL_ONE_TOKEN') {
+          const { token, clientCode } = event.data;
+          console.log('✅ Angel One authenticated via message!');
+          
+          localStorage.setItem('angel_one_token', token);
+          localStorage.setItem('angel_one_client_code', clientCode);
+          document.cookie = `angel_one_token=${token}; path=/; max-age=86400`;
+          
+          setAngelOneAccessToken(token);
+          setAngelOneIsConnected(true);
+          setConnectDialogOpen(false);
+          
+          window.removeEventListener('message', handleMessage);
+        } else if (event.data.type === 'ANGEL_ONE_ERROR') {
+          alert('Angel One Error: ' + event.data.error);
+          window.removeEventListener('message', handleMessage);
+        }
+      };
+      
+      window.addEventListener('message', handleMessage);
+      
+      const checkPopup = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopup);
+          window.removeEventListener('message', handleMessage);
+        }
+      }, 1000);
+      
+    } catch (error) {
+      console.error('❌ Angel One error:', error);
+      alert('Failed to connect to Angel One');
+    }
+  };
+
+  const handleAngelOneConnect_OLD = async () => {
+    try {
       console.log('🔶 Starting Angel One OAuth flow...');
       const response = await fetch('/api/angel-one/auth-url');
       const data = await response.json();

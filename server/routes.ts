@@ -20625,279 +20625,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ANGEL ONE OAUTH 2.0 IMPLEMENTATION
   // ========================================
 
-  // Get authorization URL for Angel One OAuth flow
-  app.get('/api/angel-one/auth-url', (req, res) => {
-    try {
-      const loginUrl = angelOneOAuthManager.getLoginPageUrl();
-      res.json({ authUrl: loginUrl });
-    } catch (error: any) {
-      console.error('🔴 [ANGEL ONE] Error generating auth URL:', error.message);
-      res.status(500).json({ error: 'Failed to generate authorization URL' });
-    }
+  // STEP 1: Generate login URL
+  app.get('/api/broker/angel-one/login-url', (req, res) => {
+    const appId = process.env.ANGELONE_APP_ID || 'web-app';
+    const appName = process.env.ANGELONE_APP_NAME || 'web-app';
+    
+    // Construct the standard Angel One login URL
+    const loginUrl = `https://www.angelone.in/login/?ApplicationName=${encodeURIComponent(appName)}&OS=Windows&AppID=${encodeURIComponent(appId)}&app=web`;
+    
+    console.log('🔗 [Angel One] Login URL:', loginUrl);
+    res.json({ loginUrl });
   });
 
-  // Poll for Angel One authentication status (after user logs in)
-  app.get('/api/angel-one/poll-auth', async (req, res) => {
-    console.log('🔶 [ANGEL ONE POLL] Checking authentication status...');
+  // STEP 2: Handle Angel One callback
+  app.get('/api/broker/angel-one/callback', async (req, res) => {
+    const requestToken = req.query.request_token as string;
     
+    if (!requestToken) {
+      console.error('❌ [Angel One] Missing request_token in callback');
+      const errorHtml = '<!DOCTYPE html><html><head><title>Error</title><script>if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:"No token received"},"*");window.close();}else{window.location.href="/?angel_one_error=no_token";}</script></head><body><p>Error</p></body></html>';
+      return res.type('text/html').send(errorHtml);
+    }
+
     try {
-      const status = angelOneOAuthManager.getStatus();
+      console.log('🔐 [Angel One] Exchanging token...');
+      const success = await angelOneOAuthManager.exchangeTokenForJWT(requestToken);
       
-      if (status.authenticated && status.accessToken) {
-        console.log('✅ [ANGEL ONE POLL] User is authenticated, sending token to popup');
-        const token = status.accessToken;
-        const escapedToken = token.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+      if (success) {
+        const accessToken = angelOneOAuthManager.getAccessToken();
+        const clientCode = angelOneOAuthManager.getStatus().clientId;
         
-        const successHtml = `<!DOCTYPE html><html><head><title>Connected</title><script>
-console.log('🔶 Angel One authenticated, sending token');
-var t="${escapedToken}";
-if(window.opener && window.opener !== window){
-  console.log('Sending token to parent window');
-  try {
-    window.opener.postMessage({type:"ANGEL_ONE_TOKEN",token:t},"*");
-    console.log('Token sent, closing popup');
-    setTimeout(function(){window.close()},300);
-  } catch(err) {
-    console.error('Error:', err);
-    window.close();
-  }
-} else {
-  console.log('No opener, redirecting to home with token');
-  window.location.href="/?angel_one_token="+encodeURIComponent(t);
-}
-</script></head><body><p>Authenticated! Closing...</p></body></html>`;
-        res.type('text/html').send(successHtml);
+        console.log('✅ [Angel One] Token exchange successful');
+        const callbackHtml = `<!DOCTYPE html><html><head><title>Connected</title><script>var t="${accessToken}";var c="${clientCode}";if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_TOKEN",token:t,clientCode:c},"*");setTimeout(function(){window.close()},500);}else{window.location.href="/?angel_one_token="+encodeURIComponent(t)+"&angel_one_client="+encodeURIComponent(c);}</script></head><body><p>Connecting...</p></body></html>`;
+        res.type('text/html').send(callbackHtml);
       } else {
-        console.log('⏳ [ANGEL ONE POLL] Not yet authenticated, redirecting to login');
-        // Redirect to Angel One login so user can log in
-        res.redirect(`https://www.angelone.in/login/?ApplicationName=${encodeURIComponent(process.env.ANGELONE_APP_NAME || 'web-app')}&OS=Windows&AppID=${encodeURIComponent(process.env.ANGELONE_APP_ID || 'web-app')}&app=web`);
+        throw new Error('Exchange failed');
       }
-    } catch (error: any) {
-      console.error('🔴 [ANGEL ONE POLL] Error:', error.message);
-      const errorMsg = 'Authentication check failed';
-      const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>
-var e="${errorMsg.replace(/"/g, '\\"')}";
-if(window.opener){
-  window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");
-  setTimeout(function(){window.close()},1000);
-} else {
-  window.location.href="/?angel_one_error="+encodeURIComponent(e);
-}
-</script></head><body><p>Error: ${errorMsg}</p></body></html>`;
+    } catch (error) {
+      console.error('❌ [Angel One] Error:', error);
+      const errorHtml = '<!DOCTYPE html><html><head><title>Error</title><script>if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:"Auth failed"},"*");window.close();}else{window.location.href="/?angel_one_error=failed";}</script></head><body><p>Error</p></body></html>';
       res.type('text/html').send(errorHtml);
     }
   });
 
-  // Handle Angel One OAuth callback (request_token flow) - kept for legacy
-  app.get('/api/angel-one/callback', async (req, res) => {
-    console.log('🔶 [ANGEL ONE CALLBACK] Received request - Query params:', req.query);
-    
+  // STEP 3: Fetch trades
+  app.get('/api/broker/angel-one/trades', async (req, res) => {
     try {
-      const requestToken = req.query.request_token as string;
-
-      if (!requestToken) {
-        console.error('🔴 [ANGEL ONE] Missing request_token in callback');
-        const errorMsg = 'No request token received';
-        const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>console.log('Angel One callback error: No request_token');var e="${errorMsg.replace(/"/g, '\\"')}";if(window.opener){console.log('Posting error to opener');window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");setTimeout(function(){window.close()},1000);}else{window.location.href="/?angel_one_error="+encodeURIComponent(e);}</script></head><body><p>Error: ${errorMsg}</p></body></html>`;
-        res.type('text/html');
-        res.status(200);
-        res.send(errorHtml);
-        return;
-      }
-
-      console.log('🔶 [ANGEL ONE] Processing callback with request token:', requestToken.substring(0, 8) + '...');
-
-      const success = await angelOneOAuthManager.exchangeTokenForJWT(requestToken);
-      console.log('🔶 [ANGEL ONE] Exchange result:', success);
-
-      if (success) {
-        console.log('✅ [ANGEL ONE] Successfully authenticated');
-        const accessToken = angelOneOAuthManager.getAccessToken();
-        console.log('🔶 [ANGEL ONE] Retrieved token:', accessToken ? accessToken.substring(0, 30) + '...' : 'NULL');
-        
-        if (!accessToken) {
-          console.error('❌ [ANGEL ONE] Token is null after exchange - state issue');
-          const errorMsg = 'Token retrieval failed after authentication';
-          const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>console.log('Angel One token is null');var e="${errorMsg.replace(/"/g, '\\"')}";if(window.opener){console.log('Posting error to opener');window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");setTimeout(function(){window.close()},1000);}else{window.location.href="/?angel_one_error="+encodeURIComponent(e);}</script></head><body><p>Error: ${errorMsg}</p></body></html>`;
-          res.type('text/html');
-          res.status(200);
-          res.send(errorHtml);
-          return;
-        }
-        
-        console.log('📤 [ANGEL ONE] Sending token to popup:', accessToken.substring(0, 30) + '...');
-        const callbackHtml = '<!DOCTYPE html><html><head><title>Connected</title><script>console.log("Angel One callback HTML executing"); var t="' + accessToken + '"; console.log("Token length: " + t.length); if(window.opener){console.log("window.opener exists, posting message"); window.opener.postMessage({type:"ANGEL_ONE_TOKEN",token:t},"*"); console.log("Message posted, closing in 500ms"); setTimeout(function(){window.close()},500);}else{console.log("No opener, redirecting"); window.location.href="/?angel_one_token="+encodeURIComponent(t);}</script></head><body><p>Authenticating...</p></body></html>';
-        res.type('text/html');
-        res.status(200);
-        res.send(callbackHtml);
-      } else {
-        const errorMsg = 'Angel One authentication failed';
-        console.error('❌ [ANGEL ONE] ' + errorMsg);
-        const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>console.log('Angel One auth failed');var e="${errorMsg.replace(/"/g, '\\"')}";if(window.opener){console.log('Posting error to opener');window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");setTimeout(function(){window.close()},1000);}else{window.location.href="/?angel_one_error="+encodeURIComponent(e);}</script></head><body><p>Error: ${errorMsg}</p></body></html>`;
-        res.type('text/html');
-        res.status(200);
-        res.send(errorHtml);
-      }
-    } catch (error: any) {
-      console.error('🔴 [ANGEL ONE] Callback error:', error.message);
-      const errorMsg = error.message || 'OAuth callback failed';
-      const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>console.log('Angel One callback exception: ${errorMsg}');var e="${errorMsg.replace(/"/g, '\\"')}";if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");setTimeout(function(){window.close()},1000);}else{window.location.href="/?angel_one_error="+encodeURIComponent(e);}</script></head><body><p>Error</p></body></html>`;
-      res.type('text/html');
-      res.status(200);
-      res.send(errorHtml);
-    }
-  });
-
-  // Get Angel One connection status
-  app.get('/api/angel-one/status', (req, res) => {
-    try {
-      const status = angelOneOAuthManager.getStatus();
-      res.json({
-        success: true,
-        ...status,
-      });
-    } catch (error: any) {
-      console.error('🔴 [ANGEL ONE] Error getting status:', error.message);
-      res.status(500).json({ success: false, error: 'Failed to get status' });
-    }
-  });
-
-  // Get Angel One user profile
-  app.get('/api/angel-one/profile', async (req, res) => {
-    try {
-      const token = req.get('Authorization')?.split(' ')[1];
-      if (!token) {
-        return res.status(401).json({ error: 'No token provided' });
-      }
-      const status = angelOneOAuthManager.getStatus();
-      if (!status.authenticated) {
-        return res.status(401).json({ error: 'Not authenticated' });
-      }
-      res.json({
-        profile: {
-          userId: status.clientId || '',
-          userName: status.userName || '',
-          email: status.userEmail || '',
-          broker: 'Angel One'
-        }
-      });
-    } catch (error: any) {
-      console.error('🔴 [ANGEL ONE] Error fetching profile:', error.message);
-      res.status(500).json({ error: 'Failed to fetch profile' });
-    }
-  });
-
-  // Get Angel One orders
-  app.get('/api/angel-one/orders', async (req, res) => {
-    try {
-      const token = req.get('Authorization')?.split(' ')[1];
-      if (!token) {
-        return res.status(401).json({ error: 'No token provided' });
-      }
-      const status = angelOneOAuthManager.getStatus();
-      if (!status.authenticated) {
-        return res.status(401).json({ error: 'Not authenticated' });
-      }
       const accessToken = angelOneOAuthManager.getAccessToken();
-      if (!accessToken) {
-        return res.status(401).json({ error: 'No valid token' });
-      }
-      const response = await axios.get(
-        'https://api.angelone.in/rest/secure/angelbroking/order/v1/getOrderList',
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Accept': 'application/json',
-          },
-          timeout: 10000,
+      if (!accessToken) return res.status(401).json({ error: 'Unauthorized' });
+
+      const response = await axios.get('https://api.angelone.in/rest/secure/angelbroking/order/v1/getOrderList', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json',
+          'X-UserType': 'USER',
+          'X-SourceID': 'WEB',
+          'X-PrivateKey': process.env.ANGELONE_API_KEY
         }
-      );
-      const trades = (response.data.data || []).map((order: any) => ({
+      });
+
+      const orders = response.data.data || [];
+      const trades = orders.map((order: any) => ({
         time: order.ordertime,
-        order: order.transactiontype === 'BUY' ? 'BUY' : 'SELL',
+        order: order.transactiontype,
         symbol: order.tradingsymbol,
         qty: order.quantity,
-        price: order.price,
-        pnl: order.filledshares ? (order.filledshares * (order.averageprice - order.price)) : 0,
-        type: order.ordertype,
-        duration: order.status
+        price: order.averageprice || order.price,
+        status: order.status === 'complete' ? 'COMPLETE' : order.status
       }));
-      res.json({ trades });
-    } catch (error: any) {
-      console.error('🔴 [ANGEL ONE] Error fetching orders:', error.message);
-      res.status(500).json({ error: 'Failed to fetch orders', trades: [] });
+
+      res.json({ trades, success: true });
+    } catch (error) {
+      console.error('❌ [Angel One] Trades error:', error);
+      res.status(500).json({ success: false });
     }
   });
 
-  // Get Angel One positions
-  app.get('/api/angel-one/positions', async (req, res) => {
+  // STEP 4: Fetch profile
+  app.get('/api/broker/angel-one/profile', async (req, res) => {
     try {
-      const token = req.get('Authorization')?.split(' ')[1];
-      if (!token) {
-        return res.status(401).json({ error: 'No token provided' });
-      }
       const status = angelOneOAuthManager.getStatus();
-      if (!status.authenticated) {
-        return res.status(401).json({ error: 'Not authenticated' });
-      }
-      const accessToken = angelOneOAuthManager.getAccessToken();
-      if (!accessToken) {
-        return res.status(401).json({ error: 'No valid token' });
-      }
-      const response = await axios.get(
-        'https://api.angelone.in/rest/secure/angelbroking/order/v1/getPosition',
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Accept': 'application/json',
-          },
-          timeout: 10000,
-        }
-      );
-      const positions = (response.data.data || []).map((pos: any) => ({
-        symbol: pos.tradingsymbol,
-        quantity: pos.quantity,
-        averagePrice: pos.averageprice,
-        currentPrice: pos.ltp,
-        pnl: (pos.ltp - pos.averageprice) * pos.quantity
-      }));
-      res.json({ positions });
-    } catch (error: any) {
-      console.error('🔴 [ANGEL ONE] Error fetching positions:', error.message);
-      res.status(500).json({ error: 'Failed to fetch positions', positions: [] });
-    }
-  });
+      if (!status.authenticated) return res.status(401).json({ error: 'Unauthorized' });
 
-  // Get Angel One funds
-  app.get('/api/angel-one/funds', async (req, res) => {
-    try {
-      const token = req.get('Authorization')?.split(' ')[1];
-      if (!token) {
-        return res.status(401).json({ error: 'No token provided' });
-      }
-      const status = angelOneOAuthManager.getStatus();
-      if (!status.authenticated) {
-        return res.status(401).json({ error: 'Not authenticated' });
-      }
-      const accessToken = angelOneOAuthManager.getAccessToken();
-      if (!accessToken) {
-        return res.status(401).json({ error: 'No valid token' });
-      }
-      const response = await axios.get(
-        'https://api.angelone.in/rest/secure/angelbroking/user/v1/getBalance',
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Accept': 'application/json',
-          },
-          timeout: 10000,
-        }
-      );
-      const funds = response.data.data || { totalBalance: 0, availableBalance: 0, usedBalance: 0 };
-      res.json({ funds });
-    } catch (error: any) {
-      console.error('🔴 [ANGEL ONE] Error fetching funds:', error.message);
-      res.status(500).json({ error: 'Failed to fetch funds', funds: {} });
+      res.json({
+        profile: {
+          userId: status.clientId,
+          userName: status.userName || status.clientId,
+          broker: 'Angel One'
+        },
+        success: true
+      });
+    } catch (error) {
+      res.status(500).json({ success: false });
     }
   });
 
