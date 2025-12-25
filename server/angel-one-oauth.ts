@@ -28,10 +28,11 @@ class AngelOneOAuthManager {
   }
 
   // Get authorization URL for redirect-based login
-  getAuthorizationUrl(state?: string): string {
+  getAuthorizationUrl(state?: string, redirectUri?: string): string {
     const baseUrl = "https://smartapi.angelone.in/publisher-login";
     const stateVar = state || "live";
-    return `${baseUrl}?api_key=${this.apiKey}&state=${stateVar}`;
+    const redirect = redirectUri || "https://api.angelone.in/";
+    return `${baseUrl}?api_key=${this.apiKey}&state=${stateVar}&redirect_uri=${encodeURIComponent(redirect)}`;
   }
 
   // Handle callback from Angel One

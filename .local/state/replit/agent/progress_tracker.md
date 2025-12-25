@@ -6,5 +6,7 @@
 [x] 6. Updated Angel One frontend connection to use postMessage listener for robust authentication flow
 [x] 7. Verified backend routes for Angel One OAuth redirect and callback handling
 [x] 8. Migrated Angel One auth to production-ready publisher login flow
-[x] 9. Fixed critical duplicate Angel One callback route issue - removed duplicate route definition that was breaking OAuth flow
-[x] 10. Import completed successfully - Angel One OAuth flow now working correctly
+[x] 9. Fixed critical duplicate Angel One callback route issue - removed duplicate route definition
+[x] 10. Identified Angel One login flow requirement: Redirect URI must be configured in MyApps settings
+[x] 11. Backend callback endpoint ready at: /api/broker/angelone/callback
+[x] 12. Import completed - Angel One OAuth infrastructure is properly configured
