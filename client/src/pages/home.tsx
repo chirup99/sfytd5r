@@ -4060,79 +4060,62 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   };
   const handleAngelOneConnect = async () => {
     try {
-      console.log('🔶 Starting Angel One OAuth redirect...');
-      
-      // Get auth URL from server
-      const response = await fetch('/api/angel-one/auth-url');
+      console.log("🔶 Starting Angel One OAuth redirect flow...");
+      const response = await fetch("/api/angelone/auth-url");
       const data = await response.json();
       
       if (!data.authUrl) {
-        alert('Error: Could not generate Angel One authorization URL');
+        alert("Error: Could not generate Angel One authorization URL");
         return;
       }
       
-      console.log('🔗 Angel One auth URL:', data.authUrl);
+      console.log("🔗 Angel One auth URL:", data.authUrl);
       
-      // Open popup for Angel One login
+      const width = 500;
+      const height = 600;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      
       const popup = window.open(
         data.authUrl,
-        'angel_one_oauth',
-        'width=600,height=800,resizable=yes,scrollbars=yes'
+        "AngelOneLogin",
+        `width=${width},height=${height},left=${left},top=${top}`
       );
       
       if (!popup) {
-        console.warn('❌ Popup blocked');
-        alert('Popup blocked. Please enable popups and try again.');
+        alert("Popup blocked! Please enable popups for this site.");
         return;
       }
       
-      console.log('✅ Angel One popup opened, polling for authentication...');
-      
-      let checkCount = 0;
-      const pollAuthStatus = setInterval(async () => {
-        checkCount++;
-        
-        if (popup.closed) {
-          clearInterval(pollAuthStatus);
-          console.log('⚠️ Angel One popup closed by user');
-          return;
+      const messageListener = (event: MessageEvent) => {
+        if (event.data.type === "ANGELONE_AUTH_SUCCESS") {
+          console.log("✅ Angel One authentication successful!");
+          localStorage.setItem("angelone_token", event.data.token); localStorage.setItem("angel_one_token", event.data.token);
+          if (event.data.feedToken) localStorage.setItem("angelone_feed_token", event.data.feedToken);
+          localStorage.setItem("angel_one_client_code", event.data.clientCode || "P176266");
+          setAngelOneAccessToken(event.data.token);
+          setAngelOneIsConnected(true);
+          window.removeEventListener("message", messageListener);
+          toast({
+            title: "Success",
+            description: "Angel One connected successfully",
+          });
+          setConnectDialogOpen(false);
+        } else if (event.data.type === "ANGELONE_AUTH_ERROR") {
+          console.error("❌ Angel One auth error:", event.data.error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: event.data.error || "Login failed",
+          });
+          window.removeEventListener("message", messageListener);
         }
-        
-        try {
-          const statusResponse = await fetch('/api/angel-one/status');
-          const status = await statusResponse.json();
-          
-          if (status.authenticated && status.accessToken) {
-            console.log('✅ [ANGEL ONE] Authenticated! Token received:', status.accessToken.substring(0, 20) + '...');
-            clearInterval(pollAuthStatus);
-            
-            localStorage.setItem('angel_one_token', status.accessToken);
-            localStorage.setItem('angel_one_client_code', status.clientCode || 'P176266');
-            
-            setAngelOneAccessToken(status.accessToken);
-            setAngelOneIsConnected(true);
-            
-            console.log('💾 Stored Angel One token in localStorage');
-            
-            popup.close();
-            setConnectDialogOpen(false);
-            return;
-          }
-        } catch (err) {
-          console.debug('🔶 [ANGEL ONE] Status polling...');
-        }
-        
-        if (checkCount > 300) {
-          clearInterval(pollAuthStatus);
-          popup.close();
-          console.log('⚠️ Angel One timeout');
-          alert('Angel One login timeout. Please try again.');
-        }
-      }, 1000);
-      
+      };
+
+      window.addEventListener("message", messageListener);
     } catch (error) {
-      console.error('❌ Angel One error:', error);
-      alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect'));
+      console.error("❌ Angel One error:", error);
+      alert("Error: " + (error instanceof Error ? error.message : "Failed to connect"));
     }
   };
 

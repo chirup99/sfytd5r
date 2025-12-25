@@ -72,71 +72,7 @@ import { upstoxOAuthManager } from './upstox-oauth';
 import { angelOneOAuthManager } from './angel-one-oauth';
 import { dhanOAuthManager } from './dhan-oauth';
 
-  // 🔶 Angel One OAuth Redirect Flow
-  app.get("/api/angelone/auth-url", (req, res) => {
-    try {
-      const state = (req.query.state as string) || "live";
-      const authUrl = angelOneOAuthManager.getAuthorizationUrl(state);
-      res.json({ success: true, authUrl });
-    } catch (error: any) {
-      res.status(500).json({ success: false, message: error.message });
-    }
-  });
-
-  app.get("/api/broker/angelone/callback", async (req, res) => {
-    try {
-      const { auth_token, feed_token } = req.query;
-      
-      if (!auth_token) {
-        return res.send(`
-          <script>
-            window.opener.postMessage({ type: 'ANGELONE_AUTH_ERROR', error: 'No auth token received' }, '*');
-            window.close();
-          </script>
-        `);
-      }
-
-      const result = await angelOneOAuthManager.handleCallback(auth_token as string, feed_token as string);
-
-      if (result.success) {
-        // Pass data back to opener window
-        res.send(`
-          <script>
-            window.opener.postMessage({ 
-              type: 'ANGELONE_AUTH_SUCCESS', 
-              token: '${result.token}',
-              feedToken: '${result.feedToken}',
-              clientCode: '${result.clientCode}'
-            }, '*');
-            window.close();
-          </script>
-        `);
-      } else {
-        res.send(`
-          <script>
-            window.opener.postMessage({ type: 'ANGELONE_AUTH_ERROR', error: '${result.message}' }, '*');
-            window.close();
-          </script>
-        `);
-      }
-    } catch (error: any) {
-      res.status(500).send(`
-        <script>
-          window.opener.postMessage({ type: 'ANGELONE_AUTH_ERROR', error: '${error.message}' }, '*');
-          window.close();
-        </script>
-      `);
-    }
-  });
-
-  // 🔶 Angel One Stock Token Mappings for historical data
 const ANGEL_ONE_STOCK_TOKENS: { [key: string]: { token: string; exchange: string; tradingSymbol: string } } = {
-  // NSE Indices
-  'NIFTY50': { token: '99926000', exchange: 'NSE', tradingSymbol: 'Nifty 50' },
-  'NIFTY': { token: '99926000', exchange: 'NSE', tradingSymbol: 'Nifty 50' },
-  'BANKNIFTY': { token: '99926009', exchange: 'NSE', tradingSymbol: 'Nifty Bank' },
-  'NIFTYBANK': { token: '99926009', exchange: 'NSE', tradingSymbol: 'Nifty Bank' },
-  'FINNIFTY': { token: '99926037', exchange: 'NSE', tradingSymbol: 'Nifty Fin Service' },
   'NIFTYFIN': { token: '99926037', exchange: 'NSE', tradingSymbol: 'Nifty Fin Service' },
   'MIDCPNIFTY': { token: '99926074', exchange: 'NSE', tradingSymbol: 'NIFTY MID SELECT' },
   'NIFTYMIDCAP': { token: '99926074', exchange: 'NSE', tradingSymbol: 'NIFTY MID SELECT' },
@@ -4360,12 +4296,112 @@ import { newsRouter } from './news-routes.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
+  // 🔶 Angel One OAuth Redirect Flow
+  app.get("/api/angelone/auth-url", (req, res) => {
+    try {
+      const state = (req.query.state as string) || "live";
+      const authUrl = angelOneOAuthManager.getAuthorizationUrl(state);
+      res.json({ success: true, authUrl });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  });
+
+  app.get("/api/broker/angelone/callback", async (req, res) => {
+    try {
+      const { auth_token, feed_token } = req.query;
+      
+      if (!auth_token) {
+        return res.send(`
+          <script>
+            window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "No auth token received" }, "*");
+            window.close();
+          </script>
+        `);
+      }
+
+      const result = await angelOneOAuthManager.handleCallback(auth_token as string, feed_token as string);
+
+      if (result.success) {
+        res.send(`
+          <script>
+            window.opener.postMessage({ 
+              type: "ANGELONE_AUTH_SUCCESS", 
+              token: "${result.token}",
+              feedToken: "${result.feedToken}",
+              clientCode: "${result.clientCode}"
+            }, "*");
+            window.close();
+          </script>
+        `);
+      } else {
+        res.send(`
+          <script>
+            window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "${result.message}" }, "*");
+            window.close();
+          </script>
+        `);
+      }
+    } catch (error: any) {
+      res.status(500).send(`
+        <script>
+          window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "${error.message}" }, "*");
+          window.close();
+        </script>
+      `);
+    }
+  });
+
   // ⚡ CRITICAL: LOAD TOKEN FROM DATABASE AT SERVER STARTUP (ONLY IF FRESH!)
   // This ensures UI-submitted tokens persist across server restarts
   // BUT: Skip expired tokens to avoid rate limit blocking
   console.log('🔑 [STARTUP] Checking for valid token in database...');
   try {
     const apiStatus = await storage.getApiStatus();
+  app.get("/api/broker/angelone/callback", async (req, res) => {
+    try {
+      const { auth_token, feed_token } = req.query;
+      
+      if (!auth_token) {
+        return res.send(`
+          <script>
+            window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "No auth token received" }, "*");
+            window.close();
+          </script>
+        `);
+      }
+
+      const result = await angelOneOAuthManager.handleCallback(auth_token as string, feed_token as string);
+
+      if (result.success) {
+        res.send(`
+          <script>
+            window.opener.postMessage({ 
+              type: "ANGELONE_AUTH_SUCCESS", 
+              token: "${result.token}",
+              feedToken: "${result.feedToken}",
+              clientCode: "${result.clientCode}"
+            }, "*");
+            window.close();
+          </script>
+        `);
+      } else {
+        res.send(`
+          <script>
+            window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "${result.message}" }, "*");
+            window.close();
+          </script>
+        `);
+      }
+    } catch (error: any) {
+      res.status(500).send(`
+        <script>
+          window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "${error.message}" }, "*");
+          window.close();
+        </script>
+      `);
+    }
+  });
     if (apiStatus?.accessToken && apiStatus?.tokenExpiry) {
       const tokenExpiryDate = new Date(apiStatus.tokenExpiry);
       const now = new Date();
