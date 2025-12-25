@@ -20652,48 +20652,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (success) {
         console.log('✅ [ANGEL ONE] Successfully authenticated');
-        // Redirect to a success page or close the window
-        res.send(`
-          <html>
-            <head>
-              <title>Angel One Connected</title>
-              <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
-                .success { color: #4CAF50; font-size: 24px; }
-              </style>
-            </head>
-            <body>
-              <div class="success">✅ Angel One Connected Successfully!</div>
-              <p>You can now close this window and return to the trading app.</p>
-              <script>
-                window.setTimeout(() => {
-                  window.close();
-                }, 2500);
-              </script>
-            </body>
-          </html>
-        `);
+        const accessToken = angelOneOAuthManager.getAccessToken();
+        const callbackHtml = `<!DOCTYPE html><html><head><title>Connected</title><script>var t="${accessToken}";if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_TOKEN",token:t},"*");setTimeout(function(){window.close()},500);}else{window.location.href="/?angel_one_token="+encodeURIComponent(t);}</script></head><body><p>Connected...</p></body></html>`;
+        res.type('text/html');
+        res.status(200);
+        res.send(callbackHtml);
       } else {
-        res.send(`
-          <html>
-            <head>
-              <title>Angel One Connection Failed</title>
-              <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
-                .error { color: #f44336; font-size: 20px; }
-              </style>
-            </head>
-            <body>
-              <div class="error">❌ Angel One Connection Failed</div>
-              <p>Please try again or contact support if the issue persists.</p>
-              <script>
-                window.setTimeout(() => {
-                  window.close();
-                }, 3000);
-              </script>
-            </body>
-          </html>
-        `);
+        const errorMsg = 'Angel One authentication failed';
+        console.error('❌ [ANGEL ONE] ' + errorMsg);
+        const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>var e="${errorMsg.replace(/"/g, '\\"')}";if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");window.close();}else{window.location.href="/?angel_one_error="+encodeURIComponent(e);}</script></head><body><p>Error</p></body></html>`;
+        res.type('text/html');
+        res.status(200);
+        res.send(errorHtml);
       }
     } catch (error: any) {
       console.error('🔴 [ANGEL ONE] Callback error:', error.message);
@@ -20712,6 +20682,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('🔴 [ANGEL ONE] Error getting status:', error.message);
       res.status(500).json({ success: false, error: 'Failed to get status' });
+    }
+  });
+
+  // Get Angel One user profile
+  app.get('/api/angel-one/profile', async (req, res) => {
+    try {
+      const token = req.get('Authorization')?.split(' ')[1];
+      if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+      }
+      const status = angelOneOAuthManager.getStatus();
+      if (!status.authenticated) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+      res.json({
+        profile: {
+          userId: status.clientId || '',
+          userName: status.userName || '',
+          email: status.userEmail || '',
+          broker: 'Angel One'
+        }
+      });
+    } catch (error: any) {
+      console.error('🔴 [ANGEL ONE] Error fetching profile:', error.message);
+      res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+  });
+
+  // Get Angel One orders
+  app.get('/api/angel-one/orders', async (req, res) => {
+    try {
+      const token = req.get('Authorization')?.split(' ')[1];
+      if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+      }
+      const status = angelOneOAuthManager.getStatus();
+      if (!status.authenticated) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+      const accessToken = angelOneOAuthManager.getAccessToken();
+      if (!accessToken) {
+        return res.status(401).json({ error: 'No valid token' });
+      }
+      const response = await axios.get(
+        'https://api.angelone.in/rest/secure/angelbroking/order/v1/getOrderList',
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/json',
+          },
+          timeout: 10000,
+        }
+      );
+      const trades = (response.data.data || []).map((order: any) => ({
+        time: order.ordertime,
+        order: order.transactiontype === 'BUY' ? 'BUY' : 'SELL',
+        symbol: order.tradingsymbol,
+        qty: order.quantity,
+        price: order.price,
+        pnl: order.filledshares ? (order.filledshares * (order.averageprice - order.price)) : 0,
+        type: order.ordertype,
+        duration: order.status
+      }));
+      res.json({ trades });
+    } catch (error: any) {
+      console.error('🔴 [ANGEL ONE] Error fetching orders:', error.message);
+      res.status(500).json({ error: 'Failed to fetch orders', trades: [] });
+    }
+  });
+
+  // Get Angel One positions
+  app.get('/api/angel-one/positions', async (req, res) => {
+    try {
+      const token = req.get('Authorization')?.split(' ')[1];
+      if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+      }
+      const status = angelOneOAuthManager.getStatus();
+      if (!status.authenticated) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+      const accessToken = angelOneOAuthManager.getAccessToken();
+      if (!accessToken) {
+        return res.status(401).json({ error: 'No valid token' });
+      }
+      const response = await axios.get(
+        'https://api.angelone.in/rest/secure/angelbroking/order/v1/getPosition',
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/json',
+          },
+          timeout: 10000,
+        }
+      );
+      const positions = (response.data.data || []).map((pos: any) => ({
+        symbol: pos.tradingsymbol,
+        quantity: pos.quantity,
+        averagePrice: pos.averageprice,
+        currentPrice: pos.ltp,
+        pnl: (pos.ltp - pos.averageprice) * pos.quantity
+      }));
+      res.json({ positions });
+    } catch (error: any) {
+      console.error('🔴 [ANGEL ONE] Error fetching positions:', error.message);
+      res.status(500).json({ error: 'Failed to fetch positions', positions: [] });
+    }
+  });
+
+  // Get Angel One funds
+  app.get('/api/angel-one/funds', async (req, res) => {
+    try {
+      const token = req.get('Authorization')?.split(' ')[1];
+      if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+      }
+      const status = angelOneOAuthManager.getStatus();
+      if (!status.authenticated) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+      const accessToken = angelOneOAuthManager.getAccessToken();
+      if (!accessToken) {
+        return res.status(401).json({ error: 'No valid token' });
+      }
+      const response = await axios.get(
+        'https://api.angelone.in/rest/secure/angelbroking/user/v1/getBalance',
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/json',
+          },
+          timeout: 10000,
+        }
+      );
+      const funds = response.data.data || { totalBalance: 0, availableBalance: 0, usedBalance: 0 };
+      res.json({ funds });
+    } catch (error: any) {
+      console.error('🔴 [ANGEL ONE] Error fetching funds:', error.message);
+      res.status(500).json({ error: 'Failed to fetch funds', funds: {} });
     }
   });
 
