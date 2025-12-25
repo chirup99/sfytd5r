@@ -20,8 +20,8 @@ class AngelOneOAuthManager {
   private apiKey: string;
 
   constructor() {
-    this.clientCode = process.env.ANGELONE_CLIENT_CODE || process.env.ANGEL_ONE_CLIENT_CODE || "P176266";
-    this.apiKey = process.env.ANGELONE_API_KEY || process.env.ANGEL_ONE_API_KEY || "";
+    this.clientCode = process.env.ANGEL_ONE_CLIENT_CODE || process.env.ANGEL_ONE_CLIENT_CODE || "P176266";
+    this.apiKey = process.env.ANGEL_ONE_API_KEY || process.env.ANGEL_ONE_API_KEY || "";
 
     console.log("✅ [ANGEL ONE] OAuth Manager initialized");
     console.log(`   Client Code: ${this.clientCode}`);
