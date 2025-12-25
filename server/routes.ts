@@ -20653,7 +20653,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (success) {
         console.log('✅ [ANGEL ONE] Successfully authenticated');
         const accessToken = angelOneOAuthManager.getAccessToken();
-        const callbackHtml = `<!DOCTYPE html><html><head><title>Connected</title><script>var t="${accessToken}";if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_TOKEN",token:t},"*");setTimeout(function(){window.close()},500);}else{window.location.href="/?angel_one_token="+encodeURIComponent(t);}</script></head><body><p>Connected...</p></body></html>`;
+        
+        if (!accessToken) {
+          console.error('❌ [ANGEL ONE] Token is null after exchange - state issue');
+          const errorMsg = 'Token retrieval failed after authentication';
+          const errorHtml = `<!DOCTYPE html><html><head><title>Error</title><script>var e="${errorMsg.replace(/"/g, '\\"')}";if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_ERROR",error:e},"*");window.close();}else{window.location.href="/?angel_one_error="+encodeURIComponent(e);}</script></head><body><p>Error</p></body></html>`;
+          res.type('text/html');
+          res.status(200);
+          res.send(errorHtml);
+          return;
+        }
+        
+        console.log('📤 [ANGEL ONE] Sending token to popup:', accessToken.substring(0, 30) + '...');
+        const callbackHtml = '<!DOCTYPE html><html><head><title>Connected</title><script>var t="' + accessToken + '";if(window.opener){window.opener.postMessage({type:"ANGEL_ONE_TOKEN",token:t},"*");setTimeout(function(){window.close()},500);}else{window.location.href="/?angel_one_token="+encodeURIComponent(t);}</script></head><body><p>Connected...</p></body></html>';
         res.type('text/html');
         res.status(200);
         res.send(callbackHtml);
