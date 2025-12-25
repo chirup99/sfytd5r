@@ -4086,17 +4086,46 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       console.log('✅ Angel One popup opened, waiting for OAuth callback...');
       
       let checkCount = 0;
-      const monitorPopup = setInterval(() => {
+      const pollAuthStatus = setInterval(async () => {
+        checkCount++;
+        
+        if (popup.closed) {
+          clearInterval(pollAuthStatus);
+          console.log('⚠️ Angel One popup closed by user');
+          return;
+        }
+        
+        try {
+          const statusResponse = await fetch('/api/angel-one/status');
+          const status = await statusResponse.json();
+          
+          if (status.authenticated && status.accessToken) {
+            console.log('✅ [ANGEL ONE] Authenticated - closing popup');
+            clearInterval(pollAuthStatus);
+            popup.close();
+            return;
+          }
+        } catch (err) {
+          console.debug('🔶 [ANGEL ONE] Status polling...');
+        }
+        
+        if (checkCount > 300) {
+          clearInterval(pollAuthStatus);
+          popup.close();
+          console.log('⚠️ Angel One timeout');
+      } catch (error) {
+        console.error('❌ Angel One error:', error);
+        alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect'));
+      }
+          alert('Angel One login timeout. Try again.');
+        }
+      }, 1000);
         checkCount++;
         if (popup.closed) {
-          clearInterval(monitorPopup);
-          console.log('⚠️ Angel One popup closed');
           return;
         }
         if (checkCount > 300) {
-          clearInterval(monitorPopup);
           popup.close();
-          console.log('⚠️ Angel One popup timeout');
         }
       }, 1000);
       
