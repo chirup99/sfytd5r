@@ -4296,7 +4296,42 @@ import { newsRouter } from './news-routes.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
-  // 🔶 Angel One OAuth Redirect Flow
+  // 🔶 Angel One TOTP-Based Authentication (Direct API)
+  app.post("/api/angelone/authenticate", async (req, res) => {
+    try {
+      const { clientCode, password, totp } = req.body;
+      
+      if (!clientCode || !password || !totp) {
+        return res.status(400).json({ success: false, message: "Missing required fields: clientCode, password, totp" });
+      }
+
+      // Use Angel One OAuth manager's TOTP authentication method
+      const result = await angelOneOAuthManager.authenticateWithTotp(totp, password);
+
+      if (result.success && result.token) {
+        console.log("✅ Angel One authentication successful!");
+        res.json({ 
+          success: true, 
+          token: result.token,
+          clientCode: clientCode,
+          message: "Authenticated successfully"
+        });
+      } else {
+        res.status(401).json({ 
+          success: false, 
+          message: result.message || "Authentication failed" 
+        });
+      }
+    } catch (error: any) {
+      console.error("🔴 Angel One auth error:", error.message);
+      res.status(500).json({ 
+        success: false, 
+        message: "Authentication error: " + error.message 
+      });
+    }
+  });
+
+  // 🔶 Angel One OAuth Redirect Flow (fallback)
   app.get("/api/angelone/auth-url", (req, res) => {
     try {
       const state = (req.query.state as string) || "live";

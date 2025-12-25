@@ -11,3 +11,7 @@
 [x] 11. Backend callback endpoint ready at: /api/broker/angelone/callback
 [x] 12. Import completed - Angel One OAuth infrastructure is properly configured
 [x] 13. Reinstalled npm dependencies and restarted workflow - application is now running successfully
+[x] 14. Fixed Angel One authentication issue - implemented TOTP-based direct API authentication instead of publisher-login popup
+[x] 15. Added POST /api/angelone/authenticate endpoint for TOTP credentials (clientCode, password, TOTP)
+[x] 16. Updated frontend handleAngelOneConnect to accept user credentials via prompts and call TOTP endpoint
+[x] 17. Angel One login now prompts for: 1) Client Code 2) Password 3) TOTP (2FA code) - RESOLVES "Unable to authenticate" error

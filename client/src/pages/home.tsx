@@ -4059,63 +4059,52 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     }
   };
   const handleAngelOneConnect = async () => {
-    try {
-      console.log("🔶 Starting Angel One OAuth redirect flow...");
-      const response = await fetch("/api/angelone/auth-url");
-      const data = await response.json();
-      
-      if (!data.authUrl) {
-        alert("Error: Could not generate Angel One authorization URL");
-        return;
-      }
-      
-      console.log("🔗 Angel One auth URL:", data.authUrl);
-      
-      const width = 500;
-      const height = 600;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
-      
-      const popup = window.open(
-        data.authUrl,
-        "AngelOneLogin",
-        `width=${width},height=${height},left=${left},top=${top}`
-      );
-      
-      if (!popup) {
-        alert("Popup blocked! Please enable popups for this site.");
-        return;
-      }
-      
-      const messageListener = (event: MessageEvent) => {
-        if (event.data.type === "ANGELONE_AUTH_SUCCESS") {
-          console.log("✅ Angel One authentication successful!");
-          localStorage.setItem("angelone_token", event.data.token); localStorage.setItem("angel_one_token", event.data.token);
-          if (event.data.feedToken) localStorage.setItem("angelone_feed_token", event.data.feedToken);
-          localStorage.setItem("angel_one_client_code", event.data.clientCode || "P176266");
-          setAngelOneAccessToken(event.data.token);
-          setAngelOneIsConnected(true);
-          window.removeEventListener("message", messageListener);
-          toast({
-            title: "Success",
-            description: "Angel One connected successfully",
-          });
-          setConnectDialogOpen(false);
-        } else if (event.data.type === "ANGELONE_AUTH_ERROR") {
-          console.error("❌ Angel One auth error:", event.data.error);
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: event.data.error || "Login failed",
-          });
-          window.removeEventListener("message", messageListener);
-        }
-      };
+    const clientCode = prompt("Enter your Angel One client code (default: P176266):", "P176266");
+    if (!clientCode) return;
 
-      window.addEventListener("message", messageListener);
+    const password = prompt("Enter your Angel One password:");
+    if (!password) return;
+
+    const totp = prompt("Enter your Angel One TOTP (2FA code):");
+    if (!totp) return;
+
+    try {
+      console.log("🔶 Starting Angel One TOTP authentication...");
+      const response = await fetch("/api/angelone/authenticate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientCode, password, totp }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.token) {
+        console.log("✅ Angel One authentication successful!");
+        localStorage.setItem("angelone_token", data.token);
+        localStorage.setItem("angel_one_token", data.token);
+        localStorage.setItem("angel_one_client_code", data.clientCode || "P176266");
+        setAngelOneAccessToken(data.token);
+        setAngelOneIsConnected(true);
+        toast({
+          title: "Success",
+          description: "Angel One connected successfully",
+        });
+        setConnectDialogOpen(false);
+      } else {
+        console.error("❌ Angel One auth error:", data.message);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: data.message || "Login failed",
+        });
+      }
     } catch (error) {
       console.error("❌ Angel One error:", error);
-      alert("Error: " + (error instanceof Error ? error.message : "Failed to connect"));
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to authenticate with Angel One",
+      });
     }
   };
 
