@@ -1,3 +1,4 @@
+import { BrokerData } from "@/components/broker-data";
 import React, {
   useState,
   useEffect,
@@ -9,6 +10,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { AuthButtonAngelOne, AngelOneStatus, AngelOneApiStatistics, AngelOneSystemStatus, AngelOneLiveMarketPrices } from "@/components/auth-button-angelone";
 import { AuthButtonUpstox } from "@/components/auth-button-upstox";
+import { TradingJournalModal } from "@/components/trading-journal-modal";
 // REMOVED: All Fyers-related imports
 // import { AuthButton } from "@/components/auth-button";
 // import { ConnectionStatus } from "@/components/connection-status";
@@ -3753,6 +3755,31 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [importError, setImportError] = useState("");
   const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
   const [upstoxAccessToken, setUpstoxAccessToken] = useState<string | null>(null);
+  const [upstoxUserId, setUpstoxUserId] = useState<string | null>(null);
+  const [upstoxUserName, setUpstoxUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (upstoxAccessToken) {
+      fetch("/api/upstox/profile")
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            const userId = data.userId && data.userId !== "undefined" ? data.userId : null;
+            const userName = data.userName && data.userName !== "undefined" ? data.userName : null;
+            
+            if (userId) {
+              setUpstoxUserId(userId);
+              localStorage.setItem("upstox_user_id", userId);
+            }
+            if (userName) {
+              setUpstoxUserName(userName);
+              localStorage.setItem("upstox_user_name", userName);
+            }
+          }
+        })
+        .catch(err => console.error("Failed to fetch Upstox profile:", err));
+    }
+  }, [upstoxAccessToken]);
   const [angelOneAccessToken, setAngelOneAccessToken] = useState<string | null>(null);
   const [angelOneIsConnected, setAngelOneIsConnected] = useState(false);
   const [dhanAccessToken, setDhanAccessToken] = useState<string | null>(null);
@@ -3776,7 +3803,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       console.log('⚠️ [ZERODHA] No saved token in localStorage');
     }
       const savedUserName = localStorage.getItem("zerodha_user_name");
-      if (savedUserName) {
+      if (savedUserName && savedUserName !== "undefined") {
         setZerodhaUserName(savedUserName);
         console.log("✅ [ZERODHA] User Name restored from localStorage");
       }
@@ -3784,6 +3811,59 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
 
   // Fetch Zerodha profile to get both userId and userName - with persistence
+
+  // Restore Upstox connection from localStorage on mount
+  useEffect(() => {
+    console.log('🔵 [UPSTOX] Checking localStorage on mount...');
+    const savedToken = localStorage.getItem('upstox_token');
+    console.log('🔵 [UPSTOX] Saved token:', savedToken ? 'FOUND ✅' : 'NOT FOUND ❌');
+    if (savedToken) {
+      setUpstoxAccessToken(savedToken);
+      setUpstoxIsConnected(true);
+      console.log('✅ [UPSTOX] Connection restored from localStorage');
+      const savedUserId = localStorage.getItem('upstox_user_id');
+      const savedUserName = localStorage.getItem('upstox_user_name');
+      if (savedUserId) {
+        setUpstoxUserId(savedUserId);
+        console.log('✅ [UPSTOX] User ID restored from localStorage');
+      }
+      if (savedUserName && savedUserName !== "undefined") {
+        setUpstoxUserName(savedUserName);
+        console.log('✅ [UPSTOX] User Name restored from localStorage');
+      }
+    } else {
+      console.log('⚠️ [UPSTOX] No saved token in localStorage');
+    }
+  }, []);
+
+  // Restore Angel One connection from localStorage on mount
+  useEffect(() => {
+    console.log('✅ [ANGEL ONE] Checking localStorage on mount...');
+    const savedToken = localStorage.getItem('angel_one_token');
+    console.log('✅ [ANGEL ONE] Saved token:', savedToken ? 'FOUND ✅' : 'NOT FOUND ❌');
+    if (savedToken) {
+      setAngelOneAccessToken(savedToken);
+      setAngelOneIsConnected(true);
+      console.log('✅ [ANGEL ONE] Connection restored from localStorage');
+    } else {
+      console.log('⚠️ [ANGEL ONE] No saved token in localStorage');
+    }
+  }, []);
+
+  // Restore Dhan connection from localStorage on mount
+  useEffect(() => {
+    console.log('🔵 [DHAN] Checking localStorage on mount...');
+    const savedToken = localStorage.getItem('dhan_token');
+    console.log('🔵 [DHAN] Saved token:', savedToken ? 'FOUND ✅' : 'NOT FOUND ❌');
+    if (savedToken) {
+      setDhanAccessToken(savedToken);
+      setDhanIsConnected(true);
+      console.log('✅ [DHAN] Connection restored from localStorage');
+    } else {
+      console.log('⚠️ [DHAN] No saved token in localStorage');
+    }
+  }, []);
+
   useEffect(() => {
     if (zerodhaAccessToken) {
       // Check if we already have profile in localStorage
@@ -3932,8 +4012,10 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         console.log('🔵 [DHAN] Token received from popup:', token.substring(0, 20) + '...');
         
         localStorage.setItem("dhan_token", token);
+        localStorage.setItem("dhan_token", token);
+        localStorage.setItem("dhan_user_id", "dhan_user");
+        localStorage.setItem("dhan_user_name", "Dhan Account");
         document.cookie = `dhan_token=${token}; path=/; SameSite=Lax; Secure`;
-        setDhanAccessToken(token);
         setDhanIsConnected(true);
         setShowConnectDialog(false);
         console.log('✅ [DHAN] Connection established and saved to localStorage');
@@ -4739,23 +4821,86 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   // Order Modal State
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [orderTab, setOrderTab] = useState("history");
-
-  // Fetch Zerodha positions when tab changes
+  // Fetch broker positions when tab changes - supports all 4 brokers (Zerodha, Upstox, Angel One, Dhan)
   useEffect(() => {
-    if (zerodhaAccessToken && orderTab === "positions") {
-      setFetchingBrokerPositions(true);
-      fetch("/api/broker/zerodha/positions", {
-        headers: { "Authorization": `Bearer ${zerodhaAccessToken}` }
-      })
-        .then(r => r.json())
-        .then(data => setBrokerPositions(data.positions || []))
-        .catch(err => {
-          console.error("❌ Positions fetch failed:", err);
+    if (orderTab === "positions" && (zerodhaAccessToken || upstoxAccessToken || angelOneAccessToken || dhanAccessToken)) {
+      const fetchPositions = async () => {
+        setFetchingBrokerPositions(true);
+        try {
+          // Determine which broker is connected and get correct endpoint/token
+          let endpoint = '';
+          let token = '';
+          let broker = '';
+          
+          if (zerodhaAccessToken) {
+            endpoint = '/api/broker/zerodha/positions';
+            token = zerodhaAccessToken;
+            broker = 'Zerodha';
+          } else if (upstoxAccessToken) {
+            endpoint = '/api/broker/upstox/positions';
+            token = upstoxAccessToken;
+            broker = 'Upstox';
+          } else if (angelOneAccessToken) {
+            endpoint = '/api/broker/angelone/positions';
+            token = angelOneAccessToken;
+            broker = 'Angel One';
+          } else if (dhanAccessToken) {
+            endpoint = '/api/broker/dhan/positions';
+            token = dhanAccessToken;
+            broker = 'Dhan';
+          }
+          
+          if (!endpoint || !token) return;
+          
+          const res = await fetch(endpoint, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await res.json();
+          let positions = data.positions || [];
+
+          // Fetch live prices for each position from WebSocket stream
+          if (positions.length > 0) {
+            const livePositions = await Promise.all(
+              positions.map(async (pos: any) => {
+                try {
+                  const symbol = pos.symbol || '';
+                  const liveRes = await fetch(`/api/live-quotes/NSE:${symbol}-EQ`);
+                  if (liveRes.ok) {
+                    const liveData = await liveRes.json();
+                    return {
+                      ...pos,
+                      currentPrice: liveData.price || pos.currentPrice || pos.current_price || 0
+                    };
+                  }
+                } catch (err) {
+                  console.warn(`⚠️ [LIVE-PRICE] Could not fetch live price for ${pos.symbol}`);
+                }
+                return pos;
+              })
+            );
+            positions = livePositions;
+          }
+
+          setBrokerPositions(positions);
+          console.log('✅ [POSITIONS]', broker, 'Fetched', positions.length, 'positions with live prices via WebSocket');
+        } catch (err) {
+          console.error('❌ [POSITIONS] Error fetching positions:', err);
           setBrokerPositions([]);
-        })
-        .finally(() => setFetchingBrokerPositions(false));
+        } finally {
+          setFetchingBrokerPositions(false);
+        }
+      };
+
+      // Fetch positions immediately when tab opens
+      fetchPositions();
+
+      // Set up polling to refresh every 700ms while tab is open
+      const pollInterval = setInterval(fetchPositions, 700);
+
+      // Cleanup: clear interval when tab changes
+      return () => clearInterval(pollInterval);
     }
-  }, [zerodhaAccessToken, orderTab]);
+  }, [zerodhaAccessToken, upstoxAccessToken, angelOneAccessToken, dhanAccessToken, orderTab]);
   const [brokerOrders, setBrokerOrders] = useState<any[]>([]);
   const [fetchingBrokerOrders, setFetchingBrokerOrders] = useState(false);
   const [brokerPositions, setBrokerPositions] = useState<any[]>([]);
@@ -4779,18 +4924,43 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   // Trade History Data State
   const [tradeHistoryData, setTradeHistoryData] = useState([]);
 
-  // Fetch broker orders when Orders dialog opens - with auto-refresh polling
+  // Fetch broker orders when Orders dialog opens - supports all 4 brokers (Zerodha, Upstox, Angel One, Dhan)
   useEffect(() => {
-    if (zerodhaAccessToken) {
+    if (orderTab === 'history' && (zerodhaAccessToken || upstoxAccessToken || angelOneAccessToken || dhanAccessToken)) {
       const fetchOrders = async () => {
         setFetchingBrokerOrders(true);
         try {
-          const res = await fetch('/api/broker/zerodha/trades', {
-            headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
+          // Determine which broker is connected and get correct endpoint/token
+          let endpoint = '';
+          let token = '';
+          let broker = '';
+          
+          if (zerodhaAccessToken) {
+            endpoint = '/api/broker/zerodha/trades';
+            token = zerodhaAccessToken;
+            broker = 'Zerodha';
+          } else if (upstoxAccessToken) {
+            endpoint = '/api/broker/upstox/trades';
+            token = upstoxAccessToken;
+            broker = 'Upstox';
+          } else if (angelOneAccessToken) {
+            endpoint = '/api/broker/angelone/trades';
+            token = angelOneAccessToken;
+            broker = 'Angel One';
+          } else if (dhanAccessToken) {
+            endpoint = '/api/broker/dhan/trades';
+            token = dhanAccessToken;
+            broker = 'Dhan';
+          }
+          
+          if (!endpoint || !token) return;
+          
+          const res = await fetch(endpoint, {
+            headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await res.json();
           setBrokerOrders(data.trades || []);
-          console.log('✅ [ORDERS] Fetched', (data.trades || []).length, 'trades from Zerodha');
+          console.log('✅ [ORDERS]', broker, 'Fetched', (data.trades || []).length, 'trades');
         } catch (err) {
           console.error('❌ [ORDERS] Error fetching trades:', err);
           setBrokerOrders([]);
@@ -4802,21 +4972,22 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       // Fetch orders immediately when dialog opens
       fetchOrders();
 
-      // Set up polling to refresh every 3 seconds while dialog is open
+      // Set up polling to refresh every 1 second while dialog is open
       const pollInterval = setInterval(fetchOrders, 1000);
 
       // Cleanup: clear interval when dialog closes
       return () => clearInterval(pollInterval);
     }
-  }, [zerodhaAccessToken]);
-
+  }, [zerodhaAccessToken, upstoxAccessToken, angelOneAccessToken, dhanAccessToken, orderTab]);
 // Fetch broker funds when dialog opens - with auto-refresh polling
   useEffect(() => {
-    if (showOrderModal && zerodhaAccessToken) {
+    if (showOrderModal && (zerodhaAccessToken || upstoxAccessToken)) {
       const fetchBrokerFunds = async () => {
         try {
-          const response = await fetch('/api/broker/zerodha/margins', {
-            headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
+          const endpoint = zerodhaAccessToken ? '/api/broker/zerodha/margins' : '/api/broker/upstox/margins';
+          const token = zerodhaAccessToken || upstoxAccessToken;
+          const response = await fetch(endpoint, {
+            headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await response.json();
           if (response.ok && data.success && data.availableCash !== undefined) {
@@ -4853,25 +5024,45 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     }
   }, [zerodhaAccessToken, brokerFunds]);
 
-  // Fetch broker funds when dialog opens - with auto-refresh polling
+  // Fetch broker funds when dialog opens - supports all 4 brokers (Zerodha, Upstox, Angel One, Dhan)
   useEffect(() => {
-    if (showOrderModal && zerodhaAccessToken) {
+    if (showOrderModal && (zerodhaAccessToken || upstoxAccessToken || angelOneAccessToken || dhanAccessToken)) {
       const fetchBrokerFunds = async () => {
         try {
-          const response = await fetch('/api/broker/zerodha/margins', {
-            headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
+          // Determine which broker is connected
+          let endpoint = '';
+          let token = '';
+          let broker = '';
+          
+          if (zerodhaAccessToken) {
+            endpoint = '/api/broker/zerodha/margins';
+            token = zerodhaAccessToken;
+            broker = 'Zerodha';
+          } else if (upstoxAccessToken) {
+            endpoint = '/api/broker/upstox/margins';
+            token = upstoxAccessToken;
+            broker = 'Upstox';
+          } else if (angelOneAccessToken) {
+            endpoint = '/api/broker/angelone/margins';
+            token = angelOneAccessToken;
+            broker = 'Angel One';
+          } else if (dhanAccessToken) {
+            endpoint = '/api/broker/dhan/margins';
+            token = dhanAccessToken;
+            broker = 'Dhan';
+          }
+          
+          if (!endpoint || !token) return;
+          
+          const response = await fetch(endpoint, {
+            headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await response.json();
-          if (response.ok && data.success && data.availableCash !== undefined) {
-            setBrokerFunds(data.availableCash);
-            localStorage.setItem("zerodha_broker_funds", data.availableCash.toString());
-            console.log('✅ [BROKER] Fetched available funds:', data.availableCash);
-          } else {
-            console.error('❌ [BROKER] Failed to fetch funds:', data.error || 'Invalid response');
-            setBrokerFunds(null);
-          }
+          setBrokerFunds(data.availableCash || data.availableFunds || 0);
+          console.log('✅ [FUNDS]', broker, 'Fetched available funds:', data.availableCash || data.availableFunds);
         } catch (error) {
-          console.error('❌ [BROKER] Failed to fetch funds:', error);
+          console.error('❌ [FUNDS] Error fetching broker funds:', error);
+          setBrokerFunds(0);
         }
       };
       
@@ -4884,7 +5075,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       // Cleanup: clear interval when dialog closes
       return () => clearInterval(pollInterval);
     }
-  }, [showOrderModal, zerodhaAccessToken]);
+  }, [showOrderModal, zerodhaAccessToken, upstoxAccessToken, angelOneAccessToken, dhanAccessToken]);
 
   // PAPER TRADING (DEMO TRADING) STATE - Like TradingView Practice Account
   // ============================================
@@ -17532,12 +17723,60 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                 size="sm"
                                 className="h-7 px-2 text-xs"
                                 onClick={() => setShowOrderModal(true)}
-                                data-testid="button-broker-orders"
-                                title="View Orders & Positions"
+                                data-testid="button-broker-orders-zerodha"
+                                title="View Orders & Positions (Zerodha)"
                               >
                                 <img 
                                   src="https://zerodha.com/static/images/products/kite-logo.svg" 
                                   alt="Zerodha" 
+                                  className="h-4 w-4"
+                                />
+                              </Button>
+                            )}
+                            {upstoxIsConnected && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={() => setShowOrderModal(true)}
+                                data-testid="button-broker-orders-upstox"
+                                title="View Orders & Positions (Upstox)"
+                              >
+                                <img 
+                                  src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" 
+                                  alt="Upstox" 
+                                  className="h-4 w-4"
+                                />
+                              </Button>
+                            )}
+                            {angelOneIsConnected && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={() => setShowOrderModal(true)}
+                                data-testid="button-broker-orders-angelone"
+                                title="View Orders & Positions (Angel One)"
+                              >
+                                <img 
+                                  src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw?v=1701" 
+                                  alt="Angel One" 
+                                  className="h-4 w-4"
+                                />
+                              </Button>
+                            )}
+                            {dhanIsConnected && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={() => setShowOrderModal(true)}
+                                data-testid="button-broker-orders-dhan"
+                                title="View Orders & Positions (Dhan)"
+                              >
+                                <img 
+                                  src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw?v=1701" 
+                                  alt="Dhan" 
                                   className="h-4 w-4"
                                 />
                               </Button>
@@ -17769,11 +18008,15 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             </Button>
                           )}
                           {upstoxIsConnected ? (
-                            <div className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800 border border-green-500 rounded h-10">
-                              <div className="flex items-center">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                className="flex-1 h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 cursor-default"
+                                data-testid="button-upstox-connected-display"
+                              >
                                 <img src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" alt="Upstox" className="h-4 mr-2" />
-                                <span className="text-black dark:text-white font-medium">Upstox</span>
-                              </div>
+                                Upstox
+                              </Button>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
@@ -19614,161 +19857,49 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           </div>
         </main>
 
-        {/* Trade History Modal with Orders & Positions */}
-        <Dialog open={showOrderModal} onOpenChange={setShowOrderModal}>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto custom-thin-scrollbar p-0">
-            {/* Compact Header */}
-            <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between gap-4">
-              <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
-              <div className="flex-1 flex items-center justify-center gap-2">
-                {zerodhaAccessToken ? (
-                  brokerFunds !== null ? (
-                    <div className="text-center">
-                      <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Available Funds</div>
-                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{showUserId ? `₹${brokerFunds.toLocaleString('en-IN', {maximumFractionDigits: 2})}` : "***"}</div>
-                    </div>
-                  ) : (
-                    <div className="text-xs text-slate-400 dark:text-slate-500">Loading funds...</div>
-                  )
-                ) : null}
-              </div>
-              <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
-                <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1">
-                  <img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3" />
-                  <span>id: {showUserId ? (zerodhaClientId || "N/A") : "••••••"} | {showUserId ? (zerodhaUserName || "N/A") : "•••••"}</span>
-                </div>
-                <button onClick={() => setShowUserId(!showUserId)} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" data-testid="button-toggle-user-id" title={showUserId ? "Hide ID" : "Show ID"}>
-                  {showUserId ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="p-4">
-              <Tabs value={orderTab} onValueChange={setOrderTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-3">
-                <TabsTrigger value="history">Orders</TabsTrigger>
-                <TabsTrigger value="positions">Positions</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="history" className="space-y-4">
-                <div className="max-h-96 overflow-y-auto border rounded-lg custom-thin-scrollbar">
-                  <table className="w-full text-xs">
-                    <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
-                      <tr>
-                        <th className="px-2 py-2 text-left font-medium">Time</th>
-                        <th className="px-2 py-2 text-left font-medium">Order</th>
-                        <th className="px-2 py-2 text-left font-medium">Symbol</th>
-                        <th className="px-2 py-2 text-left font-medium">Type</th>
-                        <th className="px-2 py-2 text-left font-medium">Qty</th>
-                        <th className="px-2 py-2 text-left font-medium">Price</th>
-                        <th className="px-2 py-2 text-left font-medium">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {brokerOrders.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
-                            {fetchingBrokerOrders ? 'Loading orders...' : zerodhaAccessToken ? 'No orders found' : 'Connect to broker to view orders'}
-                          </td>
-                        </tr>
-                      ) : (
-                        [...brokerOrders].sort((a, b) => { const aStatus = String(a.status || "").toUpperCase().trim(); const bStatus = String(b.status || "").toUpperCase().trim(); const aOrder = aStatus === "COMPLETE" || aStatus === "PENDING" ? 0 : aStatus === "REJECTED" || aStatus === "CANCELLED" ? 999 : 500; const bOrder = bStatus === "COMPLETE" || bStatus === "PENDING" ? 0 : bStatus === "REJECTED" || bStatus === "CANCELLED" ? 999 : 500; return aOrder - bOrder; }).map((trade, index) => (
-                          <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <td className="px-2 py-2 font-medium">{trade.time}</td>
-                            <td className="px-2 py-2">
-                              <span className={`px-1 py-0.5 rounded text-xs ${
-                                trade.order === "BUY"
-                                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                  : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                              }`}>
-                                {trade.order}
-                              </span>
-                            </td>
-                            <td className="px-2 py-2 font-medium">{trade.symbol}</td>
-                            <td className="px-2 py-2">{trade.type}</td>
-                            <td className="px-2 py-2">{trade.qty}</td>
-                            <td className="px-2 py-2">₹{trade.price}</td>
-<td className="px-2 py-2">
-                              <span className={`text-xs font-medium ${
-                                trade.status === 'COMPLETE' ? 'text-green-600 dark:text-green-400' :
-                                trade.status === 'REJECTED' ? 'text-red-600 dark:text-red-400' :
-                                trade.status === 'CANCELLED' ? 'text-yellow-600 dark:text-yellow-400' :
-                                'text-blue-600 dark:text-blue-400'
-                              }`}>
-                                {trade.status || 'PENDING'}
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700 mt-2">
-                  <button
-                    onClick={recordAllBrokerOrders}
-                    disabled={brokerOrders.length === 0}
-                    className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded transition-colors"
-                    data-testid="button-record-broker-orders"
-                  >
-                    Record to Journal
-                  </button>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{brokerOrders.length} orders</span>
-                </div>
-              </TabsContent>
-
-                            <TabsContent value="positions" className="space-y-4">
-                <div className="max-h-96 overflow-y-auto border rounded-lg custom-thin-scrollbar">
-                  <table className="w-full text-xs">
-                    <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
-                      <tr>
-                        <th className="px-2 py-2 text-left font-medium">Symbol</th>
-                        <th className="px-2 py-2 text-left font-medium">Entry Price</th>
-                        <th className="px-2 py-2 text-left font-medium">Current Price</th>
-                        <th className="px-2 py-2 text-left font-medium">Qty</th>
-                        <th className="px-2 py-2 text-left font-medium">Unrealized P&L</th>
-                        <th className="px-2 py-2 text-left font-medium">Return %</th>
-                        <th className="px-2 py-2 text-left font-medium">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {brokerPositions.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
-                            {fetchingBrokerPositions ? 'Loading positions...' : zerodhaAccessToken ? 'No open positions' : 'Connect to broker to view positions'}
-                          </td>
-                        </tr>
-                      ) : (
-                        [...brokerPositions].sort((a, b) => { const aStatus = String(a.status || "Open").toUpperCase().trim(); const bStatus = String(b.status || "Open").toUpperCase().trim(); return (aStatus === "OPEN" ? 0 : 999) - (bStatus === "OPEN" ? 0 : 999); }).map((pos, index) => (
-                          <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <td className="px-2 py-2 font-medium">{pos.symbol}</td>
-                            <td className="px-2 py-2">₹{pos.entryPrice || pos.entry_price}</td>
-                            <td className="px-2 py-2">₹{pos.currentPrice || pos.current_price}</td>
-                            <td className="px-2 py-2">{pos.qty || pos.quantity}</td>
-                            <td className={`px-2 py-2 font-medium ${(pos.unrealizedPnl || pos.unrealized_pnl || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                              ₹{pos.unrealizedPnl || pos.unrealized_pnl || 0}
-                            </td>
-                            <td className={`px-2 py-2 ${(pos.returnPercent || pos.return_percent || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                              {(pos.returnPercent || pos.return_percent || 0).toFixed(2)}%
-                            </td>
-                            <td className="px-2 py-2">{pos.status || 'Open'}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700 mt-2">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{brokerPositions.length} open positions</span>
-                </div>
-              </TabsContent>
-
-              </Tabs>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-
+        <BrokerData 
+          showOrderModal={showOrderModal} 
+          setShowOrderModal={setShowOrderModal} 
+          orderTab={orderTab} 
+          setOrderTab={setOrderTab} 
+          showUserId={showUserId} 
+          setShowUserId={setShowUserId} 
+          zerodhaClientId={zerodhaClientId} 
+          zerodhaUserName={zerodhaUserName} 
+          brokerOrders={brokerOrders} 
+          fetchingBrokerOrders={fetchingBrokerOrders} 
+          zerodhaAccessToken={zerodhaAccessToken} 
+          recordAllBrokerOrders={recordAllBrokerOrders} 
+          upstoxAccessToken={upstoxAccessToken}
+          upstoxUserId={upstoxUserId}
+          upstoxUserName={upstoxUserName}
+          brokerPositions={brokerPositions} 
+          fetchingBrokerPositions={fetchingBrokerPositions} 
+          showBrokerImportModal={showBrokerImportModal} 
+          setShowBrokerImportModal={setShowBrokerImportModal} 
+          handleBrokerImport={handleBrokerImport} 
+          showImportModal={showImportModal} 
+          setShowImportModal={setShowImportModal} 
+          handleFileUpload={handleFileUpload} 
+          activeFormat={activeFormat} 
+          detectedFormatLabel={detectedFormatLabel} 
+          isBuildMode={isBuildMode} 
+          setIsBuildMode={setIsBuildMode} 
+          brokerSearchInput={brokerSearchInput} 
+          setBrokerSearchInput={setBrokerSearchInput} 
+          showBrokerSuggestions={showBrokerSuggestions} 
+          setShowBrokerSuggestions={setShowBrokerSuggestions} 
+          filteredBrokers={filteredBrokers} 
+          buildModeData={buildModeData} 
+          setBuildModeData={setBuildModeData} 
+          allColumnsFilledForSave={allColumnsFilledForSave} 
+          missingColumns={missingColumns} 
+          saveFormatToUniversalLibrary={saveFormatToUniversalLibrary} 
+          currentUser={currentUser} 
+          getCognitoToken={getCognitoToken} 
+          setSavedFormats={setSavedFormats} 
+          importDataTextareaRef={importDataTextareaRef} brokerFunds={brokerFunds} 
+        />
         {/* Broker Import Dialog */}
         <BrokerImportDialog
           open={showBrokerImportModal}
@@ -20909,85 +21040,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           </DialogContent>
         </Dialog>
 
-        {/* Trading Journal Info Modal */}
-        <Dialog open={showJournalInfoModal} onOpenChange={setShowJournalInfoModal}>
-          <DialogContent className="max-w-sm w-[90vw]">
-            <DialogHeader className="text-center">
-              <div className="flex justify-center mb-2">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                  <Info className="h-6 w-6 text-white" />
-                </div>
-              </div>
-              <DialogTitle className="text-xl font-bold text-center">Trading Journal</DialogTitle>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
-                Track Your Trading Progress
-              </p>
-            </DialogHeader>
-            <div className="py-4 space-y-3">
-              <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                <Calendar className="h-5 w-5 text-blue-500" />
-                <div>
-                  <p className="text-[10px] font-medium">Daily Trade Tracking</p>
-                  <p className="text-[10px] text-gray-500">Record and monitor all your trades</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                <BarChart3 className="h-5 w-5 text-green-500" />
-                <div>
-                  <p className="text-sm font-medium">AI Performance Analysis</p>
-                  <p className="text-xs text-gray-500">View detailed P&L and trading statistics</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-amber-500" />
-                <div>
-                  <p className="text-sm font-medium">Improve Your Trading</p>
-                  <p className="text-xs text-gray-500">Learn from your trades and patterns</p>
-                </div>
-              </div>
-              <div className="mt-1 p-2 bg-red-50/30 dark:bg-red-900/5 rounded-md border border-red-100/30 dark:border-red-900/10">
-                <p className="text-[10px] leading-tight text-red-700/80 dark:text-red-400/80 font-medium text-center">
-                  Aggregate Losses Exceed ₹1.8 Lakh Crores Over Three Years <div className="inline-flex items-center gap-1 ml-1 bg-white/20 rounded px-1 py-0.5"><TrendingDown className="h-3 w-3"/><BarChart3 className="h-3 w-3"/></div>
-                </p>
-              <div className="mt-0.5 text-center"><p className="text-[8px] text-gray-600 dark:text-gray-400 font-medium uppercase tracking-tighter">Top 3 Loss Traders States:</p></div>
-              <div className="mt-0.5 flex items-center justify-center gap-2 py-1 px-2 bg-slate-50/50 dark:bg-slate-900/20 rounded-md border border-slate-100 dark:border-slate-800/50">
-                <div className="flex flex-col items-center">
-                  <span className="text-[7px] text-gray-400 uppercase tracking-tighter">Telangana</span>
-                  <div className="h-1 w-6 bg-red-400/60 rounded-full mt-0.5" />
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-[7px] text-gray-400 uppercase tracking-tighter">AP</span>
-                  <div className="h-1 w-4 bg-red-400/40 rounded-full mt-0.5" />
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-[7px] text-gray-400 uppercase tracking-tighter">Tamil Nadu</span>
-                  <div className="h-1 w-3 bg-red-400/30 rounded-full mt-0.5" />
-                </div>
-              </div>
-              </div>
-              <div className="mt-1.5 p-2 bg-red-50 dark:bg-red-900/10 border border-red-100/50 dark:border-red-900/20 rounded-lg space-y-1">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-3 w-3 text-red-500 shrink-0 mt-0.5" />
-                  <div className="space-y-0.5">
-                    <p className="text-[9px] leading-snug text-gray-700 dark:text-gray-300">
-                      93% of over 1 crore individual F&O traders incurred average losses of around ₹2 lakh per trader (inclusive of transaction costs) during the three years from FY22 to FY24.
-                    </p>
-                    <p className="text-[9px] leading-snug text-gray-700 dark:text-gray-300">
-                      Only 1% of individual traders managed to earn profits exceeding ₹1 lakh, after adjusting for transaction costs.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <Button 
-              onClick={() => setShowJournalInfoModal(false)}
-              className="w-full"
-              data-testid="button-close-journal-modal"
-            >
-              Got It
-            </Button>
-          </DialogContent>
-        </Dialog>
+        <TradingJournalModal open={showJournalInfoModal} onOpenChange={setShowJournalInfoModal} />
+
 
         {/* Paper Trading (Demo Trading) Modal - Minimalist Design */}
         <Dialog open={showPaperTradingModal} onOpenChange={setShowPaperTradingModal}>

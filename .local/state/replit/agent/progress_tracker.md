@@ -118,3 +118,6 @@
 [x] 109. Application running on port 5000 - Angel One WebSocket connected, live data streaming active
 [x] 110. Environment reset - reinstalled dotenv package and restarted workflow successfully (Dec 26, 2025)
 [x] 111. Application fully operational - Express server on port 5000, Angel One WebSocket auto-connected, live streaming active
+[x] 112. Fixed Connect Your Broker dialog - Upstox, Angel One, and Dhan now have separate X disconnect button (not nested inside broker button)
+[x] 113. All brokers (Zerodha, Upstox, Angel One, Dhan) now follow consistent layout: broker button on left, X button on right (gap-2 spacing)
+[x] 114. Workflow restarted and running - Connect Your Broker dialog now displays correct broker button layout

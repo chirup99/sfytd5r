@@ -18008,11 +18008,15 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             </Button>
                           )}
                           {upstoxIsConnected ? (
-                            <div className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800 border border-green-500 rounded h-10">
-                              <div className="flex items-center">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                className="flex-1 h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 cursor-default"
+                                data-testid="button-upstox-connected-display"
+                              >
                                 <img src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" alt="Upstox" className="h-4 mr-2" />
-                                <span className="text-black dark:text-white font-medium">Upstox</span>
-                              </div>
+                                Upstox
+                              </Button>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
@@ -18044,11 +18048,15 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             </Button>
                           )}
                           {angelOneIsConnected ? (
-                            <div className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800 border border-green-500 rounded h-10">
-                              <div className="flex items-center">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                className="flex-1 h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 cursor-default"
+                                data-testid="button-angelone-connected-display"
+                              >
                                 <img src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw?v=1701" alt="Angel One" className="h-4 mr-2" />
-                                <span className="text-black dark:text-white font-medium">Angel One</span>
-                              </div>
+                                Angel One
+                              </Button>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
@@ -18080,11 +18088,15 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             </Button>
                           )}
                           {dhanIsConnected ? (
-                            <div className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800 border border-green-500 rounded h-10">
-                              <div className="flex items-center">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                className="flex-1 h-10 bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 cursor-default"
+                                data-testid="button-dhan-connected-display"
+                              >
                                 <img src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw?v=1701" alt="Dhan" className="h-4 mr-2" />
-                                <span className="text-black dark:text-white font-medium">Dhan</span>
-                              </div>
+                                Dhan
+                              </Button>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
