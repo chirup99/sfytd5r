@@ -46,3 +46,7 @@
 [x] 46. Removed reliance on backend-provided P&L values - now calculating dynamically on frontend: P&L = (currentPrice - entryPrice) * quantity
 [x] 47. Return % now calculated dynamically: ((currentPrice - entryPrice) / entryPrice) * 100
 [x] 48. Workflow restarted - positions P&L updates now refresh in real-time with live price changes
+[x] 49. Fixed positions auto-fetching - added setInterval polling every 1 second (matching orders refresh rate)
+[x] 50. Changed positions fetch from one-time request to continuous polling using fetchPositions function
+[x] 51. Positions now auto-refresh continuously while positions tab is open - current price and qty update every 1s
+[x] 52. Workflow restarted and running - positions auto-refresh fully operational, matching orders refresh behavior

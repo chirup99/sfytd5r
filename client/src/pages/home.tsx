@@ -4741,20 +4741,34 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [orderTab, setOrderTab] = useState("history");
 
-  // Fetch Zerodha positions when tab changes
+  // Fetch Zerodha positions when tab changes - with auto-refresh polling every 1 second
   useEffect(() => {
     if (zerodhaAccessToken && orderTab === "positions") {
-      setFetchingBrokerPositions(true);
-      fetch("/api/broker/zerodha/positions", {
-        headers: { "Authorization": `Bearer ${zerodhaAccessToken}` }
-      })
-        .then(r => r.json())
-        .then(data => setBrokerPositions(data.positions || []))
-        .catch(err => {
-          console.error("❌ Positions fetch failed:", err);
+      const fetchPositions = async () => {
+        setFetchingBrokerPositions(true);
+        try {
+          const res = await fetch('/api/broker/zerodha/positions', {
+            headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
+          });
+          const data = await res.json();
+          setBrokerPositions(data.positions || []);
+          console.log('✅ [POSITIONS] Fetched', (data.positions || []).length, 'positions from Zerodha');
+        } catch (err) {
+          console.error('❌ [POSITIONS] Error fetching positions:', err);
           setBrokerPositions([]);
-        })
-        .finally(() => setFetchingBrokerPositions(false));
+        } finally {
+          setFetchingBrokerPositions(false);
+        }
+      };
+
+      // Fetch positions immediately when tab opens
+      fetchPositions();
+
+      // Set up polling to refresh every 1 second while tab is open
+      const pollInterval = setInterval(fetchPositions, 1000);
+
+      // Cleanup: clear interval when tab changes
+      return () => clearInterval(pollInterval);
     }
   }, [zerodhaAccessToken, orderTab]);
   const [brokerOrders, setBrokerOrders] = useState<any[]>([]);
