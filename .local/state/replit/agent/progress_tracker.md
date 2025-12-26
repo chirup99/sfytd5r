@@ -121,3 +121,7 @@
 [x] 112. Fixed Connect Your Broker dialog - Upstox, Angel One, and Dhan now have separate X disconnect button (not nested inside broker button)
 [x] 113. All brokers (Zerodha, Upstox, Angel One, Dhan) now follow consistent layout: broker button on left, X button on right (gap-2 spacing)
 [x] 114. Workflow restarted and running - Connect Your Broker dialog now displays correct broker button layout
+[x] 115. Created handleUpstoxDisconnect function that calls Upstox API logout endpoint: DELETE https://api.upstox.com/v2/logout
+[x] 116. Upstox disconnect button now uses API to logout with Bearer token authorization
+[x] 117. Added error handling to clear localStorage even if API call fails - ensures graceful disconnection
+[x] 118. Workflow restarted successfully - Upstox logout API integration complete and operational

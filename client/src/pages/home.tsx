@@ -4170,6 +4170,52 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect to Upstox'));
     }
   };
+
+  const handleUpstoxDisconnect = async () => {
+    try {
+      const token = upstoxAccessToken;
+      if (!token) {
+        // No token to revoke, just clear locally
+        localStorage.removeItem("upstox_token");
+        localStorage.removeItem("upstox_user_id");
+        localStorage.removeItem("upstox_user_email");
+        localStorage.removeItem("upstox_user_name");
+        setUpstoxAccessToken(null);
+        setUpstoxIsConnected(false);
+        return;
+      }
+
+      // Call Upstox logout API
+      const response = await fetch('https://api.upstox.com/v2/logout', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('🔵 Upstox logout response:', response.status);
+      
+      // Clear local storage regardless of API response
+      localStorage.removeItem("upstox_token");
+      localStorage.removeItem("upstox_user_id");
+      localStorage.removeItem("upstox_user_email");
+      localStorage.removeItem("upstox_user_name");
+      setUpstoxAccessToken(null);
+      setUpstoxIsConnected(false);
+    } catch (error) {
+      console.error('❌ Upstox disconnect error:', error);
+      // Clear local storage even if API call fails
+      localStorage.removeItem("upstox_token");
+      localStorage.removeItem("upstox_user_id");
+      localStorage.removeItem("upstox_user_email");
+      localStorage.removeItem("upstox_user_name");
+      setUpstoxAccessToken(null);
+      setUpstoxIsConnected(false);
+    }
+  };
+
   const handleAngelOneConnect = async () => {
     try {
       console.log("🔶 Starting Angel One OAuth redirect flow...");
@@ -18021,11 +18067,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                 variant="ghost" 
                                 size="icon" 
                                 className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-10 w-10 border border-slate-200 hover:border-red-100"
-                                onClick={() => {
-                                  localStorage.removeItem("upstox_token");
-                                  setUpstoxAccessToken(null);
-                                  setUpstoxIsConnected(false);
-                                }}
+                                onClick={handleUpstoxDisconnect}
                                 title="Disconnect Upstox"
                               >
                                 <X className="h-4 w-4" />
