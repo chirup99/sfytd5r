@@ -103,7 +103,7 @@ export function BrokerData(props: BrokerDataProps) {
                     </>
                   )}
                 </div>
-                {activeBroker === 'zerodha' && (
+                {(activeBroker === 'zerodha' || activeBroker === 'upstox') && (
                   <button onClick={() => setShowUserId(!showUserId)} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" data-testid="button-toggle-user-id" title={showUserId ? "Hide ID" : "Show ID"}>
                     {showUserId ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
                   </button>
