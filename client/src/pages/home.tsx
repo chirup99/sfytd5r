@@ -20947,7 +20947,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
               </div>
               <div className="mt-1 p-2 bg-red-50/30 dark:bg-red-900/5 rounded-md border border-red-100/30 dark:border-red-900/10">
                 <p className="text-[10px] leading-tight text-red-700/80 dark:text-red-400/80 font-medium text-center">
-                  Aggregate Losses Exceed ₹1.8 Lakh Crores Over Three Years
+                  Aggregate Losses Exceed ₹1.8 Lakh Crores Over Three Years <div className="inline-flex items-center gap-1 ml-1 bg-white/20 rounded px-1 py-0.5"><TrendingDown className="h-3 w-3"/><BarChart3 className="h-3 w-3"/></div>
                 </p>
               </div>
               <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/10 border border-red-100/50 dark:border-red-900/20 rounded-lg space-y-2">
