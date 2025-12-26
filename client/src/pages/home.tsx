@@ -20924,17 +20924,17 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
               </p>
             </DialogHeader>
             <div className="py-4 space-y-3">
-              <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                <Calendar className="h-4 w-4 text-blue-500" />
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                <Calendar className="h-5 w-5 text-blue-500" />
                 <div>
-                  <p className="text-[10px] font-medium">Daily Trade Tracking</p>
-                  <p className="text-[10px] text-gray-500">Record and monitor all your trades</p>
+                  <p className="text-sm font-medium">Daily Trade Tracking</p>
+                  <p className="text-xs text-gray-500">Record and monitor all your trades</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
                 <BarChart3 className="h-5 w-5 text-green-500" />
                 <div>
-                  <p className="text-sm font-medium">Performance Analysis</p>
+                  <p className="text-sm font-medium">AI Performance Analysis</p>
                   <p className="text-xs text-gray-500">View detailed P&L and trading statistics</p>
                 </div>
               </div>

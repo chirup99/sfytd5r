@@ -41,7 +41,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAngelOneAutoconnect } from "@/hooks/useAngelOneAutoconnect";
 import { cognitoSignOut, getCognitoToken, sendEmailVerificationCode, confirmEmailVerification, checkEmailVerified } from "@/cognito";
 import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickSeries, LineSeries, HistogramSeries, IPriceLine, createSeriesMarkers } from 'lightweight-charts';
-import { ArrowLeft, Banknote, Clock, ExternalLink, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award } from "lucide-react";
+import { ArrowLeft, Banknote, Clock, ExternalLink, Info, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award } from "lucide-react";
 import { parseBrokerTrades, ParseError } from "@/utils/trade-parser";
 
 // Global window type declaration for audio control
@@ -4037,17 +4037,47 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       
       console.log('✅ Upstox popup opened, waiting for OAuth callback...');
       
-      // Monitor popup closing
+      // Listen for messages from the OAuth callback popup
+      const messageListener = (event: MessageEvent) => {
+        if (event.data.type === "UPSTOX_AUTH_SUCCESS") {
+          console.log("✅ Upstox authentication successful!");
+          localStorage.setItem("upstox_token", event.data.token);
+          localStorage.setItem("upstox_user_id", event.data.userId || "");
+          localStorage.setItem("upstox_user_email", event.data.userEmail || "");
+          localStorage.setItem("upstox_user_name", event.data.userName || "");
+          setUpstoxAccessToken(event.data.token);
+          setUpstoxIsConnected(true);
+          window.removeEventListener("message", messageListener);
+          toast({
+            title: "Success",
+            description: "Upstox connected successfully!",
+          });
+        } else if (event.data.type === "UPSTOX_AUTH_ERROR") {
+          console.error("❌ Upstox authentication failed:", event.data.error);
+          window.removeEventListener("message", messageListener);
+          toast({
+            title: "Error",
+            description: event.data.error || "Failed to authenticate with Upstox",
+            variant: "destructive",
+          });
+        }
+      };
+
+      window.addEventListener("message", messageListener);
+      
+      // Monitor popup closing and cleanup
       let checkCount = 0;
       const monitorPopup = setInterval(() => {
         checkCount++;
         if (popup.closed) {
           clearInterval(monitorPopup);
+          window.removeEventListener("message", messageListener);
           console.log('⚠️ Upstox popup closed');
           return;
         }
         if (checkCount > 300) {
           clearInterval(monitorPopup);
+          window.removeEventListener("message", messageListener);
           popup.close();
           console.log('⚠️ Upstox popup timeout');
         }
@@ -4060,40 +4090,62 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   };
   const handleAngelOneConnect = async () => {
     try {
-      console.log('🔶 Starting Angel One authentication...');
-      
-      // Get password and TOTP from user
-      const password = prompt('Enter your Angel One password:');
-      if (!password) return;
-      
-      const totp = prompt('Enter your TOTP (2FA code):');
-      if (!totp) return;
-      
-      // Call authenticate endpoint
-      const response = await fetch('/api/broker/angel-one/authenticate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password, totp })
-      });
-      
+      console.log("🔶 Starting Angel One OAuth redirect flow...");
+      const response = await fetch("/api/angelone/auth-url");
       const data = await response.json();
       
-      if (data.success && data.token) {
-        console.log('✅ Angel One authenticated!');
-        localStorage.setItem('angel_one_token', data.token);
-        localStorage.setItem('angel_one_client_code', data.clientCode);
-        
-        setAngelOneAccessToken(data.token);
-        setAngelOneIsConnected(true);
-        setConnectDialogOpen(false);
-        
-        alert('Connected to Angel One successfully!');
-      } else {
-        alert('Authentication failed: ' + (data.message || 'Unknown error'));
+      if (!data.authUrl) {
+        alert("Error: Could not generate Angel One authorization URL");
+        return;
       }
+      
+      console.log("🔗 Angel One auth URL:", data.authUrl);
+      
+      const width = 500;
+      const height = 600;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      
+      const popup = window.open(
+        data.authUrl,
+        "AngelOneLogin",
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+      
+      if (!popup) {
+        alert("Popup blocked! Please enable popups for this site.");
+        return;
+      }
+      
+      const messageListener = (event: MessageEvent) => {
+        if (event.data.type === "ANGELONE_AUTH_SUCCESS") {
+          console.log("✅ Angel One authentication successful!");
+          localStorage.setItem("angelone_token", event.data.token); localStorage.setItem("angel_one_token", event.data.token);
+          if (event.data.feedToken) localStorage.setItem("angelone_feed_token", event.data.feedToken);
+          localStorage.setItem("angel_one_client_code", event.data.clientCode || "P176266");
+          setAngelOneAccessToken(event.data.token);
+          setAngelOneIsConnected(true);
+          window.removeEventListener("message", messageListener);
+          toast({
+            title: "Success",
+            description: "Angel One connected successfully",
+          });
+          setConnectDialogOpen(false);
+        } else if (event.data.type === "ANGELONE_AUTH_ERROR") {
+          console.error("❌ Angel One auth error:", event.data.error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: event.data.error || "Login failed",
+          });
+          window.removeEventListener("message", messageListener);
+        }
+      };
+
+      window.addEventListener("message", messageListener);
     } catch (error) {
-      console.error('❌ Angel One error:', error);
-      alert('Failed to connect to Angel One');
+      console.error("❌ Angel One error:", error);
+      alert("Error: " + (error instanceof Error ? error.message : "Failed to connect"));
     }
   };
 
@@ -4838,6 +4890,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   // ============================================
   const [showPaperTradingModal, setShowPaperTradingModal] = useState(false);
   const [showTradingChallengeModal, setShowTradingChallengeModal] = useState(false); // Trading Challenge Coming Soon modal
+  const [showJournalInfoModal, setShowJournalInfoModal] = useState(false); // Trading Journal Info modal
   const [hidePositionDetails, setHidePositionDetails] = useState(false); // Eye icon toggle
   const [swipedPositionId, setSwipedPositionId] = useState<string | null>(null);
   const swipeStartXRef = useRef<number>(0);
@@ -9900,6 +9953,13 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     setToDate(null);
     setIsCalendarDataFetched(false);
   };
+
+  // ✅ AUTO-OPEN JOURNAL INFO MODAL: Show modal when journal tab opens
+  useEffect(() => {
+    if (activeTab === "journal") {
+      setShowJournalInfoModal(true);
+    }
+  }, [activeTab]);
 
   // ✅ INSTANT AUTO-LOAD: Load heatmap data immediately when journal tab opens
   // No delays, no complex logic - just instant data loading
@@ -17511,6 +17571,16 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             >
                               <Trophy className="h-4 w-4" />
                             </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setShowJournalInfoModal(true)}
+                              className="h-7 w-7 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full"
+                              data-testid="button-journal-info"
+                              title="Journal Information"
+                            >
+                              <Info className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                            </Button>
                             <div className="h-7 px-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-md flex items-center justify-center text-xs font-semibold text-blue-600 dark:text-blue-300">
                               <Timer className="h-4 w-4 mr-1.5" />
                               {calculateTotalDuration(tradeHistoryData)}
@@ -20833,6 +20903,86 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
               onClick={() => setShowTradingChallengeModal(false)}
               className="w-full"
               data-testid="button-close-challenge-modal"
+            >
+              Got It
+            </Button>
+          </DialogContent>
+        </Dialog>
+
+        {/* Trading Journal Info Modal */}
+        <Dialog open={showJournalInfoModal} onOpenChange={setShowJournalInfoModal}>
+          <DialogContent className="max-w-sm w-[90vw]">
+            <DialogHeader className="text-center">
+              <div className="flex justify-center mb-2">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                  <Info className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <DialogTitle className="text-xl font-bold text-center">Trading Journal</DialogTitle>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+                Track Your Trading Progress
+              </p>
+            </DialogHeader>
+            <div className="py-4 space-y-3">
+              <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                <Calendar className="h-5 w-5 text-blue-500" />
+                <div>
+                  <p className="text-[10px] font-medium">Daily Trade Tracking</p>
+                  <p className="text-[10px] text-gray-500">Record and monitor all your trades</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                <BarChart3 className="h-5 w-5 text-green-500" />
+                <div>
+                  <p className="text-sm font-medium">AI Performance Analysis</p>
+                  <p className="text-xs text-gray-500">View detailed P&L and trading statistics</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-amber-500" />
+                <div>
+                  <p className="text-sm font-medium">Improve Your Trading</p>
+                  <p className="text-xs text-gray-500">Learn from your trades and patterns</p>
+                </div>
+              </div>
+              <div className="mt-1 p-2 bg-red-50/30 dark:bg-red-900/5 rounded-md border border-red-100/30 dark:border-red-900/10">
+                <p className="text-[10px] leading-tight text-red-700/80 dark:text-red-400/80 font-medium text-center">
+                  Aggregate Losses Exceed ₹1.8 Lakh Crores Over Three Years <div className="inline-flex items-center gap-1 ml-1 bg-white/20 rounded px-1 py-0.5"><TrendingDown className="h-3 w-3"/><BarChart3 className="h-3 w-3"/></div>
+                </p>
+              <div className="mt-0.5 text-center"><p className="text-[8px] text-gray-600 dark:text-gray-400 font-medium uppercase tracking-tighter">Top 3 Loss Traders States:</p></div>
+              <div className="mt-0.5 flex items-center justify-center gap-2 py-1 px-2 bg-slate-50/50 dark:bg-slate-900/20 rounded-md border border-slate-100 dark:border-slate-800/50">
+                <div className="flex flex-col items-center">
+                  <span className="text-[7px] text-gray-400 uppercase tracking-tighter">Telangana</span>
+                  <div className="h-1 w-6 bg-red-400/60 rounded-full mt-0.5" />
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-[7px] text-gray-400 uppercase tracking-tighter">AP</span>
+                  <div className="h-1 w-4 bg-red-400/40 rounded-full mt-0.5" />
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-[7px] text-gray-400 uppercase tracking-tighter">Tamil Nadu</span>
+                  <div className="h-1 w-3 bg-red-400/30 rounded-full mt-0.5" />
+                </div>
+              </div>
+              </div>
+              <div className="mt-1.5 p-2 bg-red-50 dark:bg-red-900/10 border border-red-100/50 dark:border-red-900/20 rounded-lg space-y-1">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-3 w-3 text-red-500 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <p className="text-[9px] leading-snug text-gray-700 dark:text-gray-300">
+                      93% of over 1 crore individual F&O traders incurred average losses of around ₹2 lakh per trader (inclusive of transaction costs) during the three years from FY22 to FY24.
+                    </p>
+                    <p className="text-[9px] leading-snug text-gray-700 dark:text-gray-300">
+                      Only 1% of individual traders managed to earn profits exceeding ₹1 lakh, after adjusting for transaction costs.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <Button 
+              onClick={() => setShowJournalInfoModal(false)}
+              className="w-full"
+              data-testid="button-close-journal-modal"
             >
               Got It
             </Button>
