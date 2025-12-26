@@ -45,6 +45,7 @@ interface BrokerDataProps {
   getCognitoToken: () => Promise<string | null>;
   setSavedFormats: (formats: any) => void;
   importDataTextareaRef: React.RefObject<HTMLTextAreaElement>;
+  brokerFunds: number | null;
 }
 
 export function BrokerData(props: BrokerDataProps) {
@@ -56,7 +57,8 @@ export function BrokerData(props: BrokerDataProps) {
     handleFileUpload, activeFormat, detectedFormatLabel, isBuildMode, setIsBuildMode,
     brokerSearchInput, setBrokerSearchInput, showBrokerSuggestions, setShowBrokerSuggestions,
     filteredBrokers, buildModeData, setBuildModeData, allColumnsFilledForSave, missingColumns,
-    saveFormatToUniversalLibrary, currentUser, getCognitoToken, setSavedFormats, importDataTextareaRef
+    saveFormatToUniversalLibrary, currentUser, getCognitoToken, setSavedFormats, importDataTextareaRef,
+    brokerFunds
   } = props;
 
   return (
@@ -66,6 +68,10 @@ export function BrokerData(props: BrokerDataProps) {
           <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
+              <div className="flex flex-col items-start gap-1">
+                <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Available Funds</span>
+                <span className="text-xs font-bold text-green-600 dark:text-green-400">₹{brokerFunds?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}</span>
+              </div>
               {zerodhaAccessToken ? (
                 <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full text-[10px] font-medium border border-green-100 dark:border-green-800">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />

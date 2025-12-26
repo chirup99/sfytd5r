@@ -19693,7 +19693,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           currentUser={currentUser} 
           getCognitoToken={getCognitoToken} 
           setSavedFormats={setSavedFormats} 
-          importDataTextareaRef={importDataTextareaRef} 
+          importDataTextareaRef={importDataTextareaRef} brokerFunds={brokerFunds} 
         />
         {/* Broker Import Dialog */}
         <BrokerImportDialog
