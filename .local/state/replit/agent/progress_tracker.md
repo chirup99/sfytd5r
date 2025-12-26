@@ -32,3 +32,4 @@
 [x] 32. Workflow restarted with new positions endpoint - positions will now fetch when users click Positions tab
 [x] 33. Reinstalled dotenv package after environment reset - resolved module not found error
 [x] 34. Workflow running successfully - Angel One WebSocket connected, live market data streaming active
+[x] 35. Created comprehensive Zerodha data flow documentation explaining all 4 missing backend API routes with complete code
