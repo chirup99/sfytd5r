@@ -68,3 +68,5 @@
 [x] 68. Fixed Upstox OAuth token exchange error: "Invalid time value" in token expiry calculation
 [x] 69. Added validation for expires_in response field with 24-hour default fallback
 [x] 70. Upstox OAuth flow complete - now handles missing/invalid expiry values gracefully
+[x] 71. Environment reset - reinstalled dotenv package and restarted workflow successfully (Dec 26, 2025)
+[x] 72. Application running on port 5000 - Angel One WebSocket connected, live data streaming for BANKNIFTY, SENSEX, GOLD
