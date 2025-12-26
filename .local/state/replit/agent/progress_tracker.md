@@ -38,3 +38,5 @@
 [x] 38. Implemented position consolidation - positions with same symbol now merged with quantities summed
 [x] 39. Fixed unrealized P&L formatting - frontend now displays P&L values with 2 decimal places (₹123.45 format)
 [x] 40. Workflow restarted successfully - all fixes deployed and running
+[x] 41. Fixed return percent formatting error - backend returns pre-formatted strings, added type checking in frontend
+[x] 42. Preview now loads successfully - application running with full functionality

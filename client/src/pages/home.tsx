@@ -19750,7 +19750,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                               ₹{((pos.unrealizedPnl || pos.unrealized_pnl || 0) as number).toFixed(2)}
                             </td>
                             <td className={`px-2 py-2 ${(pos.returnPercent || pos.return_percent || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                              {(pos.returnPercent || pos.return_percent || 0).toFixed(2)}%
+                              {typeof (pos.returnPercent || pos.return_percent) === 'string' ? (pos.returnPercent || pos.return_percent) : (pos.returnPercent || pos.return_percent || 0).toFixed(2)}%
                             </td>
                             <td className="px-2 py-2">{pos.status || 'Open'}</td>
                           </tr>
