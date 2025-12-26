@@ -20945,6 +20945,19 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                   <p className="text-xs text-gray-500">Learn from your trades and patterns</p>
                 </div>
               </div>
+              <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/10 border border-red-100/50 dark:border-red-900/20 rounded-lg space-y-2">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] leading-snug text-gray-700 dark:text-gray-300">
+                      93% of over 1 crore individual F&O traders incurred average losses of around ₹2 lakh per trader (inclusive of transaction costs) during the three years from FY22 to FY24.
+                    </p>
+                    <p className="text-[11px] leading-snug text-gray-700 dark:text-gray-300">
+                      Only 1% of individual traders managed to earn profits exceeding ₹1 lakh, after adjusting for transaction costs.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
             <Button 
               onClick={() => setShowJournalInfoModal(false)}
