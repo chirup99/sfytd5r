@@ -99,7 +99,7 @@ export function BrokerData(props: BrokerDataProps) {
                   {activeBroker === 'upstox' && (
                     <>
                       <img src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" alt="Upstox" className="w-3 h-3" />
-                      <span>id: {showUserId ? (upstoxUserId || "N/A") : "••••••"} | {showUserId ? (upstoxUserName || "N/A") : "•••••"}</span>
+                      <span>id: {showUserId ? (upstoxUserId || "N/A") : "••••••"} | {showUserId ? (upstoxUserName && upstoxUserName !== "undefined" ? upstoxUserName : "N/A") : "•••••"}</span>
                     </>
                   )}
                 </div>

@@ -3803,7 +3803,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       console.log('⚠️ [ZERODHA] No saved token in localStorage');
     }
       const savedUserName = localStorage.getItem("zerodha_user_name");
-      if (savedUserName) {
+      if (savedUserName && savedUserName !== "undefined") {
         setZerodhaUserName(savedUserName);
         console.log("✅ [ZERODHA] User Name restored from localStorage");
       }
@@ -3827,7 +3827,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         setUpstoxUserId(savedUserId);
         console.log('✅ [UPSTOX] User ID restored from localStorage');
       }
-      if (savedUserName) {
+      if (savedUserName && savedUserName !== "undefined") {
         setUpstoxUserName(savedUserName);
         console.log('✅ [UPSTOX] User Name restored from localStorage');
       }

@@ -25,6 +25,7 @@ interface UpstoxProfileResponse {
     user_id: string;
     email: string;
     name: string;
+    user_name: string;
     broker: string;
   };
 }
@@ -198,7 +199,7 @@ class UpstoxOAuthManager {
       if (profileData.data) {
         this.state.userId = profileData.data.user_id;
         this.state.userEmail = profileData.data.email;
-        this.state.userName = profileData.data.name;
+        this.state.userName = profileData.data.user_name || profileData.data.name;
 
         console.log(`✅ [UPSTOX] User profile fetched: ${this.state.userName} (${this.state.userEmail})`);
       }

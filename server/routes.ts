@@ -20607,7 +20607,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               token: "${status.accessToken || ''}",
               userId: "${status.userId || ''}",
               userEmail: "${status.userEmail || ''}",
-              userName: "${status.userName || ''}"
+              userName: "${status.userName || ''}" || ""
             }, "*");
             window.close();
           </script>
