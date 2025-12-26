@@ -29,3 +29,6 @@
 [x] 29. Added Zerodha positions endpoint at GET /api/broker/zerodha/positions - fetches from Kite API
 [x] 30. Positions endpoint transforms data: symbol, entryPrice, currentPrice, qty, unrealizedPnl, returnPercent
 [x] 31. Workflow restarted - application running, positions endpoint ready for testing
+[x] 32. Verified orders endpoint working - 13 trades fetching successfully from Zerodha API  
+[x] 33. Positions endpoint implemented identically to orders - uses axios, same auth pattern, transforms Zerodha position data
+[x] 34. Both endpoints now operational - ready for user to test Zerodha positions fetching
