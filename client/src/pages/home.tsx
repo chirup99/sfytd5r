@@ -41,7 +41,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAngelOneAutoconnect } from "@/hooks/useAngelOneAutoconnect";
 import { cognitoSignOut, getCognitoToken, sendEmailVerificationCode, confirmEmailVerification, checkEmailVerified } from "@/cognito";
 import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickSeries, LineSeries, HistogramSeries, IPriceLine, createSeriesMarkers } from 'lightweight-charts';
-import { ArrowLeft, Banknote, Clock, ExternalLink, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award } from "lucide-react";
+import { ArrowLeft, Banknote, Clock, ExternalLink, Info, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award } from "lucide-react";
 import { parseBrokerTrades, ParseError } from "@/utils/trade-parser";
 
 // Global window type declaration for audio control
@@ -17562,6 +17562,15 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                               title="Trading Challenge"
                             >
                               <Trophy className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              data-testid="button-journal-info"
+                              title="Journal Information"
+                            >
+                              <Info className="h-4 w-4" />
                             </Button>
                             <div className="h-7 px-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-md flex items-center justify-center text-xs font-semibold text-blue-600 dark:text-blue-300">
                               <Timer className="h-4 w-4 mr-1.5" />

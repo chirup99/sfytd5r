@@ -12,3 +12,4 @@
 [x] 12. Import completed - Angel One OAuth infrastructure is properly configured
 [x] 13. Reinstalled npm dependencies and restarted workflow - application is now running successfully
 [x] 14. Environment migration complete - workflow running, frontend and backend operational
+[x] 15. Added empty Info icon to journal tab header alongside the other action buttons
