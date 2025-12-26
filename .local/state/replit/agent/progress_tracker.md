@@ -40,3 +40,5 @@
 [x] 40. Workflow restarted successfully - all fixes deployed and running
 [x] 41. Fixed return percent formatting error - backend returns pre-formatted strings, added type checking in frontend
 [x] 42. Preview now loads successfully - application running with full functionality
+[x] 43. Fixed entry price and current price formatting - both now display with 2 decimal places (₹21.64 format)
+[x] 44. Workflow restarted - all price formatting complete and running

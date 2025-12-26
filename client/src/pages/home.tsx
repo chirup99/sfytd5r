@@ -19743,8 +19743,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                         [...brokerPositions].sort((a, b) => { const aStatus = String(a.status || "Open").toUpperCase().trim(); const bStatus = String(b.status || "Open").toUpperCase().trim(); return (aStatus === "OPEN" ? 0 : 999) - (bStatus === "OPEN" ? 0 : 999); }).map((pos, index) => (
                           <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td className="px-2 py-2 font-medium">{pos.symbol}</td>
-                            <td className="px-2 py-2">₹{pos.entryPrice || pos.entry_price}</td>
-                            <td className="px-2 py-2">₹{pos.currentPrice || pos.current_price}</td>
+                            <td className="px-2 py-2">₹{((pos.entryPrice || pos.entry_price || 0) as number).toFixed(2)}</td>
+                            <td className="px-2 py-2">₹{((pos.currentPrice || pos.current_price || 0) as number).toFixed(2)}</td>
                             <td className="px-2 py-2">{pos.qty || pos.quantity}</td>
                             <td className={`px-2 py-2 font-medium ${(pos.unrealizedPnl || pos.unrealized_pnl || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                               ₹{((pos.unrealizedPnl || pos.unrealized_pnl || 0) as number).toFixed(2)}
