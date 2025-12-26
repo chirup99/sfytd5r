@@ -20911,7 +20911,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
         {/* Trading Journal Info Modal */}
         <Dialog open={showJournalInfoModal} onOpenChange={setShowJournalInfoModal}>
-          <DialogContent className="max-w-xs w-[90vw]">
+          <DialogContent className="max-w-sm w-[90vw]">
             <DialogHeader className="text-center">
               <div className="flex justify-center mb-2">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
