@@ -4764,8 +4764,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       // Fetch positions immediately when tab opens
       fetchPositions();
 
-      // Set up polling to refresh every 1 second while tab is open
-      const pollInterval = setInterval(fetchPositions, 1000);
+      // Set up polling to refresh every 700ms while tab is open
+      const pollInterval = setInterval(fetchPositions, 700);
 
       // Cleanup: clear interval when tab changes
       return () => clearInterval(pollInterval);

@@ -50,3 +50,6 @@
 [x] 50. Changed positions fetch from one-time request to continuous polling using fetchPositions function
 [x] 51. Positions now auto-refresh continuously while positions tab is open - current price and qty update every 1s
 [x] 52. Workflow restarted and running - positions auto-refresh fully operational, matching orders refresh behavior
+[x] 53. Changed positions refresh interval from 1000ms to 700ms - matching WebSocket broadcast interval
+[x] 54. Current price now fetches every 700ms for faster real-time updates
+[x] 55. Workflow restarted - Angel One WebSocket connected, live price streaming active, positions auto-refresh at 700ms
