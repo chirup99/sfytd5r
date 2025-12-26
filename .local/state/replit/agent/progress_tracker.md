@@ -34,3 +34,7 @@
 [x] 34. Workflow running successfully - Angel One WebSocket connected, live market data streaming active
 [x] 35. Created comprehensive Zerodha data flow documentation explaining all 4 missing backend API routes with complete code
 [x] 36. Fixed Zerodha positions endpoint - changed from /positions to /portfolio/positions (correct Zerodha API endpoint)
+[x] 37. Removed duplicate positions display - changed backend to use ONLY net positions (not net + day) to eliminate duplicates
+[x] 38. Implemented position consolidation - positions with same symbol now merged with quantities summed
+[x] 39. Fixed unrealized P&L formatting - frontend now displays P&L values with 2 decimal places (₹123.45 format)
+[x] 40. Workflow restarted successfully - all fixes deployed and running

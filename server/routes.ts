@@ -20274,23 +20274,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const positionsData = response.data.data || {};
-      const allPositions = [...(positionsData.net || []), ...(positionsData.day || [])];
+      // Use ONLY net positions (not day) to avoid duplicates - net is the actual portfolio
+      const netPositions = positionsData.net || [];
       
-      if (allPositions.length > 0) {
-        console.log('🔍 [ZERODHA] First position structure:', JSON.stringify(allPositions[0], null, 2));
+      if (netPositions.length > 0) {
+        console.log('🔍 [ZERODHA] First position structure:', JSON.stringify(netPositions[0], null, 2));
       }
       
-      const positions = allPositions.map((pos: any) => ({
-        symbol: pos.tradingsymbol,
-        entry_price: pos.average_price || 0,
-        current_price: pos.last_price || 0,
-        qty: pos.quantity,
-        quantity: pos.quantity,
-        unrealized_pnl: pos.unrealised_value || 0,
-        unrealizedPnl: pos.unrealised_value || 0,
-        return_percent: pos.unrealised_value && pos.average_price ? ((pos.unrealised_value / (pos.average_price * pos.quantity)) * 100).toFixed(2) : 0,
-        returnPercent: pos.unrealised_value && pos.average_price ? ((pos.unrealised_value / (pos.average_price * pos.quantity)) * 100).toFixed(2) : 0,
-        status: pos.quantity > 0 ? 'OPEN' : 'CLOSED'
+      // Group by symbol and consolidate positions with same symbol
+      const positionMap = new Map();
+      
+      netPositions.forEach((pos: any) => {
+        const symbol = pos.tradingsymbol;
+        if (!positionMap.has(symbol)) {
+          positionMap.set(symbol, {
+            symbol: symbol,
+            entry_price: pos.average_price || 0,
+            current_price: pos.last_price || 0,
+            qty: pos.quantity || 0,
+            quantity: pos.quantity || 0,
+            unrealized_pnl: pos.unrealised_value || 0,
+            unrealizedPnl: pos.unrealised_value || 0,
+            status: pos.quantity > 0 ? 'OPEN' : 'CLOSED'
+          });
+        } else {
+          // Consolidate: sum quantities and P&L for same symbol
+          const existing = positionMap.get(symbol);
+          existing.qty += pos.quantity || 0;
+          existing.quantity += pos.quantity || 0;
+          existing.unrealized_pnl += pos.unrealised_value || 0;
+          existing.unrealizedPnl += pos.unrealised_value || 0;
+        }
+      });
+      
+      // Convert map to array and calculate return percentage
+      const positions = Array.from(positionMap.values()).map((pos: any) => ({
+        ...pos,
+        return_percent: pos.unrealizedPnl && pos.entry_price && pos.qty ? ((pos.unrealizedPnl / (pos.entry_price * pos.qty)) * 100).toFixed(2) : "0.00",
+        returnPercent: pos.unrealizedPnl && pos.entry_price && pos.qty ? ((pos.unrealizedPnl / (pos.entry_price * pos.qty)) * 100).toFixed(2) : "0.00"
       }));
 
       console.log('✅ [ZERODHA] Fetched', positions.length, 'positions from API');
