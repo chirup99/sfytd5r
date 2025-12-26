@@ -93,6 +93,7 @@
 [x] 93. Fixed backend endpoints to properly handle Upstox API responses and transform data format
 [x] 94. Workflow restarted successfully - Orders & Positions dialog now dynamically fetches from active broker
 [x] 95. COMPLETE: Orders, Positions, and Available Funds now switch between Zerodha and Upstox based on active connection
+[x] 96. Environment reset - reinstalled dotenv package and restarted workflow successfully (Dec 26, 2025)
 
 ## Summary of Fixes (Dec 26, 2025)
 **ISSUE**: Backend was hardcoded to fetch Zerodha data only, Upstox profile not fetching, dialog not updating when switching brokers
@@ -101,4 +102,5 @@
 2. Frontend: Made orders/positions/funds fetching dynamic - detects active broker and fetches from correct endpoint
 3. Result: Orders & Positions dialog now shows correct user ID/name and updates dynamically when switching brokers
 
-[x] 74. Environment reset - reinstalled npm dependencies and restarted workflow successfully (Dec 26, 2025)
+[x] 97. Environment reset - reinstalled npm dependencies and restarted workflow successfully (Dec 26, 2025)
+[x] 98. Application running on port 5000 - Angel One WebSocket connected, live data streaming active
