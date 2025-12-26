@@ -3755,6 +3755,22 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [importError, setImportError] = useState("");
   const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
   const [upstoxAccessToken, setUpstoxAccessToken] = useState<string | null>(null);
+  const [upstoxUserId, setUpstoxUserId] = useState<string | null>(null);
+  const [upstoxUserName, setUpstoxUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (upstoxAccessToken) {
+      fetch("/api/upstox/profile")
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            setUpstoxUserId(data.userId);
+            setUpstoxUserName(data.userName);
+          }
+        })
+        .catch(err => console.error("Failed to fetch Upstox profile:", err));
+    }
+  }, [upstoxAccessToken]);
   const [angelOneAccessToken, setAngelOneAccessToken] = useState<string | null>(null);
   const [angelOneIsConnected, setAngelOneIsConnected] = useState(false);
   const [dhanAccessToken, setDhanAccessToken] = useState<string | null>(null);
@@ -19717,6 +19733,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           zerodhaAccessToken={zerodhaAccessToken} 
           recordAllBrokerOrders={recordAllBrokerOrders} 
           upstoxAccessToken={upstoxAccessToken}
+          upstoxUserId={upstoxUserId}
+          upstoxUserName={upstoxUserName}
           brokerPositions={brokerPositions} 
           fetchingBrokerPositions={fetchingBrokerPositions} 
           showBrokerImportModal={showBrokerImportModal} 

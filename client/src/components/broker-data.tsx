@@ -16,6 +16,8 @@ interface BrokerDataProps {
   zerodhaClientId: string | null;
   zerodhaUserName: string | null;
   upstoxAccessToken?: string | null;
+  upstoxUserId?: string | null;
+  upstoxUserName?: string | null;
   brokerOrders: any[];
   fetchingBrokerOrders: boolean;
   zerodhaAccessToken: string | null;
@@ -52,7 +54,7 @@ interface BrokerDataProps {
 export function BrokerData(props: BrokerDataProps) {
   const {
     showOrderModal, setShowOrderModal, orderTab, setOrderTab, showUserId, setShowUserId,
-    zerodhaClientId, zerodhaUserName, upstoxAccessToken, brokerOrders, fetchingBrokerOrders, zerodhaAccessToken,
+    zerodhaClientId, zerodhaUserName, upstoxAccessToken, upstoxUserId, upstoxUserName, brokerOrders, fetchingBrokerOrders, zerodhaAccessToken,
     recordAllBrokerOrders, brokerPositions, fetchingBrokerPositions, showBrokerImportModal,
     setShowBrokerImportModal, handleBrokerImport, showImportModal, setShowImportModal,
     handleFileUpload, activeFormat, detectedFormatLabel, isBuildMode, setIsBuildMode,
@@ -97,7 +99,7 @@ export function BrokerData(props: BrokerDataProps) {
                   {activeBroker === 'upstox' && (
                     <>
                       <img src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" alt="Upstox" className="w-3 h-3" />
-                      <span>Connected to Upstox</span>
+                      <span>id: {showUserId ? (upstoxUserId || "N/A") : "••••••"} | {showUserId ? (upstoxUserName || "N/A") : "•••••"}</span>
                     </>
                   )}
                 </div>

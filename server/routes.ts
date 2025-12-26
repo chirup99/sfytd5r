@@ -20587,6 +20587,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       upstoxOAuthManager.disconnect();
       res.json({ success: true, message: 'Disconnected from Upstox' });
     } catch (error: any) {
+  
+  // Get Upstox user profile
+  app.get('/api/upstox/profile', (req, res) => {
+    try {
+      const token = upstoxOAuthManager.getAccessToken();
+      if (!token) {
+        return res.status(401).json({ success: false, error: 'Not authenticated with Upstox' });
+      }
+      fetch('https://api.upstox.com/v2/user/profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success' && data.data) {
+            const profile = data.data;
+            res.json({
+              success: true,
+              userId: profile.user_id || profile.email || 'N/A',
+              userName: profile.name || profile.email || 'N/A',
+              userEmail: profile.email || 'N/A'
+            });
+          } else {
+            res.json({
+              success: true,
+              userId: 'N/A',
+              userName: 'N/A',
+              userEmail: 'N/A'
+            });
+          }
+        })
+        .catch(error => {
+          console.error('🔴 [UPSTOX] Error fetching profile:', error.message);
+          res.json({
+            success: true,
+            userId: 'N/A',
+            userName: 'N/A',
+            userEmail: 'N/A'
+          });
+        });
+    } catch (error: any) {
+      console.error('🔴 [UPSTOX] Error getting profile:', error.message);
+      res.status(500).json({ success: false, error: 'Failed to get profile' });
+    }
+  });
       console.error('🔴 [UPSTOX] Error disconnecting:', error.message);
       res.status(500).json({ success: false, error: 'Failed to disconnect' });
     }

@@ -77,4 +77,12 @@
 [x] 77. Integrated upstoxAccessToken prop into BrokerData component and home.tsx
 [x] 78. Fixed syntax error in home.tsx and restarted workflow - application running successfully with Upstox support in Orders & Positions dialog
 [x] 79. Upstox Orders & Positions dialog now fully connected - displays dynamic broker information and connection status
+[x] 80. Created /api/upstox/profile backend endpoint to fetch user profile from Upstox API using Bearer token
+[x] 81. Added upstoxUserId and upstoxUserName state variables to home.tsx for profile data
+[x] 82. Added useEffect hook to fetch Upstox profile data when upstoxAccessToken changes
+[x] 83. Updated BrokerData component interface to accept upstoxUserId and upstoxUserName props
+[x] 84. Updated BrokerData component to display Upstox user ID and name in header (with toggle visibility like Zerodha)
+[x] 85. Integrated Upstox profile props from home.tsx to BrokerData component
+[x] 86. Workflow restarted successfully - Upstox Orders & Positions dialog now fetches and displays user profile information
+[x] 87. COMPLETE: Upstox Orders & Positions now shows user ID and name matching Zerodha functionality
 [x] 74. Environment reset - reinstalled npm dependencies and restarted workflow successfully (Dec 26, 2025)
