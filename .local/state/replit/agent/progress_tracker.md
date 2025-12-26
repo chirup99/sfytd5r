@@ -59,3 +59,4 @@
 [x] 59. COMPLETE: Current price is now fetched via WebSocket (Angel One real-time data stream)
 [x] 60. Workflow running - WebSocket broadcasting live prices every 700ms with continuous updates for BANKNIFTY, SENSEX, GOLD
 [x] 61. Environment reset - reinstalled dotenv package and restarted workflow successfully (Dec 26, 2025)
+[x] 62. Updated state text size from text-[7px] to text-[9px] for Telangana, AP, Tamil Nadu labels in Trading Journal modal

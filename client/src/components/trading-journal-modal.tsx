@@ -51,15 +51,15 @@ export function TradingJournalModal({ open, onOpenChange }: TradingJournalModalP
             <div className="mt-0.5 text-center"><p className="text-[8px] text-gray-600 dark:text-gray-400 font-medium uppercase tracking-tighter">Top 3 Loss Traders States:</p></div>
             <div className="mt-0.5 flex items-center justify-center gap-2 py-1 px-2 bg-slate-50/70 dark:bg-slate-800/40 rounded-md border border-slate-100 dark:border-slate-700/60">
               <div className="flex flex-col items-center">
-                <span className="text-[7px] text-gray-600 dark:text-gray-200 uppercase tracking-tighter">Telangana</span>
+                <span className="text-[9px] text-gray-600 dark:text-gray-200 uppercase tracking-tighter">Telangana</span>
                 <div className="h-1 w-6 bg-red-600 dark:bg-red-500 rounded-full mt-0.5" />
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-[7px] text-gray-600 dark:text-gray-200 uppercase tracking-tighter">AP</span>
+                <span className="text-[9px] text-gray-600 dark:text-gray-200 uppercase tracking-tighter">AP</span>
                 <div className="h-1 w-4 bg-red-500 dark:bg-red-500 rounded-full mt-0.5" />
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-[7px] text-gray-600 dark:text-gray-200 uppercase tracking-tighter">Tamil Nadu</span>
+                <span className="text-[9px] text-gray-600 dark:text-gray-200 uppercase tracking-tighter">Tamil Nadu</span>
                 <div className="h-1 w-3 bg-red-400 dark:bg-red-500 rounded-full mt-0.5" />
               </div>
             </div>
