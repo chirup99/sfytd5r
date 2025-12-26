@@ -20675,7 +20675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             res.json({
               success: true,
               userId: profile.user_id || profile.email || 'N/A',
-              userName: profile.name || profile.email || 'N/A',
+              userName: profile.user_name || profile.name || 'N/A',
               userEmail: profile.email || 'N/A'
             });
           } else {
