@@ -20984,5 +20984,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // ZERODHA FUNDS AND PNL
+  // ========================================
+
+  app.get("/api/broker/zerodha/funds", async (req, res) => {
+    try {
+      // Simulation for Zerodha margins
+      const margins = {
+        available: 125430.50,
+        used: 45200.00,
+        pnl: 1250.75
+      };
+      res.json(margins);
+    } catch (error) {
+      console.error("Error fetching Zerodha margins:", error);
+      res.status(500).json({ error: "Failed to fetch Zerodha margins" });
+    }
+  });
+
+  app.get("/api/broker/zerodha/pnl", async (req, res) => {
+    try {
+      // Simulation for Zerodha P&L
+      const pnlData = {
+        realized: 850.25,
+        unrealized: 400.50,
+        total: 1250.75
+      };
+      res.json(pnlData);
+    } catch (error) {
+      console.error("Error fetching Zerodha P&L:", error);
+      res.status(500).json({ error: "Failed to fetch Zerodha P&L" });
+    }
+  });
+
   return httpServer;
 }
