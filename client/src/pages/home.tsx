@@ -4812,15 +4812,39 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   // Order Modal State
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [orderTab, setOrderTab] = useState("history");
-
-  // Fetch Zerodha positions when tab changes - with auto-refresh polling every 1 second
+  // Fetch broker positions when tab changes - supports all 4 brokers (Zerodha, Upstox, Angel One, Dhan)
   useEffect(() => {
-    if (zerodhaAccessToken && orderTab === "positions") {
+    if (orderTab === "positions" && (zerodhaAccessToken || upstoxAccessToken || angelOneAccessToken || dhanAccessToken)) {
       const fetchPositions = async () => {
         setFetchingBrokerPositions(true);
         try {
-          const res = await fetch('/api/broker/zerodha/positions', {
-            headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
+          // Determine which broker is connected and get correct endpoint/token
+          let endpoint = '';
+          let token = '';
+          let broker = '';
+          
+          if (zerodhaAccessToken) {
+            endpoint = '/api/broker/zerodha/positions';
+            token = zerodhaAccessToken;
+            broker = 'Zerodha';
+          } else if (upstoxAccessToken) {
+            endpoint = '/api/broker/upstox/positions';
+            token = upstoxAccessToken;
+            broker = 'Upstox';
+          } else if (angelOneAccessToken) {
+            endpoint = '/api/broker/angelone/positions';
+            token = angelOneAccessToken;
+            broker = 'Angel One';
+          } else if (dhanAccessToken) {
+            endpoint = '/api/broker/dhan/positions';
+            token = dhanAccessToken;
+            broker = 'Dhan';
+          }
+          
+          if (!endpoint || !token) return;
+          
+          const res = await fetch(endpoint, {
+            headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await res.json();
           let positions = data.positions || [];
@@ -4849,7 +4873,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           }
 
           setBrokerPositions(positions);
-          console.log('✅ [POSITIONS] Fetched', positions.length, 'positions with live prices via WebSocket');
+          console.log('✅ [POSITIONS]', broker, 'Fetched', positions.length, 'positions with live prices via WebSocket');
         } catch (err) {
           console.error('❌ [POSITIONS] Error fetching positions:', err);
           setBrokerPositions([]);
@@ -4867,7 +4891,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       // Cleanup: clear interval when tab changes
       return () => clearInterval(pollInterval);
     }
-  }, [zerodhaAccessToken, upstoxAccessToken, orderTab]);
+  }, [zerodhaAccessToken, upstoxAccessToken, angelOneAccessToken, dhanAccessToken, orderTab]);
   const [brokerOrders, setBrokerOrders] = useState<any[]>([]);
   const [fetchingBrokerOrders, setFetchingBrokerOrders] = useState(false);
   const [brokerPositions, setBrokerPositions] = useState<any[]>([]);
@@ -4891,21 +4915,43 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   // Trade History Data State
   const [tradeHistoryData, setTradeHistoryData] = useState([]);
 
-  // Fetch broker orders when Orders dialog opens - with auto-refresh polling
+  // Fetch broker orders when Orders dialog opens - supports all 4 brokers (Zerodha, Upstox, Angel One, Dhan)
   useEffect(() => {
-    if (orderTab === 'history' && (zerodhaAccessToken || upstoxAccessToken)) {
+    if (orderTab === 'history' && (zerodhaAccessToken || upstoxAccessToken || angelOneAccessToken || dhanAccessToken)) {
       const fetchOrders = async () => {
         setFetchingBrokerOrders(true);
         try {
-          const endpoint = zerodhaAccessToken ? '/api/broker/zerodha/trades' : '/api/broker/upstox/trades';
-          const token = zerodhaAccessToken || upstoxAccessToken;
+          // Determine which broker is connected and get correct endpoint/token
+          let endpoint = '';
+          let token = '';
+          let broker = '';
+          
+          if (zerodhaAccessToken) {
+            endpoint = '/api/broker/zerodha/trades';
+            token = zerodhaAccessToken;
+            broker = 'Zerodha';
+          } else if (upstoxAccessToken) {
+            endpoint = '/api/broker/upstox/trades';
+            token = upstoxAccessToken;
+            broker = 'Upstox';
+          } else if (angelOneAccessToken) {
+            endpoint = '/api/broker/angelone/trades';
+            token = angelOneAccessToken;
+            broker = 'Angel One';
+          } else if (dhanAccessToken) {
+            endpoint = '/api/broker/dhan/trades';
+            token = dhanAccessToken;
+            broker = 'Dhan';
+          }
+          
+          if (!endpoint || !token) return;
+          
           const res = await fetch(endpoint, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await res.json();
           setBrokerOrders(data.trades || []);
-          const broker = zerodhaAccessToken ? 'Zerodha' : 'Upstox';
-          console.log('✅ [ORDERS] Fetched', (data.trades || []).length, `trades from ${broker}`);
+          console.log('✅ [ORDERS]', broker, 'Fetched', (data.trades || []).length, 'trades');
         } catch (err) {
           console.error('❌ [ORDERS] Error fetching trades:', err);
           setBrokerOrders([]);
@@ -4917,14 +4963,13 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       // Fetch orders immediately when dialog opens
       fetchOrders();
 
-      // Set up polling to refresh every 3 seconds while dialog is open
+      // Set up polling to refresh every 1 second while dialog is open
       const pollInterval = setInterval(fetchOrders, 1000);
 
       // Cleanup: clear interval when dialog closes
       return () => clearInterval(pollInterval);
     }
-  }, [zerodhaAccessToken, upstoxAccessToken, orderTab]);
-
+  }, [zerodhaAccessToken, upstoxAccessToken, angelOneAccessToken, dhanAccessToken, orderTab]);
 // Fetch broker funds when dialog opens - with auto-refresh polling
   useEffect(() => {
     if (showOrderModal && (zerodhaAccessToken || upstoxAccessToken)) {
@@ -4970,27 +5015,45 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     }
   }, [zerodhaAccessToken, brokerFunds]);
 
-  // Fetch broker funds when dialog opens - with auto-refresh polling
+  // Fetch broker funds when dialog opens - supports all 4 brokers (Zerodha, Upstox, Angel One, Dhan)
   useEffect(() => {
-    if (showOrderModal && (zerodhaAccessToken || upstoxAccessToken)) {
+    if (showOrderModal && (zerodhaAccessToken || upstoxAccessToken || angelOneAccessToken || dhanAccessToken)) {
       const fetchBrokerFunds = async () => {
         try {
-          const endpoint = zerodhaAccessToken ? '/api/broker/zerodha/margins' : '/api/broker/upstox/margins';
-          const token = zerodhaAccessToken || upstoxAccessToken;
+          // Determine which broker is connected
+          let endpoint = '';
+          let token = '';
+          let broker = '';
+          
+          if (zerodhaAccessToken) {
+            endpoint = '/api/broker/zerodha/margins';
+            token = zerodhaAccessToken;
+            broker = 'Zerodha';
+          } else if (upstoxAccessToken) {
+            endpoint = '/api/broker/upstox/margins';
+            token = upstoxAccessToken;
+            broker = 'Upstox';
+          } else if (angelOneAccessToken) {
+            endpoint = '/api/broker/angelone/margins';
+            token = angelOneAccessToken;
+            broker = 'Angel One';
+          } else if (dhanAccessToken) {
+            endpoint = '/api/broker/dhan/margins';
+            token = dhanAccessToken;
+            broker = 'Dhan';
+          }
+          
+          if (!endpoint || !token) return;
+          
           const response = await fetch(endpoint, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await response.json();
-          if (response.ok && data.success && data.availableCash !== undefined) {
-            setBrokerFunds(data.availableCash);
-            localStorage.setItem("zerodha_broker_funds", data.availableCash.toString());
-            console.log('✅ [BROKER] Fetched available funds:', data.availableCash);
-          } else {
-            console.error('❌ [BROKER] Failed to fetch funds:', data.error || 'Invalid response');
-            setBrokerFunds(null);
-          }
+          setBrokerFunds(data.availableCash || data.availableFunds || 0);
+          console.log('✅ [FUNDS]', broker, 'Fetched available funds:', data.availableCash || data.availableFunds);
         } catch (error) {
-          console.error('❌ [BROKER] Failed to fetch funds:', error);
+          console.error('❌ [FUNDS] Error fetching broker funds:', error);
+          setBrokerFunds(0);
         }
       };
       
@@ -5003,7 +5066,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       // Cleanup: clear interval when dialog closes
       return () => clearInterval(pollInterval);
     }
-  }, [showOrderModal, zerodhaAccessToken]);
+  }, [showOrderModal, zerodhaAccessToken, upstoxAccessToken, angelOneAccessToken, dhanAccessToken]);
 
   // PAPER TRADING (DEMO TRADING) STATE - Like TradingView Practice Account
   // ============================================
