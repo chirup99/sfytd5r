@@ -17573,12 +17573,60 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                 size="sm"
                                 className="h-7 px-2 text-xs"
                                 onClick={() => setShowOrderModal(true)}
-                                data-testid="button-broker-orders"
-                                title="View Orders & Positions"
+                                data-testid="button-broker-orders-zerodha"
+                                title="View Orders & Positions (Zerodha)"
                               >
                                 <img 
                                   src="https://zerodha.com/static/images/products/kite-logo.svg" 
                                   alt="Zerodha" 
+                                  className="h-4 w-4"
+                                />
+                              </Button>
+                            )}
+                            {upstoxIsConnected && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={() => setShowOrderModal(true)}
+                                data-testid="button-broker-orders-upstox"
+                                title="View Orders & Positions (Upstox)"
+                              >
+                                <img 
+                                  src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" 
+                                  alt="Upstox" 
+                                  className="h-4 w-4"
+                                />
+                              </Button>
+                            )}
+                            {angelOneIsConnected && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={() => setShowOrderModal(true)}
+                                data-testid="button-broker-orders-angelone"
+                                title="View Orders & Positions (Angel One)"
+                              >
+                                <img 
+                                  src="https://play-lh.googleusercontent.com/Ic8lUYwMCgTePpo-Gbg0VwE_0srDj1xD386BvQHO_mOwsfMjX8lFBLl0Def28pO_Mvk=s48-rw?v=1701" 
+                                  alt="Angel One" 
+                                  className="h-4 w-4"
+                                />
+                              </Button>
+                            )}
+                            {dhanIsConnected && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs"
+                                onClick={() => setShowOrderModal(true)}
+                                data-testid="button-broker-orders-dhan"
+                                title="View Orders & Positions (Dhan)"
+                              >
+                                <img 
+                                  src="https://play-lh.googleusercontent.com/lVXf_i8Gi3C7eZVWKgeG8U5h_kAzUT0MrmvEAXfM_ihlo44VEk01HgAi6vbBNsSzBQ=w240-h480-rw?v=1701" 
+                                  alt="Dhan" 
                                   className="h-4 w-4"
                                 />
                               </Button>

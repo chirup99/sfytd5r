@@ -70,3 +70,4 @@
 [x] 70. Upstox OAuth flow complete - now handles missing/invalid expiry values gracefully
 [x] 71. Environment reset - reinstalled dotenv package and restarted workflow successfully (Dec 26, 2025)
 [x] 72. Application running on port 5000 - Angel One WebSocket connected, live data streaming for BANKNIFTY, SENSEX, GOLD
+[x] 73. Fixed missing broker order buttons - added conditional rendering for Upstox, Angel One, and Dhan "Orders & Positions" buttons in Trade History header
