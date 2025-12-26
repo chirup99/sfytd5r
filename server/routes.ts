@@ -20652,7 +20652,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       upstoxOAuthManager.disconnect();
       res.json({ success: true, message: 'Disconnected from Upstox' });
     } catch (error: any) {
-  
+      console.error('🔴 [UPSTOX] Error disconnecting:', error.message);
+      res.status(500).json({ success: false, error: 'Failed to disconnect' });
+    }
+  });
+
   // Get Upstox user profile
   app.get('/api/upstox/profile', (req, res) => {
     try {
@@ -20703,8 +20707,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ success: false, error: 'Failed to get profile' });
     }
   });
-      console.error('🔴 [UPSTOX] Error disconnecting:', error.message);
-      res.status(500).json({ success: false, error: 'Failed to disconnect' });
+
+  // Fetch funds from Upstox
+  app.get('/api/upstox/funds', async (req, res) => {
+    try {
+      const token = upstoxOAuthManager.getAccessToken();
+      if (!token) {
+        return res.status(401).json({ success: false, error: 'Not authenticated with Upstox' });
+      }
+
+      const response = await fetch('https://api.upstox.com/v2/user/get-funds-and-margin', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      if (data.status === 'success' && data.data) {
+        const equityFunds = data.data.equity || {};
+        const availableFunds = equityFunds.available_margin || 0;
+        console.log('✅ [UPSTOX] Funds fetched:', availableFunds);
+        res.json({
+          success: true,
+          availableFunds: availableFunds,
+          data: data.data
+        });
+      } else {
+        console.log('⚠️ [UPSTOX] Funds response not successful:', data);
+        res.json({
+          success: false,
+          availableFunds: 0
+        });
+      }
+    } catch (error: any) {
+      console.error('🔴 [UPSTOX] Error fetching funds:', error.message);
+      res.status(500).json({ success: false, error: 'Failed to get funds' });
     }
   });
 
