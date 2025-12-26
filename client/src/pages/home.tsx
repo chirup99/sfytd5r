@@ -20911,27 +20911,27 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
         {/* Trading Journal Info Modal */}
         <Dialog open={showJournalInfoModal} onOpenChange={setShowJournalInfoModal}>
-          <DialogContent className="max-w-sm">
+          <DialogContent className="max-w-xs w-[90vw]">
             <DialogHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                  <Info className="h-8 w-8 text-white" />
+              <div className="flex justify-center mb-2">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                  <Info className="h-6 w-6 text-white" />
                 </div>
               </div>
               <DialogTitle className="text-xl font-bold text-center">Trading Journal</DialogTitle>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
                 Track Your Trading Progress
               </p>
             </DialogHeader>
             <div className="py-4 space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                <Calendar className="h-5 w-5 text-blue-500" />
+              <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                <Calendar className="h-4 w-4 text-blue-500" />
                 <div>
-                  <p className="text-sm font-medium">Daily Trade Tracking</p>
-                  <p className="text-xs text-gray-500">Record and monitor all your trades</p>
+                  <p className="text-[10px] font-medium">Daily Trade Tracking</p>
+                  <p className="text-[10px] text-gray-500">Record and monitor all your trades</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
                 <BarChart3 className="h-5 w-5 text-green-500" />
                 <div>
                   <p className="text-sm font-medium">Performance Analysis</p>
@@ -20949,30 +20949,30 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                 <p className="text-[10px] leading-tight text-red-700/80 dark:text-red-400/80 font-medium text-center">
                   Aggregate Losses Exceed ₹1.8 Lakh Crores Over Three Years <div className="inline-flex items-center gap-1 ml-1 bg-white/20 rounded px-1 py-0.5"><TrendingDown className="h-3 w-3"/><BarChart3 className="h-3 w-3"/></div>
                 </p>
-              <div className="mt-1 text-center"><p className="text-[9px] text-gray-600 dark:text-gray-400 font-medium uppercase tracking-tighter">Top 3 Loss Traders States:</p></div>
-              <div className="mt-1 flex items-center justify-center gap-4 py-1.5 px-2 bg-slate-50/50 dark:bg-slate-900/20 rounded-md border border-slate-100 dark:border-slate-800/50">
+              <div className="mt-0.5 text-center"><p className="text-[8px] text-gray-600 dark:text-gray-400 font-medium uppercase tracking-tighter">Top 3 Loss Traders States:</p></div>
+              <div className="mt-0.5 flex items-center justify-center gap-2 py-1 px-2 bg-slate-50/50 dark:bg-slate-900/20 rounded-md border border-slate-100 dark:border-slate-800/50">
                 <div className="flex flex-col items-center">
-                  <span className="text-[9px] text-gray-400 uppercase tracking-tighter">Telangana</span>
-                  <div className="h-1 w-8 bg-red-400/60 rounded-full mt-0.5" />
+                  <span className="text-[7px] text-gray-400 uppercase tracking-tighter">Telangana</span>
+                  <div className="h-1 w-6 bg-red-400/60 rounded-full mt-0.5" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-[9px] text-gray-400 uppercase tracking-tighter">AP</span>
-                  <div className="h-1 w-6 bg-red-400/40 rounded-full mt-0.5" />
+                  <span className="text-[7px] text-gray-400 uppercase tracking-tighter">AP</span>
+                  <div className="h-1 w-4 bg-red-400/40 rounded-full mt-0.5" />
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-[9px] text-gray-400 uppercase tracking-tighter">Tamil Nadu</span>
-                  <div className="h-1 w-5 bg-red-400/30 rounded-full mt-0.5" />
+                  <span className="text-[7px] text-gray-400 uppercase tracking-tighter">Tamil Nadu</span>
+                  <div className="h-1 w-3 bg-red-400/30 rounded-full mt-0.5" />
                 </div>
               </div>
               </div>
-              <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/10 border border-red-100/50 dark:border-red-900/20 rounded-lg space-y-2">
+              <div className="mt-1.5 p-2 bg-red-50 dark:bg-red-900/10 border border-red-100/50 dark:border-red-900/20 rounded-lg space-y-1">
                 <div className="flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
-                  <div className="space-y-1.5">
-                    <p className="text-[11px] leading-snug text-gray-700 dark:text-gray-300">
+                  <AlertCircle className="h-3 w-3 text-red-500 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <p className="text-[9px] leading-snug text-gray-700 dark:text-gray-300">
                       93% of over 1 crore individual F&O traders incurred average losses of around ₹2 lakh per trader (inclusive of transaction costs) during the three years from FY22 to FY24.
                     </p>
-                    <p className="text-[11px] leading-snug text-gray-700 dark:text-gray-300">
+                    <p className="text-[9px] leading-snug text-gray-700 dark:text-gray-300">
                       Only 1% of individual traders managed to earn profits exceeding ₹1 lakh, after adjusting for transaction costs.
                     </p>
                   </div>
