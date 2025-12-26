@@ -20362,16 +20362,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const equity = data.data?.equity || {};
         const availableCash = equity.net || 0;
         
-        // Extract Intraday P&L (often found in 'm2m' field in Zerodha's margin response)
-        const intradayPnl = equity.m2m || 0;
-        const intradayPayin = equity.intraday_payin || 0;
-        
-        console.log('✅ [ZERODHA] Fetched balance:', availableCash, 'Intraday P&L:', intradayPnl);
+        console.log('✅ [ZERODHA] Fetched available balance:', availableCash);
         return res.json({
           success: true,
           availableCash,
-          intradayPnl,
-          intradayPayin,
           equity: data.data?.equity || {}
         });
       }
