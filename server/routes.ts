@@ -20604,10 +20604,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           <script>
             window.opener.postMessage({ 
               type: "UPSTOX_AUTH_SUCCESS", 
-              token: "${status.accessToken}",
-              userId: "${status.userId}",
-              userEmail: "${status.userEmail}",
-              userName: "${status.userName}"
+              token: "${status.accessToken || ''}",
+              userId: "${status.userId || ''}",
+              userEmail: "${status.userEmail || ''}",
+              userName: "${status.userName || ''}"
             }, "*");
             window.close();
           </script>

@@ -3764,8 +3764,17 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         .then(r => r.json())
         .then(data => {
           if (data.success) {
-            setUpstoxUserId(data.userId);
-            setUpstoxUserName(data.userName);
+            const userId = data.userId && data.userId !== "undefined" ? data.userId : null;
+            const userName = data.userName && data.userName !== "undefined" ? data.userName : null;
+            
+            if (userId) {
+              setUpstoxUserId(userId);
+              localStorage.setItem("upstox_user_id", userId);
+            }
+            if (userName) {
+              setUpstoxUserName(userName);
+              localStorage.setItem("upstox_user_name", userName);
+            }
           }
         })
         .catch(err => console.error("Failed to fetch Upstox profile:", err));
