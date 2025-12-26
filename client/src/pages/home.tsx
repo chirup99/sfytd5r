@@ -20945,6 +20945,11 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                   <p className="text-xs text-gray-500">Learn from your trades and patterns</p>
                 </div>
               </div>
+              <div className="mt-1 p-2 bg-red-50/30 dark:bg-red-900/5 rounded-md border border-red-100/30 dark:border-red-900/10">
+                <p className="text-[10px] leading-tight text-red-700/80 dark:text-red-400/80 font-medium text-center">
+                  Aggregate Losses Exceed ₹1.8 Lakh Crores Over Three Years
+                </p>
+              </div>
               <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/10 border border-red-100/50 dark:border-red-900/20 rounded-lg space-y-2">
                 <div className="flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
