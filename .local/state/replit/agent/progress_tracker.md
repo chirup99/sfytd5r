@@ -65,3 +65,6 @@
 [x] 65. Fixed redirect URI mismatch - now uses `/api/upstox/callback` consistently
 [x] 66. Upstox OAuth Manager properly initialized with correct redirect URI on workflow restart
 [x] 67. Legacy endpoints removed - Upstox flow now uses OAuth Manager pattern (auth-url → callback → status)
+[x] 68. Fixed Upstox OAuth token exchange error: "Invalid time value" in token expiry calculation
+[x] 69. Added validation for expires_in response field with 24-hour default fallback
+[x] 70. Upstox OAuth flow complete - now handles missing/invalid expiry values gracefully

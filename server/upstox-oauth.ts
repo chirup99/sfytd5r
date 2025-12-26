@@ -122,19 +122,34 @@ class UpstoxOAuthManager {
       });
 
       console.log('🔵 [UPSTOX] Token response received:', response.status);
+      console.log('🔵 [UPSTOX] Response data:', JSON.stringify(response.data).substring(0, 200));
       const tokenData: UpstoxTokenResponse = response.data;
       
       if (tokenData.access_token) {
-        // Token expires in 24 hours (86400 seconds)
-        const expiryTime = new Date(Date.now() + tokenData.expires_in * 1000);
+        // Token expires in 24 hours (86400 seconds) - use default if expires_in missing
+        const expiresIn = tokenData.expires_in && typeof tokenData.expires_in === 'number' 
+          ? tokenData.expires_in 
+          : 86400; // Default to 24 hours
+        
+        const expiryTime = new Date(Date.now() + expiresIn * 1000);
+        
+        // Validate the date
+        if (isNaN(expiryTime.getTime())) {
+          console.error('🔴 [UPSTOX] Invalid expiry time calculated:', { expiresIn, expiryTime });
+          // Use default 24 hours
+          const fallbackTime = new Date(Date.now() + 86400 * 1000);
+          this.state.tokenExpiry = fallbackTime;
+        } else {
+          this.state.tokenExpiry = expiryTime;
+        }
         
         this.state.accessToken = tokenData.access_token;
-        this.state.tokenExpiry = expiryTime;
         this.state.isAuthenticated = true;
         this.state.lastRefresh = new Date();
 
         console.log('✅ [UPSTOX] Access token obtained successfully');
-        console.log(`⏰ [UPSTOX] Token expires at: ${expiryTime.toISOString()}`);
+        console.log(`⏰ [UPSTOX] Token expires in ${expiresIn} seconds`);
+        console.log(`⏰ [UPSTOX] Token expires at: ${this.state.tokenExpiry?.toISOString()}`);
 
         // Fetch user profile
         await this.fetchUserProfile();
