@@ -13,3 +13,6 @@
 [x] 13. Reinstalled npm dependencies and restarted workflow - application is now running successfully
 [x] 14. Environment migration complete - workflow running, frontend and backend operational
 [x] 15. Added empty Info icon to journal tab header alongside the other action buttons
+[x] 16. Added logo-style styling to the Info icon button for professional appearance
+[x] 17. Created Trading Journal modal dialog that opens when Info icon is clicked
+[x] 18. Modal displays with blue gradient, "Trading Journal" title, and feature descriptions matching Trophy dialog pattern

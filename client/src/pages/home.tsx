@@ -4890,6 +4890,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   // ============================================
   const [showPaperTradingModal, setShowPaperTradingModal] = useState(false);
   const [showTradingChallengeModal, setShowTradingChallengeModal] = useState(false); // Trading Challenge Coming Soon modal
+  const [showJournalInfoModal, setShowJournalInfoModal] = useState(false); // Trading Journal Info modal
   const [hidePositionDetails, setHidePositionDetails] = useState(false); // Eye icon toggle
   const [swipedPositionId, setSwipedPositionId] = useState<string | null>(null);
   const swipeStartXRef = useRef<number>(0);
@@ -17566,6 +17567,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             <Button
                               variant="ghost"
                               size="icon"
+                              onClick={() => setShowJournalInfoModal(true)}
                               className="h-7 w-7 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full"
                               data-testid="button-journal-info"
                               title="Journal Information"
@@ -20894,6 +20896,53 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
               onClick={() => setShowTradingChallengeModal(false)}
               className="w-full"
               data-testid="button-close-challenge-modal"
+            >
+              Got It
+            </Button>
+          </DialogContent>
+        </Dialog>
+
+        {/* Trading Journal Info Modal */}
+        <Dialog open={showJournalInfoModal} onOpenChange={setShowJournalInfoModal}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                  <Info className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <DialogTitle className="text-xl font-bold text-center">Trading Journal</DialogTitle>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">
+                Track Your Trading Progress
+              </p>
+            </DialogHeader>
+            <div className="py-4 space-y-3">
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                <Calendar className="h-5 w-5 text-blue-500" />
+                <div>
+                  <p className="text-sm font-medium">Daily Trade Tracking</p>
+                  <p className="text-xs text-gray-500">Record and monitor all your trades</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                <BarChart3 className="h-5 w-5 text-green-500" />
+                <div>
+                  <p className="text-sm font-medium">Performance Analysis</p>
+                  <p className="text-xs text-gray-500">View detailed P&L and trading statistics</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-amber-500" />
+                <div>
+                  <p className="text-sm font-medium">Improve Your Trading</p>
+                  <p className="text-xs text-gray-500">Learn from your trades and patterns</p>
+                </div>
+              </div>
+            </div>
+            <Button 
+              onClick={() => setShowJournalInfoModal(false)}
+              className="w-full"
+              data-testid="button-close-journal-modal"
             >
               Got It
             </Button>
