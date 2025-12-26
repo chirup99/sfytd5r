@@ -71,4 +71,10 @@
 [x] 71. Environment reset - reinstalled dotenv package and restarted workflow successfully (Dec 26, 2025)
 [x] 72. Application running on port 5000 - Angel One WebSocket connected, live data streaming for BANKNIFTY, SENSEX, GOLD
 [x] 73. Fixed missing broker order buttons - added conditional rendering for Upstox, Angel One, and Dhan "Orders & Positions" buttons in Trade History header
+[x] 74. Added Upstox support to Orders & Positions dialog - broker-data component now detects and displays both Zerodha and Upstox connections dynamically
+[x] 75. Updated connection check to work for both brokers - "Live Connected" badge shows for either Zerodha or Upstox
+[x] 76. Updated broker profile display - shows Zerodha client ID for Zerodha or "Connected to Upstox" for Upstox connections
+[x] 77. Integrated upstoxAccessToken prop into BrokerData component and home.tsx
+[x] 78. Fixed syntax error in home.tsx and restarted workflow - application running successfully with Upstox support in Orders & Positions dialog
+[x] 79. Upstox Orders & Positions dialog now fully connected - displays dynamic broker information and connection status
 [x] 74. Environment reset - reinstalled npm dependencies and restarted workflow successfully (Dec 26, 2025)

@@ -19716,6 +19716,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           fetchingBrokerOrders={fetchingBrokerOrders} 
           zerodhaAccessToken={zerodhaAccessToken} 
           recordAllBrokerOrders={recordAllBrokerOrders} 
+          upstoxAccessToken={upstoxAccessToken}
           brokerPositions={brokerPositions} 
           fetchingBrokerPositions={fetchingBrokerPositions} 
           showBrokerImportModal={showBrokerImportModal} 

@@ -15,6 +15,7 @@ interface BrokerDataProps {
   setShowUserId: (show: boolean) => void;
   zerodhaClientId: string | null;
   zerodhaUserName: string | null;
+  upstoxAccessToken?: string | null;
   brokerOrders: any[];
   fetchingBrokerOrders: boolean;
   zerodhaAccessToken: string | null;
@@ -51,7 +52,7 @@ interface BrokerDataProps {
 export function BrokerData(props: BrokerDataProps) {
   const {
     showOrderModal, setShowOrderModal, orderTab, setOrderTab, showUserId, setShowUserId,
-    zerodhaClientId, zerodhaUserName, brokerOrders, fetchingBrokerOrders, zerodhaAccessToken,
+    zerodhaClientId, zerodhaUserName, upstoxAccessToken, brokerOrders, fetchingBrokerOrders, zerodhaAccessToken,
     recordAllBrokerOrders, brokerPositions, fetchingBrokerPositions, showBrokerImportModal,
     setShowBrokerImportModal, handleBrokerImport, showImportModal, setShowImportModal,
     handleFileUpload, activeFormat, detectedFormatLabel, isBuildMode, setIsBuildMode,
@@ -61,6 +62,9 @@ export function BrokerData(props: BrokerDataProps) {
     brokerFunds
   } = props;
 
+  const isConnected = zerodhaAccessToken || upstoxAccessToken;
+  const activeBroker = zerodhaAccessToken ? 'zerodha' : upstoxAccessToken ? 'upstox' : null;
+
   return (
     <>
       <Dialog open={showOrderModal} onOpenChange={setShowOrderModal}>
@@ -68,7 +72,7 @@ export function BrokerData(props: BrokerDataProps) {
           <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center">
             <div className="w-1/3 flex items-center gap-3">
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
-              {zerodhaAccessToken ? (
+              {isConnected ? (
                 <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full text-[10px] font-medium border border-green-100 dark:border-green-800">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                   Live Connected
@@ -84,12 +88,24 @@ export function BrokerData(props: BrokerDataProps) {
             <div className="w-1/3 flex items-center justify-end gap-3">
               <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
                 <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1">
-                  <img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3" />
-                  <span>id: {showUserId ? (zerodhaClientId || "N/A") : "••••••"} | {showUserId ? (zerodhaUserName || "N/A") : "•••••"}</span>
+                  {activeBroker === 'zerodha' && (
+                    <>
+                      <img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3" />
+                      <span>id: {showUserId ? (zerodhaClientId || "N/A") : "••••••"} | {showUserId ? (zerodhaUserName || "N/A") : "•••••"}</span>
+                    </>
+                  )}
+                  {activeBroker === 'upstox' && (
+                    <>
+                      <img src="https://assets.upstox.com/content/assets/images/cms/202494/MediumWordmark_UP(WhiteOnPurple).png" alt="Upstox" className="w-3 h-3" />
+                      <span>Connected to Upstox</span>
+                    </>
+                  )}
                 </div>
-                <button onClick={() => setShowUserId(!showUserId)} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" data-testid="button-toggle-user-id" title={showUserId ? "Hide ID" : "Show ID"}>
-                  {showUserId ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                </button>
+                {activeBroker === 'zerodha' && (
+                  <button onClick={() => setShowUserId(!showUserId)} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" data-testid="button-toggle-user-id" title={showUserId ? "Hide ID" : "Show ID"}>
+                    {showUserId ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -119,7 +135,7 @@ export function BrokerData(props: BrokerDataProps) {
                       {brokerOrders.length === 0 ? (
                         <tr>
                           <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
-                            {fetchingBrokerOrders ? 'Loading orders...' : zerodhaAccessToken ? 'No orders found' : 'Connect to broker to view orders'}
+                            {fetchingBrokerOrders ? 'Loading orders...' : isConnected ? 'No orders found' : 'Connect to broker to view orders'}
                           </td>
                         </tr>
                       ) : (
@@ -192,7 +208,7 @@ export function BrokerData(props: BrokerDataProps) {
                       {brokerPositions.length === 0 ? (
                         <tr>
                           <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
-                            {fetchingBrokerPositions ? 'Loading positions...' : zerodhaAccessToken ? 'No open positions' : 'Connect to broker to view positions'}
+                            {fetchingBrokerPositions ? 'Loading positions...' : isConnected ? 'No open positions' : 'Connect to broker to view positions'}
                           </td>
                         </tr>
                       ) : (
