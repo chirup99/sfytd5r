@@ -3802,6 +3802,59 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
 
   // Fetch Zerodha profile to get both userId and userName - with persistence
+
+  // Restore Upstox connection from localStorage on mount
+  useEffect(() => {
+    console.log('🔵 [UPSTOX] Checking localStorage on mount...');
+    const savedToken = localStorage.getItem('upstox_token');
+    console.log('🔵 [UPSTOX] Saved token:', savedToken ? 'FOUND ✅' : 'NOT FOUND ❌');
+    if (savedToken) {
+      setUpstoxAccessToken(savedToken);
+      setUpstoxIsConnected(true);
+      console.log('✅ [UPSTOX] Connection restored from localStorage');
+      const savedUserId = localStorage.getItem('upstox_user_id');
+      const savedUserName = localStorage.getItem('upstox_user_name');
+      if (savedUserId) {
+        setUpstoxUserId(savedUserId);
+        console.log('✅ [UPSTOX] User ID restored from localStorage');
+      }
+      if (savedUserName) {
+        setUpstoxUserName(savedUserName);
+        console.log('✅ [UPSTOX] User Name restored from localStorage');
+      }
+    } else {
+      console.log('⚠️ [UPSTOX] No saved token in localStorage');
+    }
+  }, []);
+
+  // Restore Angel One connection from localStorage on mount
+  useEffect(() => {
+    console.log('✅ [ANGEL ONE] Checking localStorage on mount...');
+    const savedToken = localStorage.getItem('angel_one_token');
+    console.log('✅ [ANGEL ONE] Saved token:', savedToken ? 'FOUND ✅' : 'NOT FOUND ❌');
+    if (savedToken) {
+      setAngelOneAccessToken(savedToken);
+      setAngelOneIsConnected(true);
+      console.log('✅ [ANGEL ONE] Connection restored from localStorage');
+    } else {
+      console.log('⚠️ [ANGEL ONE] No saved token in localStorage');
+    }
+  }, []);
+
+  // Restore Dhan connection from localStorage on mount
+  useEffect(() => {
+    console.log('🔵 [DHAN] Checking localStorage on mount...');
+    const savedToken = localStorage.getItem('dhan_token');
+    console.log('🔵 [DHAN] Saved token:', savedToken ? 'FOUND ✅' : 'NOT FOUND ❌');
+    if (savedToken) {
+      setDhanAccessToken(savedToken);
+      setDhanIsConnected(true);
+      console.log('✅ [DHAN] Connection restored from localStorage');
+    } else {
+      console.log('⚠️ [DHAN] No saved token in localStorage');
+    }
+  }, []);
+
   useEffect(() => {
     if (zerodhaAccessToken) {
       // Check if we already have profile in localStorage
@@ -3950,8 +4003,10 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         console.log('🔵 [DHAN] Token received from popup:', token.substring(0, 20) + '...');
         
         localStorage.setItem("dhan_token", token);
+        localStorage.setItem("dhan_token", token);
+        localStorage.setItem("dhan_user_id", "dhan_user");
+        localStorage.setItem("dhan_user_name", "Dhan Account");
         document.cookie = `dhan_token=${token}; path=/; SameSite=Lax; Secure`;
-        setDhanAccessToken(token);
         setDhanIsConnected(true);
         setShowConnectDialog(false);
         console.log('✅ [DHAN] Connection established and saved to localStorage');
