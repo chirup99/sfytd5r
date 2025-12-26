@@ -20962,6 +20962,21 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                     </p>
                   </div>
                 </div>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                <div className="p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-slate-100 dark:border-slate-700/50 text-center">
+                  <p className="text-[9px] text-gray-500 uppercase font-bold tracking-tighter">Telangana</p>
+                  <p className="text-[11px] font-bold text-red-600">₹1.97 Lakh</p>
+                </div>
+                <div className="p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-slate-100 dark:border-slate-700/50 text-center">
+                  <p className="text-[9px] text-gray-500 uppercase font-bold tracking-tighter">Andhra P.</p>
+                  <p className="text-[11px] font-bold text-red-600">₹1.45 Lakh</p>
+                </div>
+                <div className="p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-slate-100 dark:border-slate-700/50 text-center">
+                  <p className="text-[9px] text-gray-500 uppercase font-bold tracking-tighter">Tamil Nadu</p>
+                  <p className="text-[11px] font-bold text-red-600">₹1.37 Lakh</p>
+                </div>
+              </div>
+                </div>
               </div>
             </div>
             <Button 
