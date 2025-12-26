@@ -3745,34 +3745,10 @@ ${
     return null;
   });
   const [brokerIntradayPnl, setBrokerIntradayPnl] = useState<number>(0);
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("zerodha_broker_funds");
-      return saved ? parseFloat(saved) : null;
-    }
-    return null;
-  });
-  const [zerodhaUserName, setZerodhaUserName] = useState<string | null>(null);
-const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const [showUserId, setShowUserId] = useState(true);
-  const [zerodhaTradesLoading, setZerodhaTradesLoading] = useState(false);
-  const [zerodhaTradesData, setZerodhaTradesData] = useState<any[]>([]);
-  const [zerodhaProfileData, setZerodhaProfileData] = useState<any>(null);
-  const [importData, setImportData] = useState("");
-  const [importError, setImportError] = useState("");
-  const [upstoxIsConnected, setUpstoxIsConnected] = useState(false);
-  const [upstoxAccessToken, setUpstoxAccessToken] = useState<string | null>(null);
-  const [angelOneAccessToken, setAngelOneAccessToken] = useState<string | null>(null);
-  const [angelOneIsConnected, setAngelOneIsConnected] = useState(false);
-  const [dhanAccessToken, setDhanAccessToken] = useState<string | null>(null);
-  const [dhanIsConnected, setDhanIsConnected] = useState(false);
-  // Zerodha OAuth Handlers
-  // Check localStorage on mount to restore connection state
-  useEffect(() => {
-    console.log('🔷 [ZERODHA] Checking localStorage on mount...');
-    const savedToken = localStorage.getItem('zerodha_token');
     console.log('🔷 [ZERODHA] Saved token:', savedToken ? 'FOUND ✅' : 'NOT FOUND ❌');
     if (savedToken) {
-      setZerodhaAccessToken(savedToken);
+  const [showUserId, setShowUserId] = useState(true);
       setZerodhaIsConnected(true);
       console.log('✅ [ZERODHA] Connection restored from localStorage');
       const savedClientId = localStorage.getItem('zerodha_client_id');
@@ -4874,6 +4850,21 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
             if (data.intradayPnl !== undefined) {
               setBrokerIntradayPnl(data.intradayPnl);
             }
+            if (data.intradayPnl !== undefined) {
+              setBrokerIntradayPnl(data.intradayPnl);
+            }
+            if (data.intradayPnl !== undefined) {
+              setBrokerIntradayPnl(data.intradayPnl);
+            }
+            if (data.intradayPnl !== undefined) {
+              setBrokerIntradayPnl(data.intradayPnl);
+            }
+            if (data.intradayPnl !== undefined) {
+              setBrokerIntradayPnl(data.intradayPnl);
+            }
+            if (data.intradayPnl !== undefined) {
+              setBrokerIntradayPnl(data.intradayPnl);
+            }
             localStorage.setItem("zerodha_broker_funds", data.availableCash.toString());
             console.log('✅ [BROKER] Fetched available funds:', data.availableCash);
           } else {
@@ -4917,6 +4908,12 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           const data = await response.json();
           if (response.ok && data.success && data.availableCash !== undefined) {
             setBrokerFunds(data.availableCash);
+            if (data.intradayPnl !== undefined) {
+              setBrokerIntradayPnl(data.intradayPnl);
+            }
+            if (data.intradayPnl !== undefined) {
+              setBrokerIntradayPnl(data.intradayPnl);
+            }
             if (data.intradayPnl !== undefined) {
               setBrokerIntradayPnl(data.intradayPnl);
             }
@@ -19685,24 +19682,12 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                     <div className="flex items-center gap-6">
                       <div className="text-center">
                         <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Available Funds</div>
-                        <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{showUserId ? `₹${brokerFunds.toLocaleString("en-IN", {maximumFractionDigits: 2})}` : "***"}</div>
+                        <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{showUserId ? `₹${(brokerFunds || 0).toLocaleString("en-IN", {maximumFractionDigits: 2})}` : "***"}</div>
                       </div>
                       <div className="text-center">
                         <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Intraday P&L</div>
                         <div className={`text-sm font-semibold ${(brokerIntradayPnl || 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                          {showUserId ? `₹${(brokerIntradayPnl || 0).toLocaleString("en-IN", {maximumFractionDigits: 2})}` : "***"}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-center">
-                        <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Available Funds</div>
-                        <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{showUserId ? `₹${brokerFunds.toLocaleString("en-IN", {maximumFractionDigits: 2})}` : "***"}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Intraday P&L</div>
-                        <div className={`text-sm font-semibold ${(brokerIntradayPnl || 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                          {showUserId ? `₹${(brokerIntradayPnl || 0).toLocaleString("en-IN", {maximumFractionDigits: 2})}` : "***"}
+                          {showUserId ? showUserId ? showUserId ? `₹${(brokerIntradayPnl || 0).toLocaleString("en-IN", {maximumFractionDigits: 2})}` : "***" : "***" : "***"}
                         </div>
                       </div>
                     </div>
