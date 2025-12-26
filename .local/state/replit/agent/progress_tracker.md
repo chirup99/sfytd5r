@@ -26,3 +26,7 @@
 [x] 26. Improved Trading Journal modal styling - Daily Trade Tracking now matches prominence of other features (gap-3 p-3, text-sm/text-xs, consistent with AI Performance Analysis and Improve Your Trading sections)
 [x] 27. Updated "Improve Your Trading" subtitle text to "Learn from your trading mistakes and patterns" for more specific messaging
 [x] 28. Environment reset - reinstalled npm dependencies and restarted workflow successfully
+[x] 29. Created missing /api/broker/zerodha/positions endpoint to fetch open positions from Zerodha API
+[x] 30. Positions endpoint transforms Zerodha data with entry price, current price, quantity, unrealized P&L, return percentage
+[x] 31. Fixed positions not fetching - added complete backend endpoint implementation matching orders fetch pattern
+[x] 32. Workflow restarted with new positions endpoint - positions will now fetch when users click Positions tab

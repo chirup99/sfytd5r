@@ -20253,6 +20253,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Fetch Zerodha positions
+  app.get('/api/broker/zerodha/positions', async (req, res) => {
+    const accessToken = req.headers.authorization?.split(' ')[1];
+    const apiKey = process.env.ZERODHA_API_KEY;
+    
+    if (!accessToken || !apiKey) {
+      return res.status(401).json({ 
+        error: 'Unauthorized',
+        positions: [] 
+      });
+    }
+
+    try {
+      const response = await axios.get('https://api.kite.trade/positions', {
+        headers: {
+          'Authorization': `token ${apiKey}:${accessToken}`,
+          'X-Kite-Version': '3'
+        }
+      });
+
+      const positionsData = response.data.data || {};
+      const allPositions = [...(positionsData.net || []), ...(positionsData.day || [])];
+      
+      if (allPositions.length > 0) {
+        console.log('🔍 [ZERODHA] First position structure:', JSON.stringify(allPositions[0], null, 2));
+      }
+      
+      const positions = allPositions.map((pos: any) => ({
+        symbol: pos.tradingsymbol,
+        entry_price: pos.average_price || 0,
+        current_price: pos.last_price || 0,
+        qty: pos.quantity,
+        quantity: pos.quantity,
+        unrealized_pnl: pos.unrealised_value || 0,
+        unrealizedPnl: pos.unrealised_value || 0,
+        return_percent: pos.unrealised_value && pos.average_price ? ((pos.unrealised_value / (pos.average_price * pos.quantity)) * 100).toFixed(2) : 0,
+        returnPercent: pos.unrealised_value && pos.average_price ? ((pos.unrealised_value / (pos.average_price * pos.quantity)) * 100).toFixed(2) : 0,
+        status: pos.quantity > 0 ? 'OPEN' : 'CLOSED'
+      }));
+
+      console.log('✅ [ZERODHA] Fetched', positions.length, 'positions from API');
+      if (positions.length > 0) {
+        console.log('📊 [ZERODHA] Sample position:', positions[0]);
+      }
+      
+      res.json({ 
+        positions,
+        success: true
+      });
+    } catch (error) {
+      console.error('❌ [ZERODHA] Error fetching positions:', error);
+      
+      res.json({ 
+        positions: [],
+        success: false,
+        message: 'Zerodha API call failed'
+      });
+    }
+  });
+
   // STEP 4: Fetch Zerodha profile details
 
   // Get Zerodha broker margins (available funds)
