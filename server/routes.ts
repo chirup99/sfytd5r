@@ -20424,7 +20424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
       })
         .then(r => r.json())
-        .then(data => res.json({ success: true, availableCash: data.data?.[0]?.net_available || 0 }))
+        .then(data => res.json({ success: true, availableCash: data.data?.available_margin || 0 }))
         .catch(() => res.json({ success: true, availableCash: 0 }));
     } catch (e) { res.json({ success: true, availableCash: 0 }); }
   });
