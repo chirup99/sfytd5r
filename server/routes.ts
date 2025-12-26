@@ -20266,7 +20266,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const response = await axios.get('https://api.kite.trade/positions', {
+      const response = await axios.get('https://api.kite.trade/portfolio/positions', {
         headers: {
           'Authorization': `token ${apiKey}:${accessToken}`,
           'X-Kite-Version': '3'

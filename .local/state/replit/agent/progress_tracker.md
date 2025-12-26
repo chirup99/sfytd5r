@@ -33,3 +33,4 @@
 [x] 33. Reinstalled dotenv package after environment reset - resolved module not found error
 [x] 34. Workflow running successfully - Angel One WebSocket connected, live market data streaming active
 [x] 35. Created comprehensive Zerodha data flow documentation explaining all 4 missing backend API routes with complete code
+[x] 36. Fixed Zerodha positions endpoint - changed from /positions to /portfolio/positions (correct Zerodha API endpoint)
