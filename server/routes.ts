@@ -20253,6 +20253,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // STEP 3.5: Fetch Zerodha positions
+  app.get('/api/broker/zerodha/positions', async (req, res) => {
+    const accessToken = req.headers.authorization?.split(' ')[1];
+    const apiKey = process.env.ZERODHA_API_KEY;
+    
+    if (!accessToken || !apiKey) {
+      return res.status(401).json({ 
+        error: 'Unauthorized',
+        positions: [] 
+      });
+    }
+
+    try {
+      // Call real Zerodha API with access token for positions
+      const response = await axios.get('https://api.kite.trade/portfolio/positions', {
+        headers: {
+          'Authorization': `token ${apiKey}:${accessToken}`,
+          'X-Kite-Version': '3'
+        }
+      });
+
+      const positionsData = response.data.data || {};
+      const net = positionsData.net || [];
+      
+      // Debug: Log first position to see available fields
+      if (net.length > 0) {
+        console.log('🔍 [ZERODHA] First position structure:', JSON.stringify(net[0], null, 2));
+      }
+      
+      // Transform Zerodha positions to our format
+      const positions = net.map((pos: any, index: number) => {
+        // Log first few positions to debug
+        if (index < 2) {
+          console.log(`📍 [ZERODHA] Position ${index}:`, {
+            symbol: pos.tradingsymbol,
+            qty: pos.quantity,
+            entry: pos.buy_value || 0,
+            current: pos.close_price || 0,
+            pnl: pos.pnl || 0
+          });
+        }
+        
+        const qty = Math.abs(pos.quantity || 0);
+        const entryPrice = qty > 0 ? (Math.abs(pos.buy_value || 0) / qty) : 0;
+        const currentPrice = pos.close_price || pos.last_price || 0;
+        const unrealizedPnl = pos.pnl || 0;
+        const returnPercent = qty > 0 && entryPrice > 0 ? ((currentPrice - entryPrice) / entryPrice) * 100 : 0;
+        
+        return {
+          symbol: pos.tradingsymbol || pos.instrument_token,
+          entryPrice: entryPrice.toFixed(2),
+          currentPrice: currentPrice.toFixed(2),
+          qty: qty,
+          unrealizedPnl: unrealizedPnl.toFixed(2),
+          returnPercent: returnPercent.toFixed(2),
+          status: 'Open'
+        };
+      });
+
+      console.log('✅ [ZERODHA] Fetched', positions.length, 'positions from API');
+      if (positions.length > 0) {
+        console.log('📊 [ZERODHA] Sample position:', positions[0]);
+      }
+      
+      res.json({ 
+        positions,
+        success: true
+      });
+    } catch (error) {
+      console.error('❌ [ZERODHA] Error fetching positions:', error);
+      
+      // Return empty positions if API fails (instead of demo data)
+      res.json({ 
+        positions: [],
+        success: false,
+        message: 'Error fetching positions from Zerodha API'
+      });
+    }
+  });
+
   // STEP 4: Fetch Zerodha profile details
 
   // Get Zerodha broker margins (available funds)

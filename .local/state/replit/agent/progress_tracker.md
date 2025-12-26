@@ -26,3 +26,6 @@
 [x] 26. Improved Trading Journal modal styling - Daily Trade Tracking now matches prominence of other features (gap-3 p-3, text-sm/text-xs, consistent with AI Performance Analysis and Improve Your Trading sections)
 [x] 27. Updated "Improve Your Trading" subtitle text to "Learn from your trading mistakes and patterns" for more specific messaging
 [x] 28. Environment reset - reinstalled npm dependencies and restarted workflow successfully
+[x] 29. Added Zerodha positions endpoint at GET /api/broker/zerodha/positions - fetches from Kite API
+[x] 30. Positions endpoint transforms data: symbol, entryPrice, currentPrice, qty, unrealizedPnl, returnPercent
+[x] 31. Workflow restarted - application running, positions endpoint ready for testing
