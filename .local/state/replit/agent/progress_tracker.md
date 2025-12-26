@@ -53,3 +53,7 @@
 [x] 53. Changed positions refresh interval from 1000ms to 700ms - matching WebSocket broadcast interval
 [x] 54. Current price now fetches every 700ms for faster real-time updates
 [x] 55. Workflow restarted - Angel One WebSocket connected, live price streaming active, positions auto-refresh at 700ms
+[x] 56. Updated positions fetch to fetch live prices from WebSocket via `/api/live-quotes/NSE:symbol-EQ` endpoint
+[x] 57. Positions now merge live prices with position data every 700ms - current price comes from real-time WebSocket stream
+[x] 58. COMPLETE: Current price is now fetched via WebSocket (Angel One real-time data stream)
+[x] 59. Workflow running - WebSocket broadcasting live prices every 700ms with continuous updates for BANKNIFTY, SENSEX, GOLD

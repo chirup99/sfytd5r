@@ -4751,8 +4751,33 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
             headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
           });
           const data = await res.json();
-          setBrokerPositions(data.positions || []);
-          console.log('✅ [POSITIONS] Fetched', (data.positions || []).length, 'positions from Zerodha');
+          let positions = data.positions || [];
+
+          // Fetch live prices for each position from WebSocket stream
+          if (positions.length > 0) {
+            const livePositions = await Promise.all(
+              positions.map(async (pos: any) => {
+                try {
+                  const symbol = pos.symbol || '';
+                  const liveRes = await fetch(`/api/live-quotes/NSE:${symbol}-EQ`);
+                  if (liveRes.ok) {
+                    const liveData = await liveRes.json();
+                    return {
+                      ...pos,
+                      currentPrice: liveData.price || pos.currentPrice || pos.current_price || 0
+                    };
+                  }
+                } catch (err) {
+                  console.warn(`⚠️ [LIVE-PRICE] Could not fetch live price for ${pos.symbol}`);
+                }
+                return pos;
+              })
+            );
+            positions = livePositions;
+          }
+
+          setBrokerPositions(positions);
+          console.log('✅ [POSITIONS] Fetched', positions.length, 'positions with live prices via WebSocket');
         } catch (err) {
           console.error('❌ [POSITIONS] Error fetching positions:', err);
           setBrokerPositions([]);
