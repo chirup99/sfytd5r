@@ -4123,19 +4123,11 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       const messageListener = (event: MessageEvent) => {
         if (event.data.type === "UPSTOX_AUTH_SUCCESS") {
           console.log("✅ Upstox authentication successful!");
-          const token = event.data.token && event.data.token !== "undefined" ? event.data.token : "";
-          const userId = event.data.userId && event.data.userId !== "undefined" ? event.data.userId : "";
-          const userEmail = event.data.userEmail && event.data.userEmail !== "undefined" ? event.data.userEmail : "";
-          const userName = event.data.userName && event.data.userName !== "undefined" ? event.data.userName : "";
-
-          if (token) localStorage.setItem("upstox_token", token);
-          if (userId) localStorage.setItem("upstox_user_id", userId);
-          if (userEmail) localStorage.setItem("upstox_user_email", userEmail);
-          if (userName) localStorage.setItem("upstox_user_name", userName);
-
-          setUpstoxAccessToken(token || null);
-          setUpstoxUserId(userId || null);
-          setUpstoxUserName(userName || null);
+          localStorage.setItem("upstox_token", event.data.token);
+          localStorage.setItem("upstox_user_id", event.data.userId || "");
+          localStorage.setItem("upstox_user_email", event.data.userEmail || "");
+          localStorage.setItem("upstox_user_name", event.data.userName || "");
+          setUpstoxAccessToken(event.data.token);
           setUpstoxIsConnected(true);
           window.removeEventListener("message", messageListener);
           toast({
@@ -4147,17 +4139,16 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           window.removeEventListener("message", messageListener);
           toast({
             title: "Error",
-            description: event.data.error,
+            description: event.data.error || "Failed to authenticate with Upstox",
             variant: "destructive",
           });
         }
       };
 
       window.addEventListener("message", messageListener);
-    } catch (error) {
-      console.error("❌ Upstox error:", error);
-      alert("Error: " + (error instanceof Error ? error.message : "Failed to connect"));
-    }
+      
+      // Monitor popup closing and cleanup
+      let checkCount = 0;
       const monitorPopup = setInterval(() => {
         checkCount++;
         if (popup.closed) {
