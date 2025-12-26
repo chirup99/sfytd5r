@@ -60,3 +60,8 @@
 [x] 60. Workflow running - WebSocket broadcasting live prices every 700ms with continuous updates for BANKNIFTY, SENSEX, GOLD
 [x] 61. Environment reset - reinstalled dotenv package and restarted workflow successfully (Dec 26, 2025)
 [x] 62. Updated state text size from text-[7px] to text-[9px] for Telangana, AP, Tamil Nadu labels in Trading Journal modal
+[x] 63. Deep analyzed Upstox OAuth issue - identified 2 conflicting endpoint implementations
+[x] 64. Removed legacy `/api/broker/upstox/*` endpoints (login-url, callback, trades, debug) that conflicted
+[x] 65. Fixed redirect URI mismatch - now uses `/api/upstox/callback` consistently
+[x] 66. Upstox OAuth Manager properly initialized with correct redirect URI on workflow restart
+[x] 67. Legacy endpoints removed - Upstox flow now uses OAuth Manager pattern (auth-url → callback → status)
