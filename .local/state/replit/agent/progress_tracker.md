@@ -16,3 +16,5 @@
 [x] 16. Added logo-style styling to the Info icon button for professional appearance
 [x] 17. Created Trading Journal modal dialog that opens when Info icon is clicked
 [x] 18. Modal displays with blue gradient, "Trading Journal" title, and feature descriptions matching Trophy dialog pattern
+[x] 19. Added useEffect to automatically open Trading Journal modal when user navigates to journal tab
+[x] 20. Feature complete - Trading Journal modal now displays automatically when journal tab opens

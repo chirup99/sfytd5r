@@ -9954,6 +9954,13 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     setIsCalendarDataFetched(false);
   };
 
+  // ✅ AUTO-OPEN JOURNAL INFO MODAL: Show modal when journal tab opens
+  useEffect(() => {
+    if (activeTab === "journal") {
+      setShowJournalInfoModal(true);
+    }
+  }, [activeTab]);
+
   // ✅ INSTANT AUTO-LOAD: Load heatmap data immediately when journal tab opens
   // No delays, no complex logic - just instant data loading
   useEffect(() => {
