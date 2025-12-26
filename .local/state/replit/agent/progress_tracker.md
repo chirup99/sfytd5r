@@ -24,3 +24,4 @@
 [x] 24. Reinstalled dotenv package and restarted workflow - application fully operational
 [x] 25. Import complete - ready for user to start building
 [x] 26. Improved Trading Journal modal styling - Daily Trade Tracking now matches prominence of other features (gap-3 p-3, text-sm/text-xs, consistent with AI Performance Analysis and Improve Your Trading sections)
+[x] 27. Updated "Improve Your Trading" subtitle text to "Learn from your trading mistakes and patterns" for more specific messaging

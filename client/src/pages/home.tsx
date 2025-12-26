@@ -20942,7 +20942,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                 <TrendingUp className="h-5 w-5 text-amber-500" />
                 <div>
                   <p className="text-sm font-medium">Improve Your Trading</p>
-                  <p className="text-xs text-gray-500">Learn from your trades and patterns</p>
+                  <p className="text-xs text-gray-500">Learn from your trading mistakes and patterns</p>
                 </div>
               </div>
               <div className="mt-1 p-2 bg-red-50/30 dark:bg-red-900/5 rounded-md border border-red-100/30 dark:border-red-900/10">
