@@ -10117,7 +10117,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } catch (error: any) {
         // If Angel One API fails, return error
-        console.error('❌ Failed to fetch historical data from Angel One:', error.message);
+        console.error('❌ Failed to fetch historical data from Angel One:');
+        console.error('  Status:', error?.response?.status);
+        console.error('  Message:', error.message);
+        console.error('  Response Data:', error?.response?.data);
+        console.error('  Full Error:', JSON.stringify({
+          message: error.message,
+          code: error.code,
+          statusCode: error?.response?.status,
+          responseData: error?.response?.data
+        }));
         return res.status(503).json({ 
           success: false,
           message: `Angel One API error: ${error.message}`,
@@ -11883,10 +11892,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Historical fetch completed",
         ...result
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('❌ Historical fetch status error:');
+      console.error('  Message:', error?.message);
+      console.error('  Status:', error?.response?.status);
+      console.error('  Response Data:', error?.response?.data);
+      console.error('  Stack:', error?.stack);
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorDetails: {
+          status: error?.response?.status,
+          data: error?.response?.data
+        }
       });
     }
   });
@@ -11961,8 +11979,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           }
 
-        } catch (fyersError) {
-          console.log(`⚠️ Fyers API failed for ${symbol}: ${fyersError instanceof Error ? fyersError.message : 'Unknown error'}`);
+        } catch (fyersError: any) {
+          console.error(`⚠️ Fyers API failed for ${symbol}:`);
+          console.error('  Message:', fyersError?.message);
+          console.error('  Status:', fyersError?.response?.status);
+          console.error('  Response Data:', fyersError?.response?.data);
+          console.error('  Code:', fyresError?.code);
           dataSource = 'backup';
         }
       } else {
@@ -12033,18 +12055,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         details: backupResult.error || 'Both primary and backup data sources unavailable'
       });
 
-    } catch (error) {
-      console.error('❌ Historical data endpoint error:', error);
+    } catch (error: any) {
+      console.error('❌ Historical data endpoint error:');
+      console.error('  Message:', error?.message);
+      console.error('  Status:', error?.response?.status);
+      console.error('  Response Data:', error?.response?.data);
+      console.error('  Request Symbol:', req.body?.symbol);
+      console.error('  Request Params:', {
+        resolution: req.body?.resolution,
+        range_from: req.body?.range_from,
+        range_to: req.body?.range_to
+      });
+      console.error('  Full Error Stack:', error?.stack);
 
       await safeAddActivityLog({
         type: "error",
-        message: `Historical data endpoint failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Historical data endpoint failed for ${req.body?.symbol}: ${error instanceof Error ? error.message : 'Unknown error'} (Status: ${error?.response?.status})`
       });
 
       return res.status(500).json({ 
         error: "Internal server error",
         message: "Failed to process historical data request",
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
+        errorInfo: {
+          statusCode: error?.response?.status,
+          responseData: error?.response?.data,
+          symbol: req.body?.symbol
+        }
       });
     }
   });
