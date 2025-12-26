@@ -10,7 +10,7 @@ interface TradingJournalModalProps {
 export function TradingJournalModal({ open, onOpenChange }: TradingJournalModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm w-[90vw]">
+      <DialogContent className="max-w-sm w-[90vw] pl-[5px] pr-[5px] pt-[12px] pb-[12px]">
         <DialogHeader className="text-center">
           <div className="flex justify-center mb-2">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
