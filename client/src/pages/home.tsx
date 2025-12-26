@@ -1,3 +1,4 @@
+import { BrokerData } from "@/components/broker-data";
 import React, {
   useState,
   useEffect,
@@ -19654,170 +19655,46 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           </div>
         </main>
 
-        {/* Trade History Modal with Orders & Positions */}
-        <Dialog open={showOrderModal} onOpenChange={setShowOrderModal}>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto custom-thin-scrollbar p-0">
-            {/* Compact Header */}
-            <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between gap-4">
-              <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
-              <div className="flex-1 flex items-center justify-center gap-2">
-                {zerodhaAccessToken ? (
-                  brokerFunds !== null ? (
-                    <div className="text-center">
-                      <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Available Funds</div>
-                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{showUserId ? `₹${brokerFunds.toLocaleString('en-IN', {maximumFractionDigits: 2})}` : "***"}</div>
-                    </div>
-                  ) : (
-                    <div className="text-xs text-slate-400 dark:text-slate-500">Loading funds...</div>
-                  )
-                ) : null}
-              </div>
-              <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
-                <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/50 rounded px-2 py-1">
-                  <img src="https://zerodha.com/static/images/products/kite-logo.svg" alt="Zerodha" className="w-3 h-3" />
-                  <span>id: {showUserId ? (zerodhaClientId || "N/A") : "••••••"} | {showUserId ? (zerodhaUserName || "N/A") : "•••••"}</span>
-                </div>
-                <button onClick={() => setShowUserId(!showUserId)} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" data-testid="button-toggle-user-id" title={showUserId ? "Hide ID" : "Show ID"}>
-                  {showUserId ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="p-4">
-              <Tabs value={orderTab} onValueChange={setOrderTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-3">
-                <TabsTrigger value="history">Orders</TabsTrigger>
-                <TabsTrigger value="positions">Positions</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="history" className="space-y-4">
-                <div className="max-h-96 overflow-y-auto border rounded-lg custom-thin-scrollbar">
-                  <table className="w-full text-xs">
-                    <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
-                      <tr>
-                        <th className="px-2 py-2 text-left font-medium">Time</th>
-                        <th className="px-2 py-2 text-left font-medium">Order</th>
-                        <th className="px-2 py-2 text-left font-medium">Symbol</th>
-                        <th className="px-2 py-2 text-left font-medium">Type</th>
-                        <th className="px-2 py-2 text-left font-medium">Qty</th>
-                        <th className="px-2 py-2 text-left font-medium">Price</th>
-                        <th className="px-2 py-2 text-left font-medium">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {brokerOrders.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
-                            {fetchingBrokerOrders ? 'Loading orders...' : zerodhaAccessToken ? 'No orders found' : 'Connect to broker to view orders'}
-                          </td>
-                        </tr>
-                      ) : (
-                        [...brokerOrders].sort((a, b) => { const aStatus = String(a.status || "").toUpperCase().trim(); const bStatus = String(b.status || "").toUpperCase().trim(); const aOrder = aStatus === "COMPLETE" || aStatus === "PENDING" ? 0 : aStatus === "REJECTED" || aStatus === "CANCELLED" ? 999 : 500; const bOrder = bStatus === "COMPLETE" || bStatus === "PENDING" ? 0 : bStatus === "REJECTED" || bStatus === "CANCELLED" ? 999 : 500; return aOrder - bOrder; }).map((trade, index) => (
-                          <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <td className="px-2 py-2 font-medium">{trade.time}</td>
-                            <td className="px-2 py-2">
-                              <span className={`px-1 py-0.5 rounded text-xs ${
-                                trade.order === "BUY"
-                                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                  : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                              }`}>
-                                {trade.order}
-                              </span>
-                            </td>
-                            <td className="px-2 py-2 font-medium">{trade.symbol}</td>
-                            <td className="px-2 py-2">{trade.type}</td>
-                            <td className="px-2 py-2">{trade.qty}</td>
-                            <td className="px-2 py-2">₹{trade.price}</td>
-<td className="px-2 py-2">
-                              <span className={`text-xs font-medium ${
-                                trade.status === 'COMPLETE' ? 'text-green-600 dark:text-green-400' :
-                                trade.status === 'REJECTED' ? 'text-red-600 dark:text-red-400' :
-                                trade.status === 'CANCELLED' ? 'text-yellow-600 dark:text-yellow-400' :
-                                'text-blue-600 dark:text-blue-400'
-                              }`}>
-                                {trade.status || 'PENDING'}
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700 mt-2">
-                  <button
-                    onClick={recordAllBrokerOrders}
-                    disabled={brokerOrders.length === 0}
-                    className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded transition-colors"
-                    data-testid="button-record-broker-orders"
-                  >
-                    Record to Journal
-                  </button>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{brokerOrders.length} orders</span>
-                </div>
-              </TabsContent>
-
-                            <TabsContent value="positions" className="space-y-4">
-                <div className="max-h-96 overflow-y-auto border rounded-lg custom-thin-scrollbar">
-                  <table className="w-full text-xs">
-                    <thead className="bg-gray-100 dark:bg-gray-700 sticky top-0">
-                      <tr>
-                        <th className="px-2 py-2 text-left font-medium">Symbol</th>
-                        <th className="px-2 py-2 text-left font-medium">Entry Price</th>
-                        <th className="px-2 py-2 text-left font-medium">Current Price</th>
-                        <th className="px-2 py-2 text-left font-medium">Qty</th>
-                        <th className="px-2 py-2 text-left font-medium">Unrealized P&L</th>
-                        <th className="px-2 py-2 text-left font-medium">Return %</th>
-                        <th className="px-2 py-2 text-left font-medium">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {brokerPositions.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
-                            {fetchingBrokerPositions ? 'Loading positions...' : zerodhaAccessToken ? 'No open positions' : 'Connect to broker to view positions'}
-                          </td>
-                        </tr>
-                      ) : (
-                        [...brokerPositions].sort((a, b) => { const aStatus = String(a.status || "Open").toUpperCase().trim(); const bStatus = String(b.status || "Open").toUpperCase().trim(); return (aStatus === "OPEN" ? 0 : 999) - (bStatus === "OPEN" ? 0 : 999); }).map((pos, index) => {
-                          const entryPrice = (pos.entryPrice || pos.entry_price || 0) as number;
-                          const currentPrice = (pos.currentPrice || pos.current_price || 0) as number;
-                          const qty = (pos.qty || pos.quantity || 0) as number;
-                          const unrealizedPnl = (currentPrice - entryPrice) * qty;
-                          const returnPercent = entryPrice > 0 ? ((currentPrice - entryPrice) / entryPrice) * 100 : 0;
-                          
-                          return (
-                          <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <td className="px-2 py-2 font-medium">{pos.symbol}</td>
-                            <td className="px-2 py-2">₹{entryPrice.toFixed(2)}</td>
-                            <td className="px-2 py-2">₹{currentPrice.toFixed(2)}</td>
-                            <td className="px-2 py-2">{qty}</td>
-                            <td className={`px-2 py-2 font-medium ${unrealizedPnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                              ₹{unrealizedPnl.toFixed(2)}
-                            </td>
-                            <td className={`px-2 py-2 ${returnPercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                              {returnPercent.toFixed(2)}%
-                            </td>
-                            <td className="px-2 py-2">{pos.status || 'Open'}</td>
-                          </tr>
-                          );
-                        })
-
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700 mt-2">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{brokerPositions.length} open positions</span>
-                </div>
-              </TabsContent>
-
-              </Tabs>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-
+        <BrokerData 
+          showOrderModal={showOrderModal} 
+          setShowOrderModal={setShowOrderModal} 
+          orderTab={orderTab} 
+          setOrderTab={setOrderTab} 
+          showUserId={showUserId} 
+          setShowUserId={setShowUserId} 
+          zerodhaClientId={zerodhaClientId} 
+          zerodhaUserName={zerodhaUserName} 
+          brokerOrders={brokerOrders} 
+          fetchingBrokerOrders={fetchingBrokerOrders} 
+          zerodhaAccessToken={zerodhaAccessToken} 
+          recordAllBrokerOrders={recordAllBrokerOrders} 
+          brokerPositions={brokerPositions} 
+          fetchingBrokerPositions={fetchingBrokerPositions} 
+          showBrokerImportModal={showBrokerImportModal} 
+          setShowBrokerImportModal={setShowBrokerImportModal} 
+          handleBrokerImport={handleBrokerImport} 
+          showImportModal={showImportModal} 
+          setShowImportModal={setShowImportModal} 
+          handleFileUpload={handleFileUpload} 
+          activeFormat={activeFormat} 
+          detectedFormatLabel={detectedFormatLabel} 
+          isBuildMode={isBuildMode} 
+          setIsBuildMode={setIsBuildMode} 
+          brokerSearchInput={brokerSearchInput} 
+          setBrokerSearchInput={setBrokerSearchInput} 
+          showBrokerSuggestions={showBrokerSuggestions} 
+          setShowBrokerSuggestions={setShowBrokerSuggestions} 
+          filteredBrokers={filteredBrokers} 
+          buildModeData={buildModeData} 
+          setBuildModeData={setBuildModeData} 
+          allColumnsFilledForSave={allColumnsFilledForSave} 
+          missingColumns={missingColumns} 
+          saveFormatToUniversalLibrary={saveFormatToUniversalLibrary} 
+          currentUser={currentUser} 
+          getCognitoToken={getCognitoToken} 
+          setSavedFormats={setSavedFormats} 
+          importDataTextareaRef={importDataTextareaRef} 
+        />
         {/* Broker Import Dialog */}
         <BrokerImportDialog
           open={showBrokerImportModal}
