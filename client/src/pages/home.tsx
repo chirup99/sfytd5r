@@ -4861,6 +4861,9 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           const data = await response.json();
           if (response.ok && data.success && data.availableCash !== undefined) {
             setBrokerFunds(data.availableCash);
+            if (data.intradayPnl !== undefined) {
+              setBrokerIntradayPnl(data.intradayPnl);
+            }
             localStorage.setItem("zerodha_broker_funds", data.availableCash.toString());
             console.log('✅ [BROKER] Fetched available funds:', data.availableCash);
           } else {
@@ -4904,6 +4907,9 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           const data = await response.json();
           if (response.ok && data.success && data.availableCash !== undefined) {
             setBrokerFunds(data.availableCash);
+            if (data.intradayPnl !== undefined) {
+              setBrokerIntradayPnl(data.intradayPnl);
+            }
             localStorage.setItem("zerodha_broker_funds", data.availableCash.toString());
             console.log('✅ [BROKER] Fetched available funds:', data.availableCash);
           } else {
@@ -19663,6 +19669,18 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
               <div className="flex-1 flex items-center justify-center gap-2">
                 {zerodhaAccessToken ? (
                   brokerFunds !== null ? (
+                    <div className="flex items-center gap-6">
+                      <div className="text-center">
+                        <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Available Funds</div>
+                        <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{showUserId ? `₹${brokerFunds.toLocaleString("en-IN", {maximumFractionDigits: 2})}` : "***"}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Intraday P&L</div>
+                        <div className={`text-sm font-semibold ${(brokerIntradayPnl || 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                          {showUserId ? `₹${(brokerIntradayPnl || 0).toLocaleString("en-IN", {maximumFractionDigits: 2})}` : "***"}
+                        </div>
+                      </div>
+                    </div>
                     <div className="text-center">
                       <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">Available Funds</div>
                       <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{showUserId ? `₹${brokerFunds.toLocaleString('en-IN', {maximumFractionDigits: 2})}` : "***"}</div>
