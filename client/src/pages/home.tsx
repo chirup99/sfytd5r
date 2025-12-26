@@ -19740,21 +19740,30 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                           </td>
                         </tr>
                       ) : (
-                        [...brokerPositions].sort((a, b) => { const aStatus = String(a.status || "Open").toUpperCase().trim(); const bStatus = String(b.status || "Open").toUpperCase().trim(); return (aStatus === "OPEN" ? 0 : 999) - (bStatus === "OPEN" ? 0 : 999); }).map((pos, index) => (
+                        [...brokerPositions].sort((a, b) => { const aStatus = String(a.status || "Open").toUpperCase().trim(); const bStatus = String(b.status || "Open").toUpperCase().trim(); return (aStatus === "OPEN" ? 0 : 999) - (bStatus === "OPEN" ? 0 : 999); }).map((pos, index) => {
+                          const entryPrice = (pos.entryPrice || pos.entry_price || 0) as number;
+                          const currentPrice = (pos.currentPrice || pos.current_price || 0) as number;
+                          const qty = (pos.qty || pos.quantity || 0) as number;
+                          const unrealizedPnl = (currentPrice - entryPrice) * qty;
+                          const returnPercent = entryPrice > 0 ? ((currentPrice - entryPrice) / entryPrice) * 100 : 0;
+                          
+                          return (
                           <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td className="px-2 py-2 font-medium">{pos.symbol}</td>
-                            <td className="px-2 py-2">₹{((pos.entryPrice || pos.entry_price || 0) as number).toFixed(2)}</td>
-                            <td className="px-2 py-2">₹{((pos.currentPrice || pos.current_price || 0) as number).toFixed(2)}</td>
-                            <td className="px-2 py-2">{pos.qty || pos.quantity}</td>
-                            <td className={`px-2 py-2 font-medium ${(pos.unrealizedPnl || pos.unrealized_pnl || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                              ₹{((pos.unrealizedPnl || pos.unrealized_pnl || 0) as number).toFixed(2)}
+                            <td className="px-2 py-2">₹{entryPrice.toFixed(2)}</td>
+                            <td className="px-2 py-2">₹{currentPrice.toFixed(2)}</td>
+                            <td className="px-2 py-2">{qty}</td>
+                            <td className={`px-2 py-2 font-medium ${unrealizedPnl >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                              ₹{unrealizedPnl.toFixed(2)}
                             </td>
-                            <td className={`px-2 py-2 ${(pos.returnPercent || pos.return_percent || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                              {typeof (pos.returnPercent || pos.return_percent) === 'string' ? (pos.returnPercent || pos.return_percent) : (pos.returnPercent || pos.return_percent || 0).toFixed(2)}%
+                            <td className={`px-2 py-2 ${returnPercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                              {returnPercent.toFixed(2)}%
                             </td>
                             <td className="px-2 py-2">{pos.status || 'Open'}</td>
                           </tr>
-                        ))
+                          );
+                        })
+
                       )}
                     </tbody>
                   </table>

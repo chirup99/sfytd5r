@@ -42,5 +42,7 @@
 [x] 42. Preview now loads successfully - application running with full functionality
 [x] 43. Fixed entry price and current price formatting - both now display with 2 decimal places (₹21.64 format)
 [x] 44. Workflow restarted - all price formatting complete and running
-[x] 45. Reinstalled dotenv package after environment migration - resolved module not found error
-[x] 46. Workflow running successfully - Angel One WebSocket connected, live market data streaming, all services operational
+[x] 45. Fixed positions unrealized P&L and return % to calculate in real-time based on entry price, current price, and quantity
+[x] 46. Removed reliance on backend-provided P&L values - now calculating dynamically on frontend: P&L = (currentPrice - entryPrice) * quantity
+[x] 47. Return % now calculated dynamically: ((currentPrice - entryPrice) / entryPrice) * 100
+[x] 48. Workflow restarted - positions P&L updates now refresh in real-time with live price changes
