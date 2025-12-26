@@ -85,4 +85,20 @@
 [x] 85. Integrated Upstox profile props from home.tsx to BrokerData component
 [x] 86. Workflow restarted successfully - Upstox Orders & Positions dialog now fetches and displays user profile information
 [x] 87. COMPLETE: Upstox Orders & Positions now shows user ID and name matching Zerodha functionality
+[x] 88. Created Upstox broker endpoints: /api/broker/upstox/trades, /api/broker/upstox/positions, /api/broker/upstox/margins
+[x] 89. Updated orders useEffect to be broker-aware - fetches from Zerodha OR Upstox based on active connection
+[x] 90. Updated positions useEffect to be broker-aware - dynamically selects correct endpoint
+[x] 91. Updated margins/funds useEffect to be broker-aware - fetches available funds from active broker
+[x] 92. Updated useEffect dependencies to include both zerodhaAccessToken and upstoxAccessToken
+[x] 93. Fixed backend endpoints to properly handle Upstox API responses and transform data format
+[x] 94. Workflow restarted successfully - Orders & Positions dialog now dynamically fetches from active broker
+[x] 95. COMPLETE: Orders, Positions, and Available Funds now switch between Zerodha and Upstox based on active connection
+
+## Summary of Fixes (Dec 26, 2025)
+**ISSUE**: Backend was hardcoded to fetch Zerodha data only, Upstox profile not fetching, dialog not updating when switching brokers
+**SOLUTION**:
+1. Backend: Added 3 new Upstox endpoints that call Upstox APIs and return data in unified format
+2. Frontend: Made orders/positions/funds fetching dynamic - detects active broker and fetches from correct endpoint
+3. Result: Orders & Positions dialog now shows correct user ID/name and updates dynamically when switching brokers
+
 [x] 74. Environment reset - reinstalled npm dependencies and restarted workflow successfully (Dec 26, 2025)

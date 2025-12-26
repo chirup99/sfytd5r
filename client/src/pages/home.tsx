@@ -4812,7 +4812,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       // Cleanup: clear interval when tab changes
       return () => clearInterval(pollInterval);
     }
-  }, [zerodhaAccessToken, orderTab]);
+  }, [zerodhaAccessToken, upstoxAccessToken, orderTab]);
   const [brokerOrders, setBrokerOrders] = useState<any[]>([]);
   const [fetchingBrokerOrders, setFetchingBrokerOrders] = useState(false);
   const [brokerPositions, setBrokerPositions] = useState<any[]>([]);
@@ -4838,16 +4838,19 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
   // Fetch broker orders when Orders dialog opens - with auto-refresh polling
   useEffect(() => {
-    if (zerodhaAccessToken) {
+    if (orderTab === 'history' && (zerodhaAccessToken || upstoxAccessToken)) {
       const fetchOrders = async () => {
         setFetchingBrokerOrders(true);
         try {
-          const res = await fetch('/api/broker/zerodha/trades', {
-            headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
+          const endpoint = zerodhaAccessToken ? '/api/broker/zerodha/trades' : '/api/broker/upstox/trades';
+          const token = zerodhaAccessToken || upstoxAccessToken;
+          const res = await fetch(endpoint, {
+            headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await res.json();
           setBrokerOrders(data.trades || []);
-          console.log('✅ [ORDERS] Fetched', (data.trades || []).length, 'trades from Zerodha');
+          const broker = zerodhaAccessToken ? 'Zerodha' : 'Upstox';
+          console.log('✅ [ORDERS] Fetched', (data.trades || []).length, `trades from ${broker}`);
         } catch (err) {
           console.error('❌ [ORDERS] Error fetching trades:', err);
           setBrokerOrders([]);
@@ -4865,15 +4868,17 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       // Cleanup: clear interval when dialog closes
       return () => clearInterval(pollInterval);
     }
-  }, [zerodhaAccessToken]);
+  }, [zerodhaAccessToken, upstoxAccessToken, orderTab]);
 
 // Fetch broker funds when dialog opens - with auto-refresh polling
   useEffect(() => {
-    if (showOrderModal && zerodhaAccessToken) {
+    if (showOrderModal && (zerodhaAccessToken || upstoxAccessToken)) {
       const fetchBrokerFunds = async () => {
         try {
-          const response = await fetch('/api/broker/zerodha/margins', {
-            headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
+          const endpoint = zerodhaAccessToken ? '/api/broker/zerodha/margins' : '/api/broker/upstox/margins';
+          const token = zerodhaAccessToken || upstoxAccessToken;
+          const response = await fetch(endpoint, {
+            headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await response.json();
           if (response.ok && data.success && data.availableCash !== undefined) {
@@ -4912,11 +4917,13 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
   // Fetch broker funds when dialog opens - with auto-refresh polling
   useEffect(() => {
-    if (showOrderModal && zerodhaAccessToken) {
+    if (showOrderModal && (zerodhaAccessToken || upstoxAccessToken)) {
       const fetchBrokerFunds = async () => {
         try {
-          const response = await fetch('/api/broker/zerodha/margins', {
-            headers: { 'Authorization': `Bearer ${zerodhaAccessToken}` }
+          const endpoint = zerodhaAccessToken ? '/api/broker/zerodha/margins' : '/api/broker/upstox/margins';
+          const token = zerodhaAccessToken || upstoxAccessToken;
+          const response = await fetch(endpoint, {
+            headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await response.json();
           if (response.ok && data.success && data.availableCash !== undefined) {

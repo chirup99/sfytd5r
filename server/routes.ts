@@ -20363,6 +20363,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const availableCash = equity.net || 0;
         
         console.log('✅ [ZERODHA] Fetched available balance:', availableCash);
+
+  // Get Upstox trades (orders)
+  app.get("'/api/broker/upstox/trades'", (req, res) => {
+    try {
+      const token = upstoxOAuthManager.getAccessToken();
+      if (!token) return res.status(401).json({ success: false });
+      fetch("https://api.upstox.com/v2/order/retrieve-all", {
+        method: "GET",
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+      })
+        .then(r => r.json())
+        .then(data => {
+          const trades = (data.data || []).map((o: any) => ({
+            time: o.order_datetime ? new Date(o.order_datetime).toLocaleTimeString() : "N/A",
+            order: o.side === "BUY" ? "BUY" : "SELL",
+            symbol: o.tradingsymbol || o.instrument_key || "N/A",
+            type: o.order_type || "MARKET",
+            qty: o.quantity || 0,
+            price: o.price || 0,
+            status: o.status || "PENDING"
+          }));
+          res.json({ success: true, trades });
+        })
+        .catch(() => res.json({ success: true, trades: [] }));
+    } catch (e) { res.json({ success: true, trades: [] }); }
+  });
+
+  // Get Upstox positions
+  app.get("'/api/broker/upstox/positions'", (req, res) => {
+    try {
+      const token = upstoxOAuthManager.getAccessToken();
+      if (!token) return res.status(401).json({ success: false });
+      fetch("https://api.upstox.com/v2/portfolio/long-positions", {
+        method: "GET",
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+      })
+        .then(r => r.json())
+        .then(data => {
+          const positions = (data.data || []).map((p: any) => ({
+            symbol: p.tradingsymbol || p.instrument_key || "N/A",
+            entry_price: p.average_price || 0,
+            current_price: p.last_price || 0,
+            quantity: p.quantity || 0,
+            status: "Open"
+          }));
+          res.json({ success: true, positions });
+        })
+        .catch(() => res.json({ success: true, positions: [] }));
+    } catch (e) { res.json({ success: true, positions: [] }); }
+  });
+
+  // Get Upstox available funds
+  app.get("'/api/broker/upstox/margins'", (req, res) => {
+    try {
+      const token = upstoxOAuthManager.getAccessToken();
+      if (!token) return res.status(401).json({ success: false });
+      fetch("https://api.upstox.com/v2/user/get-funds-and-margin", {
+        method: "GET",
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+      })
+        .then(r => r.json())
+        .then(data => res.json({ success: true, availableCash: data.data?.[0]?.net_available || 0 }))
+        .catch(() => res.json({ success: true, availableCash: 0 }));
+    } catch (e) { res.json({ success: true, availableCash: 0 }); }
+  });
         return res.json({
           success: true,
           availableCash,
