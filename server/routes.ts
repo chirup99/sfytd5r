@@ -20672,15 +20672,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .then(data => {
           if (data.status === 'success' && data.data) {
             const profile = data.data;
+            console.log('✅ [UPSTOX] Profile fetched:', profile.user_id, profile.user_name);
             res.json({
               success: true,
-              userId: profile.user_id || profile.email || 'N/A',
-              userName: profile.user_name || profile.name || 'N/A',
+              userId: profile.user_id || 'N/A',
+              userName: profile.user_name || 'N/A',
               userEmail: profile.email || 'N/A'
             });
           } else {
+            console.log('⚠️ [UPSTOX] Profile response not successful:', data);
             res.json({
-              success: true,
+              success: false,
               userId: 'N/A',
               userName: 'N/A',
               userEmail: 'N/A'
@@ -20690,7 +20692,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .catch(error => {
           console.error('🔴 [UPSTOX] Error fetching profile:', error.message);
           res.json({
-            success: true,
+            success: false,
             userId: 'N/A',
             userName: 'N/A',
             userEmail: 'N/A'
