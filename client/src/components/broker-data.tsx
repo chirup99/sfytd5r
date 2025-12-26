@@ -66,18 +66,16 @@ export function BrokerData(props: BrokerDataProps) {
       <Dialog open={showOrderModal} onOpenChange={setShowOrderModal}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto custom-thin-scrollbar p-0">
           <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center">
-            <div className="flex items-center gap-3">
+            <div className="w-1/3 flex items-center">
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Orders & Positions</span>
             </div>
 
-            <div className="flex-1 flex justify-center">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Available Funds</span>
-                <span className="text-xs font-bold text-green-600 dark:text-green-400">₹{brokerFunds?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}</span>
-              </div>
+            <div className="w-1/3 flex flex-col items-center justify-center">
+              <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Available Funds</span>
+              <span className="text-xs font-bold text-green-600 dark:text-green-400">₹{brokerFunds?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}</span>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="w-1/3 flex items-center justify-end gap-3">
               {zerodhaAccessToken ? (
                 <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full text-[10px] font-medium border border-green-100 dark:border-green-800">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
