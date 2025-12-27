@@ -67,7 +67,7 @@ class DhanOAuthManager {
   }
 
   // Step 1: Generate Consent (Call Partner API to get consentId)
-  async generateConsent(): Promise<{ consentId: string; url: string } | null> {
+  async generateConsent(domain?: string): Promise<{ consentId: string; url: string } | null> {
     try {
       if (!this.partnerId || !this.partnerSecret) {
         console.error('🔴 [DHAN] Partner credentials missing');
@@ -100,9 +100,13 @@ class DhanOAuthManager {
         return null;
       }
 
-      // Step 2: Build login URL using the consentId
+      // Step 2: Build login URL using the consentId with dynamic domain support
       const consentId = consentData.consentId;
-      const loginUrl = `https://auth.dhan.co/partner-login?consentId=${encodeURIComponent(consentId)}&redirect_url=${encodeURIComponent(this.redirectUri)}`;
+      let redirectUri = this.redirectUri;
+      if (domain) {
+        redirectUri = `https://${domain}/api/broker/dhan/callback`;
+      }
+      const loginUrl = `https://auth.dhan.co/partner-login?consentId=${encodeURIComponent(consentId)}&redirect_url=${encodeURIComponent(redirectUri)}`;
 
       this.consentIds.set(consentId, {
         id: consentId,

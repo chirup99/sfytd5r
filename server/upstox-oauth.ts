@@ -65,19 +65,26 @@ class UpstoxOAuthManager {
     console.log(`🔵 [UPSTOX] Redirect URI: ${this.redirectUri}`);
   }
 
-  // Generate OAuth authorization URL
-  generateAuthorizationUrl(): { url: string; state: string } {
+  // Generate OAuth authorization URL with dynamic domain support
+  generateAuthorizationUrl(domain?: string): { url: string; state: string } {
     const state = crypto.randomBytes(32).toString('hex');
+    
+    // Use provided domain or fallback to constructor's redirect URI
+    let redirectUri = this.redirectUri;
+    if (domain) {
+      redirectUri = `https://${domain}/api/upstox/callback`;
+    }
+    
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: this.apiKey,
-      redirect_uri: this.redirectUri,
+      redirect_uri: redirectUri,
       state: state,
     });
 
     const authUrl = `https://api.upstox.com/v2/login/authorization/dialog?${params.toString()}`;
     
-    // Store state for verification
+    // Store state with redirect URI for verification during callback
     this.oauthStates.set(state, { state, createdAt: new Date() });
     
     // Clean up old states (older than 10 minutes)
@@ -89,6 +96,7 @@ class UpstoxOAuthManager {
     }
 
     console.log(`🔵 [UPSTOX] Generated authorization URL with state: ${state.substring(0, 8)}...`);
+    console.log(`🔵 [UPSTOX] Redirect URI: ${redirectUri}`);
     return { url: authUrl, state };
   }
 

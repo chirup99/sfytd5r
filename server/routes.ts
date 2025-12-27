@@ -20569,10 +20569,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // UPSTOX OAUTH 2.0 IMPLEMENTATION
   // ========================================
 
-  // Get authorization URL for Upstox OAuth flow
+  // Get authorization URL for Upstox OAuth flow (with dynamic domain support)
   app.get('/api/upstox/auth-url', (req, res) => {
     try {
-      const { url, state } = upstoxOAuthManager.generateAuthorizationUrl();
+      // Get the current domain from request headers for dynamic OAuth redirect
+      const currentDomain = req.get('host') || 'localhost:5000';
+      console.log(`🔵 [UPSTOX] Auth URL requested from domain: ${currentDomain}`);
+      
+      const { url, state } = upstoxOAuthManager.generateAuthorizationUrl(currentDomain);
       res.json({ authUrl: url, state });
     } catch (error: any) {
       console.error('🔴 [UPSTOX] Error generating auth URL:', error.message);
@@ -20878,10 +20882,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // DHAN OAUTH IMPLEMENTATION
   // ========================================
 
-  // Step 1: Get authorization URL for Dhan OAuth flow
+  // Step 1: Get authorization URL for Dhan OAuth flow (with dynamic domain support)
   app.get('/api/broker/dhan/login-url', async (req, res) => {
     try {
-      const consentData = await dhanOAuthManager.generateConsent();
+      // Get the current domain from request headers for dynamic OAuth redirect
+      const currentDomain = req.get('host') || 'localhost:5000';
+      console.log(`🔵 [DHAN] Login URL requested from domain: ${currentDomain}`);
+      
+      const consentData = await dhanOAuthManager.generateConsent(currentDomain);
       
       if (!consentData) {
         console.error('🔴 [DHAN] Failed to generate consent');
