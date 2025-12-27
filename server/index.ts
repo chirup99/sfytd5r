@@ -240,18 +240,22 @@ server.listen(listenOptions, () => {
     setTimeout(async () => {
       // AUTO-CONNECT: Angel One API using environment credentials at server startup
       console.log('🔶 [STARTUP] Checking Angel One auto-connect...');
-      try {
-        // Guard: Skip if already connected
-        if (angelOneApi.isConnected()) {
-          console.log('✅ [STARTUP] Angel One already connected, skipping auto-connect');
-        } else {
+      
+      const attemptConnection = async (retryCount = 0) => {
+        try {
+          // Guard: Skip if already connected
+          if (angelOneApi.isConnected()) {
+            console.log('✅ [STARTUP] Angel One already connected, skipping auto-connect');
+            return true;
+          }
+
           const clientCode = process.env.ANGEL_ONE_CLIENT_CODE;
           const pin = process.env.ANGEL_ONE_PIN;
           const apiKey = process.env.ANGEL_ONE_API_KEY;
           const totpSecret = process.env.ANGEL_ONE_TOTP_SECRET;
 
           if (clientCode && pin && apiKey && totpSecret) {
-            console.log('🔶 [STARTUP] Angel One credentials found, auto-connecting...');
+            console.log(`🔶 [STARTUP] Angel One auto-connecting (Attempt ${retryCount + 1})...`);
             
             angelOneApi.setCredentials({
               clientCode: clientCode.trim(),
@@ -263,23 +267,27 @@ server.listen(listenOptions, () => {
             const session = await angelOneApi.generateSession();
             if (session) {
               console.log('✅ [STARTUP] Angel One auto-connected successfully!');
-              console.log(`   Client Code: ${clientCode}`);
-              // Notify live price streamer
               liveWebSocketStreamer.onAngelOneAuthenticated();
-            } else {
-              console.log('⚠️ [STARTUP] Angel One auto-connect failed - session not created');
+              return true;
             }
-          } else {
-            console.log('⚠️ [STARTUP] Angel One credentials not found in environment, skipping auto-connect');
-            console.log(`   CLIENT_CODE: ${clientCode ? 'SET' : 'MISSING'}`);
-            console.log(`   PIN: ${pin ? 'SET' : 'MISSING'}`);
-            console.log(`   API_KEY: ${apiKey ? 'SET' : 'MISSING'}`);
-            console.log(`   TOTP_SECRET: ${totpSecret ? 'SET' : 'MISSING'}`);
           }
+        } catch (error: any) {
+          console.error(`❌ [STARTUP] Angel One auto-connect error (Attempt ${retryCount + 1}):`, error.message);
         }
-      } catch (error: any) {
-        console.error('❌ [STARTUP] Angel One auto-connect error:', error.message);
-        console.log('⚠️ [STARTUP] Server will continue - user can manually connect later');
+        return false;
+      };
+
+      // Initial attempt
+      const success = await attemptConnection();
+      
+      // If failed, retry a few times with backoff
+      if (!success) {
+        let retries = 3;
+        for (let i = 0; i < retries; i++) {
+          console.log(`⏳ [STARTUP] Retrying Angel One connection in ${10 * (i + 1)}s...`);
+          await new Promise(resolve => setTimeout(resolve, 10000 * (i + 1)));
+          if (await attemptConnection(i + 1)) break;
+        }
       }
 
       // Start the live WebSocket price streaming system using Angel One API

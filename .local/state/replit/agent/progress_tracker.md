@@ -104,3 +104,10 @@
         - WebSocket streaming live market data (BANKNIFTY, SENSEX, GOLD)
 [x] 167. Vite HMR WebSocket warning is development-only and doesn't affect production
 [x] 168. COMPLETE: Project import fully operational and ready for use
+
+## Connection Stability Fix (Dec 27, 2025)
+[x] 169. Analyzed Angel One auto-connection issue (not connecting automatically on daily basis)
+[x] 170. Implemented robust backend auto-reconnection with retry logic and exponential backoff on server startup
+[x] 171. Updated frontend `useAngelOneAutoconnect` hook to remove single-attempt restriction and added periodic health checks
+[x] 172. Verified backend `server/index.ts` logs for auto-connection attempts and success status
+[x] 173. COMPLETE: Angel One connection will now automatically reconnect on server startup and maintain status across browser refreshes

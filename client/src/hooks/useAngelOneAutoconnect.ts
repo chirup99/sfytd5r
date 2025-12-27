@@ -57,13 +57,14 @@ export function useAngelOneAutoconnect() {
         tokenExpired: angelStatus.tokenExpired,
       });
       
-      hasAttemptedRef.current = true;
+      // Removed: hasAttemptedRef.current = true;
+      // We want it to retry on page reload if it's still not connected
       isConnectingRef.current = true;
       
       const timer = setTimeout(() => {
         console.log("🔶 [AUTO-CONNECT] Triggering Angel One auto-connect...");
         connectMutation.mutate();
-      }, 1000);
+      }, 500);
 
       return () => clearTimeout(timer);
     } else {
@@ -71,6 +72,21 @@ export function useAngelOneAutoconnect() {
       hasAttemptedRef.current = true;
     }
   }, [isLoading, angelStatus, connectMutation]);
+
+  // Periodic check to ensure connection stays alive
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (angelStatus && (!angelStatus.connected || !angelStatus.authenticated || angelStatus.tokenExpired)) {
+        if (!isConnectingRef.current) {
+          console.log("🔄 [AUTO-CONNECT] Periodic health check: Reconnecting...");
+          isConnectingRef.current = true;
+          connectMutation.mutate();
+        }
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, [angelStatus, connectMutation]);
 
   useEffect(() => {
     if (!angelStatus?.connected || !angelStatus?.authenticated) return;
