@@ -279,6 +279,40 @@ class AngelOneAPI {
         };
       }
 
+      // PERSIST TOKEN TO DATABASE
+      try {
+        const { storage } = await import('./storage');
+        const expiry = new Date();
+        expiry.setHours(expiry.getHours() + 23); // Standard 24h lifespan, save with buffer
+        
+        await storage.updateApiStatus({
+          connected: true,
+          authenticated: true,
+          accessToken: this.session.jwtToken,
+          tokenExpiry: expiry
+        });
+        console.log('✅ [Angel One] Token persisted to database for persistence');
+      } catch (e) {
+        console.error('⚠️ [Angel One] Failed to persist token to database:', e);
+      }
+
+      // PERSIST TOKEN TO DATABASE
+      try {
+        const { storage } = await import('./storage');
+        const expiry = new Date();
+        expiry.setHours(expiry.getHours() + 23); // Standard 24h lifespan
+        
+        await storage.updateApiStatus({
+          connected: true,
+          authenticated: true,
+          accessToken: this.session.jwtToken,
+          tokenExpiry: expiry
+        });
+        console.log('✅ [Angel One] Token persisted to database');
+      } catch (e) {
+        console.error('⚠️ [Angel One] Persistence failed:', e);
+      }
+
       // Step 5: Get feed token (like SmartAPI getFeedToken())
       try {
         if (this.smartApi.getFeedToken) {
@@ -332,7 +366,7 @@ class AngelOneAPI {
   }
 
   // Check if token will expire soon (within 5 minutes) and auto-refresh if needed
-  private async ensureTokenFreshness(): Promise<boolean> {
+  public async ensureTokenFreshness(): Promise<boolean> {
     if (!this.session || !this.sessionGeneratedAt) {
       return false;
     }
