@@ -51,10 +51,14 @@ class UpstoxOAuthManager {
     this.apiSecret = apiSecret || process.env.UPSTOX_API_SECRET || '';
     
     // Set redirect URI based on environment
-    // Set redirect URI based on environment
-    const baseUrl = (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS)
-      ? `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS}`
-      : `http://localhost:5000`;
+    let baseUrl;
+    if (process.env.NODE_ENV === 'production' && process.env.PRODUCTION_DOMAIN) {
+      baseUrl = `https://${process.env.PRODUCTION_DOMAIN}`;
+    } else {
+      baseUrl = (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS)
+        ? `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS}`
+        : `http://localhost:5000`;
+    }
     this.redirectUri = `${baseUrl}/api/upstox/callback`;
 
     console.log('🔵 [UPSTOX] OAuth Manager initialized');
