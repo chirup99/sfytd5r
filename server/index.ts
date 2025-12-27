@@ -322,8 +322,11 @@ server.listen(listenOptions, () => {
         if (angelOneApi.isConnected()) {
           console.log('🔄 [BACKGROUND] Running periodic Angel One token freshness check...');
           try {
-            // @ts-ignore - accessing private for background task
-            await angelOneApi.ensureTokenFreshness();
+            // Check if token will expire soon and refresh if needed
+            const refreshed = await angelOneApi.ensureTokenFreshness();
+            if (refreshed) {
+              console.log('✅ [BACKGROUND] Angel One token refreshed/verified fresh');
+            }
           } catch (e) {
             console.error('❌ [BACKGROUND] Token refresh failed:', e);
           }

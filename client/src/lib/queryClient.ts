@@ -81,6 +81,12 @@ export async function apiRequest(
     await throwIfResNotOk(res);
     return await res.json();
   } catch (error: any) {
+    // AUTO-RECONNECT: If Angel One session expired (401/403), trigger background auto-connect
+    if (error.status === 401 || error.status === 403) {
+      console.warn('⚠️ [API] Session expired, triggering background re-authentication...');
+      fetch('/api/angel-one/auto-connect', { method: 'POST' }).catch(() => {});
+    }
+
     if (error.message && error.message.includes('timeout')) {
       const timeoutError: any = new Error('Connection timeout. The server is taking too long to respond. Please try again.');
       timeoutError.isTimeout = true;
