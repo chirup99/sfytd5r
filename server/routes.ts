@@ -20926,7 +20926,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (success) {
         console.log('✅ [DHAN] Successfully authenticated');
-        const callbackHtml = '<!DOCTYPE html><html><head><title>Auth</title><script>var t="' + tokenId + '";if(window.opener){window.opener.postMessage({type:"DHAN_TOKEN",token:t},"*");setTimeout(function(){window.close()},500);}else{window.location.href="/?dhan_token="+encodeURIComponent(t);}</script></head><body><p>Connecting...</p></body></html>';
+        const accessToken = dhanOAuthManager.getAccessToken();
+        if (!accessToken) {
+          const errorMsg = 'Failed to retrieve access token after authentication';
+          console.error('❌ [DHAN] ' + errorMsg);
+          const errorHtml = '<!DOCTYPE html><html><head><title>Error</title><script>var e="' + errorMsg + '";if(window.opener){window.opener.postMessage({type:"DHAN_ERROR",error:e},"*");window.close();}else{window.location.href="/?dhan_error="+encodeURIComponent(e);}</script></head><body><p>Error</p></body></html>';
+          res.type('text/html');
+          res.status(200);
+          return res.send(errorHtml);
+        }
+        const callbackHtml = '<!DOCTYPE html><html><head><title>Auth</title><script>var t="' + accessToken + '";if(window.opener){window.opener.postMessage({type:"DHAN_TOKEN",token:t},"*");setTimeout(function(){window.close()},500);}else{window.location.href="/?dhan_token="+encodeURIComponent(t);}</script></head><body><p>Connecting...</p></body></html>';
         res.type('text/html');
         res.status(200);
         res.send(callbackHtml);
