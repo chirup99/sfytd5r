@@ -20954,6 +20954,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get Dhan trades
+  app.get('/api/broker/dhan/trades', async (req, res) => {
+    try {
+      const { fetchDhanTrades } = await import('./services/broker-integrations/dhanService');
+      const trades = await fetchDhanTrades();
+      res.json({ success: true, trades });
+    } catch (error: any) {
+      console.error('🔴 [DHAN] Error fetching trades:', error.message);
+      res.json({ success: false, trades: [] });
+    }
+  });
+
+  // Get Dhan positions
+  app.get('/api/broker/dhan/positions', async (req, res) => {
+    try {
+      const { fetchDhanPositions } = await import('./services/broker-integrations/dhanService');
+      const positions = await fetchDhanPositions();
+      res.json({ success: true, positions });
+    } catch (error: any) {
+      console.error('🔴 [DHAN] Error fetching positions:', error.message);
+      res.json({ success: false, positions: [] });
+    }
+  });
+
+  // Get Dhan available funds (margins)
+  app.get('/api/broker/dhan/margins', async (req, res) => {
+    try {
+      const { fetchDhanMargins } = await import('./services/broker-integrations/dhanService');
+      const availableCash = await fetchDhanMargins();
+      res.json({ success: true, availableCash });
+    } catch (error: any) {
+      console.error('🔴 [DHAN] Error fetching margins:', error.message);
+      res.json({ success: false, availableCash: 0 });
+    }
+  });
+
+  // Disconnect from Dhan
+  app.post('/api/broker/dhan/disconnect', (req, res) => {
+    try {
+      dhanOAuthManager.disconnect();
+      res.json({ success: true, message: 'Disconnected from Dhan' });
+    } catch (error: any) {
+      console.error('🔴 [DHAN] Error disconnecting:', error.message);
+      res.status(500).json({ success: false, error: 'Failed to disconnect' });
+    }
+  });
+
   // Disconnect from Angel One
   app.post('/api/angel-one/disconnect', (req, res) => {
     try {
