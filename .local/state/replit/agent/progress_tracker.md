@@ -125,3 +125,5 @@
 [x] 116. Upstox disconnect button now uses API to logout with Bearer token authorization
 [x] 117. Added error handling to clear localStorage even if API call fails - ensures graceful disconnection
 [x] 118. Workflow restarted successfully - Upstox logout API integration complete and operational
+[x] 119. Environment reset - reinstalled dotenv package and restarted workflow successfully (Dec 27, 2025)
+[x] 120. Application fully operational - Express server on port 5000, Angel One WebSocket connected with live streaming for BANKNIFTY, SENSEX, GOLD
