@@ -51,9 +51,14 @@ class DhanOAuthManager {
     this.partnerSecret = partnerSecret || process.env.DHAN_PARTNER_SECRET || '';
     
     // Set redirect URI based on environment
-    const baseUrl = (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS)
-      ? `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS}`
-      : `http://localhost:5000`;
+    let baseUrl;
+    if (process.env.NODE_ENV === 'production' && process.env.PRODUCTION_DOMAIN) {
+      baseUrl = `https://${process.env.PRODUCTION_DOMAIN}`;
+    } else {
+      baseUrl = (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS)
+        ? `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS}`
+        : `http://localhost:5000`;
+    }
     this.redirectUri = `${baseUrl}/api/broker/dhan/callback`;
 
     console.log('🔵 [DHAN] Partner OAuth Manager initialized');
