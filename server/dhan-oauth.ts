@@ -80,6 +80,11 @@ class DhanOAuthManager {
       // Call Dhan Partner API to generate consent - per official documentation
       // POST to https://auth.dhan.co/partner/generate-consent
       // Headers: partner_id, partner_secret
+      console.log('🔵 [DHAN] Headers being used:', {
+        'partner_id': this.partnerId.substring(0, 4) + '...',
+        'partner_secret': this.partnerSecret.substring(0, 4) + '...'
+      });
+
       const response = await axios.post(
         'https://auth.dhan.co/partner/generate-consent',
         {},
@@ -88,6 +93,7 @@ class DhanOAuthManager {
             'partner_id': this.partnerId,
             'partner_secret': this.partnerSecret,
             'Content-Type': 'application/json',
+            'Accept': 'application/json'
           },
           timeout: 10000,
         }
@@ -106,7 +112,7 @@ class DhanOAuthManager {
       if (domain) {
         redirectUri = `https://${domain}/api/broker/dhan/callback`;
       }
-      const loginUrl = `https://auth.dhan.co/partner-login?consentId=${encodeURIComponent(consentId)}&redirect_url=${encodeURIComponent(redirectUri)}`;
+      const loginUrl = `https://auth.dhan.co/consent-login?consentId=${encodeURIComponent(consentId)}&redirect_url=${encodeURIComponent(redirectUri)}`;
 
       this.consentIds.set(consentId, {
         id: consentId,
@@ -144,14 +150,16 @@ class DhanOAuthManager {
       console.log('🔵 [DHAN] Step 3: Consuming consent with tokenId...');
 
       // Call Dhan Partner API to consume consent
-      // POST to https://auth.dhan.co/partner/consumePartner-consent?tokenId=<TOKEN_ID>
+      // POST to https://auth.dhan.co/partner/consume-consent?tokenId=<TOKEN_ID>
       const response = await axios.post(
-        `https://auth.dhan.co/partner/consumePartner-consent?tokenId=${tokenId}`,
+        `https://auth.dhan.co/partner/consume-consent?tokenId=${tokenId}`,
         {},
         {
           headers: {
             'partner_id': this.partnerId,
             'partner_secret': this.partnerSecret,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           },
           timeout: 10000,
         }
