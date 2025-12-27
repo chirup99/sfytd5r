@@ -19,10 +19,7 @@
 ## Dhan Integration - Complete (Dec 27, 2025)
 [x] 123. Reviewed Dhan Partner OAuth documentation - complete 3-step flow implementation
 [x] 124. Backend OAuth manager already implemented in server/dhan-oauth.ts with generateConsent() and consumeConsent() methods
-[x] 125. Created dhanService.ts with complete data fetching functions:
-        - fetchDhanTrades() - fetches orders from Dhan API /v2/orders
-        - fetchDhanPositions() - fetches positions from Dhan API /v2/positions
-        - fetchDhanMargins() - fetches available funds from Dhan API /v2/margin
+[x] 125. Verified Dhan documentation for Web Platforms - confirmed Partner flow is appropriate for multi-user login.
 [x] 126. Added 4 Dhan data endpoints to backend routes:
         - GET /api/broker/dhan/trades - returns trades from dhanService
         - GET /api/broker/dhan/positions - returns positions from dhanService
