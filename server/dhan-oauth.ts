@@ -133,11 +133,21 @@ class DhanOAuthManager {
       };
     } catch (error: any) {
       console.error('🔴 [DHAN] Error generating consent:', error.message);
+      if (error.response?.status === 401) {
+        console.error('🔴 [DHAN] HTTP 401 Unauthorized - Partner credentials are invalid or expired');
+        console.error('🔴 [DHAN] Please verify:');
+        console.error('   1. DHAN_PARTNER_ID is set correctly');
+        console.error('   2. DHAN_PARTNER_SECRET is set correctly');
+        console.error('   3. Credentials are active in Dhan dashboard');
+      }
       if (error.response?.status === 400) {
         console.error('🔴 [DHAN] HTTP 400 Error - Check partner credentials and request format');
       }
       if (error.response?.data) {
         console.error('🔴 [DHAN] API Response:', error.response.data);
+      }
+      if (error.response?.status === 401) {
+        console.error('🔴 [DHAN] Full error details:', JSON.stringify(error.response.data || error.message));
       }
       return null;
     }
