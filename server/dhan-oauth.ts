@@ -80,16 +80,16 @@ class DhanOAuthManager {
 
       console.log('🔵 [DHAN] Step 1: Calling app/generate-consent API...');
       console.log(`🔵 [DHAN] Using API Key: ${this.apiKey.substring(0, 4)}...`);
+      console.log(`🔵 [DHAN] API Secret length: ${this.apiSecret.length}`);
 
       // Call Dhan Individual API to generate consent - per official documentation
-      // Use Basic Authentication: base64(app_id:app_secret)
-      const credentials = Buffer.from(`${this.apiKey.trim()}:${this.apiSecret.trim()}`).toString('base64');
-
+      // Headers: app_id and app_secret (custom headers, not Basic Auth)
       const response = await axios({
         method: 'post',
-        url: `https://auth.dhan.co/app/generate-consent?client_id=${this.apiKey}`,
+        url: `https://auth.dhan.co/app/generate-consent?client_id=${this.apiKey.trim()}`,
         headers: {
-          'Authorization': `Basic ${credentials}`,
+          'app_id': this.apiKey.trim(),
+          'app_secret': this.apiSecret.trim(),
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -158,15 +158,14 @@ class DhanOAuthManager {
 
       // Call Dhan Individual API to consume consent
       // POST to https://auth.dhan.co/app/consumeApp-consent?tokenId=<TOKEN_ID>
-      // Use Basic Authentication: base64(app_id:app_secret)
-      const credentials = Buffer.from(`${this.apiKey.trim()}:${this.apiSecret.trim()}`).toString('base64');
-      
+      // Headers: app_id and app_secret (custom headers, not Basic Auth)
       const response = await axios.post(
         `https://auth.dhan.co/app/consumeApp-consent?tokenId=${tokenId}`,
         {},
         {
           headers: {
-            'Authorization': `Basic ${credentials}`,
+            'app_id': this.apiKey.trim(),
+            'app_secret': this.apiSecret.trim(),
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           },
