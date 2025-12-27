@@ -79,3 +79,17 @@
 [x] 153. All broker APIs initialized and authenticated (Angel One connected with auto-TOTP)
 [x] 154. WebSocket streaming active for market data
 [x] 155. MIGRATION COMPLETE - Project ready for use
+
+## Dhan API Key Authentication Migration (Dec 27, 2025 - CRITICAL FIX)
+[x] 156. Reviewed Dhan Individual API Key OAuth documentation (not Partner flow)
+[x] 157. User provided Dhan API Key: 3fa2d762 and Secret: 177dac8b-9264-48e7-be1f-b866ccf51fa0
+[x] 158. Replaced Partner OAuth flow with Individual API Key flow:
+        - Changed from partner/generate-consent to app/generate-consent?client_id={API_KEY}
+        - Changed header from partner_id/partner_secret to app_id/app_secret
+        - Changed login URL from consent-login to login/consentApp-login
+        - Changed from partner/consume-consent to app/consumeApp-consent
+[x] 159. Set environment variables: DHAN_API_KEY and DHAN_API_SECRET
+[x] 160. Workflow restarted with new Dhan Individual API Key OAuth Manager
+[x] 161. Verified logs: "[DHAN] API Key OAuth Manager initialized" and "API Key configured: YES"
+[x] 162. Dhan OAuth now using Individual API Key flow per official documentation
+[x] 163. COMPLETE: Dhan login button popup will now function correctly with proper consent generation
