@@ -283,23 +283,6 @@ class AngelOneAPI {
       try {
         const { storage } = await import('./storage');
         const expiry = new Date();
-        expiry.setHours(expiry.getHours() + 23); // Standard 24h lifespan, save with buffer
-        
-        await storage.updateApiStatus({
-          connected: true,
-          authenticated: true,
-          accessToken: this.session.jwtToken,
-          tokenExpiry: expiry
-        });
-        console.log('✅ [Angel One] Token persisted to database for persistence');
-      } catch (e) {
-        console.error('⚠️ [Angel One] Failed to persist token to database:', e);
-      }
-
-      // PERSIST TOKEN TO DATABASE
-      try {
-        const { storage } = await import('./storage');
-        const expiry = new Date();
         expiry.setHours(expiry.getHours() + 23); // Standard 24h lifespan
         
         await storage.updateApiStatus({
