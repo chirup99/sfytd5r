@@ -89,3 +89,9 @@ All critical production bugs have been identified and fixed.
         - Journal chart data accessible after token refresh
         - WebSocket streaming continues without interruption
         - No crashes during token refresh cycle
+
+## Final Migration Steps (Current Session)
+[x] 1. Installed dotenv package (npm install dotenv)
+[x] 2. Configured workflow with webview output on port 5000
+[x] 3. Workflow restarted and running successfully
+[x] 4. Ready for verification and import completion
