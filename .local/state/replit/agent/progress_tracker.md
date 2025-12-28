@@ -63,3 +63,29 @@ All critical production bugs have been identified and fixed.
 [x] Workflow restarted successfully
 [x] Application verified working via screenshot
 [x] Import completed
+
+## Background Angel One Token Refresh Implementation (Dec 28, 2025)
+[x] 1. Backend token refresh scheduler verified (server/routes.ts line 9146)
+        - Runs every 30 minutes automatically
+        - Checks token expiry proactively
+        - Auto-refreshes if needed
+        - Runs regardless of dashboard being open
+        
+[x] 2. Frontend Angel One auto-connect verified (App.tsx line 497)
+        - AngelOneGlobalAutoConnect component active
+        - Handles token refresh in background
+        - No manual dashboard opening required
+        
+[x] 3. Token Lifecycle Confirmed:
+        - Initial auto-connect on server startup (3 seconds delay)
+        - Background refresh every 30 minutes
+        - Proactive refresh before 55-minute expiry
+        - Handles edge cases gracefully
+        - Maintains WebSocket connection through refreshes
+        
+[x] 4. Features Verified:
+        - Angel One reconnects automatically without user action
+        - Token stays fresh for entire session
+        - Journal chart data accessible after token refresh
+        - WebSocket streaming continues without interruption
+        - No crashes during token refresh cycle
