@@ -62,11 +62,23 @@ class UpstoxOAuthManager {
     this.redirectUri = `${baseUrl}/api/upstox/callback`;
 
     console.log('🔵 [UPSTOX] OAuth Manager initialized');
+    console.log(`🔵 [UPSTOX] API Key loaded: ${this.apiKey ? '✅ YES' : '❌ NO'}`);
+    console.log(`🔵 [UPSTOX] API Secret loaded: ${this.apiSecret ? '✅ YES' : '❌ NO'}`);
     console.log(`🔵 [UPSTOX] Redirect URI: ${this.redirectUri}`);
+    
+    if (!this.apiKey || !this.apiSecret) {
+      console.error('🔴 [UPSTOX] CRITICAL: Missing Upstox credentials!');
+      console.error('🔴 [UPSTOX] Please set UPSTOX_API_KEY and UPSTOX_API_SECRET environment variables');
+    }
   }
 
   // Generate OAuth authorization URL with dynamic domain support
   generateAuthorizationUrl(domain?: string): { url: string; state: string } {
+    // Check if credentials are configured
+    if (!this.apiKey || !this.apiSecret) {
+      throw new Error('Upstox credentials not configured. Please set UPSTOX_API_KEY and UPSTOX_API_SECRET environment variables.');
+    }
+
     const state = crypto.randomBytes(32).toString('hex');
     
     // Use provided domain or fallback to constructor's redirect URI

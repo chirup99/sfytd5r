@@ -40,11 +40,38 @@
 [x] 194. Workflow restarted with fix deployed
 [x] 195. CRITICAL FIX COMPLETE: Token refresh scheduler now working without crashes
 
+## UPSTOX AWS DEPLOYMENT FIX (Dec 28, 2025)
+[x] 196. Identified Upstox OAuth issue on AWS:
+        **Problem**: Empty client_id in redirect URL
+        - `client_id=` appears empty in Upstox login popup
+        - Error: "API Key is required"
+        - Root cause: UPSTOX_API_KEY environment variable NOT SET on AWS deployment
+        - Works on Replit: Credentials are set in environment
+        - Works on AWS for Zerodha: Different OAuth implementation
+
+[x] 197. Implemented diagnostic logging:
+        - Added detailed logging to Upstox OAuth Manager constructor
+        - Shows whether API Key and Secret are loaded
+        - Shows "✅ YES" or "❌ NO" for each credential
+        - Logs if credentials are missing
+
+[x] 198. Added error checking:
+        - generateAuthorizationUrl() now checks if credentials exist
+        - Throws clear error message if credentials missing
+        - Error message: "Upstox credentials not configured. Please set UPSTOX_API_KEY and UPSTOX_API_SECRET environment variables."
+        - Error is caught and returned to frontend with proper HTTP status
+
+[x] 199. Verification on Replit:
+        - Workflow restarted with new error handling
+        - Logs show: "🔵 [UPSTOX] API Key loaded: ✅ YES"
+        - Logs show: "🔵 [UPSTOX] API Secret loaded: ✅ YES"
+        - Application running successfully with Upstox credentials detected
+
 ## DEPLOYMENT READINESS
 **For AWS/Production Deployment:**
 - Token refresh mechanism fixed and working
-- No more crashes in token scheduler
-- Chart data will load successfully after token expires
+- Upstox OAuth error handling improved with diagnostic logging
+- Clear error messages when credentials are missing
 - Auto-refresh happens every 30 minutes proactively
 - Handles edge cases gracefully
 
@@ -55,43 +82,15 @@
 2. Fixed `safeGetApiStatus` crash - removed undefined function call from token scheduler
 3. Implemented robust token refresh - runs safely every 30 minutes
 4. Journal chart token refresh effect - monitors token changes and refetches
+5. Upstox OAuth diagnostic logging - shows credential status on startup
+6. Upstox OAuth error handling - clear message when credentials missing
 
 All critical production bugs have been identified and fixed.
-
-## Import Migration (Dec 28, 2025)
-[x] Installed missing `dotenv` package
-[x] Workflow restarted successfully
-[x] Application verified working via screenshot
-[x] Import completed
-
-## Background Angel One Token Refresh Implementation (Dec 28, 2025)
-[x] 1. Backend token refresh scheduler verified (server/routes.ts line 9146)
-        - Runs every 30 minutes automatically
-        - Checks token expiry proactively
-        - Auto-refreshes if needed
-        - Runs regardless of dashboard being open
-        
-[x] 2. Frontend Angel One auto-connect verified (App.tsx line 497)
-        - AngelOneGlobalAutoConnect component active
-        - Handles token refresh in background
-        - No manual dashboard opening required
-        
-[x] 3. Token Lifecycle Confirmed:
-        - Initial auto-connect on server startup (3 seconds delay)
-        - Background refresh every 30 minutes
-        - Proactive refresh before 55-minute expiry
-        - Handles edge cases gracefully
-        - Maintains WebSocket connection through refreshes
-        
-[x] 4. Features Verified:
-        - Angel One reconnects automatically without user action
-        - Token stays fresh for entire session
-        - Journal chart data accessible after token refresh
-        - WebSocket streaming continues without interruption
-        - No crashes during token refresh cycle
 
 ## Final Migration Steps (Current Session)
 [x] 1. Installed dotenv package (npm install dotenv)
 [x] 2. Configured workflow with webview output on port 5000
 [x] 3. Workflow restarted and running successfully
-[x] 4. Ready for verification and import completion
+[x] 4. Added Upstox OAuth error handling and logging
+[x] 5. Verified Upstox credentials are loaded correctly on Replit
+[x] 6. Documented AWS deployment fix requirements
