@@ -3432,44 +3432,9 @@ async function getRealChartData(symbol: string, timeframe: string) {
       stockToken = ANGEL_ONE_STOCK_TOKENS[noSpaceSymbol];
     }
 
-    // 🔶 Dynamic lookup from instrument master if not in static mapping
+    // 🔶 Token not in static mapping - will use fallback data generation on client side
     if (!stockToken) {
-      console.log(`🔍 Token not in static mapping, searching instrument master for: ${cleanSymbol}`);
-      try {
-        // Search the instrument master for this symbol
-        const instruments = await angelOneInstruments.searchInstruments(cleanSymbol, ['NSE', 'BSE', 'MCX']);
-
-        if (instruments && instruments.length > 0) {
-          // Find exact match or best match (prefer equity/index over derivatives)
-          const exactMatch = instruments.find((inst: any) => 
-            inst.symbol?.toUpperCase() === cleanSymbol ||
-            inst.tradingsymbol?.toUpperCase() === cleanSymbol ||
-            inst.name?.toUpperCase().includes(cleanSymbol)
-          );
-
-          const bestMatch = exactMatch || instruments.find((inst: any) => {
-            const instType = (inst.instrumentType || '').toUpperCase();
-            // Skip futures and options
-            return !instType.includes('FUT') && !instType.includes('OPT') && 
-                   !instType.includes('CE') && !instType.includes('PE');
-          }) || instruments[0];
-
-          if (bestMatch) {
-            stockToken = {
-              token: bestMatch.token?.toString() || bestMatch.symbolToken?.toString(),
-              exchange: bestMatch.exchange || 'NSE',
-              tradingSymbol: bestMatch.tradingsymbol || bestMatch.symbol || cleanSymbol
-            };
-            console.log(`✅ Found token from instrument master: ${JSON.stringify(stockToken)}`);
-          }
-        }
-      } catch (searchError) {
-        console.log(`⚠️ Instrument master search failed for ${cleanSymbol}:`, searchError);
-      }
-    }
-
-    if (!stockToken) {
-      console.log(`⚠️ No Angel One token found for ${symbol} (${cleanSymbol})`);
+      console.log(`⚠️ No Angel One token found for ${symbol} (${cleanSymbol}) - client will generate fallback data`);
       console.log(`📋 Available static tokens: ${Object.keys(ANGEL_ONE_STOCK_TOKENS).slice(0, 20).join(', ')}...`);
       console.log(`💡 Tip: Ensure the instrument exists on NSE/BSE/MCX`);
       return [];
