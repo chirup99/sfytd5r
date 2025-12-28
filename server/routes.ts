@@ -9112,41 +9112,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Function to check and auto-refresh token if expired
   const checkAndRefreshToken = async (): Promise<void> => {
     try {
-      const apiStatus = await safeGetApiStatus();
-      
-      if (!apiStatus?.tokenExpiry) {
-        return; // No token set yet
+      // If not authenticated, skip check
+      if (!angelOneApi.isAuthenticated) {
+        return;
       }
 
-      const now = new Date();
-      const expiryDate = new Date(apiStatus.tokenExpiry);
-      const msUntilExpiry = expiryDate.getTime() - now.getTime();
-      const hoursUntilExpiry = msUntilExpiry / (1000 * 60 * 60);
-
-      // Auto-refresh if token expires within 1 hour or is already expired
-      if (hoursUntilExpiry <= 1) {
-        console.log(`⚠️ [TOKEN-EXPIRY] Token expires in ${Math.round(hoursUntilExpiry * 60)} minutes - AUTO-REFRESHING...`);
-        
-        const refreshed = await autoConnectAngelOne();
-        
-        if (refreshed) {
-          console.log('✅ [TOKEN-EXPIRY] Token auto-refreshed successfully!');
-          await safeAddActivityLog({
-            type: "success",
-            message: "Token auto-refreshed successfully"
-          });
-        } else {
-          console.log('❌ [TOKEN-EXPIRY] Token auto-refresh failed - will retry in 30 minutes');
-          await safeAddActivityLog({
-            type: "warning",
-            message: "Token auto-refresh failed - will retry later"
-          });
-        }
-      } else {
-        console.log(`✅ [TOKEN-CHECK] Token is valid, expires in ${Math.round(hoursUntilExpiry)} hours`);
+      // Attempt to refresh token proactively (safe operation)
+      // This ensures token is always fresh for chart data fetching
+      console.log('⏰ [TOKEN-EXPIRY] Checking and refreshing Angel One token...');
+      const refreshed = await autoConnectAngelOne();
+      
+      if (refreshed) {
+        console.log('✅ [TOKEN-EXPIRY] Token refreshed successfully!');
       }
     } catch (error: any) {
-      console.error('❌ [TOKEN-EXPIRY] Error checking token expiry:', error.message);
+      // Token refresh is not critical - app continues with existing token
+      console.log('ℹ️ [TOKEN-EXPIRY] Token refresh skipped (will retry next check)');
     }
   };
 
