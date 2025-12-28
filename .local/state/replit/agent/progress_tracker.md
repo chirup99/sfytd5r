@@ -119,3 +119,15 @@
 [x] 177. All broker integrations initialized (Angel One, Dhan, Upstox)
 [x] 178. WebSocket streaming active for real-time market data
 [x] 179. COMPLETE: Project import migration finished - application fully operational
+
+## Journal Chart Token Refresh Fix (Dec 28, 2025 - CRITICAL)
+[x] 180. Identified journal chart not loading data after token expires the next day
+[x] 181. Root cause: Journal chart fetchJournalChartData dependencies missing angelOneAccessToken
+[x] 182. Fixed useCallback dependencies - added selectedInstrumentToken and angelOneAccessToken
+[x] 183. Fixed useEffect dependencies - added angelOneAccessToken to trigger refetch on token changes
+[x] 184. Added new useEffect that triggers instant refetch when angelOneAccessToken changes:
+        - Monitors for token refresh (next day or new session)
+        - Automatically fetches chart data when token changes
+        - Prevents stale data issues across daily token boundaries
+[x] 185. Workflow restarted with journal chart fix deployed
+[x] 186. COMPLETE: Journal chart now instantly works with token refresh - no daily reload needed

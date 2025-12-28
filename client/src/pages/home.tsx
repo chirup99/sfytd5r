@@ -7852,6 +7852,14 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   }, [selectedJournalSymbol, activeTab, fetchJournalChartData]);
 
   // ========== HEATMAP CHART FETCH FUNCTION (Completely Separate) ==========
+
+  // ✅ INSTANT REFETCH when Angel One token refreshes (next day or new session)
+  useEffect(() => {
+    if (!selectedJournalSymbol || !angelOneAccessToken || activeTab !== 'journal') return;
+    
+    console.log(`🔄 [TOKEN-REFRESH] Journal chart refetching with new Angel One token`);
+    fetchJournalChartData();
+  }, [angelOneAccessToken, selectedJournalSymbol, activeTab, fetchJournalChartData]);
   const fetchHeatmapChartData = useCallback(async (symbol: string, date: string) => {
     try {
       console.log(`🗓️ [HEATMAP FETCH] Starting fetch for ${symbol} on ${date}`);
