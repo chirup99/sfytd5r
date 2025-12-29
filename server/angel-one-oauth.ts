@@ -21,18 +21,27 @@ class AngelOneOAuthManager {
 
   constructor() {
     this.clientCode = process.env.ANGEL_ONE_CLIENT_CODE || process.env.ANGEL_ONE_CLIENT_CODE || "P176266";
-    this.apiKey = process.env.ANGEL_ONE_API_KEY || process.env.ANGEL_ONE_API_KEY || "";
+    this.apiKey = process.env.ANGEL_ONE_API_KEY || "";
 
     console.log("✅ [ANGEL ONE] OAuth Manager initialized");
     console.log(`   Client Code: ${this.clientCode}`);
+    console.log(`   API Key: ${this.apiKey ? "✅ Configured" : "❌ NOT SET - Web login will fail"}`);
   }
 
   // Get authorization URL for redirect-based login
   // Note: redirect_uri is pre-configured in MyApps - do NOT pass it as query parameter
   getAuthorizationUrl(state?: string): string {
+    if (!this.apiKey) {
+      console.error("❌ [ANGEL ONE] API Key not configured - auth will fail");
+      console.error("   Please set ANGEL_ONE_API_KEY environment variable");
+    }
+    
     const baseUrl = "https://smartapi.angelone.in/publisher-login";
+    const apiKey = this.apiKey || "";
     const stateVar = state || "live";
-    return `${baseUrl}?api_key=${this.apiKey}&state=${stateVar}`;
+    
+    // API key goes in the path: /publisher-login/{api_key}
+    return `${baseUrl}/${apiKey}?state=${stateVar}`;
   }
 
   // Handle callback from Angel One
