@@ -33,7 +33,7 @@ class AngelOneOAuthManager {
   }
 
   // Get authorization URL for redirect-based login
-  getAuthorizationUrl(state?: string): string {
+  getAuthorizationUrl(state?: string, redirectUri?: string): string {
     // CRITICAL: Re-read API key from environment at request time (not at init time)
     const freshApiKey = process.env.ANGEL_ONE_API_KEY || this.apiKey || "";
     
@@ -46,12 +46,24 @@ class AngelOneOAuthManager {
     
     const baseUrl = "https://smartapi.angelone.in/publisher-login";
     const stateVar = state || "live";
-    const authUrl = `${baseUrl}?api_key=${freshApiKey}&state=${stateVar}`;
+    
+    // Build auth URL with redirect_uri parameter (CRITICAL for proper OAuth flow)
+    const params = new URLSearchParams();
+    params.append("api_key", freshApiKey);
+    params.append("state", stateVar);
+    
+    // If redirect_uri is provided, include it
+    if (redirectUri) {
+      params.append("redirect_uri", redirectUri);
+      console.log(`   Redirect URI: ${redirectUri}`);
+    }
+    
+    const authUrl = `${baseUrl}?${params.toString()}`;
     
     console.log("✅ [ANGEL ONE] Auth URL generated:");
     console.log(`   API Key: ${freshApiKey.substring(0, 4)}...`);
     console.log(`   State: ${stateVar}`);
-    console.log(`   URL: ${authUrl}`);
+    console.log(`   Full URL: ${authUrl}`);
     
     return authUrl;
   }
