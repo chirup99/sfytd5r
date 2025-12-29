@@ -1,8 +1,10 @@
-// Angel One OAuth - Simple Credential-Based Authentication
+// Angel One OAuth - Proper Token Exchange Implementation
 import axios from "axios";
 
 interface AngelOneSession {
   accessToken: string | null;
+  refreshToken: string | null;
+  feedToken: string | null;
   clientCode: string | null;
   userName: string | null;
   isAuthenticated: boolean;
@@ -11,6 +13,8 @@ interface AngelOneSession {
 class AngelOneOAuthManager {
   private session: AngelOneSession = {
     accessToken: null,
+    refreshToken: null,
+    feedToken: null,
     clientCode: null,
     userName: null,
     isAuthenticated: false,
@@ -20,7 +24,7 @@ class AngelOneOAuthManager {
   private apiKey: string;
 
   constructor() {
-    this.clientCode = process.env.ANGEL_ONE_CLIENT_CODE || process.env.ANGEL_ONE_CLIENT_CODE || "P176266";
+    this.clientCode = process.env.ANGEL_ONE_CLIENT_CODE || "P176266";
     this.apiKey = process.env.ANGEL_ONE_API_KEY || "";
 
     console.log("✅ [ANGEL ONE] OAuth Manager initialized");
@@ -29,7 +33,6 @@ class AngelOneOAuthManager {
   }
 
   // Get authorization URL for redirect-based login
-  // Note: redirect_uri is pre-configured in MyApps - do NOT pass it as query parameter
   getAuthorizationUrl(state?: string): string {
     if (!this.apiKey) {
       console.error("❌ [ANGEL ONE] API Key not configured - auth will fail");
@@ -40,8 +43,75 @@ class AngelOneOAuthManager {
     const apiKey = this.apiKey || "";
     const stateVar = state || "live";
     
-    // API key goes in query string: ?api_key={api_key}
     return `${baseUrl}?api_key=${apiKey}&state=${stateVar}`;
+  }
+
+  // CRITICAL: Exchange temporary auth_token & feed_token for JWT tokens
+  async exchangeTokensForJWT(authToken: string, feedToken: string): Promise<{
+    success: boolean;
+    jwtToken?: string;
+    refreshToken?: string;
+    feedToken?: string;
+    message?: string;
+  }> {
+    try {
+      console.log("🔶 [ANGEL ONE] Exchanging temporary tokens for JWT tokens...");
+      console.log(`   auth_token: ${authToken.substring(0, 30)}...`);
+      
+      // IMPORTANT: According to Angel One docs, use generateTokens endpoint
+      // This converts the temporary auth_token to JWT tokens
+      const response = await axios.post(
+        "https://apiconnect.angelone.in/rest/auth/angelbroking/jwt/v1/generateTokens",
+        {
+          authToken: authToken,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-PrivateKey": this.apiKey,
+          },
+          timeout: 10000,
+        }
+      );
+
+      console.log("🔶 [ANGEL ONE] Token exchange response received");
+      
+      if (response.data?.status === true && response.data?.data?.jwtToken) {
+        console.log("✅ [ANGEL ONE] JWT tokens acquired successfully!");
+        console.log(`   JWT Token: ${response.data.data.jwtToken.substring(0, 30)}...`);
+        
+        this.session.accessToken = response.data.data.jwtToken;
+        this.session.refreshToken = response.data.data.refreshToken;
+        this.session.feedToken = feedToken;
+        this.session.clientCode = this.clientCode;
+        this.session.isAuthenticated = true;
+        this.session.userName = this.clientCode;
+
+        return {
+          success: true,
+          jwtToken: response.data.data.jwtToken,
+          refreshToken: response.data.data.refreshToken,
+          feedToken: feedToken,
+        };
+      } else {
+        const errorMsg = response.data?.message || "Token exchange failed";
+        console.error("🔴 [ANGEL ONE] Token exchange failed:", errorMsg);
+        return {
+          success: false,
+          message: errorMsg,
+        };
+      }
+    } catch (error: any) {
+      console.error("🔴 [ANGEL ONE] Token exchange error:", error.message);
+      if (error.response?.data) {
+        console.error("   Response:", error.response.data);
+      }
+      return {
+        success: false,
+        message: error.response?.data?.message || "Token exchange failed: " + error.message,
+      };
+    }
   }
 
   // Handle callback from Angel One
@@ -49,23 +119,30 @@ class AngelOneOAuthManager {
     success: boolean;
     token?: string;
     feedToken?: string;
+    refreshToken?: string;
     clientCode?: string;
     message?: string;
   }> {
     try {
       console.log("🔶 [ANGEL ONE] Handling OAuth callback...");
       
-      this.session.accessToken = authToken;
-      this.session.clientCode = this.clientCode; // Use default if not provided by callback
-      this.session.isAuthenticated = true;
-      this.session.userName = this.clientCode;
+      // Exchange temporary tokens for JWT tokens
+      const exchangeResult = await this.exchangeTokensForJWT(authToken, feedToken);
+      
+      if (!exchangeResult.success) {
+        return {
+          success: false,
+          message: exchangeResult.message || "Failed to exchange tokens",
+        };
+      }
 
-      console.log("✅ [ANGEL ONE] Successfully authenticated via callback!");
+      console.log("✅ [ANGEL ONE] Successfully authenticated via OAuth callback!");
 
       return {
         success: true,
-        token: authToken,
-        feedToken: feedToken,
+        token: exchangeResult.jwtToken,
+        refreshToken: exchangeResult.refreshToken,
+        feedToken: exchangeResult.feedToken,
         clientCode: this.clientCode,
       };
     } catch (error: any) {
@@ -88,7 +165,7 @@ class AngelOneOAuthManager {
       console.log("🔶 [ANGEL ONE] Authenticating with TOTP...");
 
       const response = await axios.post(
-        "https://api.angelone.in/rest/auth/angelbroking/user/v1/generateSession",
+        "https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/generateSession",
         {
           clientcode: this.clientCode,
           password: password,
@@ -105,6 +182,8 @@ class AngelOneOAuthManager {
 
       if (response.data?.status === true && response.data?.data?.jwtToken) {
         this.session.accessToken = response.data.data.jwtToken;
+        this.session.refreshToken = response.data.data.refreshToken;
+        this.session.feedToken = response.data.data.feedToken;
         this.session.clientCode = this.clientCode;
         this.session.isAuthenticated = true;
         this.session.userName = response.data.data?.userName || this.clientCode;
@@ -133,11 +212,24 @@ class AngelOneOAuthManager {
     }
   }
 
+  // Set tokens directly (for database-loaded tokens)
+  setTokens(accessToken: string, refreshToken?: string, feedToken?: string) {
+    this.session.accessToken = accessToken;
+    if (refreshToken) this.session.refreshToken = refreshToken;
+    if (feedToken) this.session.feedToken = feedToken;
+    this.session.clientCode = this.clientCode;
+    this.session.isAuthenticated = true;
+    this.session.userName = this.clientCode;
+    console.log("✅ [ANGEL ONE] Tokens loaded from database");
+  }
+
   // Get current session
   getSession() {
     return {
       authenticated: this.session.isAuthenticated,
       accessToken: this.session.accessToken,
+      refreshToken: this.session.refreshToken,
+      feedToken: this.session.feedToken,
       clientCode: this.session.clientCode,
       userName: this.session.userName,
     };
@@ -148,10 +240,17 @@ class AngelOneOAuthManager {
     return this.session.accessToken;
   }
 
+  // Get feed token only
+  getFeedToken(): string | null {
+    return this.session.feedToken;
+  }
+
   // Disconnect
   disconnect() {
     this.session = {
       accessToken: null,
+      refreshToken: null,
+      feedToken: null,
       clientCode: null,
       userName: null,
       isAuthenticated: false,

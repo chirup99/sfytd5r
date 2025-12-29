@@ -4314,6 +4314,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (result.success) {
         console.log("✅ [ANGEL ONE CALLBACK] Successfully authenticated!");
+        
+        // Persist tokens to database for app restart persistence
+        try {
+          await storage.updateApiStatus({
+            accessToken: result.token,
+            refreshToken: result.refreshToken,
+            feedToken: result.feedToken,
+            tokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hour expiry
+            brokerName: "angel_one",
+          });
+          console.log("✅ [ANGEL ONE CALLBACK] Tokens persisted to database");
+        } catch (storageError: any) {
+          console.error("⚠️ [ANGEL ONE CALLBACK] Failed to persist tokens:", storageError.message);
+        }
+        
         res.send(`
           <html><head><title>Connected</title></head><body>
           <h1>Connected to Angel One</h1>
@@ -4323,6 +4338,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               type: "ANGELONE_AUTH_SUCCESS", 
               token: "${result.token}",
               feedToken: "${result.feedToken}",
+              refreshToken: "${result.refreshToken || ''}",
               clientCode: "${result.clientCode}"
             }, "*");
             setTimeout(() => window.close(), 1000);
