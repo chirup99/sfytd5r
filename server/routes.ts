@@ -4276,12 +4276,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🔍 DIAGNOSTIC: Test if callback endpoint is reachable
+  app.get("/api/broker/angelone/callback-test", (req, res) => {
+    const callbackUrl = `${req.protocol}://${req.get('host')}/api/broker/angelone/callback`;
+    res.json({
+      success: true,
+      message: "Callback endpoint is reachable",
+      callbackUrl,
+      yourApiKey: process.env.ANGEL_ONE_API_KEY ? `${process.env.ANGEL_ONE_API_KEY.substring(0, 4)}...` : "NOT SET",
+      timestamp: new Date().toISOString(),
+    });
+  });
+
   app.get("/api/broker/angelone/callback", async (req, res) => {
     try {
-      console.log("🔶 [ANGEL ONE CALLBACK] Received request");
+      console.log("🔶 [ANGEL ONE CALLBACK] ════════════════════════════════════");
+      console.log("🔶 [ANGEL ONE CALLBACK] Received redirect request from Angel One");
+      console.log("🔶 [ANGEL ONE CALLBACK] ════════════════════════════════════");
       console.log("   Full URL:", req.url);
+      console.log("   Protocol:", req.protocol);
+      console.log("   Host:", req.get('host'));
+      console.log("   Origin:", req.get('origin'));
+      console.log("   User-Agent:", req.get('user-agent'));
       console.log("   Query params:", JSON.stringify(req.query));
-      console.log("   Headers:", { host: req.get('host'), protocol: req.protocol });
+      console.log("   All headers:", JSON.stringify(req.headers, null, 2).substring(0, 500));
       
       const { auth_token, feed_token } = req.query;
       
