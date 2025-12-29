@@ -5,27 +5,35 @@
 
 ---
 
-## ANGEL ONE OAUTH FIX - CLIENT CODE IN URL PATH (Dec 29, 2025 - 6:08 PM)
+## ANGEL ONE OAUTH FIX - CORRECT URL FORMAT (Dec 29, 2025 - 6:10 PM)
 
-[x] **FIXED: Angel One OAuth URL Format**
+[x] **FIXED: Angel One OAuth URL Format per Official Documentation**
 
-The issue was that the OAuth URL was missing the client code in the path.
+**Official Documentation Reference:**
+According to Angel One official docs, the OAuth login URL should be:
+```
+https://smartapi.angelone.in/publisher-login?api_key={api_key}&state={state}&redirect_uri={redirect_uri}
+```
 
-**What was wrong:**
-- URL format: `https://smartapi.angelone.in/publisher-login?api_key=xxx` (incorrect)
-- This resulted in 404 error with `undefined` in the path
+**What was corrected:**
+- Removed client code from URL path (was incorrectly added)
+- Updated `server/angel-one-oauth.ts` line 67
+- OAuth flow now matches Angel One's official specification
 
-**What was fixed:**
-- URL format: `https://smartapi.angelone.in/publisher-login/{clientCode}?api_key=xxx&redirect_uri=...` (correct)
-- Updated `server/angel-one-oauth.ts` line 67 to include client code in path
-- Angel One OAuth button now works correctly like Zerodha and Upstox
+**Current Implementation:**
+```
+const authUrl = `${baseUrl}?${params.toString()}`;
+// Generates: https://smartapi.angelone.in/publisher-login?api_key=...&state=live&redirect_uri=...
+```
 
-**Testing results:**
+**Testing Results:**
 - ✅ Server restarted successfully
-- ✅ Angel One auto-connect working
-- ✅ WebSocket connection active
+- ✅ Angel One auto-connect working with environment credentials
+- ✅ JWT token generation successful
+- ✅ Token persistence to database working
+- ✅ WebSocket connection active (connected subscribed to BANKNIFTY, SENSEX, GOLD)
 - ✅ Real-time price streaming active
-- ✅ Ready for web OAuth login flow
+- ✅ OAuth button ready for web login flow
 
 ---
 
