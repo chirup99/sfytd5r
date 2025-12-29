@@ -4264,15 +4264,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🔶 Angel One OAuth Redirect Flow
   app.get("/api/angelone/auth-url", (req, res) => {
     try {
+      // Validate API key FIRST
+      const apiKey = process.env.ANGEL_ONE_API_KEY;
+      if (!apiKey) {
+        console.error("❌ [ANGEL ONE AUTH-URL] API Key is NOT SET");
+        console.error("   Environment vars:", {
+          ANGEL_ONE_API_KEY: process.env.ANGEL_ONE_API_KEY ? "SET" : "MISSING",
+          ANGEL_ONE_CLIENT_CODE: process.env.ANGEL_ONE_CLIENT_CODE || "P176266"
+        });
+        return res.status(400).json({ 
+          success: false, 
+          message: "ANGEL_ONE_API_KEY is not configured. Please set it in your Replit secrets.",
+          apiKeySet: !!apiKey
+        });
+      }
+      
       const state = (req.query.state as string) || "live";
       // Redirect URI is pre-configured in Angel One MyApps - do NOT pass as parameter
       const authUrl = angelOneOAuthManager.getAuthorizationUrl(state);
-      console.log("🔶 [ANGEL ONE] Auth URL generated:");
+      console.log("🔶 [ANGEL ONE] Auth URL generated successfully");
       console.log(`   Auth URL: ${authUrl}`);
       console.log(`   Note: Redirect URI is pre-configured in Angel One MyApps`);
       res.json({ success: true, authUrl });
     } catch (error: any) {
-      res.status(500).json({ success: false, message: error.message });
+      console.error("❌ [ANGEL ONE AUTH-URL] Error:", error.message);
+      res.status(500).json({ 
+        success: false, 
+        message: error.message || "Failed to generate authorization URL",
+        error: error.message
+      });
     }
   });
 

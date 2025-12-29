@@ -34,16 +34,26 @@ class AngelOneOAuthManager {
 
   // Get authorization URL for redirect-based login
   getAuthorizationUrl(state?: string): string {
-    if (!this.apiKey) {
-      console.error("❌ [ANGEL ONE] API Key not configured - auth will fail");
+    // CRITICAL: Re-read API key from environment at request time (not at init time)
+    const freshApiKey = process.env.ANGEL_ONE_API_KEY || this.apiKey || "";
+    
+    if (!freshApiKey) {
+      console.error("❌ [ANGEL ONE] API Key not configured!");
       console.error("   Please set ANGEL_ONE_API_KEY environment variable");
+      console.error("   Current value:", process.env.ANGEL_ONE_API_KEY);
+      throw new Error("ANGEL_ONE_API_KEY environment variable is not set");
     }
     
     const baseUrl = "https://smartapi.angelone.in/publisher-login";
-    const apiKey = this.apiKey || "";
     const stateVar = state || "live";
+    const authUrl = `${baseUrl}?api_key=${freshApiKey}&state=${stateVar}`;
     
-    return `${baseUrl}?api_key=${apiKey}&state=${stateVar}`;
+    console.log("✅ [ANGEL ONE] Auth URL generated:");
+    console.log(`   API Key: ${freshApiKey.substring(0, 4)}...`);
+    console.log(`   State: ${stateVar}`);
+    console.log(`   URL: ${authUrl}`);
+    
+    return authUrl;
   }
 
   // CRITICAL: Exchange temporary auth_token & feed_token for JWT tokens
