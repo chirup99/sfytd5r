@@ -80,14 +80,14 @@ class UpstoxOAuthManager {
     let redirectUri = this.redirectUri;
     
     if (domain) {
-      // Re-map common AWS/Custom domain patterns to ensure exact matching
-      // If we are on perala.in, we use perala.in.
-      // If we are on the EB URL, we use the EB URL.
-      // Upstox is very strict: redirect_uri MUST match portal EXACTLY.
+      // Logic: If the current domain is perala.in, we use perala.in.
+      // We must avoid the Replit URL if we are on the custom domain.
       const protocol = (domain.includes('localhost') || domain.includes('127.0.0.1')) ? 'http' : 'https';
       
-      // Strip port if present (e.g., perala.in:8081 -> perala.in)
+      // Strip port if present
       const cleanDomain = domain.split(':')[0];
+      
+      // IMPORTANT: Construct the redirect URI using the CURRENT visiting domain
       redirectUri = `${protocol}://${cleanDomain}/api/upstox/callback`;
     }
     
@@ -100,7 +100,9 @@ class UpstoxOAuthManager {
       state: state,
     });
 
+    // Log the EXACT URL for verification
     const authUrl = `https://api.upstox.com/v2/login/authorization/dialog?${params.toString()}`;
+    console.log(`🔵 [UPSTOX] Generated URL: ${authUrl}`);
     
     // Store state with redirect URI for verification during callback
     this.oauthStates.set(state, { state, createdAt: new Date() });
@@ -113,8 +115,6 @@ class UpstoxOAuthManager {
       }
     }
 
-    console.log(`🔵 [UPSTOX] Generated authorization URL with state: ${state.substring(0, 8)}...`);
-    console.log(`🔵 [UPSTOX] Redirect URI: ${redirectUri}`);
     return { url: authUrl, state };
   }
 
