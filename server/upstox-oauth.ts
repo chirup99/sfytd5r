@@ -81,20 +81,24 @@ class UpstoxOAuthManager {
 
     const state = crypto.randomBytes(32).toString('hex');
     
-    // Determine redirect URI
+    // Use the exact redirect URI registered in the Upstox Developer Portal.
+    // If you have multiple domains, you must register EACH one in Upstox and send the matching one.
+    // By default, we prioritize the PRODUCTION_DOMAIN if the user is visiting it.
     let redirectUri = this.redirectUri;
     
     if (domain) {
-      // ALWAYS use the domain provided by the request host
-      // This ensures that whether the user is on perala.in or the elasticbeanstalk.com URL,
-      // it matches the environment they are currently using.
-      const protocol = domain.includes('localhost') ? 'http' : 'https';
-      redirectUri = `${protocol}://${domain}/api/upstox/callback`;
+      // Logic: If the current domain is the production domain or the EB domain, 
+      // construct the redirect URI using that specific domain.
+      // Upstox is very strict: the redirect_uri MUST be an exact match to one of the 
+      // 'Redirect URIs' entered in your Upstox App configuration.
+      const protocol = (domain.includes('localhost') || domain.includes('127.0.0.1')) ? 'http' : 'https';
+      
+      // Strip port if present (e.g., perala.in:8081 -> perala.in)
+      const cleanDomain = domain.split(':')[0];
+      redirectUri = `${protocol}://${cleanDomain}/api/upstox/callback`;
     }
     
-    if (!redirectUri) {
-      throw new Error('Could not determine redirect URI. Please check domain configuration.');
-    }
+    console.log(`🔵 [UPSTOX] Using Redirect URI for auth: ${redirectUri}`);
     
     const params = new URLSearchParams({
       response_type: 'code',
@@ -135,9 +139,12 @@ class UpstoxOAuthManager {
       // Determine redirect URI used during authorization
       let redirectUri = this.redirectUri;
       if (domain) {
-        const protocol = domain.includes('localhost') ? 'http' : 'https';
-        redirectUri = `${protocol}://${domain}/api/upstox/callback`;
+        const protocol = (domain.includes('localhost') || domain.includes('127.0.0.1')) ? 'http' : 'https';
+        const cleanDomain = domain.split(':')[0];
+        redirectUri = `${protocol}://${cleanDomain}/api/upstox/callback`;
       }
+      
+      console.log(`🔵 [UPSTOX] Using Redirect URI for token exchange: ${redirectUri}`);
 
       console.log('🔵 [UPSTOX] Exchanging authorization code for token...');
       console.log(`🔵 [UPSTOX] Code: ${code.substring(0, 20)}...`);
