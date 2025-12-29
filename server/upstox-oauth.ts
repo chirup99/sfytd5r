@@ -50,24 +50,21 @@ class UpstoxOAuthManager {
     this.apiKey = apiKey || process.env.UPSTOX_API_KEY || '';
     this.apiSecret = apiSecret || process.env.UPSTOX_API_SECRET || '';
     
-    // Set redirect URI based on environment
+    // Set static redirect URI based on environment (fallback for background tasks)
     let baseUrl;
-    if (process.env.NODE_ENV === 'production') {
-      // Prioritize PRODUCTION_DOMAIN if set, otherwise fallback to request host
-      baseUrl = process.env.PRODUCTION_DOMAIN 
-        ? `https://${process.env.PRODUCTION_DOMAIN}`
-        : null; // Will be handled dynamically in generateAuthorizationUrl
+    if (process.env.NODE_ENV === 'production' && process.env.PRODUCTION_DOMAIN) {
+      baseUrl = `https://${process.env.PRODUCTION_DOMAIN}`;
     } else {
       baseUrl = (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS)
         ? `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS}`
         : `http://localhost:5000`;
     }
-    this.redirectUri = baseUrl ? `${baseUrl}/api/upstox/callback` : '';
+    this.redirectUri = `${baseUrl}/api/upstox/callback`;
 
     console.log('🔵 [UPSTOX] OAuth Manager initialized');
     console.log(`🔵 [UPSTOX] API Key loaded: ${this.apiKey ? '✅ YES' : '❌ NO'}`);
-    console.log(`🔵 [UPSTOX] API Secret loaded: ${this.apiKey ? '✅ YES' : '❌ NO'}`);
-    console.log(`🔵 [UPSTOX] Static Redirect URI: ${this.redirectUri || 'DYNAMIC'}`);
+    console.log(`🔵 [UPSTOX] API Secret loaded: ${this.apiSecret ? '✅ YES' : '❌ NO'}`);
+    console.log(`🔵 [UPSTOX] Default Redirect URI: ${this.redirectUri}`);
     
     if (!this.apiKey || !this.apiSecret) {
       console.error('🔴 [UPSTOX] CRITICAL: Missing Upstox credentials!');
@@ -84,19 +81,23 @@ class UpstoxOAuthManager {
 
     const state = crypto.randomBytes(32).toString('hex');
     
-    // Determine redirect URI
-    let redirectUri;
+    // Use provided domain or fallback to constructor's redirect URI
+    let redirectUri = this.redirectUri;
     
     if (domain) {
-      // Use the actual host from the request (works for both Replit and custom domains)
+      // Clean domain - remove any port if it's there but keep it for localhost
+      let cleanDomain = domain;
       const protocol = domain.includes('localhost') ? 'http' : 'https';
-      redirectUri = `${protocol}://${domain}/api/upstox/callback`;
-    } else {
-      redirectUri = this.redirectUri;
-    }
-    
-    if (!redirectUri) {
-      throw new Error('Could not determine redirect URI. Please check domain configuration.');
+      
+      // If we're in production and have a PRODUCTION_DOMAIN, prioritize it if it matches
+      if (process.env.NODE_ENV === 'production' && process.env.PRODUCTION_DOMAIN) {
+        // If the requesting domain is the production domain or a subdomain
+        if (domain.includes(process.env.PRODUCTION_DOMAIN)) {
+          cleanDomain = process.env.PRODUCTION_DOMAIN;
+        }
+      }
+      
+      redirectUri = `${protocol}://${cleanDomain}/api/upstox/callback`;
     }
     
     const params = new URLSearchParams({
@@ -138,8 +139,16 @@ class UpstoxOAuthManager {
       // Determine redirect URI used during authorization
       let redirectUri = this.redirectUri;
       if (domain) {
+        let cleanDomain = domain;
         const protocol = domain.includes('localhost') ? 'http' : 'https';
-        redirectUri = `${protocol}://${domain}/api/upstox/callback`;
+        
+        if (process.env.NODE_ENV === 'production' && process.env.PRODUCTION_DOMAIN) {
+          if (domain.includes(process.env.PRODUCTION_DOMAIN)) {
+            cleanDomain = process.env.PRODUCTION_DOMAIN;
+          }
+        }
+        
+        redirectUri = `${protocol}://${cleanDomain}/api/upstox/callback`;
       }
 
       console.log('🔵 [UPSTOX] Exchanging authorization code for token...');
