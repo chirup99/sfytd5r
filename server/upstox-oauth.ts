@@ -52,13 +52,12 @@ class UpstoxOAuthManager {
     
     // Set static redirect URI based on environment (fallback for background tasks)
     let baseUrl;
-    if (process.env.NODE_ENV === 'production' && process.env.PRODUCTION_DOMAIN) {
-      baseUrl = `https://${process.env.PRODUCTION_DOMAIN}`;
+    if (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS) {
+      baseUrl = `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS}`;
     } else {
-      baseUrl = (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS)
-        ? `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS}`
-        : `http://localhost:5000`;
+      baseUrl = `http://localhost:5000`;
     }
+    
     this.redirectUri = `${baseUrl}/api/upstox/callback`;
 
     console.log('🔵 [UPSTOX] OAuth Manager initialized');
@@ -74,23 +73,24 @@ class UpstoxOAuthManager {
 
   // Generate OAuth authorization URL with dynamic domain support
   generateAuthorizationUrl(domain?: string): { url: string; state: string } {
+    console.log(`🔵 [UPSTOX] Generating auth URL for domain: ${domain || 'constructor-default'}`);
+    
     // Check if credentials are configured
     if (!this.apiKey || !this.apiSecret) {
+      console.error('🔴 [UPSTOX] Missing credentials during URL generation');
       throw new Error('Upstox credentials not configured. Please set UPSTOX_API_KEY and UPSTOX_API_SECRET environment variables.');
     }
 
     const state = crypto.randomBytes(32).toString('hex');
     
     // Use the exact redirect URI registered in the Upstox Developer Portal.
-    // If you have multiple domains, you must register EACH one in Upstox and send the matching one.
-    // By default, we prioritize the PRODUCTION_DOMAIN if the user is visiting it.
     let redirectUri = this.redirectUri;
     
     if (domain) {
-      // Logic: If the current domain is the production domain or the EB domain, 
-      // construct the redirect URI using that specific domain.
-      // Upstox is very strict: the redirect_uri MUST be an exact match to one of the 
-      // 'Redirect URIs' entered in your Upstox App configuration.
+      // Re-map common AWS/Custom domain patterns to ensure exact matching
+      // If we are on perala.in, we use perala.in.
+      // If we are on the EB URL, we use the EB URL.
+      // Upstox is very strict: redirect_uri MUST match portal EXACTLY.
       const protocol = (domain.includes('localhost') || domain.includes('127.0.0.1')) ? 'http' : 'https';
       
       // Strip port if present (e.g., perala.in:8081 -> perala.in)
@@ -98,7 +98,7 @@ class UpstoxOAuthManager {
       redirectUri = `${protocol}://${cleanDomain}/api/upstox/callback`;
     }
     
-    console.log(`🔵 [UPSTOX] Using Redirect URI for auth: ${redirectUri}`);
+    console.log(`🔵 [UPSTOX] Final Redirect URI being sent to Upstox: ${redirectUri}`);
     
     const params = new URLSearchParams({
       response_type: 'code',
