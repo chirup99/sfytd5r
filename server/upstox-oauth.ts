@@ -81,23 +81,19 @@ class UpstoxOAuthManager {
 
     const state = crypto.randomBytes(32).toString('hex');
     
-    // Use provided domain or fallback to constructor's redirect URI
+    // Determine redirect URI
     let redirectUri = this.redirectUri;
     
     if (domain) {
-      // Clean domain - remove any port if it's there but keep it for localhost
-      let cleanDomain = domain;
+      // ALWAYS use the domain provided by the request host
+      // This ensures that whether the user is on perala.in or the elasticbeanstalk.com URL,
+      // it matches the environment they are currently using.
       const protocol = domain.includes('localhost') ? 'http' : 'https';
-      
-      // If we're in production and have a PRODUCTION_DOMAIN, prioritize it if it matches
-      if (process.env.NODE_ENV === 'production' && process.env.PRODUCTION_DOMAIN) {
-        // If the requesting domain is the production domain or a subdomain
-        if (domain.includes(process.env.PRODUCTION_DOMAIN)) {
-          cleanDomain = process.env.PRODUCTION_DOMAIN;
-        }
-      }
-      
-      redirectUri = `${protocol}://${cleanDomain}/api/upstox/callback`;
+      redirectUri = `${protocol}://${domain}/api/upstox/callback`;
+    }
+    
+    if (!redirectUri) {
+      throw new Error('Could not determine redirect URI. Please check domain configuration.');
     }
     
     const params = new URLSearchParams({
@@ -139,16 +135,8 @@ class UpstoxOAuthManager {
       // Determine redirect URI used during authorization
       let redirectUri = this.redirectUri;
       if (domain) {
-        let cleanDomain = domain;
         const protocol = domain.includes('localhost') ? 'http' : 'https';
-        
-        if (process.env.NODE_ENV === 'production' && process.env.PRODUCTION_DOMAIN) {
-          if (domain.includes(process.env.PRODUCTION_DOMAIN)) {
-            cleanDomain = process.env.PRODUCTION_DOMAIN;
-          }
-        }
-        
-        redirectUri = `${protocol}://${cleanDomain}/api/upstox/callback`;
+        redirectUri = `${protocol}://${domain}/api/upstox/callback`;
       }
 
       console.log('🔵 [UPSTOX] Exchanging authorization code for token...');
