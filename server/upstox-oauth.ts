@@ -50,16 +50,13 @@ class UpstoxOAuthManager {
     this.apiKey = apiKey || process.env.UPSTOX_API_KEY || '';
     this.apiSecret = apiSecret || process.env.UPSTOX_API_SECRET || '';
     
-    // Default redirect URI (fallback)
-    this.redirectUri = `https://perala.in/api/upstox/callback`;
+    // Default to a placeholder if nothing else is available
+    this.redirectUri = `http://localhost:5000/api/upstox/callback`;
 
     console.log('🔵 [UPSTOX] OAuth Manager initialized');
-    console.log(`🔵 [UPSTOX] API Key present: ${this.apiKey ? '✅' : '❌'}`);
-    console.log(`🔵 [UPSTOX] API Secret present: ${this.apiSecret ? '✅' : '❌'}`);
-    
-    if (!this.apiKey || !this.apiSecret) {
-      console.warn('⚠️ [UPSTOX] Warning: Missing credentials. Ensure UPSTOX_API_KEY and UPSTOX_API_SECRET are set in AWS Environment Properties.');
-    }
+    console.log(`🔵 [UPSTOX] API Key loaded: ${this.apiKey ? '✅ YES' : '❌ NO'}`);
+    console.log(`🔵 [UPSTOX] API Secret loaded: ${this.apiSecret ? '✅ YES' : '❌ NO'}`);
+    console.log(`🔵 [UPSTOX] Default Redirect URI: ${this.redirectUri}`);
     
     if (!this.apiKey || !this.apiSecret) {
       console.error('🔴 [UPSTOX] CRITICAL: Missing Upstox credentials!');
