@@ -32,6 +32,11 @@
         - Consolidated environment variables under `aws:elasticbeanstalk:application:environment`
         - Resolved deployment validation error
 
+[x] 205. Documented Terminal Deployment Guide:
+        - Provided 5-step terminal guide for manual package creation
+        - Documented build, workspace preparation, zipping, and cleanup commands
+        - Location: Shared in chat session instructions
+
 ## DEPLOYMENT STEPS FOR AWS ELASTIC BEANSTALK
 
 ### Step 1: Download the Deployment Package
