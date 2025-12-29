@@ -40,8 +40,8 @@ class AngelOneOAuthManager {
     const apiKey = this.apiKey || "";
     const stateVar = state || "live";
     
-    // API key goes in the path: /publisher-login/{api_key}
-    return `${baseUrl}/${apiKey}?state=${stateVar}`;
+    // API key goes in query string: ?api_key={api_key}
+    return `${baseUrl}?api_key=${apiKey}&state=${stateVar}`;
   }
 
   // Handle callback from Angel One
