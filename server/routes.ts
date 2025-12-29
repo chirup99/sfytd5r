@@ -4278,21 +4278,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/broker/angelone/callback", async (req, res) => {
     try {
+      console.log("🔶 [ANGEL ONE CALLBACK] Received request");
+      console.log("   Full URL:", req.url);
+      console.log("   Query params:", JSON.stringify(req.query));
+      console.log("   Headers:", { host: req.get('host'), protocol: req.protocol });
+      
       const { auth_token, feed_token } = req.query;
       
+      console.log(`   auth_token: ${auth_token ? '✅ Present (' + String(auth_token).substring(0, 20) + '...)' : '❌ MISSING'}`);
+      console.log(`   feed_token: ${feed_token ? '✅ Present (' + String(feed_token).substring(0, 20) + '...)' : '❌ MISSING'}`);
+      
       if (!auth_token) {
+        console.error("🔴 [ANGEL ONE CALLBACK] auth_token is missing!");
+        console.log("   This likely means the Redirect URI is not registered in Angel One MyApps");
+        console.log("   Expected callback URL: " + req.protocol + "://" + req.get('host') + "/api/broker/angelone/callback");
         return res.send(`
+          <html><head><title>Error</title></head><body>
+          <h1>Authentication Failed</h1>
+          <p>No auth token received from Angel One.</p>
+          <p><strong>Expected Redirect URI in Angel One MyApps:</strong></p>
+          <pre>${req.protocol}://${req.get('host')}/api/broker/angelone/callback</pre>
+          <p>Please ensure this URL is registered in your Angel One app settings.</p>
           <script>
-            window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "No auth token received" }, "*");
-            window.close();
+            setTimeout(() => {
+              window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "No auth token received - Redirect URI may not be registered in Angel One MyApps" }, "*");
+              window.close();
+            }, 2000);
           </script>
+          </body></html>
         `);
       }
 
+      console.log("✅ [ANGEL ONE CALLBACK] Processing tokens...");
       const result = await angelOneOAuthManager.handleCallback(auth_token as string, feed_token as string);
 
       if (result.success) {
+        console.log("✅ [ANGEL ONE CALLBACK] Successfully authenticated!");
         res.send(`
+          <html><head><title>Connected</title></head><body>
+          <h1>Connected to Angel One</h1>
+          <p>Your Angel One account is now connected. Closing...</p>
           <script>
             window.opener.postMessage({ 
               type: "ANGELONE_AUTH_SUCCESS", 
@@ -4300,23 +4325,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
               feedToken: "${result.feedToken}",
               clientCode: "${result.clientCode}"
             }, "*");
-            window.close();
+            setTimeout(() => window.close(), 1000);
           </script>
+          </body></html>
         `);
       } else {
+        console.error("🔴 [ANGEL ONE CALLBACK] Authentication failed:", result.message);
         res.send(`
+          <html><head><title>Error</title></head><body>
+          <h1>Authentication Failed</h1>
+          <p>${result.message || 'Unknown error'}</p>
           <script>
             window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "${result.message}" }, "*");
             window.close();
           </script>
+          </body></html>
         `);
       }
     } catch (error: any) {
+      console.error("🔴 [ANGEL ONE CALLBACK] Exception:", error.message);
       res.status(500).send(`
+        <html><head><title>Error</title></head><body>
+        <h1>Server Error</h1>
+        <p>${error.message}</p>
         <script>
           window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "${error.message}" }, "*");
           window.close();
         </script>
+        </body></html>
       `);
     }
   });
