@@ -83,7 +83,7 @@ AWS_REGION=eu-north-1
 
 ### Step 4: Verify Deployment
 After deployment, check the logs:
-- Logs should show: `🔵 [UPSTOX] API Key loaded: ✅ YES`
+- Logs should show: `[UPSTOX] API Key loaded: YES`
 - Application should be running on port 8081
 - Check CloudWatch logs for any errors
 
@@ -125,7 +125,7 @@ deploy_eb/
 4. Built production-ready package
 
 ## DEPLOYMENT READINESS STATUS
-✅ READY FOR PRODUCTION
+READY FOR PRODUCTION
 - Build: Successful
 - Package: Complete (2.0MB zip)
 - Configuration: Complete (.ebextensions/port.config)
