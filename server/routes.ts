@@ -4308,6 +4308,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // 🔶 CRITICAL: Handle Angel One callback at ROOT level (MyApps redirects to base domain)
+  // Angel One redirects to the Redirect URL registered in MyApps with auth_token & feed_token as query params
+  // If registered URL is https://domain.com/, Angel One redirects to https://domain.com/?auth_token=xxx&feed_token=yyy
+  app.get("/", async (req, res, next) => {
+    // Check if this is an Angel One callback redirect
+    if (req.query.auth_token && req.query.feed_token) {
+      console.log("🔶 [ANGEL ONE ROOT CALLBACK] Detected Angel One redirect at root level");
+      console.log("   auth_token: ✅ Present");
+      console.log("   feed_token: ✅ Present");
+      
+      // Forward to our dedicated callback handler
+      return res.redirect(307, `/api/broker/angelone/callback?auth_token=${req.query.auth_token}&feed_token=${req.query.feed_token}`);
+    }
+    
+    // Otherwise, pass to next handler (frontend serving)
+    next();
+  });
+
   app.get("/api/broker/angelone/callback", async (req, res) => {
     try {
       console.log("🔶 [ANGEL ONE CALLBACK] ════════════════════════════════════");

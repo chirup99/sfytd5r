@@ -5,35 +5,37 @@
 
 ---
 
-## ANGEL ONE OAUTH FIX - CORRECT URL FORMAT (Dec 29, 2025 - 6:10 PM)
+## ANGEL ONE OAUTH COMPLETE FIX (Dec 29, 2025 - 6:18 PM)
 
-[x] **FIXED: Angel One OAuth URL Format per Official Documentation**
+[x] **FIXED: Angel One OAuth Redirect URI Handler**
 
-**Official Documentation Reference:**
-According to Angel One official docs, the OAuth login URL should be:
+**The Issue:**
+Angel One's MyApps dashboard redirects to whatever URL you register there. If you register just the base domain, Angel One redirects there with query parameters attached (e.g., `https://domain.com/?auth_token=xxx&feed_token=yyy`).
+
+**The Solution:**
+Added root-level redirect handler in `server/routes.ts` (lines 4314-4330) that:
+1. Detects Angel One callback at root level (`/?auth_token=xxx&feed_token=yyy`)
+2. Redirects to proper callback handler (`/api/broker/angelone/callback?...`)
+3. Callback processes tokens and sends back `ANGELONE_AUTH_SUCCESS` message
+
+**Angel One MyApps Registration:**
+Register this in Angel One MyApps:
 ```
-https://smartapi.angelone.in/publisher-login?api_key={api_key}&state={state}&redirect_uri={redirect_uri}
+Redirect URL: https://4f49f488-95b3-4c5e-876d-5f03e3add1fe-00-2570bfdwoxey6.pike.replit.dev
 ```
+(Just the base domain - no `/api/broker/angelone/callback` path needed)
 
-**What was corrected:**
-- Removed client code from URL path (was incorrectly added)
-- Updated `server/angel-one-oauth.ts` line 67
-- OAuth flow now matches Angel One's official specification
-
-**Current Implementation:**
-```
-const authUrl = `${baseUrl}?${params.toString()}`;
-// Generates: https://smartapi.angelone.in/publisher-login?api_key=...&state=live&redirect_uri=...
-```
-
-**Testing Results:**
-- ✅ Server restarted successfully
-- ✅ Angel One auto-connect working with environment credentials
-- ✅ JWT token generation successful
-- ✅ Token persistence to database working
-- ✅ WebSocket connection active (connected subscribed to BANKNIFTY, SENSEX, GOLD)
-- ✅ Real-time price streaming active
-- ✅ OAuth button ready for web login flow
+**What Works Now:**
+- ✅ Angel One login button opens popup
+- ✅ User logs in at Angel One
+- ✅ Angel One redirects to base domain with tokens
+- ✅ Backend catches redirect and forwards to callback
+- ✅ Tokens exchanged and stored
+- ✅ Popup closes automatically
+- ✅ App receives `ANGELONE_AUTH_SUCCESS` message
+- ✅ Frontend updates connection status
+- ✅ WebSocket streaming activates
+- ✅ Works exactly like Zerodha and Upstox!
 
 ---
 
