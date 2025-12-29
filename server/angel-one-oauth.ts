@@ -44,10 +44,12 @@ class AngelOneOAuthManager {
       throw new Error("ANGEL_ONE_API_KEY environment variable is not set");
     }
     
+    // According to Angel One docs: https://smartapi.angelone.in/docs/User#Authenticate
+    // OAuth URL format: https://smartapi.angelone.in/publisher-login/{clientCode}?api_key={apiKey}&redirect_uri={redirectUri}
     const baseUrl = "https://smartapi.angelone.in/publisher-login";
     const stateVar = state || "live";
     
-    // Build auth URL with redirect_uri parameter (CRITICAL for proper OAuth flow)
+    // Build auth URL with proper query parameters (CRITICAL for proper OAuth flow)
     const params = new URLSearchParams();
     params.append("api_key", freshApiKey);
     params.append("state", stateVar);
@@ -58,9 +60,11 @@ class AngelOneOAuthManager {
       console.log(`   Redirect URI: ${redirectUri}`);
     }
     
-    const authUrl = `${baseUrl}?${params.toString()}`;
+    // Format: https://smartapi.angelone.in/publisher-login/{clientCode}?api_key=...&redirect_uri=...
+    const authUrl = `${baseUrl}/${this.clientCode}?${params.toString()}`;
     
     console.log("✅ [ANGEL ONE] Auth URL generated:");
+    console.log(`   Client Code: ${this.clientCode}`);
     console.log(`   API Key: ${freshApiKey.substring(0, 4)}...`);
     console.log(`   State: ${stateVar}`);
     console.log(`   Full URL: ${authUrl}`);

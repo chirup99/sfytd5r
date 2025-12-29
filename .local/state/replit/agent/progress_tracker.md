@@ -5,6 +5,30 @@
 
 ---
 
+## ANGEL ONE OAUTH FIX - CLIENT CODE IN URL PATH (Dec 29, 2025 - 6:08 PM)
+
+[x] **FIXED: Angel One OAuth URL Format**
+
+The issue was that the OAuth URL was missing the client code in the path.
+
+**What was wrong:**
+- URL format: `https://smartapi.angelone.in/publisher-login?api_key=xxx` (incorrect)
+- This resulted in 404 error with `undefined` in the path
+
+**What was fixed:**
+- URL format: `https://smartapi.angelone.in/publisher-login/{clientCode}?api_key=xxx&redirect_uri=...` (correct)
+- Updated `server/angel-one-oauth.ts` line 67 to include client code in path
+- Angel One OAuth button now works correctly like Zerodha and Upstox
+
+**Testing results:**
+- ✅ Server restarted successfully
+- ✅ Angel One auto-connect working
+- ✅ WebSocket connection active
+- ✅ Real-time price streaming active
+- ✅ Ready for web OAuth login flow
+
+---
+
 ## ANGEL ONE OAUTH FIX - TOKEN EXCHANGE (Dec 29, 2025 - 5:25 PM)
 
 [x] **CRITICAL FIX: Angel One OAuth Callback Token Exchange**
