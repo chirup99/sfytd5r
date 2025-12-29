@@ -50,15 +50,8 @@ class UpstoxOAuthManager {
     this.apiKey = apiKey || process.env.UPSTOX_API_KEY || '';
     this.apiSecret = apiSecret || process.env.UPSTOX_API_SECRET || '';
     
-    // Set static redirect URI based on environment (fallback for background tasks)
-    let baseUrl;
-    if (process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS) {
-      baseUrl = `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS}`;
-    } else {
-      baseUrl = `http://localhost:5000`;
-    }
-    
-    this.redirectUri = `${baseUrl}/api/upstox/callback`;
+    // Default to a placeholder if nothing else is available
+    this.redirectUri = `http://localhost:5000/api/upstox/callback`;
 
     console.log('🔵 [UPSTOX] OAuth Manager initialized');
     console.log(`🔵 [UPSTOX] API Key loaded: ${this.apiKey ? '✅ YES' : '❌ NO'}`);
