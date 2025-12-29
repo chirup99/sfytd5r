@@ -20547,8 +20547,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log('🔵 [UPSTOX] Processing OAuth callback...');
-
-      const success = await upstoxOAuthManager.exchangeCodeForToken(code, state);
+      
+      // Get the current domain from request headers for dynamic OAuth redirect verification
+      const currentDomain = req.get('host');
+      const success = await upstoxOAuthManager.exchangeCodeForToken(code, state, currentDomain);
 
       if (success) {
         console.log('✅ [UPSTOX] Successfully authenticated');
