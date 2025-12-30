@@ -4374,13 +4374,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Persist tokens to database for app restart persistence
         try {
           await storage.updateApiStatus({
+            connected: true,
+            authenticated: true,
             accessToken: result.token,
             refreshToken: result.refreshToken,
             feedToken: result.feedToken,
             tokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hour expiry
             brokerName: "angel_one",
           });
-          console.log("✅ [ANGEL ONE CALLBACK] Tokens persisted to database");
+          
+          // Also update the live API instance
+          const { angelOneApi } = await import('./angel-one-api');
+          angelOneApi.setTokens(result.token, result.refreshToken, result.feedToken);
+          
+          console.log("✅ [ANGEL ONE CALLBACK] Tokens persisted to database and API instance updated");
         } catch (storageError: any) {
           console.error("⚠️ [ANGEL ONE CALLBACK] Failed to persist tokens:", storageError.message);
         }

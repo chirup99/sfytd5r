@@ -589,6 +589,28 @@ class AngelOneAPI {
     return quotes;
   }
 
+  // Set tokens directly (for database-loaded tokens or OAuth callback)
+  setTokens(accessToken: string, refreshToken?: string, feedToken?: string): void {
+    this.session = {
+      jwtToken: accessToken,
+      refreshToken: refreshToken || '',
+      feedToken: feedToken || ''
+    };
+    this.isAuthenticated = true;
+    this.sessionGeneratedAt = new Date();
+    this.connectionStartTime = new Date();
+    
+    // Initialize SmartAPI if not already done
+    if (!this.smartApi && this.credentials?.apiKey) {
+      this.smartApi = new SmartAPI({
+        api_key: this.credentials.apiKey
+      });
+    }
+    
+    this.addActivityLog('success', 'Tokens updated from external source');
+    console.log('✅ [Angel One] Tokens updated successfully');
+  }
+
   // Connection status with token expiry info
   getConnectionStatus(): { connected: boolean; authenticated: boolean; profile: AngelOneProfile | null; session: boolean; tokenExpiry?: number; tokenExpired?: boolean; clientCode?: string } {
     let tokenExpiry: number | undefined;

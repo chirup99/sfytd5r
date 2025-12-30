@@ -89,12 +89,17 @@ class AngelOneOAuthManager {
       const response = await axios.post(
         "https://apiconnect.angelone.in/rest/auth/angelbroking/jwt/v1/generateTokens",
         {
-          authToken: authToken,
+          refreshToken: authToken, // Angel One uses the authToken from URL as refreshToken for this specific endpoint
         },
         {
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
+            "X-UserType": "USER",
+            "X-SourceID": "WEB",
+            "X-ClientLocalIP": "127.0.0.1",
+            "X-ClientPublicIP": "127.0.0.1",
+            "X-MACAddress": "00:00:00:00:00:00",
             "X-PrivateKey": this.apiKey,
           },
           timeout: 10000,
