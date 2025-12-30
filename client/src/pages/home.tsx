@@ -3959,7 +3959,22 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     const handleMessage = (event: MessageEvent) => {
       console.log("📡 [MESSAGE] Received message:", event.data.type, event.data);
       
-      if (event.data.type === 'ZERODHA_TOKEN' && event.data.token) {
+      if (event.data.type === 'ANGELONE_AUTH_SUCCESS' && event.data.token) {
+        const token = event.data.token;
+        console.log('✅ [ANGELONE] Token received from popup:', token.substring(0, 20) + '...');
+        
+        localStorage.setItem("angelone_token", token);
+        if (event.data.feedToken) localStorage.setItem("angelone_feed_token", event.data.feedToken);
+        if (event.data.refreshToken) localStorage.setItem("angelone_refresh_token", event.data.refreshToken);
+        if (event.data.clientCode) localStorage.setItem("angelone_client_code", event.data.clientCode);
+        
+        document.cookie = `angelone_token=${token}; path=/; SameSite=Lax; Secure`;
+        setAngelOneAccessToken(token);
+        setAngelOneIsConnected(true);
+        setShowConnectDialog(false);
+        
+        console.log('✅ [ANGELONE] Connection established and saved to localStorage');
+      } else if (event.data.type === 'ZERODHA_TOKEN' && event.data.token) {
         const token = event.data.token;
         console.log('✅ [ZERODHA] Token received from popup:', token.substring(0, 20) + '...');
         

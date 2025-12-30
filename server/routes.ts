@@ -4397,14 +4397,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           <h1>Connected to Angel One</h1>
           <p>Your Angel One account is now connected. Closing...</p>
           <script>
-            window.opener.postMessage({ 
-              type: "ANGELONE_AUTH_SUCCESS", 
-              token: "${result.token}",
-              feedToken: "${result.feedToken}",
-              refreshToken: "${result.refreshToken || ''}",
-              clientCode: "${result.clientCode}"
-            }, "*");
-            setTimeout(() => window.close(), 1000);
+            if (window.opener) {
+              console.log("🔶 [ANGEL ONE CALLBACK] Sending success message to opener");
+              window.opener.postMessage({ 
+                type: "ANGELONE_AUTH_SUCCESS", 
+                token: "${result.token}",
+                feedToken: "${result.feedToken}",
+                refreshToken: "${result.refreshToken || ''}",
+                clientCode: "${result.clientCode}"
+              }, "*");
+              setTimeout(function() { window.close(); }, 1000);
+            } else {
+              console.log("🔶 [ANGEL ONE CALLBACK] No opener found, redirecting to home");
+              window.location.href = "/?angelone_auth=success";
+            }
           </script>
           </body></html>
         `);
