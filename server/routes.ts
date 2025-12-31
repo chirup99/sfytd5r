@@ -4280,18 +4280,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const state = (req.query.state as string) || "live";
-      const currentDomain = req.get('host') || 'localhost:5000';
+      const currentHost = req.get('host') || 'localhost:5000';
       
-      // DYNAMIC REDIRECT URI MATCHING: Use the CURRENT domain accessing the app
-      // This matches the domain registered in Angel One MyApps settings
-      const protocol = (currentDomain.includes('localhost') || currentDomain.includes('127.0.0.1')) ? 'http' : 'https';
-      const cleanDomain = currentDomain.split(':')[0];
-      const redirectUri = `${protocol}://${cleanDomain}/api/broker/angelone/callback`;
+      // CRITICAL: Use the FULL host (including port if present) for accurate redirect URI
+      // Angel One redirects to the registered redirect_uri with tokens as query params
+      // Format that Angel One expects: https://domain.com/ or https://domain.com:port/
+      const protocol = (currentHost.includes('localhost') || currentHost.includes('127.0.0.1')) ? 'http' : 'https';
+      
+      // Keep the FULL host including port for Replit compatibility
+      let redirectUri = `${protocol}://${currentHost}/`;
+      
+      // If running on Replit with dynamic domain, make sure we use the right format
+      if (currentHost.includes('.replit.dev') || currentHost.includes('replit.dev')) {
+        // For Replit dynamic domains: use the full domain as root
+        redirectUri = `${protocol}://${currentHost}/`;
+      }
+      
+      console.log("🔶 [ANGEL ONE] Auth URL being generated");
+      console.log(`   Current Host: ${currentHost}`);
+      console.log(`   Redirect URI: ${redirectUri}`);
       
       const authUrl = angelOneOAuthManager.getAuthorizationUrl(state, redirectUri);
-      console.log("🔶 [ANGEL ONE] Auth URL generated successfully");
-      console.log(`   Current Domain: ${currentDomain}`);
-      console.log(`   Final Redirect URI: ${redirectUri}`);
+      console.log("✅ [ANGEL ONE] Auth URL generated successfully");
+      console.log(`   Full Auth URL: ${authUrl}`);
       res.json({ success: true, authUrl });
     } catch (error: any) {
       console.error("❌ [ANGEL ONE AUTH-URL] Error:", error.message);
@@ -4325,8 +4336,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("   auth_token: ✅ Present");
       console.log("   feed_token: ✅ Present");
       
-      // Forward to our dedicated callback handler
-      return res.redirect(307, `/api/broker/angelone/callback?auth_token=${req.query.auth_token}&feed_token=${req.query.feed_token}`);
+      // Directly process the callback here instead of redirecting
+      // (Redirects don't work reliably from popups)
+      try {
+        const { auth_token, feed_token } = req.query;
+        const result = await angelOneOAuthManager.handleCallback(auth_token as string, feed_token as string);
+
+        if (result.success) {
+          console.log("✅ [ANGEL ONE] Token exchange successful");
+          
+          // Persist to database
+          try {
+            await storage.updateApiStatus({
+              broker: "angel_one",
+              access_token: result.token,
+              refresh_token: result.refreshToken || "",
+              status: "connected",
+              clientCode: result.clientCode,
+              feedToken: result.feedToken
+            });
+          } catch (dbError) {
+            console.error("⚠️ Database save error (non-critical):", dbError);
+          }
+
+          // Return HTML that sends token back to parent popup
+          const html = `
+            <!DOCTYPE html>
+            <html>
+            <head><title>Processing...</title></head>
+            <body>
+            <script>
+              setTimeout(() => {
+                window.opener.postMessage({
+                  type: 'ANGELONE_AUTH_SUCCESS',
+                  token: '${result.token}',
+                  refreshToken: '${result.refreshToken}',
+                  feedToken: '${result.feedToken}',
+                  clientCode: '${result.clientCode}'
+                }, '*');
+                window.close();
+              }, 300);
+            </script>
+            </body>
+            </html>
+          `;
+          return res.send(html);
+        } else {
+          return res.send(`
+            <!DOCTYPE html>
+            <html>
+            <head><title>Error</title></head>
+            <body>
+            <script>
+              setTimeout(() => {
+                window.opener.postMessage({
+                  type: 'ANGELONE_AUTH_ERROR',
+                  error: '${result.error || 'Token exchange failed'}'
+                }, '*');
+                window.close();
+              }, 300);
+            </script>
+            </body>
+            </html>
+          `);
+        }
+      } catch (error) {
+        return res.send(`
+          <!DOCTYPE html>
+          <html>
+          <head><title>Error</title></head>
+          <body>
+          <script>
+            setTimeout(() => {
+              window.opener.postMessage({
+                type: 'ANGELONE_AUTH_ERROR',
+                error: '${String(error).substring(0, 100)}'
+              }, '*');
+              window.close();
+            }, 300);
+          </script>
+          </body>
+          </html>
+        `);
+      }
     }
     
     // Otherwise, pass to next handler (frontend serving)
