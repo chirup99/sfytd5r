@@ -4262,6 +4262,26 @@ import { newsRouter } from './news-routes.js';
 export async function registerRoutes(app: Express): Promise<Server> {
 
   // 🔶 Angel One OAuth Redirect Flow - Now with DYNAMIC domain support (like Upstox)
+
+
+  app.get("/api/angelone/status", (req, res) => {
+    try {
+      const session = angelOneOAuthManager.getSession();
+      if (session && session.jwtToken && session.feedToken) {
+        res.json({
+          isConnected: true,
+          token: session.jwtToken,
+          refreshToken: session.refreshToken || "",
+          feedToken: session.feedToken,
+          clientCode: process.env.ANGEL_ONE_CLIENT_CODE || "P176266"
+        });
+      } else {
+        res.json({ isConnected: false });
+      }
+    } catch (error) {
+      res.status(500).json({ isConnected: false });
+    }
+  });
   app.get("/api/angelone/auth-url", (req, res) => {
     try {
       // Validate API key FIRST
