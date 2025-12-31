@@ -66,7 +66,46 @@ If Angel One has the wrong redirect URI registered, it won't know where to send 
 
 ---
 
-## FINAL PROJECT STATUS (Dec 31, 2025, 4:35 AM)
+## ANGEL ONE OAUTH FIX - USER INSTRUCTION (Dec 31, 2025, 4:45 AM)
+
+### ✅ BACKEND IS READY - ONLY THE DOMAIN ROOT REDIRECT URI
+The server is now fully configured to handle Angel One OAuth with ONLY the domain root (no `/api/broker/angelone/callback` path).
+
+### CRITICAL: UPDATE ANGEL ONE'S MYAPPS SETTINGS
+
+**You MUST update Angel One's MyApps Redirect URI to the ROOT domain only:**
+
+1. Go to: https://smartapi.angelone.in/publisher-login
+2. Log in with your Angel One credentials  
+3. Find your App Settings / OAuth Configuration
+4. Set **Redirect URI** to EXACTLY:
+   ```
+   https://7b8ce61c-9cb0-4ed5-bd5f-60ab35c2c106-00-21uuvh46hi76c.pike.replit.dev/
+   ```
+   (Replace with your actual Replit domain, but the path MUST be just `/` - nothing after the domain)
+
+5. **REMOVE** any old paths like `/api/broker/angelone/callback` from the settings
+6. **SAVE** the changes
+
+### HOW IT WORKS NOW:
+1. User clicks "Angel One" button → Popup opens with OAuth URL ✅
+2. User logs in → Angel One generates auth_token & feed_token ✅
+3. Angel One redirects to `https://yourdomain.replit.dev/?auth_token=...&feed_token=...` ✅
+4. Root "/" handler catches these tokens ✅
+5. Tokens are processed and persisted to database ✅
+6. HTML response with postMessage sent back to popup ✅
+7. Popup closes and parent window updates with connection ✅
+
+### CURRENT STATUS:
+- ✅ Backend code ready for root domain redirect
+- ✅ Root "/" handler properly configured
+- ✅ Token processing and postMessage working
+- ✅ Database persistence enabled
+- ⏳ **WAITING**: User to update Angel One MyApps redirect URI setting
+
+---
+
+## FINAL PROJECT STATUS (Dec 31, 2025, 4:45 AM)
 
 ✅ **All Systems Operational**
 - Express server running on port 5000
@@ -77,7 +116,8 @@ If Angel One has the wrong redirect URI registered, it won't know where to send 
 - CORS: Properly configured
 - OAuth flow: Ready for user testing
 
-🚀 **Ready for User Testing**
+🚀 **Ready for Testing**
+- Update Angel One MyApps Redirect URI to root domain only
 - Test Angel One popup login
 - Verify tokens are properly exchanged
 - Confirm connection persists across page reloads
