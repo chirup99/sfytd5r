@@ -4261,7 +4261,7 @@ import { newsRouter } from './news-routes.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
-  // 🔶 Angel One OAuth Redirect Flow
+  // 🔶 Angel One OAuth Redirect Flow - Now with DYNAMIC domain support (like Upstox)
   app.get("/api/angelone/auth-url", (req, res) => {
     try {
       // Validate API key FIRST
@@ -4280,11 +4280,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const state = (req.query.state as string) || "live";
-      // Pass the redirect_uri explicitly to Angel One (required for OAuth flow)
-      const redirectUri = `${req.protocol}://${req.get('host')}/api/broker/angelone/callback`;
+      const currentDomain = req.get('host') || 'localhost:5000';
+      
+      // DYNAMIC REDIRECT URI MATCHING: Use the CURRENT domain accessing the app
+      // This matches the domain registered in Angel One MyApps settings
+      const protocol = (currentDomain.includes('localhost') || currentDomain.includes('127.0.0.1')) ? 'http' : 'https';
+      const cleanDomain = currentDomain.split(':')[0];
+      const redirectUri = `${protocol}://${cleanDomain}/api/broker/angelone/callback`;
+      
       const authUrl = angelOneOAuthManager.getAuthorizationUrl(state, redirectUri);
       console.log("🔶 [ANGEL ONE] Auth URL generated successfully");
-      console.log(`   Redirect URI will be: ${redirectUri}`);
+      console.log(`   Current Domain: ${currentDomain}`);
+      console.log(`   Final Redirect URI: ${redirectUri}`);
       res.json({ success: true, authUrl });
     } catch (error: any) {
       console.error("❌ [ANGEL ONE AUTH-URL] Error:", error.message);
@@ -4406,7 +4413,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 refreshToken: "${result.refreshToken || ''}",
                 clientCode: "${result.clientCode}"
               }, "*");
-              setTimeout(function() { window.close(); }, 1000);
+              // Close immediately after posting message (no delay)
+              window.close();
             } else {
               console.log("🔶 [ANGEL ONE CALLBACK] No opener found, redirecting to home");
               window.location.href = "/?angelone_auth=success";
