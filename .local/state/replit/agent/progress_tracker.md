@@ -154,12 +154,41 @@ Check browser console (F12) for:
 - ✅ Check the popup's console - what URL is loaded?
 - ✅ Check server logs for: "ANGEL ONE ROOT CALLBACK" message
 
+### ⚠️ ROOT CAUSE FOUND:
+You have **TWO APPS** in Angel One MyApps:
+1. **Replit Domain App** (with redirect URI ending in .pike.replit.dev/)
+2. **Static IP App** (35.244.44.75)
+
+**THE PROBLEM:** Angel One is redirecting to the STATIC IP app instead of the Replit app!
+
+### 🔧 IMMEDIATE FIX (User Action Required):
+
+**Step 1:** Go to https://smartapi.angelone.in/publisher-login
+
+**Step 2:** Delete the STATIC IP app (the one with Primary Static IP: 35.244.44.75 or 13.48.242.136)
+- ✅ KEEP the Replit domain app
+- ✅ Make sure it has Redirect URI: `https://7b8ce61c-9cb0-4ed5-bd5f-60ab35c2c106-00-21uuvh46hi76c.pike.replit.dev/`
+
+**Step 3:** Test the flow again:
+1. Click "Angel One" button
+2. Popup opens → Angel One login page
+3. Log in with your credentials
+4. Angel One redirects to YOUR REPLIT DOMAIN (not static IP)
+5. Popup shows "Processing..."
+6. Popup closes → App shows "Connected to Angel One" ✅
+
+### Why This Works:
+- Having TWO apps causes Angel One to send tokens to BOTH redirect URIs
+- The static IP app is likely older and doesn't have active handling
+- By deleting it, you ensure Angel One ONLY redirects to your Replit app
+- Your Replit app's "/" handler is configured to catch these tokens ✅
+
 ### CURRENT STATUS:
 - ✅ Backend code is CORRECT and fully configured
 - ✅ Root "/" handler properly catches tokens
 - ✅ postMessage flow is working
 - ✅ Database persistence enabled
-- 🔴 **BLOCKED**: Waiting for you to update Angel One MyApps Redirect URI
+- 🔴 **ACTION REQUIRED:** Delete the Static IP app from Angel One MyApps, keep ONLY the Replit app
 
 ---
 
