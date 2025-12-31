@@ -4376,18 +4376,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // If registered URL is https://domain.com/, Angel One redirects to https://domain.com/?auth_token=xxx&feed_token=yyy
   app.get("/", async (req, res, next) => {
     // Log ALL root requests to debug which domain is being hit
-    if (Object.keys(req.query).length > 0) {
-      console.log("════════════════════════════════════════════════════════");
-      console.log("📥 [ROOT /] Request received with query params:");
-      console.log(`   Host: ${req.get('host')}`);
-      console.log(`   Protocol: ${req.protocol}`);
-      console.log(`   URL: ${req.originalUrl}`);
-      console.log(`   Query Keys: ${Object.keys(req.query).join(', ')}`);
-      console.log("════════════════════════════════════════════════════════");
-    }
+    console.log("════════════════════════════════════════════════════════");
+    console.log("📥 [ROOT /] Request received:");
+    console.log(`   Host: ${req.get('host')}`);
+    console.log(`   Protocol: ${req.protocol}`);
+    console.log(`   URL: ${req.originalUrl}`);
+    console.log(`   Query Params: ${JSON.stringify(req.query)}`);
+    console.log(`   Query Keys: ${Object.keys(req.query).join(', ') || 'NONE'}`);
+    console.log("════════════════════════════════════════════════════════");
     
-    // Check if this is an Angel One callback redirect
-    if (req.query.auth_token && req.query.feed_token) {
+    // Check if this is an Angel One callback redirect (check multiple possible param names)
+    const authToken = req.query.auth_token || req.query.authToken || req.query.access_token || req.body?.auth_token;
+    const feedToken = req.query.feed_token || req.query.feedToken || req.body?.feed_token;
+    
+    if (authToken && feedToken) {
       console.log("🔶 [ANGEL ONE ROOT CALLBACK] Detected Angel One redirect at root level");
       console.log("   auth_token: ✅ Present");
       console.log("   feed_token: ✅ Present");
@@ -4396,8 +4398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Directly process the callback here instead of redirecting
       // (Redirects don't work reliably from popups)
       try {
-        const { auth_token, feed_token } = req.query;
-        const result = await angelOneOAuthManager.handleCallback(auth_token as string, feed_token as string);
+        const result = await angelOneOAuthManager.handleCallback(authToken as string, feedToken as string);
 
         if (result.success) {
           console.log("✅ [ANGEL ONE] Token exchange successful");
