@@ -8,35 +8,72 @@
 [x] 8. Updated Angel One button to use backend auto-authenticated tokens
 [x] 9. Provided Replit preview domain for Angel One OAuth testing
 [x] 10. Identified Angel One callback endpoint configuration issue
+[x] 11. Created individual user login endpoint `/api/angelone/user-login`
 
-## ANGEL ONE CALLBACK ISSUE - SOLUTION (Dec 31, 2025, 2:21 PM)
+## INDIVIDUAL USER LOGIN IMPLEMENTATION (Dec 31, 2025, 2:25 PM)
 
-### PROBLEM:
-- After Angel One OAuth login, redirect URL shows: `https://smartapi.angelone.in/publisher-login/undefined?auth_token=...`
-- HTTP ERROR 404 - Angel One's publisher-login page doesn't recognize the redirect
+### PROBLEM SOLVED:
+- Static IP blocking OAuth callback redirects
+- Individual users need to authenticate without popup OAuth flow
 
-### ROOT CAUSE:
-- The callback endpoint URL is not registered in Angel One's MyApps settings
-- Angel One doesn't know where to redirect after authentication
+### SOLUTION IMPLEMENTED:
+**New Backend Endpoint**: `/api/angelone/user-login` (POST)
 
-### SOLUTION:
-Register this callback endpoint in Angel One MyApps dashboard:
-
+**Request Parameters:**
+```json
+{
+  "clientCode": "P176266",
+  "pin": "user_pin_here"
+}
 ```
-https://184ce506-4b8e-42bb-8baf-5621cc2fd334-00-3j7sjozugz54s.picard.replit.dev/api/broker/angelone/callback
+
+**Response:**
+```json
+{
+  "success": true,
+  "token": "JWT_TOKEN",
+  "refreshToken": "REFRESH_TOKEN",
+  "feedToken": "FEED_TOKEN",
+  "clientCode": "P176266"
+}
 ```
 
-### STEPS TO FIX:
-1. Go to Angel One MyApps dashboard
-2. Find your app settings
-3. Update "Redirect URI" or "Callback URL" to:
-   `https://184ce506-4b8e-42bb-8baf-5621cc2fd334-00-3j7sjozugz54s.picard.replit.dev/api/broker/angelone/callback`
-4. Save the settings
-5. Delete the old static IP entry (35.244.44.75)
-6. Try Angel One login again
+### HOW IT WORKS:
+1. User provides their Angel One clientCode & PIN
+2. Backend uses TOTP secret from `ANGEL_ONE_TOTP_SECRET` environment variable
+3. Generates TOTP token + authenticates user
+4. Returns JWT, refresh, and feed tokens
+5. User's tokens saved to localStorage
+6. **No popup, no redirect, no static IP issues**
 
-### ALTERNATIVE (RECOMMENDED):
-Use the **auto-authentication** feature that's already working:
-- Backend automatically connects at startup with environment credentials
-- Click "Angel One" button → instantly connected (no popup, no redirect needed)
-- Users don't need to go through OAuth at all
+### FRONTEND USAGE (Update Angel One button):
+```javascript
+const handleAngelOneUserLogin = async (clientCode, pin) => {
+  const response = await fetch("/api/angelone/user-login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ clientCode, pin })
+  });
+  const data = await response.json();
+  if (data.success) {
+    localStorage.setItem("angel_one_token", data.token);
+    localStorage.setItem("angel_one_feed_token", data.feedToken);
+    // User is now authenticated!
+  }
+};
+```
+
+### REQUIREMENTS:
+Set these environment variables:
+- `ANGEL_ONE_CLIENT_CODE` = your Angel One client code
+- `ANGEL_ONE_API_KEY` = your API key
+- `ANGEL_ONE_TOTP_SECRET` = your TOTP secret (for 2FA)
+
+### TEST THE ENDPOINT:
+```bash
+curl -X POST http://localhost:5000/api/angelone/user-login \
+  -H "Content-Type: application/json" \
+  -d '{"clientCode":"P176266","pin":"your_pin"}'
+```
+
+✅ This endpoint is now active and ready for frontend integration!

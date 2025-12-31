@@ -10712,6 +10712,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🔐 INDIVIDUAL USER LOGIN - Bypass OAuth redirect issue
+  app.post("/api/angelone/user-login", async (req, res) => {
+    try {
+      const { clientCode, pin } = req.body;
+      
+      if (!clientCode || !pin) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "clientCode and pin are required"
+        });
+      }
+      
+      console.log("🔐 [USER-LOGIN] Attempting individual user login...");
+      console.log(`   Client: ${clientCode}`);
+      
+      // Create temporary credentials object
+      const userCredentials = {
+        clientCode,
+        pin,
+        apiKey: process.env.ANGEL_ONE_API_KEY || "",
+        totpSecret: process.env.ANGEL_ONE_TOTP_SECRET || ""
+      };
+      
+      // Import SmartAPI and TOTP for this request
+      const { SmartAPI } = require('smartapi-javascript');
+      const { TOTP } = require('totp-generator');
+      
+      const smartApi = new SmartAPI();
+      smartApi.setClientCode(clientCode);
+      smartApi.setApiKey(userCredentials.apiKey);
+      
+      // Generate TOTP
+      let totpToken = "";
+      if (userCredentials.totpSecret) {
+        try {
+          const totpResult = await TOTP.generate(userCredentials.totpSecret);
+          totpToken = totpResult.otp;
+          console.log(`🔐 TOTP generated: ${totpToken}`);
+        } catch (totpError) {
+          console.error("❌ TOTP generation failed:", totpError);
+          return res.status(400).json({
+            success: false,
+            message: "TOTP secret not configured. Please set ANGEL_ONE_TOTP_SECRET in environment."
+          });
+        }
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "TOTP secret not configured. Please set ANGEL_ONE_TOTP_SECRET in environment."
+        });
+      }
+      
+      // Generate session with user credentials
+      const sessionResponse = await smartApi.generateSession(clientCode, pin, totpToken);
+      
+      if (!sessionResponse.status || !sessionResponse.data) {
+        console.error("❌ Session generation failed:", sessionResponse.message);
+        return res.status(400).json({
+          success: false,
+          message: sessionResponse.message || "Session generation failed"
+        });
+      }
+      
+      console.log("✅ [USER-LOGIN] Session generated successfully");
+      
+      // Generate tokens
+      const tokenResponse = await smartApi.generateToken(sessionResponse.data.refreshToken);
+      
+      if (!tokenResponse.status || !tokenResponse.data) {
+        console.error("❌ Token generation failed:", tokenResponse.message);
+        return res.status(400).json({
+          success: false,
+          message: "Token generation failed"
+        });
+      }
+      
+      console.log("✅ [USER-LOGIN] User authenticated successfully!");
+      console.log(`   Client: ${clientCode}`);
+      
+      res.json({
+        success: true,
+        message: "User authenticated successfully",
+        token: tokenResponse.data.jwtToken,
+        refreshToken: tokenResponse.data.refreshToken,
+        feedToken: sessionResponse.data.feedToken || "",
+        clientCode: clientCode
+      });
+      
+    } catch (error: any) {
+      console.error("❌ [USER-LOGIN] Error:", error.message);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Login failed"
+      });
+    }
+  });
+
   // ============================================================
   // END ANGEL ONE API ROUTES
   // ============================================================
