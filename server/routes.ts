@@ -4267,6 +4267,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/angelone/status", async (req, res) => {
     try {
       const storage = app.locals.storage;
+      
+      // If storage not available, return disconnected
+      if (!storage) {
+        console.log("⚠️ [STATUS] Storage not initialized, returning disconnected");
+        return res.json({ isConnected: false });
+      }
+      
       const apiStatus = await storage.getApiStatus();
       
       console.log("🔶 [STATUS] Retrieved apiStatus from database:", {
@@ -4395,16 +4402,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (result.success) {
           console.log("✅ [ANGEL ONE] Token exchange successful");
           
-          // Persist to database
+          // Persist to database (if available)
           try {
-            await storage.updateApiStatus({
-              broker: "angel_one",
-              access_token: result.token,
-              refresh_token: result.refreshToken || "",
-              status: "connected",
-              clientCode: result.clientCode,
-              feedToken: result.feedToken
-            });
+            const storage = app.locals.storage;
+            if (storage) {
+              await storage.updateApiStatus({
+                broker: "angel_one",
+                access_token: result.token,
+                refresh_token: result.refreshToken || "",
+                status: "connected",
+                clientCode: result.clientCode,
+                feedToken: result.feedToken
+              });
+              console.log("✅ [ANGEL ONE] Token persisted to database");
+            } else {
+              console.log("⚠️ [ANGEL ONE] Storage not available, skipping database save");
+            }
           } catch (dbError) {
             console.error("⚠️ Database save error (non-critical):", dbError);
           }
