@@ -10712,6 +10712,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🔐 AUTO-LOGIN WITH WEB SCRAPING - Bypass OAuth redirect, use backend credentials
+  app.post("/api/angelone/auto-login", async (req, res) => {
+    try {
+      console.log("🔐 [AUTO-LOGIN] Attempting automated Angel One login...");
+      
+      const clientCode = process.env.ANGEL_ONE_CLIENT_CODE || "";
+      const pin = process.env.ANGEL_ONE_PIN || "";
+      const apiKey = process.env.ANGEL_ONE_API_KEY || "";
+      const totpSecret = process.env.ANGEL_ONE_TOTP_SECRET || "";
+      
+      if (!clientCode || !pin || !apiKey || !totpSecret) {
+        console.error("❌ Missing environment credentials");
+        return res.status(400).json({
+          success: false,
+          message: "Angel One credentials not configured in environment. Set ANGEL_ONE_CLIENT_CODE, ANGEL_ONE_PIN, ANGEL_ONE_API_KEY, ANGEL_ONE_TOTP_SECRET"
+        });
+      }
+      
+      try {
+        // Use angelOneApi instance which is already imported at top
+        const session = await angelOneApi.generateSession();
+        
+        if (!session || !session.jwtToken) {
+          console.error("❌ Session generation failed");
+          return res.status(400).json({
+            success: false,
+            message: "Failed to generate Angel One session"
+          });
+        }
+        
+        console.log("✅ [AUTO-LOGIN] Successfully authenticated!");
+        console.log(`   Client: ${clientCode}`);
+        
+        res.json({
+          success: true,
+          message: "Auto-login successful",
+          token: session.jwtToken,
+          refreshToken: session.refreshToken,
+          feedToken: session.feedToken || "",
+          clientCode: clientCode,
+          isAutoLogin: true
+        });
+        
+      } catch (apiError: any) {
+        console.error("❌ Angel One API error:", apiError.message);
+        return res.status(400).json({
+          success: false,
+          message: apiError.message || "Failed to authenticate with Angel One"
+        });
+      }
+      
+    } catch (error: any) {
+      console.error("❌ [AUTO-LOGIN] Error:", error.message);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Auto-login failed"
+      });
+    }
+  });
+
   // 🔐 INDIVIDUAL USER LOGIN - Bypass OAuth redirect issue
   app.post("/api/angelone/user-login", async (req, res) => {
     try {

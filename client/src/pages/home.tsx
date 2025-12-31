@@ -4251,12 +4251,34 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
   const handleAngelOneConnect = async () => {
     try {
-      console.log("🔶 Checking backend for auto-authenticated Angel One tokens...");
+      console.log("🔶 Attempting Angel One auto-login (web scraping)...");
+      
+      // Try auto-login first (uses backend credentials + TOTP)
+      const autoLoginResponse = await fetch("/api/angelone/auto-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+      
+      const autoLoginData = await autoLoginResponse.json();
+      
+      if (autoLoginData.success && autoLoginData.token && autoLoginData.feedToken) {
+        console.log("✅ [ANGEL ONE] Auto-login successful! Using backend credentials...");
+        localStorage.setItem("angel_one_token", autoLoginData.token);
+        localStorage.setItem("angel_one_refresh_token", autoLoginData.refreshToken || "");
+        localStorage.setItem("angel_one_feed_token", autoLoginData.feedToken);
+        localStorage.setItem("angel_one_client_code", autoLoginData.clientCode);
+        setAngelOneAccessToken(autoLoginData.token);
+        setAngelOneIsConnected(true);
+        toast({ title: "Success", description: `Connected to Angel One (${autoLoginData.clientCode})` });
+        return;
+      }
+      
+      console.log("⚠️ Auto-login failed, checking status endpoint...");
       const response = await fetch("/api/angelone/status");
       const data = await response.json();
       
       if (data.isConnected && data.token && data.feedToken) {
-        console.log("✅ [ANGEL ONE] Using backend auto-authenticated tokens!");
+        console.log("✅ [ANGEL ONE] Using status endpoint tokens!");
         localStorage.setItem("angel_one_token", data.token);
         localStorage.setItem("angel_one_refresh_token", data.refreshToken || "");
         localStorage.setItem("angel_one_feed_token", data.feedToken);
@@ -4267,7 +4289,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         return;
       }
       
-      console.log("⚠️ No backend tokens found, attempting popup OAuth...");
+      console.log("⚠️ No tokens available, attempting popup OAuth...");
       const authResponse = await fetch("/api/angelone/auth-url");
       const authData = await authResponse.json();
       
