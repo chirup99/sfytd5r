@@ -4359,6 +4359,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🔶 NEW: Accept external tokens from user paste/scraping (bypasses redirect blocking)
+  app.post("/api/angelone/validate-token", async (req, res) => {
+    try {
+      const { jwtToken, refreshToken, feedToken } = req.body;
+      
+      if (!jwtToken || !feedToken) {
+        return res.status(400).json({
+          success: false,
+          message: "JWT Token and Feed Token are required"
+        });
+      }
+
+      console.log("🔶 [ANGEL ONE VALIDATE] Attempting to validate external token");
+      
+      // Try to use the token with Angel One API to validate it
+      try {
+        const { angelOneApi } = await import('./angel-one-api');
+        
+        // Set the tokens temporarily
+        angelOneApi.setTokens(jwtToken, refreshToken || "", feedToken);
+        
+        // Try a simple API call to validate the token
+        const testResponse = await angelOneApi.getProfile();
+        
+        if (testResponse && testResponse.status === 'success') {
+          console.log("✅ [ANGEL ONE VALIDATE] Token is VALID");
+          
+          // Persist to database
+          try {
+            const storage = app.locals.storage;
+            if (storage) {
+              await storage.updateApiStatus({
+                connected: true,
+                authenticated: true,
+                accessToken: jwtToken,
+                refreshToken: refreshToken || "",
+                feedToken: feedToken,
+                tokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                brokerName: "angel_one",
+              });
+              console.log("✅ [ANGEL ONE VALIDATE] Token saved to database");
+            }
+          } catch (dbError) {
+            console.error("⚠️ [ANGEL ONE VALIDATE] Failed to save to database:", dbError);
+          }
+          
+          return res.json({
+            success: true,
+            message: "Token validated and saved successfully",
+            isConnected: true
+          });
+        } else {
+          return res.status(400).json({
+            success: false,
+            message: "Token validation failed - invalid or expired token"
+          });
+        }
+      } catch (apiError: any) {
+        console.error("❌ [ANGEL ONE VALIDATE] API validation failed:", apiError.message);
+        return res.status(400).json({
+          success: false,
+          message: apiError.message || "Failed to validate token with Angel One API"
+        });
+      }
+    } catch (error: any) {
+      console.error("❌ [ANGEL ONE VALIDATE] Error:", error.message);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Server error"
+      });
+    }
+  });
+
   // 🔍 DIAGNOSTIC: Test if callback endpoint is reachable
   app.get("/api/broker/angelone/callback-test", (req, res) => {
     const callbackUrl = `${req.protocol}://${req.get('host')}/api/broker/angelone/callback`;
