@@ -96,12 +96,70 @@ The server is now fully configured to handle Angel One OAuth with ONLY the domai
 6. HTML response with postMessage sent back to popup ✅
 7. Popup closes and parent window updates with connection ✅
 
+### DETAILED DEBUGGING STEPS FOR USER:
+
+#### Step 1: Verify Your Current Domain
+Your current Replit domain is: `7b8ce61c-9cb0-4ed5-bd5f-60ab35c2c106-00-21uuvh46hi76c.pike.replit.dev`
+
+#### Step 2: Check What Angel One MyApps Currently Has
+Go to: https://smartapi.angelone.in/publisher-login
+- Look at your App Settings / OAuth Configuration
+- Check the **Redirect URI** field
+
+**COMMON MISTAKES:**
+- ❌ Has `/api/broker/angelone/callback` → **DELETE THIS**
+- ❌ Has `/publisher-login/callback` → **DELETE THIS**
+- ❌ Has `undefined` anywhere → **DELETE AND REPLACE**
+
+#### Step 3: Update to CORRECT Redirect URI
+Set **Redirect URI** to EXACTLY:
+```
+https://7b8ce61c-9cb0-4ed5-bd5f-60ab35c2c106-00-21uuvh46hi76c.pike.replit.dev/
+```
+
+**CRITICAL RULES:**
+1. Must start with `https://` (NOT http://)
+2. Must be ONLY the domain + `/` 
+3. NO paths like `/api/` or `/callback` or anything else after the domain
+4. Must end with `/`
+
+#### Step 4: Test the Flow
+
+Once updated:
+1. Click "Angel One" button in your app
+2. A popup window should open
+3. You should see Angel One's login page
+4. Log in with your Angel One credentials
+5. After login, Angel One redirects to your app
+6. You should see a "Processing..." message
+7. Then the popup closes and connection establishes
+
+#### What Happens Behind the Scenes:
+```
+1. Your app → /api/angelone/auth-url (Backend)
+2. Backend generates OAuth URL with redirect_uri = your domain root
+3. Popup opens and user logs in
+4. Angel One sends: https://yourdomain.replit.dev/?auth_token=...&feed_token=...
+5. Root "/" handler catches these tokens
+6. Tokens are exchanged for JWT
+7. HTML response sends postMessage back to popup
+8. Popup closes, parent window gets tokens
+9. App shows "Connected to Angel One" ✅
+```
+
+#### If It STILL Doesn't Work:
+Check browser console (F12) for:
+- ✅ Is the auth URL being generated?
+- ✅ Is the popup opening?
+- ✅ Check the popup's console - what URL is loaded?
+- ✅ Check server logs for: "ANGEL ONE ROOT CALLBACK" message
+
 ### CURRENT STATUS:
-- ✅ Backend code ready for root domain redirect
-- ✅ Root "/" handler properly configured
-- ✅ Token processing and postMessage working
+- ✅ Backend code is CORRECT and fully configured
+- ✅ Root "/" handler properly catches tokens
+- ✅ postMessage flow is working
 - ✅ Database persistence enabled
-- ⏳ **WAITING**: User to update Angel One MyApps redirect URI setting
+- 🔴 **BLOCKED**: Waiting for you to update Angel One MyApps Redirect URI
 
 ---
 
