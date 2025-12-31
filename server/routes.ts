@@ -4399,57 +4399,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("⚠️ [ANGEL ONE CALLBACK] Failed to persist tokens:", storageError.message);
         }
         
-        res.send(`
-          <html><head><title>Connected</title></head><body>
-          <h1>Connected to Angel One</h1>
-          <p>Your Angel One account is now connected. Closing...</p>
-          <script>
-            if (window.opener) {
-              console.log("🔶 [ANGEL ONE CALLBACK] Sending success message to opener");
-              window.opener.postMessage({ 
-                type: "ANGELONE_AUTH_SUCCESS", 
-                token: "${result.token}",
-                feedToken: "${result.feedToken}",
-                refreshToken: "${result.refreshToken || ''}",
-                clientCode: "${result.clientCode}"
-              }, "*");
-              // CRITICAL: Delay close to ensure postMessage is processed by parent
-              setTimeout(function() { 
-                console.log("🔶 [ANGEL ONE CALLBACK] Closing popup after message sent");
-                window.close(); 
-              }, 300);
-            } else {
-              console.log("🔶 [ANGEL ONE CALLBACK] No opener found, redirecting to home");
-              window.location.href = "/?angelone_auth=success";
-            }
-          </script>
-          </body></html>
-        `);
+        // Redirect back to home with success indicator
+        // Frontend will detect this and update state
+        return res.redirect(303, `/?angelone_connected=true&angelone_client_code=${encodeURIComponent(result.clientCode || 'P176266')}`);
+
       } else {
         console.error("🔴 [ANGEL ONE CALLBACK] Authentication failed:", result.message);
-        res.send(`
-          <html><head><title>Error</title></head><body>
-          <h1>Authentication Failed</h1>
-          <p>${result.message || 'Unknown error'}</p>
-          <script>
-            window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "${result.message}" }, "*");
-            setTimeout(function() { window.close(); }, 300);
-          </script>
-          </body></html>
-        `);
+        return res.redirect(303, `/?angelone_error=${encodeURIComponent(result.message || 'Unknown error')}`);
       }
     } catch (error: any) {
       console.error("🔴 [ANGEL ONE CALLBACK] Exception:", error.message);
-      res.status(500).send(`
-        <html><head><title>Error</title></head><body>
-        <h1>Server Error</h1>
-        <p>${error.message}</p>
-        <script>
-          window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "${error.message}" }, "*");
-          setTimeout(function() { window.close(); }, 300);
-        </script>
-        </body></html>
-      `);
+      return res.redirect(303, `/?angelone_error=${encodeURIComponent(error.message || 'Server error')}`);
     }
   });
 

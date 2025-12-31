@@ -1870,6 +1870,24 @@ const getFullApiUrl = (path: string): string => {
 export default function Home() {
   const [location, setLocation] = useLocation();
 
+  // 🔶 Detect Angel One OAuth callback from redirect
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("angelone_connected")) {
+      console.log("✅ Angel One connected successfully (redirect callback)");
+      setAngelOneIsConnected(true);
+      setAngelOneAccessToken(params.get("angelone_client_code") || "P176266");
+      localStorage.setItem("angel_one_client_code", params.get("angelone_client_code") || "P176266");
+      toast({ title: "Success", description: "Angel One connected successfully" });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    if (params.has("angelone_error")) {
+      const error = decodeURIComponent(params.get("angelone_error") || "");
+      console.error("❌ Angel One auth error:", error);
+      toast({ variant: "destructive", title: "Error", description: error });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
   // AUTO-CONNECT: Angel One API - Automatically connect when app loads
   useAngelOneAutoconnect();
   const { theme, toggleTheme } = useTheme();
@@ -4233,62 +4251,17 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
   const handleAngelOneConnect = async () => {
     try {
-      console.log("🔶 Starting Angel One OAuth redirect flow...");
       const response = await fetch("/api/angelone/auth-url");
       const data = await response.json();
-      
-      if (!data.authUrl) {
-        alert("Error: Could not generate Angel One authorization URL");
-        return;
+      if (data.authUrl) {
+        console.log("🔶 Redirecting to Angel One login (no popup - clean redirect flow)");
+        window.location.href = data.authUrl; // Direct redirect, no popup
+      } else {
+        toast({ variant: "destructive", title: "Error", description: "Could not generate auth URL" });
       }
-      
-      console.log("🔗 Angel One auth URL:", data.authUrl);
-      
-      const width = 500;
-      const height = 600;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
-      
-      const popup = window.open(
-        data.authUrl,
-        "AngelOneLogin",
-        `width=${width},height=${height},left=${left},top=${top}`
-      );
-      
-      if (!popup) {
-        alert("Popup blocked! Please enable popups for this site.");
-        return;
-      }
-      
-      const messageListener = (event: MessageEvent) => {
-        if (event.data.type === "ANGELONE_AUTH_SUCCESS") {
-          console.log("✅ Angel One authentication successful!");
-          localStorage.setItem("angelone_token", event.data.token); localStorage.setItem("angel_one_token", event.data.token);
-          if (event.data.feedToken) localStorage.setItem("angelone_feed_token", event.data.feedToken);
-          localStorage.setItem("angel_one_client_code", event.data.clientCode || "P176266");
-          setAngelOneAccessToken(event.data.token);
-          setAngelOneIsConnected(true);
-          window.removeEventListener("message", messageListener);
-          toast({
-            title: "Success",
-            description: "Angel One connected successfully",
-          });
-          setConnectDialogOpen(false);
-        } else if (event.data.type === "ANGELONE_AUTH_ERROR") {
-          console.error("❌ Angel One auth error:", event.data.error);
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: event.data.error || "Login failed",
-          });
-          window.removeEventListener("message", messageListener);
-        }
-      };
-
-      window.addEventListener("message", messageListener);
     } catch (error) {
       console.error("❌ Angel One error:", error);
-      alert("Error: " + (error instanceof Error ? error.message : "Failed to connect"));
+      toast({ variant: "destructive", title: "Error", description: error instanceof Error ? error.message : "Failed to connect" });
     }
   };
 
