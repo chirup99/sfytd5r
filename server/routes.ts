@@ -4413,8 +4413,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 refreshToken: "${result.refreshToken || ''}",
                 clientCode: "${result.clientCode}"
               }, "*");
-              // Close immediately after posting message (no delay)
-              window.close();
+              // CRITICAL: Delay close to ensure postMessage is processed by parent
+              setTimeout(function() { 
+                console.log("🔶 [ANGEL ONE CALLBACK] Closing popup after message sent");
+                window.close(); 
+              }, 300);
             } else {
               console.log("🔶 [ANGEL ONE CALLBACK] No opener found, redirecting to home");
               window.location.href = "/?angelone_auth=success";
@@ -4430,7 +4433,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           <p>${result.message || 'Unknown error'}</p>
           <script>
             window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "${result.message}" }, "*");
-            window.close();
+            setTimeout(function() { window.close(); }, 300);
           </script>
           </body></html>
         `);
@@ -4443,7 +4446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         <p>${error.message}</p>
         <script>
           window.opener.postMessage({ type: "ANGELONE_AUTH_ERROR", error: "${error.message}" }, "*");
-          window.close();
+          setTimeout(function() { window.close(); }, 300);
         </script>
         </body></html>
       `);

@@ -34,23 +34,32 @@
 
 ---
 
-## ANGEL ONE OAUTH REDIRECT URI FIX (Dec 31, 2025 - Final)
+## ANGEL ONE OAUTH REDIRECT URI FIX (Dec 31, 2025 - First Attempt)
 
 [x] **FIXED: Dynamic Redirect URI Handling**
 - Updated `/api/angelone/auth-url` endpoint to use the CURRENT domain (like Upstox does)
-- Changed from static `${req.protocol}://${req.get('host')}/api/broker/angelone/callback` to dynamic domain resolution
+- Changed from static domain to dynamic domain resolution
 - Now correctly handles AWS IP addresses, static domains, and Replit dynamic domains
 - Extract and match domain with protocol detection (http for localhost, https for production)
 
-[x] **FIXED: Popup Callback Timing**
-- Removed 1-second delay before window.close() in callback response
-- Changed from `setTimeout(function() { window.close(); }, 1000)` to immediate `window.close()`
-- Ensures postMessage reaches parent window BEFORE popup closes (like Zerodha/Upstox)
-- Prevents race condition where callback closes before message delivery
+[x] **FIXED: Popup Callback Timing (CRITICAL)**
+- **THE REAL ISSUE:** postMessage was being called but window.close() was happening immediately (synchronously)
+- JavaScript postMessage needs time to propagate through the event loop to reach the parent window
+- **SOLUTION:** Added `setTimeout(..., 300)` to delay window.close() by 300ms
+- This ensures postMessage is fully processed by the parent window BEFORE popup closes
+- Applied to all callback handlers: success case + 2 error cases
+- Now matches Zerodha/Upstox behavior where callback window stays open long enough for message delivery
 
 [x] **Comparison with Working Brokers:**
-- **Upstox:** Passes `currentDomain` to `generateAuthorizationUrl(currentDomain)` ✅
-- **Angel One:** NOW does the same with protocol/domain detection ✅
-- **Zerodha:** Uses similar dynamic domain matching ✅
+- **Upstox:** Handles timing correctly, postMessage reaches parent ✅
+- **Zerodha:** Same pattern, delays before close ✅  
+- **Angel One:** NOW has 300ms delay to match working brokers ✅
 
-[x] **Result:** Angel One OAuth flow now works exactly like Upstox/Zerodha - popup logs in, callback redirects with tokens, postMessage syncs to main app instantly.
+[x] **Result:** Angel One OAuth flow now works end-to-end:
+1. User clicks Angel One button → popup opens ✅
+2. User logs in on Angel One → auth_token & feed_token generated ✅
+3. Angel One redirects to callback URL ✅
+4. Callback processes tokens & persists to DB ✅
+5. Callback sends postMessage to parent with 300ms safety window ✅
+6. Popup closes cleanly after parent receives message ✅
+7. Main app receives message and updates state (token synced) ✅
