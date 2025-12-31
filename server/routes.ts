@@ -4264,31 +4264,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🔶 Angel One OAuth Redirect Flow - Now with DYNAMIC domain support (like Upstox)
 
 
-  app.get("/api/angelone/status", (req, res) => {
+  app.get("/api/angelone/status", async (req, res) => {
     try {
-      const session = angelOneOAuthManager.getSession();
-      console.log("🔶 [STATUS] Checking Angel One session:", JSON.stringify(session, null, 2));
+      const storage = app.locals.storage;
+      const apiStatus = await storage.getApiStatus();
       
-      // Check multiple property naming conventions
-      const jwtToken = session?.jwtToken || session?.accessToken || session?.token;
-      const feedToken = session?.feedToken || session?.feed_token;
-      const refreshToken = session?.refreshToken || session?.refresh_token;
+      console.log("🔶 [STATUS] Retrieved apiStatus from database:", {
+        authenticated: apiStatus?.authenticated,
+        broker: apiStatus?.broker,
+        hasAccessToken: !!apiStatus?.accessToken,
+        hasFeedToken: !!apiStatus?.feedToken
+      });
       
-      if (session && jwtToken && feedToken) {
-        console.log("✅ [STATUS] Session found with tokens");
+      // Angel One tokens are stored in apiStatus (database) - check brokerName field
+      if (apiStatus?.authenticated && apiStatus?.brokerName === "angel_one" && apiStatus?.accessToken && apiStatus?.feedToken) {
+        console.log("✅ [STATUS] Angel One tokens found in database!");
         res.json({
           isConnected: true,
-          token: jwtToken,
-          refreshToken: refreshToken || "",
-          feedToken: feedToken,
+          token: apiStatus.accessToken,
+          refreshToken: apiStatus.refreshToken || "",
+          feedToken: apiStatus.feedToken,
           clientCode: process.env.ANGEL_ONE_CLIENT_CODE || "P176266"
         });
       } else {
-        console.log("⚠️ [STATUS] No complete session found", { session: !!session, jwtToken: !!jwtToken, feedToken: !!feedToken });
+        console.log("⚠️ [STATUS] No Angel One tokens in database", { 
+          authenticated: apiStatus?.authenticated, 
+          broker: apiStatus?.broker,
+          hasAccessToken: !!apiStatus?.accessToken, 
+          hasFeedToken: !!apiStatus?.feedToken 
+        });
         res.json({ isConnected: false });
       }
     } catch (error) {
-      console.error("❌ [STATUS] Error checking session:", error);
+      console.error("❌ [STATUS] Error checking Angel One status:", error);
       res.status(500).json({ isConnected: false });
     }
   });
@@ -9337,6 +9345,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (session) {
         console.log('✅ [AUTO-CONNECT] Angel One auto-connected successfully!');
+        
+        // CRITICAL: Save tokens to database for frontend /api/angelone/status endpoint
+        try {
+          await storage.updateApiStatus({
+            authenticated: true,
+            accessToken: session.jwtToken || session.accessToken,
+            refreshToken: session.refreshToken,
+            feedToken: session.feedToken,
+            brokerName: "angel_one",
+            connected: true,
+            tokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+          });
+          console.log('✅ [AUTO-CONNECT] Tokens persisted to database for frontend retrieval');
+        } catch (dbError) {
+          console.error('⚠️ [AUTO-CONNECT] Failed to persist tokens to database:', dbError);
+        }
         
         // Notify live price streamer
         liveWebSocketStreamer.onAngelOneAuthenticated();
