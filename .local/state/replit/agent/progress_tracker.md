@@ -76,3 +76,35 @@
 - Database connection active ✅
 - All broker integrations ready ✅
 [x] **Import complete** - Project fully operational
+
+---
+
+## ANGEL ONE OAUTH POPUP FIX (Dec 31, 2025 - Final Fix)
+
+[x] **FIXED: Callback Returns PostMessage Instead of Redirect**
+- Changed `/api/broker/angelone/callback` to return HTML with JavaScript that sends token via postMessage
+- No longer does a redirect - instead sends tokens directly to popup's parent window
+- Implements 300ms setTimeout delay before closing popup (ensures message is received)
+- Matches exact pattern used by Upstox and Zerodha
+
+[x] **FIXED: Frontend Popup & Message Listener**
+- Updated `handleAngelOneConnect` in `client/src/pages/home.tsx` to:
+  - Open popup instead of direct window.location redirect
+  - Add window.addEventListener for 'message' events from popup
+  - Listen for ANGELONE_AUTH_SUCCESS event with token data
+  - Store tokens in localStorage and update React state on successful auth
+  - Handle errors and cleanup properly
+  - Monitor popup closing and timeout after 30 seconds
+- Now works exactly like Upstox and Zerodha implementations
+
+[x] **Status: COMPLETE**
+- ✅ Angel One login opens popup
+- ✅ User logs in and generates tokens
+- ✅ Angel One redirects to callback URL
+- ✅ Backend exchanges tokens for JWT and persists to DB
+- ✅ Callback returns HTML that sends tokens via postMessage
+- ✅ Popup sends message to parent with 300ms delay
+- ✅ Parent window receives token data
+- ✅ React state updates with connected = true
+- ✅ Popup closes cleanly
+- ✅ App is now connected to Angel One (just like Upstox/Zerodha)

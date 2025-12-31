@@ -4399,9 +4399,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("⚠️ [ANGEL ONE CALLBACK] Failed to persist tokens:", storageError.message);
         }
         
-        // Redirect back to home with success indicator
-        // Frontend will detect this and update state
-        return res.redirect(303, `/?angelone_connected=true&angelone_client_code=${encodeURIComponent(result.clientCode || 'P176266')}`);
+        // Send token back to popup via postMessage (matching Upstox/Zerodha pattern)
+        return res.send(`
+          <html>
+            <head><title>Angel One Authentication</title></head>
+            <body style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+              <h2>Authentication Successful</h2>
+              <p>Connecting to Angel One...</p>
+              <script>
+                window.addEventListener('load', () => {
+                  const tokenData = {
+                    type: 'ANGELONE_AUTH_SUCCESS',
+                    token: '${result.token}',
+                    refreshToken: '${result.refreshToken}',
+                    feedToken: '${result.feedToken}',
+                    clientCode: '${result.clientCode || 'P176266'}'
+                  };
+                  console.log('Sending Angel One token to parent window...');
+                  window.opener.postMessage(tokenData, '*');
+                  
+                  // Close popup after 300ms to ensure message is received
+                  setTimeout(() => {
+                    window.close();
+                  }, 300);
+                });
+              </script>
+            </body>
+          </html>
+        `);
 
       } else {
         console.error("🔴 [ANGEL ONE CALLBACK] Authentication failed:", result.message);
