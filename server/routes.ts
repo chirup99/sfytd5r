@@ -4267,18 +4267,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/angelone/status", (req, res) => {
     try {
       const session = angelOneOAuthManager.getSession();
-      if (session && session.jwtToken && session.feedToken) {
+      console.log("🔶 [STATUS] Checking Angel One session:", JSON.stringify(session, null, 2));
+      
+      // Check multiple property naming conventions
+      const jwtToken = session?.jwtToken || session?.accessToken || session?.token;
+      const feedToken = session?.feedToken || session?.feed_token;
+      const refreshToken = session?.refreshToken || session?.refresh_token;
+      
+      if (session && jwtToken && feedToken) {
+        console.log("✅ [STATUS] Session found with tokens");
         res.json({
           isConnected: true,
-          token: session.jwtToken,
-          refreshToken: session.refreshToken || "",
-          feedToken: session.feedToken,
+          token: jwtToken,
+          refreshToken: refreshToken || "",
+          feedToken: feedToken,
           clientCode: process.env.ANGEL_ONE_CLIENT_CODE || "P176266"
         });
       } else {
+        console.log("⚠️ [STATUS] No complete session found", { session: !!session, jwtToken: !!jwtToken, feedToken: !!feedToken });
         res.json({ isConnected: false });
       }
     } catch (error) {
+      console.error("❌ [STATUS] Error checking session:", error);
       res.status(500).json({ isConnected: false });
     }
   });
