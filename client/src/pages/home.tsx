@@ -9350,7 +9350,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
         // ✅ Markers disabled - LightweightCharts doesn't support setMarkers on series
         (journalCandlestickSeriesRef.current as any).setMarkers(chartMarkers);
-        console.log(`📊 ✅ Markers disabled in this version`);
+        console.log(`📊 ✅ Markers applied to series: ${chartMarkers.length}`);
       } else {
         console.log('📊 No markers to apply - clearing');
  if (journalCandlestickSeriesRef.current) (journalCandlestickSeriesRef.current as any).setMarkers([]);
