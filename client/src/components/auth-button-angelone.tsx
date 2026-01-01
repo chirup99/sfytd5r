@@ -5,6 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 
 interface AngelOneProfile {
@@ -81,6 +82,10 @@ export function AuthButtonAngelOne() {
   const { toast } = useToast();
   const [hasAttemptedAutoConnect, setHasAttemptedAutoConnect] = useState(false);
   const [hasWarnedAboutExpiry, setHasWarnedAboutExpiry] = useState(false);
+  
+  const [manualClientCode, setManualClientCode] = useState("");
+  const [manualPin, setManualPin] = useState("");
+  const [manualTotpSecret, setManualTotpSecret] = useState("");
 
   const { data: angelStatus, isLoading: isStatusLoading } = useQuery<AngelOneStatusData>({
     queryKey: ["/api/angelone/status"],
@@ -93,7 +98,6 @@ export function AuthButtonAngelOne() {
     refetchInterval: 10000,
   });
 
-  // Connect using backend environment credentials
   const connectMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("POST", "/api/angelone/connect-env");
@@ -102,18 +106,34 @@ export function AuthButtonAngelOne() {
       queryClient.invalidateQueries({ queryKey: ["/api/angelone/status"] });
       queryClient.invalidateQueries({ queryKey: ["/api/angelone/profile"] });
       setHasWarnedAboutExpiry(false);
-      
-      toast({
-        title: "Connected!",
-        description: "Angel One API connected successfully.",
-      });
+      toast({ title: "Connected!", description: "Angel One API connected successfully." });
     },
     onError: (error: any) => {
-      toast({
-        title: "Connection Failed",
-        description: error?.message || "Failed to connect. Check environment credentials.",
-        variant: "destructive",
+      toast({ title: "Connection Failed", description: error?.message || "Failed to connect. Check environment credentials.", variant: "destructive" });
+    },
+  });
+
+  const manualLoginMutation = useMutation({
+    mutationFn: async (credentials: { clientCode: string; pin: string; totpSecret: string }) => {
+      const response = await fetch("/api/angelone/user-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials)
       });
+      const data = await response.json();
+      if (!data.success) throw new Error(data.message || "Manual login failed");
+      return data;
+    },
+    onSuccess: (data) => {
+      localStorage.setItem("angel_one_token", data.token);
+      localStorage.setItem("angel_one_feed_token", data.feedToken);
+      localStorage.setItem("angel_one_client_code", data.clientCode);
+      queryClient.invalidateQueries({ queryKey: ["/api/angelone/status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/angelone/profile"] });
+      toast({ title: "Connected!", description: `Connected as ${data.clientCode} successfully.` });
+    },
+    onError: (error: any) => {
+      toast({ title: "Manual Login Failed", description: error?.message || "Check your credentials.", variant: "destructive" });
     },
   });
 
@@ -122,156 +142,94 @@ export function AuthButtonAngelOne() {
       return await apiRequest("POST", "/api/angelone/disconnect");
     },
     onSuccess: () => {
+      localStorage.removeItem("angel_one_token");
+      localStorage.removeItem("angel_one_feed_token");
+      localStorage.removeItem("angel_one_client_code");
       queryClient.invalidateQueries({ queryKey: ["/api/angelone/status"] });
       queryClient.invalidateQueries({ queryKey: ["/api/angelone/profile"] });
-      
-      toast({
-        title: "Disconnected",
-        description: "Angel One API disconnected.",
-      });
+      toast({ title: "Disconnected", description: "Angel One API disconnected." });
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error?.message || "Failed to disconnect.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error?.message || "Failed to disconnect.", variant: "destructive" });
     },
   });
 
-  // Auto-connect on component mount if not already connected
   useEffect(() => {
-    if (!isStatusLoading && !hasAttemptedAutoConnect && angelStatus && !angelStatus.connected && !connectMutation.isPending) {
+    if (!isStatusLoading && angelStatus && !angelStatus.connected && !hasAttemptedAutoConnect && !connectMutation.isPending) {
       setHasAttemptedAutoConnect(true);
-      console.log('🔶 [Angel One] Auto-connecting with environment credentials...');
       connectMutation.mutate();
     }
-  }, [isStatusLoading, angelStatus, hasAttemptedAutoConnect, connectMutation.isPending]);
+  }, [isStatusLoading, angelStatus?.connected]);
 
-  // Auto-reconnect when token expires or is about to expire
   useEffect(() => {
-    if (!isStatusLoading && angelStatus && angelStatus.connected && angelStatus.authenticated) {
-      // Check if token is expired or expiring soon (within 1 hour)
-      const isTokenExpired = angelStatus.tokenExpired;
-      const hoursUntilExpiry = angelStatus.tokenExpiry 
-        ? Math.floor((angelStatus.tokenExpiry * 1000 - Date.now()) / (1000 * 60 * 60))
-        : null;
-
-      if (isTokenExpired || (hoursUntilExpiry !== null && hoursUntilExpiry <= 1)) {
-        if (!hasWarnedAboutExpiry && !connectMutation.isPending) {
-          setHasWarnedAboutExpiry(true);
-          console.log('⏰ [Angel One] Token expired or expiring soon, auto-reconnecting...');
-          
-          toast({
-            title: "Token Expiring",
-            description: "Automatically reconnecting to Angel One...",
-          });
-          
-          // Trigger automatic reconnection
-          setTimeout(() => {
-            connectMutation.mutate();
-          }, 500);
-        }
-      }
+    if (angelStatus?.tokenExpired && !hasWarnedAboutExpiry) {
+      setHasWarnedAboutExpiry(true);
+      toast({ title: "Session Expired", description: "Your Angel One session has expired.", variant: "destructive" });
     }
-  }, [isStatusLoading, angelStatus?.tokenExpired, angelStatus?.tokenExpiry, angelStatus?.connected, angelStatus?.authenticated, connectMutation.isPending, hasWarnedAboutExpiry]);
+  }, [angelStatus?.tokenExpired]);
 
-  const isConnected = angelStatus?.connected && angelStatus?.authenticated;
-  const userName = profileData?.profile?.name || angelStatus?.clientCode || "User";
-
-  // Connected state - show status and disconnect button
-  if (isConnected) {
+  if (isStatusLoading) {
     return (
-      <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mb-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center space-x-3 flex-1">
-            <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center flex-shrink-0">
-              <CheckCircle2 className="text-orange-600 dark:text-orange-400 h-4 w-4" />
+      <div className="flex items-center justify-center p-4">
+        <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+      </div>
+    );
+  }
+
+  if (angelStatus?.connected && angelStatus?.authenticated) {
+    return (
+      <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 dark:bg-green-800 p-2 rounded-full">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
-            <div className="min-w-0">
-              <h3 className="text-sm font-medium text-orange-900 dark:text-orange-200">
-                Angel One Connected
-              </h3>
-              <p className="text-xs text-orange-700 dark:text-orange-300 truncate">
-                User: <span className="font-semibold">{userName}</span>
-              </p>
+            <div>
+              <h3 className="text-sm font-medium text-green-900 dark:text-green-200">Angel One Connected</h3>
+              <p className="text-xs text-green-700 dark:text-green-300">{profileData?.profile?.name || angelStatus.clientCode || 'Authenticated User'}</p>
             </div>
           </div>
-          <Button
-            onClick={() => disconnectMutation.mutate()}
-            disabled={disconnectMutation.isPending}
-            variant="outline"
-            size="sm"
-            className="border-orange-600 dark:border-orange-600 text-orange-600 dark:text-orange-400 flex-shrink-0"
-            data-testid="button-angelone-disconnect"
-          >
-            {disconnectMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              "Disconnect"
-            )}
+          <Button onClick={() => disconnectMutation.mutate()} disabled={disconnectMutation.isPending} variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50 dark:hover:bg-red-900/30">
+            {disconnectMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><LogOut className="mr-2 h-4 w-4" />Disconnect</>}
           </Button>
         </div>
       </div>
     );
   }
 
-  // Connecting state
-  if (connectMutation.isPending) {
-    return (
-      <div className="bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mb-6">
-        <div className="flex items-center justify-center gap-3 py-2">
-          <Loader2 className="h-5 w-5 text-orange-600 animate-spin" />
-          <div>
-            <h3 className="text-sm font-medium text-orange-900 dark:text-orange-200">
-              Connecting to Angel One...
-            </h3>
-            <p className="text-xs text-orange-700 dark:text-orange-300">
-              Using environment credentials
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state or disconnected - show connect button
   return (
-    <div className="bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mb-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center space-x-3 flex-1">
-          <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center flex-shrink-0">
-            {connectMutation.isError ? (
-              <AlertCircle className="text-red-600 dark:text-red-400 h-4 w-4" />
-            ) : (
-              <Plug className="text-orange-600 dark:text-orange-400 h-4 w-4" />
-            )}
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
+      <Tabs defaultValue="auto" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 rounded-none bg-slate-100 dark:bg-slate-800">
+          <TabsTrigger value="auto" className="rounded-none data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900">System</TabsTrigger>
+          <TabsTrigger value="manual" className="rounded-none data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900">Personal</TabsTrigger>
+        </TabsList>
+        <TabsContent value="auto" className="p-4 space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="bg-orange-100 dark:bg-orange-800 p-2 rounded-full mt-1">
+              <Shield className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100">System Auto-Login</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Pre-configured system credentials.</p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <h3 className="text-sm font-medium text-orange-900 dark:text-orange-200">
-              {connectMutation.isError ? 'Connection Failed' : 'Angel One Disconnected'}
-            </h3>
-            <p className="text-xs text-orange-700 dark:text-orange-300">
-              {connectMutation.isError 
-                ? 'Tap Connect to retry' 
-                : 'Tap Connect to authenticate'}
-            </p>
+          <Button onClick={() => { setHasAttemptedAutoConnect(true); connectMutation.mutate(); }} disabled={connectMutation.isPending} className="w-full bg-orange-600 hover:bg-orange-700 text-white">
+            {connectMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Key className="mr-2 h-4 w-4" />}Connect System
+          </Button>
+        </TabsContent>
+        <TabsContent value="manual" className="p-4 space-y-3">
+          <div className="space-y-3">
+            <Input placeholder="Client Code" value={manualClientCode} onChange={(e) => setManualClientCode(e.target.value.toUpperCase())} className="h-9" />
+            <Input type="password" placeholder="MPIN" value={manualPin} onChange={(e) => setManualPin(e.target.value)} className="h-9" />
+            <Input type="password" placeholder="TOTP Secret" value={manualTotpSecret} onChange={(e) => setManualTotpSecret(e.target.value)} className="h-9" />
+            <Button onClick={() => manualLoginMutation.mutate({ clientCode: manualClientCode, pin: manualPin, totpSecret: manualTotpSecret })} disabled={manualLoginMutation.isPending} className="w-full bg-slate-900 dark:bg-slate-100 dark:text-slate-900">
+              {manualLoginMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plug className="mr-2 h-4 w-4" />}Connect Personal
+            </Button>
+            <p className="text-[10px] text-slate-500 text-center italic">*Direct SmartAPI authentication</p>
           </div>
-        </div>
-        <Button
-          onClick={() => {
-            setHasAttemptedAutoConnect(true);
-            connectMutation.mutate();
-          }}
-          disabled={connectMutation.isPending}
-          size="sm"
-          className="bg-orange-600 hover:bg-orange-700 text-white flex-shrink-0"
-          data-testid="button-angelone-connect"
-        >
-          <Key className="mr-2 h-4 w-4" />
-          Connect
-        </Button>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
