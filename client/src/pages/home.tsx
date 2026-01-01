@@ -12132,12 +12132,12 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       if (errors.length === 0) {
         setShowImportModal(false);
         setImportData("");
-        setShowOrderModal(true);
+        // setShowOrderModal(true);
         // Reset user format selection for fresh start next time
         setUserSelectedFormatId(null);
       } else {
         // Keep modal open to show errors but still set the data
-        setShowOrderModal(true);
+        // setShowOrderModal(true);
       }
     } catch (error) {
       setImportError(
