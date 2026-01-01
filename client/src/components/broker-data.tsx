@@ -162,7 +162,7 @@ export function BrokerData(props: BrokerDataProps) {
                             <td className="px-2 py-2 font-medium">{trade.symbol}</td>
                             <td className="px-2 py-2">{trade.type}</td>
                             <td className="px-2 py-2">{trade.qty}</td>
-                            <td className="px-2 py-2">₹{trade.price}</td>
+                            <td className="px-2 py-2">₹{typeof trade.price === 'number' ? trade.price.toFixed(2) : trade.price}</td>
                             <td className="px-2 py-2">
                               <span className={`text-xs font-medium ${
                                 trade.status === 'COMPLETE' ? 'text-green-600 dark:text-green-400' :
