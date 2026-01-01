@@ -43,7 +43,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAngelOneAutoconnect } from "@/hooks/useAngelOneAutoconnect";
 import { cognitoSignOut, getCognitoToken, sendEmailVerificationCode, confirmEmailVerification, checkEmailVerified } from "@/cognito";
 import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickSeries, LineSeries, HistogramSeries, IPriceLine, createSeriesMarkers } from 'lightweight-charts';
-import { ArrowLeft, Banknote, Clock, ExternalLink, Info, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award, Headset } from "lucide-react";
+import { ArrowLeft, Banknote, Clock, ExternalLink, Info, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award, Headset, X } from "lucide-react";
 import { parseBrokerTrades, ParseError } from "@/utils/trade-parser";
 
 // Global window type declaration for audio control
