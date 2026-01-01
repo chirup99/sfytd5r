@@ -76,5 +76,5 @@ The application is now fully configured for Angel One streaming without OAuth!
 
 [x] 1. Install the required packages (dotenv installed)
 [x] 2. Restart the workflow to see if the project is working
-[x] 3. Verify the project is working - Server running on port 5000
+[x] 3. Verify the project is working - Server running on port 5000, UI renders correctly
 [x] 4. Inform user the import is completed and mark import as completed
