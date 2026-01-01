@@ -13228,27 +13228,74 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
             <button
               onClick={() => handleTabClick("backtest")}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors sidebar-text ${
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
                 activeTab === "backtest"
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-accent hover:bg-opacity-50"
               }`}
             >
+              <History className="h-4 w-4" />
               Backtest
             </button>
 
             <button
+              onClick={() => handleTabClick("chart")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
+                activeTab === "chart"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              <LineChart className="h-4 w-4" />
+              Trading Charts
+            </button>
+
+            <button
+              onClick={() => handleTabClick("check")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
+                activeTab === "check"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              <Zap className="h-4 w-4" />
+              BATTU Scan
+            </button>
+
+            <button
+              onClick={() => handleTabClick("4candle")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
+                activeTab === "4candle"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              <Calendar className="h-4 w-4" />
+              4 Candle Rule
+            </button>
+
+            <button
+              onClick={() => handleTabClick("scanner")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
+                activeTab === "scanner"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              <Search className="h-4 w-4" />
+              Complete Scanner
+            </button>
+
+            <button
               onClick={handleTradingMasterAccess}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors sidebar-text ${
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
                 activeTab === "trading-master"
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-accent hover:bg-opacity-50"
               }`}
             >
-              <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4" />
-                Trading Master
-              </div>
+              <Activity className="h-4 w-4" />
+              Trading Master
             </button>
           </div>
 
@@ -13258,17 +13305,63 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
             </p>
 
             <button
+              onClick={() => handleTabClick("backtest")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
+                activeTab === "backtest"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              <History className="h-4 w-4" />
+              Backtest
+            </button>
+
+            <button
+              onClick={() => handleTabClick("cb")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
+                activeTab === "cb"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              <Database className="h-4 w-4" />
+              Historical Data
+            </button>
+
+            <button
+              onClick={() => handleTabClick("simulator")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
+                activeTab === "simulator"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              <Play className="h-4 w-4" />
+              Trade Simulator
+            </button>
+
+            <button
               onClick={() => checkAuthAndNavigate("journal")}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors sidebar-text ${
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
                 activeTab === "journal"
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-accent hover:bg-opacity-50"
               }`}
             >
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                Journal
-              </div>
+              <BookOpen className="h-4 w-4" />
+              Journal
+            </button>
+
+            <button
+              onClick={() => handleTabClick("insights")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
+                activeTab === "insights"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              <BarChart2 className="h-4 w-4" />
+              Insights
             </button>
           </div>
 
@@ -13278,31 +13371,75 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
             </p>
 
             <button
-              onClick={() => handleTabClick("trading-home")}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors sidebar-text ${
-                activeTab === "trading-home"
+              onClick={() => handleTabClick("tutor")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
+                activeTab === "tutor"
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-accent hover:bg-opacity-50"
               }`}
             >
-              <div className="flex items-center gap-2">
-                <HomeIcon className="h-4 w-4" />
-                Trading Home
-              </div>
+              <GraduationCap className="h-4 w-4" />
+              Tutor
             </button>
 
             <button
               onClick={() => checkAuthAndNavigate("voice")}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors sidebar-text ${
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
                 activeTab === "voice"
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-accent hover:bg-opacity-50"
               }`}
             >
-              <div className="flex items-center gap-2">
-                <MessageCircle className="h-4 w-4" />
-                Social Feed
-              </div>
+              <MessageCircle className="h-4 w-4" />
+              Social Feed
+            </button>
+
+            <button
+              onClick={() => handleTabClick("documentation")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
+                activeTab === "documentation"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              <FileText className="h-4 w-4" />
+              Documentation
+            </button>
+
+            <button
+              onClick={() => handleTabClick("strategy-build")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
+                activeTab === "strategy-build"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              <Cpu className="h-4 w-4" />
+              Strategy Build
+            </button>
+
+            <button
+              onClick={() => handleTabClick("trading-home")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 sidebar-text ${
+                activeTab === "trading-home"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              <HomeIcon className="h-4 w-4" />
+              Trading Home
+            </button>
+
+            <button
+              onClick={() => handleTabClick("stock-news")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 flex items-center gap-2 font-semibold shadow-md ${
+                activeTab === "stock-news"
+                  ? "bg-green-600 text-white"
+                  : "bg-green-600 hover:bg-green-500 text-white"
+              }`}
+            >
+              <Newspaper className="h-4 w-4" />
+              Stock News
             </button>
           </div>
         </nav>
