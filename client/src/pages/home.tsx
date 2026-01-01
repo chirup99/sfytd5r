@@ -17704,7 +17704,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                       <td className="p-1">{trade.symbol}</td>
                                       <td className="p-1">{trade.type}</td>
                                       <td className="p-1">{trade.qty}</td>
-                                      <td className="p-1">₹{trade.price}</td>
+                                      <td className="p-1">₹{typeof trade.price === "number" ? trade.price.toFixed(2) : trade.price}</td>
                                       <td
                                         className={`p-2 ${
                                           (trade.pnl || "").includes("+")
@@ -17958,7 +17958,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     </td>
                                     <td className="px-2 py-2 text-indigo-600 dark:text-indigo-300 font-semibold">MIS</td>
                                     <td className="px-2 py-2 text-slate-600 dark:text-slate-400">{trade.qty}</td>
-                                    <td className="px-2 py-2 text-amber-600 dark:text-amber-300 font-medium">₹{trade.price}</td>
+                                    <td className="px-2 py-2 text-amber-600 dark:text-amber-300 font-medium">₹{typeof trade.price === "number" ? trade.price.toFixed(2) : trade.price}</td>
                                     <td
                                       className={`px-2 py-2 font-bold ${
                                         (trade.pnl || "").includes("+")
