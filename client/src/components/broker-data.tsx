@@ -67,6 +67,45 @@ export function BrokerData(props: BrokerDataProps) {
   const isConnected = zerodhaAccessToken || upstoxAccessToken;
   const activeBroker = zerodhaAccessToken ? 'zerodha' : upstoxAccessToken ? 'upstox' : null;
 
+  const formatSymbol = (symbol: string) => {
+    if (!symbol) return "";
+    
+    // NIFTY2610626100CE -> NIFTY 06th JAN 26100 CE
+    // Pattern: [NAME][YY][M][DD][STRIKE][TYPE]
+    // NIFTY 26 1 06 26100 CE
+    
+    const regex = /^([A-Z]+)(\d{2})([1-9]|O|N|D)(\d{2})(\d+)([PC]E)$/;
+    const match = symbol.match(regex);
+    
+    if (match) {
+      const [_, name, year, month, day, strike, type] = match;
+      
+      const months: Record<string, string> = {
+        "1": "JAN", "2": "FEB", "3": "MAR", "4": "APR", "5": "MAY", "6": "JUN",
+        "7": "JUL", "8": "AUG", "9": "SEP", "O": "OCT", "N": "NOV", "D": "DEC"
+      };
+      
+      const getOrdinal = (d: string) => {
+        const n = parseInt(d);
+        if (n > 3 && n < 21) return 'th';
+        switch (n % 10) {
+          case 1: return "st";
+          case 2: return "nd";
+          case 3: return "rd";
+          default: return "th";
+        }
+      };
+
+      const monthName = months[month] || month;
+      const dayNum = parseInt(day).toString();
+      const ordinal = getOrdinal(day);
+      
+      return `${name} ${dayNum}${ordinal} ${monthName} ${strike} ${type}`;
+    }
+    
+    return symbol;
+  };
+
   return (
     <>
       <Dialog open={showOrderModal} onOpenChange={setShowOrderModal}>
@@ -159,7 +198,7 @@ export function BrokerData(props: BrokerDataProps) {
                                 {trade.order}
                               </span>
                             </td>
-                            <td className="px-2 py-2 font-medium">{trade.symbol}</td>
+                            <td className="px-2 py-2 font-medium">{formatSymbol(trade.symbol)}</td>
                             <td className="px-2 py-2">{trade.type}</td>
                             <td className="px-2 py-2">{trade.qty}</td>
                             <td className="px-2 py-2">₹{typeof trade.price === 'number' ? trade.price.toFixed(2) : trade.price}</td>
@@ -227,7 +266,7 @@ export function BrokerData(props: BrokerDataProps) {
                           
                           return (
                             <tr key={index} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
-                              <td className="px-2 py-2 font-medium">{pos.symbol}</td>
+                              <td className="px-2 py-2 font-medium">{formatSymbol(pos.symbol)}</td>
                               <td className="px-2 py-2">₹{entryPrice.toFixed(2)}</td>
                               <td className="px-2 py-2">₹{currentPrice.toFixed(2)}</td>
                               <td className="px-2 py-2">{qty}</td>
