@@ -16115,6 +16115,82 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
               </div>
             )}
 
+            {activeTab === "backtest" && (
+              <div className="h-full relative">
+                <Button
+                  onClick={() => setTabWithAuthCheck("trading-home")}
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden absolute top-4 right-4 z-50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                  data-testid="button-back-to-home-backtest"
+                >
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+                <ThreeCycleScanner />
+              </div>
+            )}
+
+            {activeTab === "chart" && (
+              <div className="h-full relative">
+                <Button
+                  onClick={() => setTabWithAuthCheck("trading-home")}
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden absolute top-4 right-4 z-50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                  data-testid="button-back-to-home-chart"
+                >
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+                <AdvancedCandlestickChart />
+                <IndicatorCrossingsDisplay />
+              </div>
+            )}
+
+            {activeTab === "check" && (
+              <div className="h-full relative">
+                <Button
+                  onClick={() => setTabWithAuthCheck("trading-home")}
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden absolute top-4 right-4 z-50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                  data-testid="button-back-to-home-check"
+                >
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+                <BattuScanSimulation />
+              </div>
+            )}
+
+            {activeTab === "4candle" && (
+              <div className="h-full relative">
+                <Button
+                  onClick={() => setTabWithAuthCheck("trading-home")}
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden absolute top-4 right-4 z-50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                  data-testid="button-back-to-home-4candle"
+                >
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+                <FourCandleRuleScanner />
+              </div>
+            )}
+
+            {activeTab === "scanner" && (
+              <div className="h-full relative">
+                <Button
+                  onClick={() => setTabWithAuthCheck("trading-home")}
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden absolute top-4 right-4 z-50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                  data-testid="button-back-to-home-scanner"
+                >
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+                <SimpleCompleteScanner />
+              </div>
+            )}
+
             {activeTab === "journal" && (
                 <div className="space-y-6 px-0.5 md:px-6 py-0.5 relative">
                 {/* Back Button - Mobile Only */}
