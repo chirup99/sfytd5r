@@ -13238,6 +13238,50 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
             </button>
 
             <button
+              onClick={() => handleTabClick("chart")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors sidebar-text ${
+                activeTab === "chart"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              Trading Charts
+            </button>
+
+            <button
+              onClick={() => handleTabClick("check")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors sidebar-text ${
+                activeTab === "check"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              BATTU Scan
+            </button>
+
+            <button
+              onClick={() => handleTabClick("4candle")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors sidebar-text ${
+                activeTab === "4candle"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              4 Candle Rule
+            </button>
+
+            <button
+              onClick={() => handleTabClick("scanner")}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors sidebar-text ${
+                activeTab === "scanner"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-accent hover:bg-opacity-50"
+              }`}
+            >
+              Complete Scanner
+            </button>
+
+            <button
               onClick={handleTradingMasterAccess}
               className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors sidebar-text ${
                 activeTab === "trading-master"
@@ -13249,6 +13293,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                 <Activity className="h-4 w-4" />
                 Trading Master
               </div>
+            </button>
             </button>
           </div>
 
