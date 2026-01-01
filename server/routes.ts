@@ -10775,25 +10775,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🔐 INDIVIDUAL USER LOGIN - Bypass OAuth redirect issue
   app.post("/api/angelone/user-login", async (req, res) => {
     try {
-      const { clientCode, pin } = req.body;
+      const { clientCode, pin, totpSecret } = req.body;
       
-      if (!clientCode || !pin) {
+      if (!clientCode || !pin || !totpSecret) {
         return res.status(400).json({ 
           success: false, 
-          message: "clientCode and pin are required"
+          message: "clientCode, pin, and totpSecret are required"
         });
       }
       
       console.log("🔐 [USER-LOGIN] Attempting individual user login...");
       console.log(`   Client: ${clientCode}`);
-      
-      // Create temporary credentials object
-      const userCredentials = {
-        clientCode,
-        pin,
-        apiKey: process.env.ANGEL_ONE_API_KEY || "",
-        totpSecret: process.env.ANGEL_ONE_TOTP_SECRET || ""
-      };
       
       // Import SmartAPI and TOTP for this request
       const { SmartAPI } = require('smartapi-javascript');
@@ -10801,26 +10793,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const smartApi = new SmartAPI();
       smartApi.setClientCode(clientCode);
-      smartApi.setApiKey(userCredentials.apiKey);
+      smartApi.setApiKey(process.env.ANGEL_ONE_API_KEY || "");
       
       // Generate TOTP
       let totpToken = "";
-      if (userCredentials.totpSecret) {
-        try {
-          const totpResult = await TOTP.generate(userCredentials.totpSecret);
-          totpToken = totpResult.otp;
-          console.log(`🔐 TOTP generated: ${totpToken}`);
-        } catch (totpError) {
-          console.error("❌ TOTP generation failed:", totpError);
-          return res.status(400).json({
-            success: false,
-            message: "TOTP secret not configured. Please set ANGEL_ONE_TOTP_SECRET in environment."
-          });
-        }
-      } else {
+      try {
+        const totpResult = await TOTP.generate(totpSecret);
+        totpToken = totpResult.otp;
+        console.log(`🔐 TOTP generated for ${clientCode}: ${totpToken}`);
+      } catch (totpError) {
+        console.error("❌ TOTP generation failed:", totpError);
         return res.status(400).json({
           success: false,
-          message: "TOTP secret not configured. Please set ANGEL_ONE_TOTP_SECRET in environment."
+          message: "Invalid TOTP secret provided"
         });
       }
       
@@ -10849,7 +10834,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log("✅ [USER-LOGIN] User authenticated successfully!");
-      console.log(`   Client: ${clientCode}`);
       
       res.json({
         success: true,
