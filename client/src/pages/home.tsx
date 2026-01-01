@@ -18246,10 +18246,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         <Input type="password" placeholder="Enter verification PIN" className="h-12 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-lg tracking-widest focus:ring-2 focus:ring-blue-500/20" />
                                       </div>
                                     </div>
-                                    <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
-                                      <Button variant="outline" className="h-11 px-6 rounded-lg text-slate-600 dark:text-slate-300">Cancel</Button>
-                                      <Button className="h-11 px-6 bg-slate-500 hover:bg-slate-600 text-white rounded-lg font-semibold shadow-lg shadow-slate-500/20">Verify Identity</Button>
-                                    </div>
                                   </div>
                                 </div>
                               </DialogContent>
