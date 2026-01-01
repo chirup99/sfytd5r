@@ -18238,13 +18238,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                   </div>
                                   <div className="w-full md:w-1/2 p-8 flex flex-col justify-between relative">
                                     <div className="space-y-6">
-                                      <div className="space-y-2">
-                                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Verify Your Identity</h2>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">Enter your secure PIN to complete verification.</p>
-                                      </div>
-                                      <div className="space-y-3">
-                                        <Input type="password" placeholder="Enter verification PIN" className="h-12 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-lg tracking-widest focus:ring-2 focus:ring-blue-500/20" />
-                                      </div>
                                     </div>
                                   </div>
                                 </div>
