@@ -9349,11 +9349,11 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         console.log(`  🎯 Final markers to apply: ${chartMarkers.length}`);
 
         // ✅ Markers disabled - LightweightCharts doesn't support setMarkers on series
-        // (journalCandlestickSeriesRef.current as any).setMarkers(chartMarkers);
+        (journalCandlestickSeriesRef.current as any).setMarkers(chartMarkers);
         console.log(`📊 ✅ Markers disabled in this version`);
       } else {
         console.log('📊 No markers to apply - clearing');
- // setMarkers removed - not supported in LightweightCharts
+ if (journalCandlestickSeriesRef.current) (journalCandlestickSeriesRef.current as any).setMarkers([]);
       }
     } catch (e) {
       console.error('📊 ❌ Marker Error:', e);
