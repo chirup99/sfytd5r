@@ -18202,71 +18202,59 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                     <div className="relative">
                     <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                       <CardContent className="p-6 px-0.5 md:px-4 md:py-4 pt-[10px] pb-[10px]">
-                    {/* Identity Verification Dialog */}
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-4 w-4" data-testid="button-tradebook-help">
-                          <Headset className="h-3 w-3" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-[700px] p-0 overflow-hidden bg-white dark:bg-slate-900 border-none rounded-xl shadow-2xl">
-                        <div className="flex flex-col md:flex-row h-full min-h-[350px]">
-                          {/* Left Side: Identity Card Visual */}
-                          <div className="w-full md:w-1/2 p-8 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden">
-                            <div className="absolute inset-0 opacity-10">
-                              <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] rounded-full bg-gradient-to-br from-violet-500 via-transparent to-transparent"></div>
-                            </div>
-                            
-                            <div className="relative w-full aspect-[1.6/1] bg-black rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden">
-                              {/* Card Content */}
-                              <div className="flex justify-between items-start">
-                                <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase">Identity Card</div>
-                                <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider">Valid</div>
-                              </div>
-                              
-                              <div className="relative h-20 w-full overflow-hidden">
-                                <div className="absolute bottom-[-100%] left-[-10%] w-[120%] h-[200%] rounded-full bg-gradient-to-t from-blue-600/40 via-blue-500/10 to-transparent blur-xl"></div>
-                              </div>
-                              
-                              <div className="space-y-4">
-                                <div className="flex items-center gap-2">
-                                  <div className="text-sm font-bold text-white tracking-[0.2em]">ID **** 4590</div>
-                                </div>
-                                <div className="flex justify-between items-end">
-                                  <div className="text-xs font-medium text-white/80 uppercase tracking-widest">Ruixen UI</div>
-                                  <div className="text-[10px] font-mono text-white/60">11/29</div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Right Side: Verification Form */}
-                          <div className="w-full md:w-1/2 p-8 flex flex-col justify-between relative">
-                            <div className="space-y-6">
-                              <div className="space-y-2">
-                                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Verify Your Identity</h2>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Enter your secure PIN to complete verification.</p>
-                              </div>
-
-                              <div className="space-y-3">
-                                <Input 
-                                  type="password" 
-                                  placeholder="Enter verification PIN"
-                                  className="h-12 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-lg tracking-widest focus:ring-2 focus:ring-blue-500/20"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
-                              <Button variant="outline" className="h-11 px-6 rounded-lg text-slate-600 dark:text-slate-300">Cancel</Button>
-                              <Button className="h-11 px-6 bg-slate-500 hover:bg-slate-600 text-white rounded-lg font-semibold shadow-lg shadow-slate-500/20">Verify Identity</Button>
-                            </div>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
                         <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2 flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-1"><div>Trade Book</div><Button size="icon" variant="ghost" className="h-4 w-4" data-testid="button-tradebook-help"><Headset className="h-3 w-3" /></Button></div>
+                          <div className="flex items-center gap-1">
+                            <div>Trade Book</div>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-4 w-4" data-testid="button-tradebook-help">
+                                  <Headset className="h-3 w-3" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-[700px] p-0 overflow-hidden bg-white dark:bg-slate-900 border-none rounded-xl shadow-2xl">
+                                <div className="flex flex-col md:flex-row h-full min-h-[350px]">
+                                  <div className="w-full md:w-1/2 p-8 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden">
+                                    <div className="absolute inset-0 opacity-10">
+                                      <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] rounded-full bg-gradient-to-br from-violet-500 via-transparent to-transparent"></div>
+                                    </div>
+                                    <div className="relative w-full aspect-[1.6/1] bg-black rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden">
+                                      <div className="flex justify-between items-start">
+                                        <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase">Identity Card</div>
+                                        <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider">Valid</div>
+                                      </div>
+                                      <div className="relative h-20 w-full overflow-hidden">
+                                        <div className="absolute bottom-[-100%] left-[-10%] w-[120%] h-[200%] rounded-full bg-gradient-to-t from-blue-600/40 via-blue-500/10 to-transparent blur-xl"></div>
+                                      </div>
+                                      <div className="space-y-4">
+                                        <div className="flex items-center gap-2">
+                                          <div className="text-sm font-bold text-white tracking-[0.2em]">ID **** 4590</div>
+                                        </div>
+                                        <div className="flex justify-between items-end">
+                                          <div className="text-xs font-medium text-white/80 uppercase tracking-widest">Ruixen UI</div>
+                                          <div className="text-[10px] font-mono text-white/60">11/29</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="w-full md:w-1/2 p-8 flex flex-col justify-between relative">
+                                    <div className="space-y-6">
+                                      <div className="space-y-2">
+                                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Verify Your Identity</h2>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">Enter your secure PIN to complete verification.</p>
+                                      </div>
+                                      <div className="space-y-3">
+                                        <Input type="password" placeholder="Enter verification PIN" className="h-12 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-lg tracking-widest focus:ring-2 focus:ring-blue-500/20" />
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+                                      <Button variant="outline" className="h-11 px-6 rounded-lg text-slate-600 dark:text-slate-300">Cancel</Button>
+                                      <Button className="h-11 px-6 bg-slate-500 hover:bg-slate-600 text-white rounded-lg font-semibold shadow-lg shadow-slate-500/20">Verify Identity</Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
                           <div className="flex items-center gap-1">
                             <span className="text-[10px] text-gray-600 dark:text-gray-400">
                               {isDemoMode ? "Preview" : "Personal"}
@@ -18305,7 +18293,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             </Button>
                           </div>
                         </div>
-
                         {/* ✅ NEW CLEAN HEATMAP IMPLEMENTATION - Separate components for Demo & Personal */}
                         <div className="relative">
                          <div ref={heatmapContainerRef} className="pt-0.5">
