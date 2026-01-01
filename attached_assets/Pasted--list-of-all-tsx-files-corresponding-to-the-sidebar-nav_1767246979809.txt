@@ -1,0 +1,47 @@
+ list of all .tsx files corresponding to the sidebar navigation tabs.
+
+From my analysis of home.tsx and the component list:
+
+Market Dashboard (dashboard):
+AuthButton -> client/src/components/auth-button.tsx
+ConnectionStatus -> client/src/components/connection-status.tsx
+MonthlyProgressTracker -> client/src/components/monthly-progress-tracker.tsx
+SigninDataWindow -> client/src/components/signin-data-window.tsx
+ApiStatistics -> client/src/components/api-statistics.tsx
+ErrorPanel -> client/src/components/error-panel.tsx
+Backtest (backtest):
+ThreeCycleScanner -> client/src/components/three-cycle-scanner.tsx
+Trading Charts (chart):
+AdvancedCandlestickChart -> client/src/components/advanced-candlestick-chart.tsx
+IndicatorCrossingsDisplay -> client/src/components/indicator-crossings-display.tsx
+BATTU Scan (check):
+BattuScanSimulation -> client/src/components/battu-scan-simulation.tsx
+4 Candle Rule (4candle):
+FourCandleRuleScanner -> client/src/components/four-candle-rule-scanner.tsx
+Complete Scanner (scanner):
+SimpleCompleteScanner -> client/src/components/simple-complete-scanner.tsx
+Trading Master (trading-master):
+TradingMaster -> client/src/components/trading-master.tsx
+Historical Data (cb):
+HistoricalDataSection (In home.tsx as a sub-component, but related data logic is in server/fyers-api.ts)
+Actually, activeTab === 'cb' rendering:
+I need to check where cb is rendered in home.tsx.
+Trade Simulator (simulator):
+HistoricalTradeSimulator -> client/src/components/historical-trade-simulator.tsx
+Journal (journal):
+client/src/components/trading-journal-ai.tsx (from my previous memory of adding it)
+Wait, let's check activeTab === 'journal' in home.tsx.
+Insights (insights):
+InsightsView (Need to find where it's imported from)
+Tutor (tutor):
+Implementation is directly in home.tsx (line 4769+).
+Social Feed (voice):
+NeoFeedSocialFeed -> client/src/components/neofeed-social-feed.tsx
+Documentation (documentation):
+BattuDocumentationDisplay -> client/src/components/battu-documentation-display.tsx
+Strategy Build (strategy-build):
+StrategyBuilder -> client/src/components/strategy-builder.tsx
+Trading Home (trading-home):
+Implementation is directly in home.tsx (line 4165+).
+Stock News (stock-news):
+StockNewsSearch -> client/src/components/stock-news-search.tsx
