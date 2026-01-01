@@ -43,7 +43,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAngelOneAutoconnect } from "@/hooks/useAngelOneAutoconnect";
 import { cognitoSignOut, getCognitoToken, sendEmailVerificationCode, confirmEmailVerification, checkEmailVerified } from "@/cognito";
 import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickSeries, LineSeries, HistogramSeries, IPriceLine, createSeriesMarkers } from 'lightweight-charts';
-import { ArrowLeft, Banknote, Clock, ExternalLink, Info, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award, Headset, Video, Mic2, Globe, } from "lucide-react";
+import { ArrowLeft, Banknote, Clock, ExternalLink, Info, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award, Headset } from "lucide-react";
 import { parseBrokerTrades, ParseError } from "@/utils/trade-parser";
 
 // Global window type declaration for audio control
@@ -18238,55 +18238,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                   </div>
                                   <div className="w-full md:w-1/2 p-8 flex flex-col justify-between relative">
                                     <div className="space-y-6">
-                                    <div className="relative group">
-                                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                                        <Search className="h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                                      </div>
-                                      <Input 
-                                        placeholder="What is up?" 
-                                        className="h-14 pl-11 pr-11 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-800 rounded-xl text-lg focus:ring-0 focus:border-blue-500 transition-all shadow-sm"
-                                        autoFocus
-                                      />
-                                      <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                                        <kbd className="hidden sm:inline-flex h-6 items-center gap-1 rounded border bg-slate-100 dark:bg-slate-700 px-1.5 font-mono text-[10px] font-medium text-slate-500 opacity-100">
-                                          <span className="text-xs">⌘</span>K
-                                        </kbd>
-                                      </div>
-                                    </div>
-                                    <div className="mt-4 space-y-1 p-1 overflow-y-auto max-h-[400px] scrollbar-hide">
-                                      {[ 
-                                        { icon: Ticket, title: "Book tickets", subtitle: "Operator", shortcut: "⌘K", type: "Agent", color: "text-blue-500" },
-                                        { icon: BarChart3, title: "Summarize", subtitle: "gpt-4o", shortcut: "⌥cmd+p", type: "Command", color: "text-orange-500" },
-                                        { icon: Video, title: "Screen Studio", subtitle: "gpt-4o", type: "Application", color: "text-purple-500" },
-                                        { icon: Mic2, title: "Talk to Jarvis", subtitle: "gpt-4o voice", type: "Active", color: "text-green-500" },
-                                        { icon: Globe, title: "Translate", subtitle: "gpt-4o", type: "Command", color: "text-blue-400" },
-                                      ].map((item, i) => (
-                                        <button 
-                                          key={i} 
-                                          className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group text-left"
-                                        >
-                                          <div className="flex items-center gap-4">
-                                            <div className={`p-2 rounded-md bg-slate-50 dark:bg-slate-700 ${item.color}`}>
-                                              <item.icon className="h-5 w-5" />
-                                            </div>
-                                            <div>
-                                              <div className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                                                {item.title} 
-                                                <span className="text-[10px] font-normal text-slate-400">{item.subtitle}</span>
-                                              </div>
-                                            </div>
-                                          </div>
-                                          <div className="flex items-center gap-3 text-[10px] text-slate-400 font-medium">
-                                            {item.shortcut && <span className="px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">{item.shortcut}</span>}
-                                            <span className="group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">{item.type}</span>
-                                          </div>
-                                        </button>
-                                      ))}
-                                    </div>
-                                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400 px-2 font-medium uppercase tracking-wider">
-                                      <span>Press ⌘K to open commands</span>
-                                      <span>ESC to cancel</span>
-                                    </div>
                                     </div>
                                   </div>
                                 </div>
