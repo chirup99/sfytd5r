@@ -13294,7 +13294,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                 Trading Master
               </div>
             </button>
-            </button>
           </div>
 
           <div className="space-y-1 pt-4">
