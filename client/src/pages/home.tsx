@@ -18214,7 +18214,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                               </DialogTrigger>
                               <DialogContent className="max-w-[700px] p-0 overflow-hidden bg-white dark:bg-slate-900 border-none rounded-xl shadow-2xl">
                                 <div className="flex flex-col md:flex-row h-full min-h-[350px]">
-                                  <div className="w-full md:w-1/2 p-8 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden">
+                                  {/* Left Side: Card Display */}
+                                  <div className="w-full md:w-1/2 p-8 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden border-r border-slate-200 dark:border-slate-700">
                                     <div className="absolute inset-0 opacity-10">
                                       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] rounded-full bg-gradient-to-br from-violet-500 via-transparent to-transparent"></div>
                                     </div>
@@ -18236,10 +18237,75 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         </div>
                                       </div>
                                     </div>
-                                  </div>
-                                    <div className="absolute left-1/2 -translate-x-1/2 top-4">
-                                      <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">mini play</span>
+                                  <div className="w-full md:w-1/2 flex flex-col bg-white dark:bg-slate-900">
+                                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                      <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider">Mental Wellness</h3>
+                                      <div className="text-[10px] text-slate-400 uppercase font-medium">6 Tracks</div>
                                     </div>
+                                    
+                                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                      {/* Meditation Section */}
+                                      <div>
+                                        <h4 className="text-[10px] font-bold text-violet-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                          <span className="w-1 h-1 rounded-full bg-violet-500"></span>
+                                          Meditation
+                                        </h4>
+                                        <div className="space-y-1">
+                                          {[
+                                            { title: "Detachment Breathing", duration: "3:20", id: "m1" },
+                                            { title: "Post-Loss Calm", duration: "5:00", id: "m2" },
+                                            { title: "Morning Discipline", duration: "4:15", id: "m3" }
+                                          ].map((track) => (
+                                            <div key={track.id} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                                              <div className="flex items-center gap-3">
+                                                <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:bg-violet-500 transition-colors">
+                                                  <Play className="w-3 h-3 text-violet-500 group-hover:text-white" />
+                                                </div>
+                                                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{track.title}</span>
+                                              </div>
+                                              <span className="text-[10px] font-mono text-slate-400">{track.duration}</span>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+
+                                      {/* Psychology Section */}
+                                      <div>
+                                        <h4 className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                          <span className="w-1 h-1 rounded-full bg-blue-500"></span>
+                                          Psychology
+                                        </h4>
+                                        <div className="space-y-1">
+                                          {[
+                                            { title: "Risk Management Mindset", duration: "6:45", id: "p1" },
+                                            { title: "Overcoming FOMO", duration: "4:30", id: "p2" },
+                                            { title: "The Probabilistic Edge", duration: "8:15", id: "p3" }
+                                          ].map((track) => (
+                                            <div key={track.id} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                                              <div className="flex items-center gap-3">
+                                                <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:bg-blue-500 transition-colors">
+                                                  <Play className="w-3 h-3 text-blue-500 group-hover:text-white" />
+                                                </div>
+                                                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{track.title}</span>
+                                              </div>
+                                              <span className="text-[10px] font-mono text-slate-400">{track.duration}</span>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Footer / Now Playing Stub */}
+                                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg animate-pulse">
+                                        <Music2 className="w-4 h-4 text-white" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="text-[10px] font-bold text-slate-900 dark:text-slate-100 truncate">Select a session</div>
+                                        <div className="text-[9px] text-slate-500 uppercase tracking-tighter">Ready to play</div>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                               </DialogContent>
                             </Dialog>
