@@ -18273,21 +18273,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     </div>
 
                                     <div className="flex items-center gap-3 pt-6">
-                                      <DialogTrigger asChild>
-                                        <Button 
-                                          variant="outline" 
-                                          className="flex-1 h-11 rounded-xl border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                          data-testid="button-cancel-verify"
-                                        >
-                                          Cancel
-                                        </Button>
-                                      </DialogTrigger>
-                                      <Button 
-                                        className="flex-1 h-11 rounded-xl bg-slate-500 hover:bg-slate-600 text-white shadow-lg shadow-slate-500/20"
-                                        data-testid="button-verify-identity"
-                                      >
-                                        Verify Identity
-                                      </Button>
                                     </div>
                                   </div>
                                 </div>
