@@ -18237,15 +18237,29 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     </div>
                                   </div>
                                     <div className="absolute left-1/2 -translate-x-1/2 top-4">
+                                    <div className="absolute left-1/2 -translate-x-1/2 top-4">
                                       <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">mini play</span>
                                     </div>
                                   <div className="w-full md:w-1/2 p-8 flex flex-col justify-between relative">
                                     <div className="space-y-6">
+                                      <Tabs defaultValue="news1" className="w-full">
+                                        <TabsList className="grid w-full grid-cols-2">
+                                          <TabsTrigger value="news1" data-testid="tabs-trigger-news1">News 1</TabsTrigger>
+                                          <TabsTrigger value="news2" data-testid="tabs-trigger-news2">News 2</TabsTrigger>
+                                        </TabsList>
+                                        <TabsContent value="news1" className="mt-4">
+                                          <div className="text-sm text-slate-500 dark:text-slate-400">
+                                            Latest market news and updates will appear here.
+                                          </div>
+                                        </TabsContent>
+                                        <TabsContent value="news2" className="mt-4">
+                                          <div className="text-sm text-slate-500 dark:text-slate-400">
+                                            Sector-specific analysis and insights.
+                                          </div>
+                                        </TabsContent>
+                                      </Tabs>
                                     </div>
                                   </div>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
                           </div>
                           <div className="flex items-center gap-1">
                             <span className="text-[10px] text-gray-600 dark:text-gray-400">
