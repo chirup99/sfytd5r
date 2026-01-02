@@ -18256,6 +18256,9 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         </button>
                                       </div>
                                       
+                                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                                        Enter your secure PIN to complete verification.
+                                      </p>
 
                                       <div className="space-y-4 pt-4">
                                         <div className="relative group">
