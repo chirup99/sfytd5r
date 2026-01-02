@@ -18243,7 +18243,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                   <div className="w-full md:w-1/2 p-8 flex flex-col justify-between relative">
                                     <div className="space-y-6">
                                       <div className="flex justify-between items-center">
-                                        
+                                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Verify Your Identity</h2>
                                       </div>
                                       <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-lg w-fit mt-4">
                                         {["Psychology", "Meditation"].map((tab) => (
@@ -18265,15 +18265,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                             )}
                                             <span className="relative z-10">{tab}</span>
                                           </button>
-                                      </div>
-                                      <div className="flex gap-2 mt-4 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory">
-                                        <Card className="min-w-[140px] h-20 bg-blue-500/10 border-blue-500/20 snap-center flex items-center justify-center">
-                                          <span className="text-[10px] text-blue-500 font-medium">Mindset Tip 1</span>
-                                        </Card>
-                                        <Card className="min-w-[140px] h-20 bg-purple-500/10 border-purple-500/20 snap-center flex items-center justify-center">
-                                          <span className="text-[10px] text-purple-500 font-medium">Mindset Tip 2</span>
-                                        </Card>
-                                      </div>
                                         ))}
                                       </div>
 
