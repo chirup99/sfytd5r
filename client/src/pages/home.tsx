@@ -18255,12 +18255,23 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           Tab 3
                                         </button>
                                       </div>
+                                      
+                                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                                        Enter your secure PIN to complete verification.
+                                      </p>
+
                                       <div className="space-y-4 pt-4">
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                                          Your identity has been verified securely.
-                                        </p>
+                                        <div className="relative group">
+                                          <Input 
+                                            placeholder="Enter verification PIN" 
+                                            className="h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 rounded-xl px-4 text-slate-900 dark:text-white placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-blue-500/50 transition-all"
+                                            type="password"
+                                            data-testid="input-verification-pin"
+                                          />
+                                        </div>
                                       </div>
                                     </div>
+
                                     <div className="flex items-center gap-3 pt-6">
                                       <DialogTrigger asChild>
                                         <Button 
@@ -18283,6 +18294,10 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                               </DialogContent>
                             </Dialog>
                           </div>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] text-gray-600 dark:text-gray-400">
+                              {isDemoMode ? "Preview" : "Personal"}
+                            </span>
                             <Switch
                               checked={isDemoMode}
                               onCheckedChange={(checked) => {
