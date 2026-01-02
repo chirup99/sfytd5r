@@ -117,3 +117,4 @@ The application is now fully configured for Angel One streaming without OAuth!
 ## UI UPDATES (Jan 2, 2026)
 [x] 1. Updated tab names to "Psychology" and "Meditation" and removed the third tab in home.tsx.
 [x] 2. Removed the result window content area in home.tsx.
+[x] 3. Removed the secure PIN verification instruction text in home.tsx.

@@ -18270,7 +18270,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
                                       
                                       <p className="text-sm text-slate-500 dark:text-slate-400">
-                                        Enter your secure PIN to complete verification.
                                       </p>
 
                                     </div>
