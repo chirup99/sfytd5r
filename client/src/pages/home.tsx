@@ -18265,6 +18265,15 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                             )}
                                             <span className="relative z-10">{tab}</span>
                                           </button>
+                                      </div>
+                                      <div className="flex gap-2 mt-4 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory">
+                                        <Card className="min-w-[140px] h-20 bg-blue-500/10 border-blue-500/20 snap-center flex items-center justify-center">
+                                          <span className="text-[10px] text-blue-500 font-medium">Mindset Tip 1</span>
+                                        </Card>
+                                        <Card className="min-w-[140px] h-20 bg-purple-500/10 border-purple-500/20 snap-center flex items-center justify-center">
+                                          <span className="text-[10px] text-purple-500 font-medium">Mindset Tip 2</span>
+                                        </Card>
+                                      </div>
                                         ))}
                                       </div>
 
