@@ -18243,7 +18243,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                   <div className="w-full md:w-1/2 p-8 flex flex-col justify-between relative">
                                     <div className="space-y-6">
                                       <div className="flex justify-between items-center">
-                                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Verify Your Identity</h2>
+                                        
                                       </div>
                                       <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-lg w-fit mt-4">
                                         {["Psychology", "Meditation"].map((tab) => (
