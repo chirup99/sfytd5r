@@ -18248,6 +18248,28 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             </Dialog>
                           </div>
                           <div className="flex items-center gap-1">
+                                      <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                                        <div className="flex flex-col">
+                                          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">Window Label</span>
+                                          <span className="text-xs text-slate-500">Task 1</span>
+                                        </div>
+                                        <Switch 
+                                          checked={true} 
+                                          onCheckedChange={() => {}} 
+                                          data-testid="switch-task-1"
+                                        />
+                                      </div>
+                                      <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                                        <div className="flex flex-col">
+                                          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">Task 2</span>
+                                          <span className="text-xs text-slate-500">Status Control</span>
+                                        </div>
+                                        <Switch 
+                                          checked={false} 
+                                          onCheckedChange={() => {}} 
+                                          data-testid="switch-task-2"
+                                        />
+                                      </div>
                             <span className="text-[10px] text-gray-600 dark:text-gray-400">
                               {isDemoMode ? "Preview" : "Personal"}
                             </span>
