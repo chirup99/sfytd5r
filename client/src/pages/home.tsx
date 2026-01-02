@@ -18255,12 +18255,12 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           Tab 3
                                         </button>
                                       </div>
-                                      
                                       <div className="space-y-4 pt-4">
                                         <p className="text-sm text-slate-500 dark:text-slate-400">
                                           Your identity has been verified securely.
                                         </p>
                                       </div>
+                                    </div>
                                     <div className="flex items-center gap-3 pt-6">
                                       <DialogTrigger asChild>
                                         <Button 
@@ -18283,10 +18283,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                               </DialogContent>
                             </Dialog>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-gray-600 dark:text-gray-400">
-                              {isDemoMode ? "Preview" : "Personal"}
-                            </span>
                             <Switch
                               checked={isDemoMode}
                               onCheckedChange={(checked) => {
