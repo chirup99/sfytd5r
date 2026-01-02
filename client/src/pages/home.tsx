@@ -18240,6 +18240,35 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     <div className="absolute left-1/2 -translate-x-1/2 top-4">
                                       <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">mini play</span>
                                     </div>
+                                  <div className="w-full md:w-1/2 p-8 flex flex-col justify-between relative bg-slate-50 dark:bg-slate-800/20">
+                                    <div className="space-y-6">
+                                      <div className="flex justify-between items-center">
+                                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Mini Play</h2>
+                                        <div className="flex items-center gap-2 bg-slate-200 dark:bg-slate-700/50 p-1 rounded-lg">
+                                          <button 
+                                            onClick={() => setActiveTab("Window 1")} 
+                                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeTab === "Window 1" ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                                          >
+                                            Window 1
+                                          </button>
+                                          <button 
+                                            onClick={() => setActiveTab("Window 2")} 
+                                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeTab === "Window 2" ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                                          >
+                                            Window 2
+                                          </button>
+                                        </div>
+                                      </div>
+
+                                      <div className="relative min-h-[200px] border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center">
+                                        {activeTab === "Window 1" ? (
+                                          <div className="text-slate-400 text-sm">Window 1 Content Area</div>
+                                        ) : (
+                                          <div className="text-slate-400 text-sm">Window 2 Content Area</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                               </DialogContent>
                             </Dialog>
