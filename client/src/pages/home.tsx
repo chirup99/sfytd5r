@@ -18197,18 +18197,12 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                           </p>
                         </div>
                       </DialogContent>
-                    </Dialog>
+                    <div className="relative">
                         <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2 flex items-center justify-between gap-2">
                           <div className="flex items-center gap-1">
                             <div>Trade Book</div>
-                              </DialogContent>
-                            </Dialog>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-gray-600 dark:text-gray-400">
-                              {isDemoMode ? "Preview" : "Personal"}
-                            </span>
-                            <Switch
+                            <div>Trade Book</div>
                               checked={isDemoMode}
                               onCheckedChange={(checked) => {
                                 console.log(`🔄 Demo mode toggle: ${checked ? 'ON (Preview)' : 'OFF (Personal)'}`);
