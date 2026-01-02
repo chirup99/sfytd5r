@@ -18268,32 +18268,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         ))}
                                       </div>
 
-                                      <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 min-h-[160px] flex gap-4">
-                                        <div className="w-1/3 aspect-square bg-slate-200 dark:bg-slate-800 rounded-lg overflow-hidden shrink-0">
-                                          <img 
-                                            src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2813&auto=format&fit=crop" 
-                                            alt="Tab Content"
-                                            className="w-full h-full object-cover"
-                                          />
-                                        </div>
-                                        <div className="flex-1 space-y-2 overflow-hidden">
-                                          <AnimatePresence mode="wait">
-                                            <motion.div
-                                              key={activeTab}
-                                              initial={{ opacity: 0, x: 10 }}
-                                              animate={{ opacity: 1, x: 0 }}
-                                              exit={{ opacity: 0, x: -10 }}
-                                              transition={{ duration: 0.2 }}
-                                            >
-                                              <h3 className="text-lg font-bold text-slate-900 dark:text-white">{activeTab}</h3>
-                                              <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-4">
-                                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. 
-                                                This is the content for {activeTab.toLowerCase()} of the identity verification process.
-                                              </p>
-                                            </motion.div>
-                                          </AnimatePresence>
-                                        </div>
-                                      </div>
                                       
                                       <p className="text-sm text-slate-500 dark:text-slate-400">
                                         Enter your secure PIN to complete verification.
