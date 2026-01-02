@@ -18244,6 +18244,17 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                       <div className="flex justify-between items-center">
                                         <h2 className="text-xl font-bold text-slate-900 dark:text-white">Verify Your Identity</h2>
                                       </div>
+                                      <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-lg w-fit mt-4">
+                                        <button className="px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition-all">
+                                          Tab 1
+                                        </button>
+                                        <button className="px-3 py-1.5 text-xs font-medium rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                                          Tab 2
+                                        </button>
+                                        <button className="px-3 py-1.5 text-xs font-medium rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+                                          Tab 3
+                                        </button>
+                                      </div>
                                       
                                       <p className="text-sm text-slate-500 dark:text-slate-400">
                                         Enter your secure PIN to complete verification.
