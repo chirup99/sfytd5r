@@ -18236,27 +18236,11 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                       </div>
                                     </div>
                                   </div>
-                                  <div className="absolute left-1/2 -translate-x-1/2 top-4">
-                                    <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">mini play</span>
-                                  </div>
+                                    <div className="absolute left-1/2 -translate-x-1/2 top-4">
+                                      <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">mini play</span>
+                                    </div>
                                   <div className="w-full md:w-1/2 p-8 flex flex-col justify-between relative">
                                     <div className="space-y-6">
-                                      <Tabs defaultValue="news1" className="w-full">
-                                        <TabsList className="grid w-full grid-cols-2">
-                                          <TabsTrigger value="news1" data-testid="tabs-trigger-news1">News 1</TabsTrigger>
-                                          <TabsTrigger value="news2" data-testid="tabs-trigger-news2">News 2</TabsTrigger>
-                                        </TabsList>
-                                        <TabsContent value="news1" className="mt-4">
-                                          <div className="min-h-[200px] flex items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
-                                            <span className="text-xs text-slate-400">Empty Screen</span>
-                                          </div>
-                                        </TabsContent>
-                                        <TabsContent value="news2" className="mt-4">
-                                          <div className="min-h-[200px] flex items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
-                                            <span className="text-xs text-slate-400">Empty Screen</span>
-                                          </div>
-                                        </TabsContent>
-                                      </Tabs>
                                     </div>
                                   </div>
                                 </div>
@@ -18269,10 +18253,26 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             </span>
                             <Switch
                               checked={isDemoMode}
+                              onCheckedChange={(checked) => {
+                                console.log(`🔄 Demo mode toggle: ${checked ? 'ON (Preview)' : 'OFF (Personal)'}`);
+                                setHasManuallyToggledMode(true);
+                                localStorage.setItem("hasManuallyToggledMode", "true");
+                                setIsDemoMode(checked);
+                                setSelectedDailyFactors([]);
+                                setSelectedIndicators([]);
+                                setTradeHistoryData([]);
+                                setTradingImages([]);
+                                setTradingDataByDate({});
+                                setPersonalHeatmapRevision(prev => prev + 1);
                                 console.log(`✅ Switched to ${checked ? 'Preview' : 'Personal'} mode - CLEARED cache, heatmap fetching fresh AWS data...`);
                               }}
                               data-testid="switch-demo-mode"
                               className="scale-75"
+                            />
+                            <Button
+                              onClick={saveAllTradingData}
+                              size="sm"
+                              variant="outline"
                               disabled={isDemoMode && localStorage.getItem('currentUserId') !== 'c06ce90c-20a1-7033-d457-efac5a682529'}
                               className={`h-5 px-2 text-[10px] border-gray-300 dark:border-gray-700 ${
                                 (isDemoMode && localStorage.getItem('currentUserId') !== 'c06ce90c-20a1-7033-d457-efac5a682529')
