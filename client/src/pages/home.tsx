@@ -18237,6 +18237,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         </div>
                                       </div>
                                     </div>
+                                  </div>
                                   <div className="w-full md:w-1/2 flex flex-col bg-white dark:bg-slate-900">
                                     <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                                       <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider">Mental Wellness</h3>
