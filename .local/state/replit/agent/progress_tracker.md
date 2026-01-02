@@ -113,3 +113,6 @@ The application is now fully configured for Angel One streaming without OAuth!
 [x] 2. Restart the workflow - Server running on port 5000 with webview output
 [x] 3. Verify the project is working - Angel One authenticated (P176266), WebSocket streaming live market data (BANKNIFTY: 60097.65, SENSEX: 85638.77, GOLD: 37491.56)
 [x] 4. Import completed successfully - All systems fully operational
+
+## UI UPDATES (Jan 2, 2026)
+[x] 1. Updated tab names to "Psychology" and "Meditation" and removed the third tab in home.tsx.

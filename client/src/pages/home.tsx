@@ -18246,7 +18246,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         <h2 className="text-xl font-bold text-slate-900 dark:text-white">Verify Your Identity</h2>
                                       </div>
                                       <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-lg w-fit mt-4">
-                                        {["Tab 1", "Tab 2", "Tab 3"].map((tab) => (
+                                        {["Psychology", "Meditation"].map((tab) => (
                                           <button
                                             key={tab}
                                             onClick={() => setActiveTab(tab)}
