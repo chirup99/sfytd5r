@@ -18237,47 +18237,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                       </div>
                                     </div>
                                   </div>
-                                    <div className="absolute left-1/2 -translate-x-1/2 top-4">
-                                      <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">mini play</span>
-                                    </div>
-                                  <div className="w-full md:w-1/2 p-8 flex flex-col justify-between relative">
-                                    <div className="space-y-6">
-                                      <div className="flex justify-between items-center">
-                                        
-                                      </div>
-                                      <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-lg w-fit mt-4">
-                                        {["Psychology", "Meditation"].map((tab) => (
-                                          <button
-                                            key={tab}
-                                            onClick={() => setActiveTab(tab)}
-                                            className={`relative px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                                              activeTab === tab 
-                                                ? "text-white" 
-                                                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                                            }`}
-                                          >
-                                            {activeTab === tab && (
-                                              <motion.div
-                                                layoutId="activeIdentityTab"
-                                                className="absolute inset-0 bg-slate-900 dark:bg-slate-700 shadow-sm rounded-md"
-                                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                              />
-                                            )}
-                                            <span className="relative z-10">{tab}</span>
-                                          </button>
-                                        ))}
-                                      </div>
-
-                                      
-                                      <p className="text-sm text-slate-500 dark:text-slate-400">
-                                      </p>
-
-                                    </div>
-
-                                    <div className="flex items-center gap-3 pt-6">
-                                    </div>
-                                  </div>
-                                </div>
                               </DialogContent>
                             </Dialog>
                           </div>
