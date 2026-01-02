@@ -18268,7 +18268,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                               Switch tabs above to view different information.
                                             </div></div>
                                         ) : (
-                                          <div className="text-slate-400 text-sm">Window 2 Content Area</div>
+                                          <div className="text-slate-400 text-sm">Window 2 Context Area</div>
                                         )}
                                       </div>
                                     </div>
