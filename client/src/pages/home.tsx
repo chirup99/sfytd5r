@@ -18249,12 +18249,18 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         {["Tab 1", "Tab 2", "Tab 3"].map((tab) => (
                                           <button
                                             key={tab}
-                                            onClick={() => setActiveTab(tab)}
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+                                              console.log("Setting active tab to:", tab);
+                                              setActiveTab(tab);
+                                            }}
                                             className={`relative px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                                               activeTab === tab 
                                                 ? "text-white" 
                                                 : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                                             }`}
+                                            type="button"
                                             data-testid={`button-tab-${tab.replace(" ", "-").toLowerCase()}`}
                                           >
                                             {activeTab === tab && (
@@ -18303,7 +18309,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     </div>
                                     <div className="flex items-center gap-3 pt-6"></div>
                                   </div>
-                                </div>
                               </DialogContent>
                             </Dialog>
                           </div>
