@@ -18287,8 +18287,9 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                             >
                                               <h3 className="text-lg font-bold text-slate-900 dark:text-white">{activeTab}</h3>
                                               <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-4">
-                                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. 
-                                                This is the content for {activeTab.toLowerCase()} of the identity verification process.
+                                                {activeTab === "Tab 1" && "Step 1: Identity verification initiated. Please ensure your document is ready for scanning."}
+                                                {activeTab === "Tab 2" && "Step 2: Biometric authentication required. Position your face within the frame."}
+                                                {activeTab === "Tab 3" && "Step 3: Final confirmation. Your details are being encrypted and securely stored."}
                                               </p>
                                             </motion.div>
                                           </AnimatePresence>
