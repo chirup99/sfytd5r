@@ -17181,6 +17181,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                               </button>
                                             </DialogTrigger>
                                             <DialogContent className="sm:max-w-[300px]">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                                </div>
                                               <DialogHeader>
                                                 <DialogTitle>Custom Timeframe</DialogTitle>
                                               </DialogHeader>
@@ -18023,6 +18025,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                     {/* Connect Dialog - Shows Zerodha and Upstox broker options */}
                     <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
                       <DialogContent className="max-w-md">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                                </div>
                         <DialogHeader>
                           <DialogTitle>Connect Your Broker</DialogTitle>
                         </DialogHeader>
@@ -18212,10 +18216,12 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                   <Headset className="h-3 w-3" />
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-[700px] p-0 overflow-hidden bg-white dark:bg-slate-900 border-none rounded-xl shadow-2xl">
+                              <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white dark:bg-slate-900 border-none rounded-xl shadow-2xl">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                                </div>
                                 <div className="flex flex-col md:flex-row h-full min-h-[350px]">
                                   {/* Left Side: Card Display */}
-                                  <div className="w-full md:w-1/2 p-8 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden border-r border-slate-200 dark:border-slate-700">
+                                  <div className="w-full md:w-[45%] p-8 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden border-r border-slate-200 dark:border-slate-700">
                                     <div className="absolute inset-0 opacity-10">
                                       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] rounded-full bg-gradient-to-br from-violet-500 via-transparent to-transparent"></div>
                                     </div>
@@ -18233,14 +18239,15 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         </div>
                                         <div className="flex justify-between items-end">
                                           <div className="text-xs font-medium text-white/80 uppercase tracking-widest">Ruixen UI</div>
-                                          <div className="text-[10px] font-mono text-white/60">11/29</div>
-                                        </div>
+                                    <div className="p-4 flex items-center justify-center gap-4 mt-8">
+                                      <div className="px-6 py-2 rounded-full bg-slate-100/80 dark:bg-slate-800/80 text-xs font-medium text-slate-600 dark:text-slate-300">Psychology</div>
+                                      <div className="px-6 py-2 rounded-full bg-slate-50/50 dark:bg-slate-800/40 text-xs font-medium text-slate-400 dark:text-slate-500">Meditation</div>
+                                    </div>
                                       </div>
                                     </div>
                                   </div>
-                                  <div className="w-full md:w-1/2 flex flex-col bg-white dark:bg-slate-900">
+                                  <div className="w-full md:w-[55%] flex flex-col bg-white dark:bg-slate-900">
                                     <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-center relative">
-                                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] opacity-50">Mini Play</div>
                                     </div>
                                     
                                     <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -20077,6 +20084,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         {/* Import Modal - Minimalist Design */}
         <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
           <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto custom-thin-scrollbar p-0">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                                </div>
             {/* Compact Header */}
             <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Import P&L Data</span>
@@ -21163,6 +21172,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         {/* Trading Challenge Coming Soon Modal */}
         <Dialog open={showTradingChallengeModal} onOpenChange={setShowTradingChallengeModal}>
           <DialogContent className="max-w-sm">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                                </div>
             <DialogHeader className="text-center">
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
@@ -21213,6 +21224,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         {/* Paper Trading (Demo Trading) Modal - Minimalist Design */}
         <Dialog open={showPaperTradingModal} onOpenChange={setShowPaperTradingModal}>
           <DialogContent className="w-full h-auto sm:max-w-2xl sm:max-h-[85vh] rounded-none sm:rounded-lg overflow-hidden p-0 bg-white sm:dark:bg-gray-900 hidden sm:flex flex-col">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                                </div>
             {/* Mobile Wallet-Style View */}
             <div className="flex flex-col h-full sm:hidden">
               {/* Hero Balance Section - Dark gradient background */}
@@ -22232,6 +22245,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         {/* Save Confirmation Dialog - Minimalistic Design */}
         <Dialog open={showSaveConfirmation} onOpenChange={setShowSaveConfirmation}>
           <DialogContent className="max-w-sm">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                                </div>
             <DialogHeader className="space-y-2">
               {saveConfirmationData?.error ? (
                 <>
@@ -22292,6 +22307,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         {/* Passcode Modal */}
         <Dialog open={showPasscodeModal} onOpenChange={setShowPasscodeModal}>
           <DialogContent className="max-w-sm">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                                </div>
             <DialogHeader>
               <DialogTitle className="text-center">Enter Passcode</DialogTitle>
             </DialogHeader>
@@ -22339,6 +22356,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         {/* Option Chain Modal */}
         <Dialog open={showOptionChain} onOpenChange={(open) => { setShowOptionChain(open); if (open) { fetchOptionChainData(selectedOptionIndex); } }}>
           <DialogContent className="w-full max-w-2xl md:max-w-2xl p-0 md:p-0 bg-white dark:bg-gray-900 rounded-lg md:rounded-lg border border-gray-200 dark:border-gray-700">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                                </div>
 
             {/* Desktop Header */}
             <div className="block border-b border-gray-200 dark:border-gray-700 px-4 py-2">
@@ -22503,6 +22522,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         {/* Trading Master Coming Soon Modal */}
         <Dialog open={showTradingMasterComingSoon} onOpenChange={setShowTradingMasterComingSoon}>
           <DialogContent className="max-w-md">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                                </div>
             <div className="space-y-6 py-6">
               <div className="flex flex-col items-center justify-center space-y-4">
                 <div className="w-20 h-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center animate-pulse">
@@ -22536,6 +22557,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         {/* Journal AI Dialog */}
         <Dialog open={showJournalAI} onOpenChange={setShowJournalAI}>
           <DialogContent className="max-w-5xl h-[85vh] p-0">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                                </div>
             <DialogHeader className="p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
               <DialogTitle className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
@@ -23346,6 +23369,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           }}
         >
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col" data-testid="dialog-share-tradebook">
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                                </div>
             <DialogHeader className="flex-shrink-0">
               <div className="flex items-start justify-between gap-4">
                 {/* Left side: PERALA and tagline */}
