@@ -18243,11 +18243,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     <div className="space-y-6">
                                       <div className="flex justify-between items-center">
                                         <h2 className="text-xl font-bold text-slate-900 dark:text-white">Verify Your Identity</h2>
-                                        <DialogTrigger asChild>
-                                          <Button size="icon" variant="ghost" className="h-6 w-6 rounded-full opacity-60 hover:opacity-100">
-                                            <X className="h-4 w-4" />
-                                          </Button>
-                                        </DialogTrigger>
                                       </div>
                                       
                                       <p className="text-sm text-slate-500 dark:text-slate-400">
