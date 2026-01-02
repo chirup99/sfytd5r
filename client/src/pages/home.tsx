@@ -18236,7 +18236,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                       </div>
                                     </div>
                                   </div>
-                                    <div className="absolute right-4 top-4">
+                                    <div className="absolute left-1/2 -translate-x-1/2 top-4">
                                       <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">mini play</span>
                                     </div>
                                   <div className="w-full md:w-1/2 p-8 flex flex-col justify-between relative">
