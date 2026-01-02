@@ -44,11 +44,10 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAngelOneAutoconnect } from "@/hooks/useAngelOneAutoconnect";
 import { cognitoSignOut, getCognitoToken, sendEmailVerificationCode, confirmEmailVerification, checkEmailVerified } from "@/cognito";
 import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickSeries, LineSeries, HistogramSeries, IPriceLine, createSeriesMarkers } from 'lightweight-charts';
-import { ArrowLeft, Banknote, Clock, ExternalLink, Info, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award, Headset, X, Play, Music2, Pause } from "lucide-react";
+import { ArrowLeft, Banknote, Clock, ExternalLink, Info, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award, Headset, X, Play, Music2 } from "lucide-react";
 import { parseBrokerTrades, ParseError } from "@/utils/trade-parser";
 
 // Global window type declaration for audio control
-import { Slider } from "@/components/ui/slider";
 declare global {
   interface Window {
     stopNewsAudio?: () => void;
@@ -6614,9 +6613,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   // Switch ON (true) = Demo mode active (shared demo data, Heatmap #1)
   // Switch OFF (false) = Personal mode active (user-specific data, Heatmap #2)
   const [isDemoMode, setIsDemoMode] = useState(() => {
-  const [activeTrack, setActiveTrack] = React.useState<any>(null);
-  const [isPlaying, setIsPlaying] = React.useState(false);
-  const [progress, setProgress] = React.useState(0);
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("tradingJournalDemoMode");
       // If user has explicitly set a preference, respect it
@@ -18220,9 +18216,11 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                 <div className="absolute top-4 left-0 right-0 flex justify-center pointer-events-none z-[60]">
                                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] opacity-50">Mini Play</div>
                                 </div>
+                                <div className="absolute top-4 left-0 right-0 flex justify-center pointer-events-none z-50">
+                                </div>
                                 <div className="flex flex-col md:flex-row h-full min-h-[350px]">
                                   {/* Left Side: Card Display */}
-                                  <div className="w-full md:w-1/2 p-8 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden border-r border-slate-200 dark:border-slate-700">
+                                  <div className="w-full md:w-1/2 p-8 bg-slate-100 dark:bg-slate-800 flex items-center justify-between overflow-hidden border-r border-slate-200 dark:border-slate-700">
                                     <div className="absolute inset-0 opacity-10">
                                       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] rounded-full bg-gradient-to-br from-violet-500 via-transparent to-transparent"></div>
                                     </div>
@@ -18260,7 +18258,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           {[
                                             { title: "Detachment Breathing", duration: "3:20", id: "m1" }
                                           ].map((track) => (
-                                            <div key={track.id} onClick={() => { setActiveTrack(track); setIsPlaying(true); setProgress(0); }} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                                            <div key={track.id} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
                                               <div className="flex items-center gap-3">
                                                 <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:bg-violet-500 transition-colors">
                                                   <Play className="w-3 h-3 text-violet-500 group-hover:text-white" />
@@ -18283,7 +18281,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           {[
                                             { title: "Risk Management Mindset", duration: "6:45", id: "p1" }
                                           ].map((track) => (
-                                            <div key={track.id} onClick={() => { setActiveTrack(track); setIsPlaying(true); setProgress(0); }} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                                            <div key={track.id} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
                                               <div className="flex items-center gap-3">
                                                 <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:bg-blue-500 transition-colors">
                                                   <Play className="w-3 h-3 text-blue-500 group-hover:text-white" />
@@ -18297,46 +18295,15 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                       </div>
                                     </div>
 
-                                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
-                                      {activeTrack ? (
-                                        <div className="space-y-3">
-                                          <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg">
-                                              {isPlaying ? <Music2 className="w-4 h-4 text-white animate-pulse" /> : <Play className="w-4 h-4 text-white" />}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                              <div className="text-[10px] font-bold text-slate-900 dark:text-slate-100 truncate">{activeTrack.title}</div>
-                                              <div className="text-[9px] text-slate-500 uppercase tracking-tighter">Playing Now</div>
-                                            </div>
-                                            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsPlaying(!isPlaying)}>
-                                              {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                                            </Button>
-                                          </div>
-                                          <div className="space-y-1">
-                                            <Slider 
-                                              value={[progress]} 
-                                              max={100} 
-                                              step={1} 
-                                              onValueChange={(vals) => setProgress(vals[0])}
-                                              className="h-1"
-                                            />
-                                            <div className="flex justify-between text-[8px] font-mono text-slate-400">
-                                              <span>0:00</span>
-                                              <span>{activeTrack.duration}</span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      ) : (
-                                        <div className="flex items-center gap-3 opacity-50">
-                                          <div className="w-8 h-8 rounded bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                                            <Music2 className="w-4 h-4 text-slate-400" />
-                                          </div>
-                                          <div className="flex-1 min-w-0">
-                                            <div className="text-[10px] font-bold text-slate-900 dark:text-slate-100 truncate">Select a session</div>
-                                            <div className="text-[9px] text-slate-500 uppercase tracking-tighter">Ready to play</div>
-                                          </div>
-                                        </div>
-                                      )}
+                                    {/* Footer / Now Playing Stub */}
+                                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg animate-pulse">
+                                        <Music2 className="w-4 h-4 text-white" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="text-[10px] font-bold text-slate-900 dark:text-slate-100 truncate">Select a session</div>
+                                        <div className="text-[9px] text-slate-500 uppercase tracking-tighter">Ready to play</div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
