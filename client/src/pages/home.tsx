@@ -18268,7 +18268,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         ))}
                                       </div>
 
-                                      <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 min-h-[160px] flex gap-4">
+                                      <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 min-h[160px] flex gap-4">
                                         <div className="w-1/3 aspect-square bg-slate-200 dark:bg-slate-800 rounded-lg overflow-hidden shrink-0">
                                           <img 
                                             src={activeTab === "Tab 1" ? "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2813&auto=format&fit=crop" : activeTab === "Tab 2" ? "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=2080&auto=format&fit=crop" : "https://images.unsplash.com/photo-1454165833767-02a6e30aa601?q=80&w=2070&auto=format&fit=crop"} 
@@ -18294,6 +18294,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                             </motion.div>
                                           </AnimatePresence>
                                         </div>
+                                      </div>
                                       </div>
                                       
                                       <p className="text-sm text-slate-500 dark:text-slate-400">
