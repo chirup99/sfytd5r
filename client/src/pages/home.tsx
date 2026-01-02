@@ -18244,19 +18244,14 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     <div className="space-y-6">
                                       <div className="flex justify-between items-center">
                                         <h2 className="text-xl font-bold text-slate-900 dark:text-white">Mini Play</h2>
-                                        <div className="flex items-center gap-2 bg-slate-200 dark:bg-slate-700/50 p-1 rounded-lg">
-                                          <button 
-                                            onClick={() => setActiveTab("Window 1")} 
-                                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeTab === "Window 1" ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
-                                          >
-                                            Window 1
-                                          </button>
-                                          <button 
-                                            onClick={() => setActiveTab("Window 2")} 
-                                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeTab === "Window 2" ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
-                                          >
-                                            Window 2
-                                          </button>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-[10px] font-medium text-slate-500 uppercase">W1</span>
+                                          <Switch 
+                                            checked={activeTab === "Window 2"}
+                                            onCheckedChange={(checked) => setActiveTab(checked ? "Window 2" : "Window 1")}
+                                            className="scale-75"
+                                          />
+                                          <span className="text-[10px] font-medium text-slate-500 uppercase">W2</span>
                                         </div>
                                       </div>
 
@@ -18267,20 +18262,9 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           <div className="text-slate-400 text-sm">Window 2 Content Area</div>
                                         )}
                                       </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-gray-600 dark:text-gray-400">
-                              {isDemoMode ? "Preview" : "Personal"}
-                            </span>
-                            <Switch
                               checked={isDemoMode}
                               onCheckedChange={(checked) => {
-                                console.log(`🔄 Demo mode toggle: ${checked ? 'ON (Preview)' : 'OFF (Personal)'}`);
+                                console.log(`🔄 Demo mode toggle: ${checked ? "ON (Preview)" : "OFF (Personal)"}`);
                                 setHasManuallyToggledMode(true);
                                 localStorage.setItem("hasManuallyToggledMode", "true");
                                 setIsDemoMode(checked);
@@ -18289,8 +18273,32 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                 setTradeHistoryData([]);
                                 setTradingImages([]);
                                 setTradingDataByDate({});
-                                setPersonalHeatmapRevision(prev => prev + 1);
-                                console.log(`✅ Switched to ${checked ? 'Preview' : 'Personal'} mode - CLEARED cache, heatmap fetching fresh AWS data...`);
+                                setPersonalHeatmapRevision((prev) => prev + 1);
+                                console.log(
+                                  `✅ Switched to ${checked ? "Preview" : "Personal"} mode - CLEARED cache, heatmap fetching fresh AWS data...`
+                                );
+                              }}
+                              data-testid="switch-demo-mode"
+                              className="scale-75"
+                            />
+                              {isDemoMode ? "Preview" : "Personal"}
+                            </span>
+                            <Switch
+                              checked={isDemoMode}
+                              onCheckedChange={(checked) => {
+                                console.log(`🔄 Demo mode toggle: ${checked ? "ON (Preview)" : "OFF (Personal)"}`);
+                                setHasManuallyToggledMode(true);
+                                localStorage.setItem("hasManuallyToggledMode", "true");
+                                setIsDemoMode(checked);
+                                setSelectedDailyFactors([]);
+                                setSelectedIndicators([]);
+                                setTradeHistoryData([]);
+                                setTradingImages([]);
+                                setTradingDataByDate({});
+                                setPersonalHeatmapRevision((prev) => prev + 1);
+                                console.log(
+                                  `✅ Switched to ${checked ? "Preview" : "Personal"} mode - CLEARED cache, heatmap fetching fresh AWS data...`
+                                );
                               }}
                               data-testid="switch-demo-mode"
                               className="scale-75"
@@ -18299,11 +18307,17 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                               onClick={saveAllTradingData}
                               size="sm"
                               variant="outline"
-                              disabled={isDemoMode && localStorage.getItem('currentUserId') !== 'c06ce90c-20a1-7033-d457-efac5a682529'}
+                              disabled={
+                                isDemoMode &&
+                                localStorage.getItem("currentUserId") !==
+                                  "c06ce90c-20a1-7033-d457-efac5a682529"
+                              }
                               className={`h-5 px-2 text-[10px] border-gray-300 dark:border-gray-700 ${
-                                (isDemoMode && localStorage.getItem('currentUserId') !== 'c06ce90c-20a1-7033-d457-efac5a682529')
-                                  ? 'text-gray-400 dark:text-gray-500 opacity-50 cursor-not-allowed' 
-                                  : 'text-gray-600 dark:text-gray-400'
+                                isDemoMode &&
+                                localStorage.getItem("currentUserId") !==
+                                  "c06ce90c-20a1-7033-d457-efac5a682529"
+                                  ? "text-gray-400 dark:text-gray-500 opacity-50 cursor-not-allowed"
+                                  : "text-gray-600 dark:text-gray-400"
                               }`}
                               data-testid="button-save-trade-book"
                             >
@@ -18311,17 +18325,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             </Button>
                           </div>
                         </div>
-                        {/* ✅ NEW CLEAN HEATMAP IMPLEMENTATION - Separate components for Demo & Personal */}
-                        <div className="relative">
-                         <div ref={heatmapContainerRef} className="pt-0.5">
-                          {isDemoMode ? (
-                            <DemoHeatmap 
-                              onDateSelect={handleDateSelect}
-                              selectedDate={selectedDate}
-                              tradingDataByDate={tradingDataByDate}
-                              onDataUpdate={(data) => {
-                                handleHeatmapDataUpdate(data);
-                                // Scroll to latest data for demo mode
                                 setTimeout(() => {
                                   if (heatmapContainerRef.current) {
                                     const scrollContainer = heatmapContainerRef.current.querySelector('[style*="overflow"]') as HTMLElement;
