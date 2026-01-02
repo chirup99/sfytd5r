@@ -32,7 +32,11 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     strictPort: false,
-    hmr: false,
+    hmr: {
+      host: "89f38df9-463f-475f-86d3-b91eba083d4f-00-27tc4wvho8036.janeway.replit.dev",
+      protocol: "wss",
+      port: 443,
+    },
     fs: {
       strict: true,
       deny: ["**/.*"],
