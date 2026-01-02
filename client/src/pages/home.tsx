@@ -18220,7 +18220,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     </div>
                                     <div className="relative w-full aspect-[1.6/1] bg-black rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden">
                                       <div className="flex justify-between items-start">
-                                        <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase">Identity Card</div>
+                                        <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase">Card</div>
                                         <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider">Valid</div>
                                       </div>
                                       <div className="relative h-20 w-full overflow-hidden">
@@ -18228,7 +18228,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                       </div>
                                       <div className="space-y-4">
                                         <div className="flex items-center gap-2">
-                                          <div className="text-sm font-bold text-white tracking-[0.2em]">ID **** 4590</div>
+                                          <div className="text-sm font-bold text-white tracking-[0.2em]">**** 4590</div>
                                         </div>
                                         <div className="flex justify-between items-end">
                                           <div className="text-xs font-medium text-white/80 uppercase tracking-widest">Ruixen UI</div>
