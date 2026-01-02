@@ -18276,9 +18276,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         </h4>
                                         <div className="space-y-1">
                                           {[
-                                            { title: "Risk Management Mindset", duration: "6:45", id: "p1" },
-                                            { title: "Overcoming FOMO", duration: "4:30", id: "p2" },
-                                            { title: "The Probabilistic Edge", duration: "8:15", id: "p3" }
+                                            { title: "Risk Management Mindset", duration: "6:45", id: "p1" }
                                           ].map((track) => (
                                             <div key={track.id} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
                                               <div className="flex items-center gap-3">
