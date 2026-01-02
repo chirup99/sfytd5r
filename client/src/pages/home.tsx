@@ -18262,7 +18262,11 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
                                       <div className="relative min-h-[200px] border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center">
                                         {activeTab === "Window 1" ? (
-                                          <div className="text-slate-400 text-sm">Window 1 Content Area</div>
+                                          <div className="text-slate-400 text-sm">Window 1 Overview
+                                            <div className="text-slate-500 dark:text-slate-400 text-sm">
+                                              This is the primary context area for Window 1. 
+                                              Switch tabs above to view different information.
+                                            </div></div>
                                         ) : (
                                           <div className="text-slate-400 text-sm">Window 2 Content Area</div>
                                         )}
