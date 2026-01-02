@@ -12891,7 +12891,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
                         {/* Event Image */}
                         <div className="relative z-10 w-20 h-20 flex-shrink-0">
-                          <div className="w-full h-full bg-gradient-to-br from-purple-500/30 to-indigo-700/30 rounded-lg border border-white/20 flex items-center justify-center relative overflow-hidden">
+                          <div className="w-full h-full bg-gradient-to-br from-purple-500/30 to-indigo-700/30 rounded-lg border border-white/20 flex items-center justify-between overflow-hidden">
                             <div className="absolute inset-0 bg-gradient-to-br from-violet-600/20 to-indigo-800/20"></div>
                             <div className="absolute top-1 right-1 w-1 h-1 bg-cyan-400/60 rounded-full"></div>
                             <div className="absolute bottom-1 left-1 w-1 h-1 bg-pink-400/60 rounded-full"></div>
@@ -12944,7 +12944,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                               className="w-full h-full object-cover rounded-lg border border-white/20"
                             />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-purple-400/30 to-blue-600/30 rounded-lg border border-white/20 flex items-center justify-center relative overflow-hidden">
+                            <div className="w-full h-full bg-gradient-to-br from-purple-400/30 to-blue-600/30 rounded-lg border border-white/20 flex items-center justify-between overflow-hidden">
                               <div className="text-white/70 text-[8px] font-medium">BUSINESS</div>
                             </div>
                           )}
@@ -12991,7 +12991,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                               className="w-full h-full object-cover rounded-lg border border-white/20"
                             />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-emerald-400/30 to-cyan-600/30 rounded-lg border border-white/20 flex items-center justify-center relative overflow-hidden">
+                            <div className="w-full h-full bg-gradient-to-br from-emerald-400/30 to-cyan-600/30 rounded-lg border border-white/20 flex items-center justify-between overflow-hidden">
                               <div className="text-white/70 text-[8px] font-medium">STARTUP</div>
                             </div>
                           )}
@@ -13037,7 +13037,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                               className="w-full h-full object-cover rounded-lg border border-white/20"
                             />
                           ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-fuchsia-400/30 to-violet-600/30 rounded-lg border border-white/20 flex items-center justify-center relative overflow-hidden">
+                            <div className="w-full h-full bg-gradient-to-br from-fuchsia-400/30 to-violet-600/30 rounded-lg border border-white/20 flex items-center justify-between overflow-hidden">
                               <div className="text-white/70 text-[8px] font-medium">AI TECH</div>
                             </div>
                           )}
@@ -18213,9 +18213,14 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                 </Button>
                               </DialogTrigger>
                               <DialogContent className="max-w-[700px] p-0 overflow-hidden bg-white dark:bg-slate-900 border-none rounded-xl shadow-2xl">
+                                <div className="absolute top-4 left-0 right-0 flex justify-center pointer-events-none z-[60]">
+                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] opacity-50">Mini Play</div>
+                                </div>
+                                <div className="absolute top-4 left-0 right-0 flex justify-center pointer-events-none z-50">
+                                </div>
                                 <div className="flex flex-col md:flex-row h-full min-h-[350px]">
                                   {/* Left Side: Card Display */}
-                                  <div className="w-full md:w-1/2 p-8 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden border-r border-slate-200 dark:border-slate-700">
+                                  <div className="w-full md:w-1/2 p-8 bg-slate-100 dark:bg-slate-800 flex items-center justify-between overflow-hidden border-r border-slate-200 dark:border-slate-700">
                                     <div className="absolute inset-0 opacity-10">
                                       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] rounded-full bg-gradient-to-br from-violet-500 via-transparent to-transparent"></div>
                                     </div>
@@ -18239,8 +18244,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     </div>
                                   </div>
                                   <div className="w-full md:w-1/2 flex flex-col bg-white dark:bg-slate-900">
-                                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-center relative">
-                                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] opacity-50">Mini Play</div>
+                                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                                     </div>
                                     
                                     <div className="flex-1 overflow-y-auto p-4 space-y-4">
