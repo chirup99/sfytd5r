@@ -18249,19 +18249,12 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         {["Tab 1", "Tab 2", "Tab 3"].map((tab) => (
                                           <button
                                             key={tab}
-                                            onClick={(e) => {
-                                              e.preventDefault();
-                                              e.stopPropagation();
-                                              console.log("Setting active tab to:", tab);
-                                              setActiveTab(tab);
-                                            }}
+                                            onClick={() => setActiveTab(tab)}
                                             className={`relative px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                                               activeTab === tab 
                                                 ? "text-white" 
                                                 : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                                             }`}
-                                            type="button"
-                                            data-testid={`button-tab-${tab.replace(" ", "-").toLowerCase()}`}
                                           >
                                             {activeTab === tab && (
                                               <motion.div
@@ -18275,10 +18268,10 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         ))}
                                       </div>
 
-                                      <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 min-h[160px] flex gap-4">
+                                      <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 min-h-[160px] flex gap-4">
                                         <div className="w-1/3 aspect-square bg-slate-200 dark:bg-slate-800 rounded-lg overflow-hidden shrink-0">
                                           <img 
-                                            src={activeTab === "Tab 1" ? "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2813&auto=format&fit=crop" : activeTab === "Tab 2" ? "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=2080&auto=format&fit=crop" : "https://images.unsplash.com/photo-1454165833767-02a6e30aa601?q=80&w=2070&auto=format&fit=crop"} 
+                                            src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2813&auto=format&fit=crop" 
                                             alt="Tab Content"
                                             className="w-full h-full object-cover"
                                           />
@@ -18294,21 +18287,24 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                             >
                                               <h3 className="text-lg font-bold text-slate-900 dark:text-white">{activeTab}</h3>
                                               <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-4">
-                                                {activeTab === "Tab 1" && "Step 1: Identity verification initiated. Please ensure your document is ready for scanning."}
-                                                {activeTab === "Tab 2" && "Step 2: Biometric authentication required. Position your face within the frame."}
-                                                {activeTab === "Tab 3" && "Step 3: Final confirmation. Your details are being encrypted and securely stored."}
+                                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. 
+                                                This is the content for {activeTab.toLowerCase()} of the identity verification process.
                                               </p>
                                             </motion.div>
                                           </AnimatePresence>
                                         </div>
                                       </div>
-
+                                      
                                       <p className="text-sm text-slate-500 dark:text-slate-400">
                                         Enter your secure PIN to complete verification.
                                       </p>
+
                                     </div>
-                                    <div className="flex items-center gap-3 pt-6"></div>
+
+                                    <div className="flex items-center gap-3 pt-6">
+                                    </div>
                                   </div>
+                                </div>
                               </DialogContent>
                             </Dialog>
                           </div>
