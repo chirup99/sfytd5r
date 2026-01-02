@@ -18255,6 +18255,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                                 ? "text-white" 
                                                 : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                                             }`}
+                                            data-testid={`button-tab-${tab.replace(" ", "-").toLowerCase()}`}
                                           >
                                             {activeTab === tab && (
                                               <motion.div
@@ -18295,16 +18296,12 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           </AnimatePresence>
                                         </div>
                                       </div>
-                                      </div>
-                                      
+
                                       <p className="text-sm text-slate-500 dark:text-slate-400">
                                         Enter your secure PIN to complete verification.
                                       </p>
-
                                     </div>
-
-                                    <div className="flex items-center gap-3 pt-6">
-                                    </div>
+                                    <div className="flex items-center gap-3 pt-6"></div>
                                   </div>
                                 </div>
                               </DialogContent>
