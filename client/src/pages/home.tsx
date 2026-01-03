@@ -178,6 +178,8 @@ import {
   Filter,
   Radar,
   RefreshCcw,
+  Pause,
+  Volume2,
   MoreVertical,
   ChevronsUpDown,
   CalendarDays,
@@ -1927,6 +1929,8 @@ export default function Home() {
   // View-only mode for unauthenticated users - they can view but not interact with protected features
   const [isViewOnlyMode, setIsViewOnlyMode] = useState(false);
   const [selectedAudioTrack, setSelectedAudioTrack] = useState<{title: string, duration: string} | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
 
   // Get current user data from AWS DynamoDB
   const { currentUser } = useCurrentUser();
@@ -18255,7 +18259,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           {[
                                             { title: "Detachment Breathing", duration: "3:20", id: "m1" }
                                           ].map((track) => (
-                                            <div key={track.id} onClick={() => setSelectedAudioTrack(track)} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                                            <div key={track.id} onClick={() => { setSelectedAudioTrack(track); setIsPlaying(true); setAudioProgress(0); }} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
                                               <div className="flex items-center gap-3">
                                                 <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:bg-violet-500 transition-colors">
                                                   <Play className="w-3 h-3 text-violet-500 group-hover:text-white" />
@@ -18278,7 +18282,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           {[
                                             { title: "Risk Management Mindset", duration: "6:45", id: "p1" }
                                           ].map((track) => (
-                                            <div key={track.id} onClick={() => setSelectedAudioTrack(track)} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                                            <div key={track.id} onClick={() => { setSelectedAudioTrack(track); setIsPlaying(true); setAudioProgress(0); }} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
                                               <div className="flex items-center gap-3">
                                                 <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:bg-blue-500 transition-colors">
                                                   <Play className="w-3 h-3 text-blue-500 group-hover:text-white" />
@@ -18293,16 +18297,64 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     </div>
 
                                     {/* Footer / Now Playing Stub */}
-                                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                                      <div className={`w-8 h-8 rounded bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg ${selectedAudioTrack ? "animate-none" : "animate-pulse"}`}>
-                                        <Music2 className="w-4 h-4 text-white" />
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <div className="text-[10px] font-bold text-slate-900 dark:text-slate-100 truncate">
-                                          {selectedAudioTrack ? selectedAudioTrack.title : "Select a session"}
+                                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
+                                      {/* Progress Bar */}
+                                      <div className="mb-2 px-1">
+                                        <div className="relative w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full cursor-pointer group">
+                                          <div 
+                                            className="absolute top-0 left-0 h-full bg-violet-500 rounded-full transition-all duration-300" 
+                                            style={{ width: selectedAudioTrack ? `${audioProgress || 30}%` : "0%" }}
+                                          ></div>
+                                          <div 
+                                            className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white border border-violet-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                            style={{ left: selectedAudioTrack ? `${audioProgress || 30}%` : "0%" }}
+                                          ></div>
                                         </div>
-                                        <div className="text-[9px] text-slate-500 uppercase tracking-tighter">
-                                          {selectedAudioTrack ? `Playing • ${selectedAudioTrack.duration}` : "Ready to play"}
+                                      </div>
+
+                                      <div className="flex items-center gap-3">
+                                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg ${selectedAudioTrack && isPlaying ? "animate-pulse" : ""}`}>
+                                          <Music2 className="w-5 h-5 text-white" />
+                                        </div>
+                                        
+                                        <div className="flex-1 min-w-0">
+                                          <div className="text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate">
+                                            {selectedAudioTrack ? selectedAudioTrack.title : "Select a session"}
+                                          </div>
+                                          <div className="text-[9px] text-slate-500 uppercase tracking-tighter flex items-center gap-2">
+                                            {selectedAudioTrack ? (
+                                              <>
+                                                <span className="text-violet-500 font-medium">{isPlaying ? "Playing" : "Paused"}</span>
+                                                <span className="opacity-50">•</span>
+                                                <span>{selectedAudioTrack.duration}</span>
+                                              </>
+                                            ) : (
+                                              "Ready to play"
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        {/* Playback Controls */}
+                                        <div className="flex items-center gap-1">
+                                          <Button size="icon" variant="ghost" className="h-7 w-7 text-slate-400 hover:text-slate-600" disabled={!selectedAudioTrack}>
+                                            <SkipBack className="h-3.5 w-3.5" />
+                                          </Button>
+                                          <Button 
+                                            size="icon" 
+                                            variant="ghost" 
+                                            className="h-8 w-8 bg-violet-500 hover:bg-violet-600 text-white rounded-full shadow-sm"
+                                            disabled={!selectedAudioTrack}
+                                            onClick={() => setIsPlaying(!isPlaying)}
+                                          >
+                                            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
+                                          </Button>
+                                          <Button size="icon" variant="ghost" className="h-7 w-7 text-slate-400 hover:text-slate-600" disabled={!selectedAudioTrack}>
+                                            <SkipForward className="h-3.5 w-3.5" />
+                                          </Button>
+                                          <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                                          <Button size="icon" variant="ghost" className="h-7 w-7 text-slate-400 hover:text-slate-600">
+                                            <Volume2 className="h-3.5 w-3.5" />
+                                          </Button>
                                         </div>
                                       </div>
                                     </div>
