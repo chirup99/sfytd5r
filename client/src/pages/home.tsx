@@ -1926,6 +1926,7 @@ export default function Home() {
   const [authInitialized, setAuthInitialized] = useState(false);
   // View-only mode for unauthenticated users - they can view but not interact with protected features
   const [isViewOnlyMode, setIsViewOnlyMode] = useState(false);
+  const [selectedAudioTrack, setSelectedAudioTrack] = useState<{title: string, duration: string} | null>(null);
 
   // Get current user data from AWS DynamoDB
   const { currentUser } = useCurrentUser();
@@ -18254,7 +18255,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           {[
                                             { title: "Detachment Breathing", duration: "3:20", id: "m1" }
                                           ].map((track) => (
-                                            <div key={track.id} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                                            <div key={track.id} onClick={() => setSelectedAudioTrack(track)} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
                                               <div className="flex items-center gap-3">
                                                 <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:bg-violet-500 transition-colors">
                                                   <Play className="w-3 h-3 text-violet-500 group-hover:text-white" />
@@ -18277,7 +18278,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           {[
                                             { title: "Risk Management Mindset", duration: "6:45", id: "p1" }
                                           ].map((track) => (
-                                            <div key={track.id} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                                            <div key={track.id} onClick={() => setSelectedAudioTrack(track)} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
                                               <div className="flex items-center gap-3">
                                                 <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:bg-blue-500 transition-colors">
                                                   <Play className="w-3 h-3 text-blue-500 group-hover:text-white" />
@@ -18293,12 +18294,16 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
                                     {/* Footer / Now Playing Stub */}
                                     <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg animate-pulse">
+                                      <div className={`w-8 h-8 rounded bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg ${selectedAudioTrack ? "animate-none" : "animate-pulse"}`}>
                                         <Music2 className="w-4 h-4 text-white" />
                                       </div>
                                       <div className="flex-1 min-w-0">
-                                        <div className="text-[10px] font-bold text-slate-900 dark:text-slate-100 truncate">Select a session</div>
-                                        <div className="text-[9px] text-slate-500 uppercase tracking-tighter">Ready to play</div>
+                                        <div className="text-[10px] font-bold text-slate-900 dark:text-slate-100 truncate">
+                                          {selectedAudioTrack ? selectedAudioTrack.title : "Select a session"}
+                                        </div>
+                                        <div className="text-[9px] text-slate-500 uppercase tracking-tighter">
+                                          {selectedAudioTrack ? `Playing • ${selectedAudioTrack.duration}` : "Ready to play"}
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
