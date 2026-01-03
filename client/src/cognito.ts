@@ -138,8 +138,11 @@ export async function cognitoSignIn(email: string, password: string): Promise<{ 
 export async function cognitoSignInWithGoogle(): Promise<void> {
   initializeCognito();
   
+  // Using customState to pass any data if needed
   await signInWithRedirect({
-    provider: 'Google',
+    provider: {
+      custom: 'Google'
+    }
   });
 }
 
