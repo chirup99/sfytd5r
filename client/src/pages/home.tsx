@@ -18303,10 +18303,9 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         <div className="absolute inset-0 z-0">
                                           <img 
                                             src={`https://img.youtube.com/vi/${selectedAudioTrack.youtubeId}/maxresdefault.jpg`} 
-                                            className="w-full h-full object-cover opacity-40 blur-[2px]"
+                                            className="w-full h-full object-cover"
                                             alt=""
                                           />
-                                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-slate-900/40"></div>
                                         </div>
                                       )}
                                       <div className="flex justify-between items-start">
