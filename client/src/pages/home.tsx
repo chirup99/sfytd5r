@@ -18409,7 +18409,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                       
                                       {/* Audio Progress Slider */}
                                       <div className="px-1">
-                                        <div className="relative w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                        <div className="relative w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden cursor-pointer" onClick={(e) => { if (selectedAudioTrack && youtubePlayerRef.current && duration > 0) { const rect = e.currentTarget.getBoundingClientRect(); const x = e.clientX - rect.left; const clickedProgress = x / rect.width; const newTime = clickedProgress * duration; youtubePlayerRef.current.seekTo(newTime, true); setCurrentTime(newTime); setAudioProgress(clickedProgress * 100); } } }>
                                           <div 
                                             className="absolute top-0 left-0 h-full bg-gradient-to-r from-violet-500 to-purple-600 transition-all duration-300"
                                             style={{ width: `${selectedAudioTrack ? audioProgress : 0}%` }}
