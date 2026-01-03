@@ -18324,6 +18324,17 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           <div className="text-[10px] font-mono text-white/60"></div>
                                         </div>
                                       </div>
+                                      {selectedAudioTrack?.youtubeId && (
+                                        <a 
+                                          href={`https://www.youtube.com/watch?v=${selectedAudioTrack.youtubeId}`} 
+                                          target="_blank" 
+                                          rel="noopener noreferrer"
+                                          className="absolute bottom-2 right-2 z-20 p-1 bg-black/50 hover:bg-black/70 rounded-md transition-colors group"
+                                          title="Watch on YouTube"
+                                        >
+                                          <SiYoutube className="w-5 h-5 text-red-600 group-hover:text-red-500" />
+                                        </a>
+                                      )}
                                     </motion.div>
                                   </div>
                                   <div className="w-full md:w-1/2 flex flex-col bg-white dark:bg-slate-900">
