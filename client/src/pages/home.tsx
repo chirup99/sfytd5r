@@ -18312,9 +18312,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         <div className="text-[10px] font-medium tracking-widest text-black uppercase"></div>
                                         <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider"></div>
                                       </div>
-                                      <div className="relative h-20 w-full overflow-hidden">
-                                        <div className="absolute bottom-[-100%] left-[-10%] w-[120%] h-[200%] rounded-full bg-gradient-to-t from-blue-600/40 via-blue-500/10 to-transparent blur-xl"></div>
-                                      </div>
                                       <div className="space-y-4">
                                         <div className="flex items-center gap-2">
                                           <div className="text-sm font-bold text-white tracking-[0.2em]"></div>
