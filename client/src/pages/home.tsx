@@ -18222,36 +18222,21 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     <div className="absolute inset-0 opacity-10">
                                       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] rounded-full bg-gradient-to-br from-violet-500 via-transparent to-transparent"></div>
                                     </div>
-                                    <div className="flex flex-col gap-4 w-full">
-                                      {/* Meditation Card */}
-                                      <div className={`relative w-full aspect-[1.6/1] ${selectedAudioTrack?.id.startsWith("m") ? "bg-violet-900" : "bg-black/40"} rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden transition-all duration-500`}>
-                                        <div className="flex justify-between items-start">
-                                          <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase">Meditation</div>
-                                          {selectedAudioTrack?.id.startsWith("m") && <div className="text-[10px] font-bold text-violet-400 uppercase tracking-wider animate-pulse">Active</div>}
-                                        </div>
-                                        <div className="relative h-12 w-full overflow-hidden">
-                                          <div className="absolute bottom-[-100%] left-[-10%] w-[120%] h-[200%] rounded-full bg-gradient-to-t from-violet-600/40 via-violet-500/10 to-transparent blur-xl"></div>
-                                        </div>
-                                        <div className="space-y-4">
-                                          <div className="flex items-center gap-2">
-                                            <div className="text-sm font-bold text-white tracking-[0.2em]">SESS-MED-01</div>
-                                          </div>
-                                        </div>
+                                    <div className={`relative w-full aspect-[1.6/1] ${selectedAudioTrack?.id.startsWith("m") ? "bg-violet-900" : selectedAudioTrack?.id.startsWith("p") ? "bg-blue-900" : "bg-black"} rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden`}>
+                                      <div className="flex justify-between items-start">
+                                        <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase"></div>
+                                        <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider"></div>
                                       </div>
-
-                                      {/* Psychology Card */}
-                                      <div className={`relative w-full aspect-[1.6/1] ${selectedAudioTrack?.id.startsWith("p") ? "bg-blue-900" : "bg-black/40"} rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden transition-all duration-500`}>
-                                        <div className="flex justify-between items-start">
-                                          <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase">Psychology</div>
-                                          {selectedAudioTrack?.id.startsWith("p") && <div className="text-[10px] font-bold text-blue-400 uppercase tracking-wider animate-pulse">Active</div>}
+                                      <div className="relative h-20 w-full overflow-hidden">
+                                        <div className="absolute bottom-[-100%] left-[-10%] w-[120%] h-[200%] rounded-full bg-gradient-to-t from-blue-600/40 via-blue-500/10 to-transparent blur-xl"></div>
+                                      </div>
+                                      <div className="space-y-4">
+                                        <div className="flex items-center gap-2">
+                                          <div className="text-sm font-bold text-white tracking-[0.2em]"></div>
                                         </div>
-                                        <div className="relative h-12 w-full overflow-hidden">
-                                          <div className="absolute bottom-[-100%] left-[-10%] w-[120%] h-[200%] rounded-full bg-gradient-to-t from-blue-600/40 via-blue-500/10 to-transparent blur-xl"></div>
-                                        </div>
-                                        <div className="space-y-4">
-                                          <div className="flex items-center gap-2">
-                                            <div className="text-sm font-bold text-white tracking-[0.2em]">SESS-PSY-01</div>
-                                          </div>
+                                        <div className="flex justify-between items-end">
+                                          <div className="text-xs font-medium text-white/80 uppercase tracking-widest"></div>
+                                          <div className="text-[10px] font-mono text-white/60"></div>
                                         </div>
                                       </div>
                                     </div>
@@ -18260,6 +18245,12 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-center relative">
                                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] opacity-50">Mini Play</div>
                                     </div>
+                                    
+                                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                      {/* Meditation Section */}
+                                      <div>
+                                        <h4 className="text-[10px] font-bold text-violet-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                          <span className="w-1 h-1 rounded-full bg-violet-500"></span>
                                           Meditation
                                         </h4>
                                         <div className="space-y-1">
