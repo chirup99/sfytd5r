@@ -78,3 +78,4 @@ The application is now fully configured for Angel One streaming without OAuth!
 [x] 2. Restart the workflow - Server running on port 5000, workflow status: RUNNING
 [x] 3. Verify the project is working - Angel One authenticated (P176266), JWT tokens generated, WebSocket streaming active with real-time market data (BANKNIFTY, SENSEX, GOLD)
 [x] 4. Import completed successfully - All systems operational
+[x] 5. Fixed email validation in landing page to prevent invalid email formats during sign-up.
