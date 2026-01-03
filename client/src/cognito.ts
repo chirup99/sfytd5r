@@ -138,11 +138,9 @@ export async function cognitoSignIn(email: string, password: string): Promise<{ 
 export async function cognitoSignInWithGoogle(): Promise<void> {
   initializeCognito();
   
-  // Using customState to pass any data if needed
+  // Directly trigger Google OAuth via AWS Cognito
   await signInWithRedirect({
-    provider: {
-      custom: 'Google'
-    }
+    provider: 'Google'
   });
 }
 
