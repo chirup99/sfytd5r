@@ -182,13 +182,35 @@ export default function Landing() {
 
       toast({
         title: "Account Verified",
-        description: "Your account has been verified successfully. You can now login.",
+        description: "Your account has been verified successfully. Logging you in...",
       });
 
-      setIsSignupVerification(false);
-      setIsLogin(true);
-      setOtp("");
-      setPassword("");
+      // Now automatically sign the user in since we have the password and email from state
+      console.log('🔐 Signing in after verification...');
+      const user = await cognitoSignIn(email, password);
+      
+      localStorage.setItem('currentUserId', user.userId);
+      localStorage.setItem('currentUserEmail', user.email);
+      localStorage.setItem('currentUserName', user.name);
+
+      const token = await getCognitoToken();
+      if (token) {
+        try {
+          await fetch('/api/auth/cognito', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ name: user.name, email: user.email }),
+          });
+        } catch (err) {
+          console.warn('Backend sync failed, continuing...', err);
+        }
+      }
+
+      console.log('✅ Auto-login successful, redirecting to app...');
+      window.location.href = "/";
     } catch (error: any) {
       console.error('❌ Verification error:', error);
       toast({
