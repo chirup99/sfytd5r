@@ -46,8 +46,16 @@ const cognitoConfig = {
         oauth: {
           domain: import.meta.env.VITE_COGNITO_DOMAIN || '',
           scopes: ['openid', 'email', 'profile'],
-          redirectSignIn: [getRedirectUrl()],
-          redirectSignOut: [getRedirectUrl()],
+          redirectSignIn: [
+            'https://perala.in/landing',
+            'http://localhost:5000/landing',
+            window.location.origin + '/landing'
+          ],
+          redirectSignOut: [
+            'https://perala.in/landing',
+            'http://localhost:5000/landing',
+            window.location.origin + '/landing'
+          ],
           responseType: 'code' as const,
         },
       },
