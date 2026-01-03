@@ -1,15 +1,22 @@
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence } from "framer-motion";
 import { BrokerData } from "@/components/broker-data";
-import React, {
+import React,
+  {
   useState,
   useEffect,
   useMemo,
   useCallback,
   useRef,
-} from "react";
+  } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { AuthButtonAngelOne, AngelOneStatus, AngelOneApiStatistics, AngelOneSystemStatus, AngelOneLiveMarketPrices } from "@/components/auth-button-angelone";
+import { AuthButtonAngelOne,
+  AngelOneStatus,
+  AngelOneApiStatistics,
+  AngelOneSystemStatus,
+  AngelOneLiveMarketPrices } from "@/components/auth-button-angelone";
 import { AuthButtonUpstox } from "@/components/auth-button-upstox";
 import { TradingJournalModal } from "@/components/trading-journal-modal";
 // REMOVED: All Fyers-related imports
@@ -27,7 +34,7 @@ import { MinimalChart } from "@/components/minimal-chart";
 import {
   MultipleImageUpload,
   MultipleImageUploadRef,
-} from "@/components/multiple-image-upload";
+  } from "@/components/multiple-image-upload";
 import { IndicatorCrossingsDisplay } from "@/components/indicator-crossings-display";
 import { BattuScanSimulation } from "@/components/battu-scan-simulation";
 import { FourCandleRuleScanner } from "@/components/four-candle-rule-scanner";
@@ -42,9 +49,37 @@ import { PersonalHeatmap } from "@/components/PersonalHeatmap";
 import { useTheme } from "@/components/theme-provider";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAngelOneAutoconnect } from "@/hooks/useAngelOneAutoconnect";
-import { cognitoSignOut, getCognitoToken, sendEmailVerificationCode, confirmEmailVerification, checkEmailVerified } from "@/cognito";
-import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickSeries, LineSeries, HistogramSeries, IPriceLine, createSeriesMarkers } from 'lightweight-charts';
-import { ArrowLeft, Banknote, Clock, ExternalLink, Info, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award, Headset, X, Play, Music2 } from "lucide-react";
+import { cognitoSignOut,
+  getCognitoToken,
+  sendEmailVerificationCode,
+  confirmEmailVerification,
+  checkEmailVerified } from "@/cognito";
+import { createChart,
+  ColorType,
+  IChartApi,
+  ISeriesApi,
+  CandlestickSeries,
+  LineSeries,
+  HistogramSeries,
+  IPriceLine,
+  createSeriesMarkers } from 'lightweight-charts';
+import { ArrowLeft,
+  Banknote,
+  Clock,
+  ExternalLink,
+  Info,
+  Loader2,
+  LogOut,
+  Newspaper,
+  RefreshCw,
+  Save,
+  TrendingUp,
+  Award,
+  Headset,
+  X,
+  Play,
+  Music2
+} from "lucide-react";
 import { parseBrokerTrades, ParseError } from "@/utils/trade-parser";
 
 // Global window type declaration for audio control
@@ -178,7 +213,6 @@ import {
   Filter,
   Radar,
   RefreshCcw,
-  Pause,
   Volume2,
   MoreVertical,
   ChevronsUpDown,
@@ -840,7 +874,6 @@ function SwipeableCardStack({
                     {isTop && isLoading ? (
                       <RotateCcw className="w-4 h-4 animate-spin" />
                     ) : isTop && isPlaying ? (
-                      <Pause className="w-4 h-4" />
                     ) : (
                       <Play className="w-4 h-4" />
                     )}
@@ -848,7 +881,6 @@ function SwipeableCardStack({
                       {isTop && isLoading
                         ? "Generating..."
                         : isTop && isPlaying
-                          ? "Pause"
                           : card.buttonText}
                     </span>
                   </div>
@@ -13177,7 +13209,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                       <SkipBack className="w-3 h-3" />
                     </Button>
                     <Button variant="ghost" size="sm" className="text-white w-6 h-6 p-0">
-                      <Pause className="w-3 h-3" />
                     </Button>
                     <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white w-6 h-6 p-0">
                       <SkipForward className="w-3 h-3" />
@@ -18324,7 +18355,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           <div className="text-[9px] text-slate-500 uppercase tracking-tighter flex items-center gap-2">
                                             {selectedAudioTrack ? (
                                               <>
-                                                <span className="text-violet-500 font-medium">{isPlaying ? "Playing" : "Paused"}</span>
                                                 <span className="opacity-50">•</span>
                                                 <span>{selectedAudioTrack.duration}</span>
                                               </>
@@ -18346,7 +18376,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                             disabled={!selectedAudioTrack}
                                             onClick={() => setIsPlaying(!isPlaying)}
                                           >
-                                            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
                                           </Button>
                                           <Button size="icon" variant="ghost" className="h-7 w-7 text-slate-400 hover:text-slate-600" disabled={!selectedAudioTrack}>
                                             <SkipForward className="h-3.5 w-3.5" />
