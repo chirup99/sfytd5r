@@ -241,11 +241,39 @@ export default function Landing() {
 
     setIsEmailLoading(true);
     try {
-      let user;
-      
       if (isLogin) {
         console.log('🔐 Signing in with AWS Cognito...');
-        user = await cognitoSignIn(email, password);
+        const user = await cognitoSignIn(email, password);
+        
+        localStorage.setItem('currentUserId', user.userId);
+        localStorage.setItem('currentUserEmail', user.email);
+        localStorage.setItem('currentUserName', user.name);
+
+        console.log('🔑 Authentication successful:', { 
+          action: 'login',
+          userId: user.userId,
+          email: user.email 
+        });
+
+        const token = await getCognitoToken();
+        if (token) {
+          try {
+            await fetch('/api/auth/cognito', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ name: user.name, email: user.email }),
+              signal: AbortSignal.timeout(8000)
+            });
+          } catch (fetchError) {
+            console.warn('⚠️ Backend sync failed, but Cognito Auth succeeded. Continuing...', fetchError);
+          }
+        }
+
+        console.log('✅ Authentication successful, redirecting to app...');
+        window.location.href = "/";
       } else {
         console.log('🔐 Signing up with AWS Cognito...');
         await cognitoSignUp(email, password, name);
@@ -256,38 +284,7 @@ export default function Landing() {
           title: "Verification Required",
           description: "Please check your email for a verification code.",
         });
-        return;
       }
-
-      localStorage.setItem('currentUserId', user.userId);
-      localStorage.setItem('currentUserEmail', user.email);
-      localStorage.setItem('currentUserName', user.name);
-
-      console.log('🔑 Authentication successful:', { 
-        action: isLogin ? 'login' : 'register',
-        userId: user.userId,
-        email: user.email 
-      });
-
-      const token = await getCognitoToken();
-      if (token) {
-        try {
-          await fetch('/api/auth/cognito', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ name: user.name, email: user.email }),
-            signal: AbortSignal.timeout(8000)
-          });
-        } catch (fetchError) {
-          console.warn('⚠️ Backend sync failed, but Cognito Auth succeeded. Continuing...', fetchError);
-        }
-      }
-
-      console.log('✅ Authentication successful, redirecting to app...');
-      window.location.href = "/";
     } catch (error: any) {
       console.error('❌ Authentication error:', error);
       
