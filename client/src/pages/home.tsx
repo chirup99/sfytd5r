@@ -18222,33 +18222,28 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     <div className="absolute inset-0 opacity-10">
                                       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] rounded-full bg-gradient-to-br from-violet-500 via-transparent to-transparent"></div>
                                     </div>
-                                    <div className="relative w-full aspect-[1.6/1] bg-black rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden group/card">
-                                      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 via-transparent to-blue-500/20 opacity-0 group-hover/card:opacity-100 transition-opacity duration-700"></div>
-                                      <div className="flex justify-between items-start z-10">
-                                        <div className="text-[10px] font-medium tracking-widest text-white/40 uppercase">Audio Session</div>
-                                        <div className="text-[10px] font-bold text-violet-400 uppercase tracking-wider">{selectedAudioTrack ? "Now Playing" : "Ready"}</div>
+                                    <div className="relative w-full aspect-[1.6/1] bg-black rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden">
+                                      <div className="flex justify-between items-start">
+                                        <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase"></div>
+                                        <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider"></div>
                                       </div>
-                                      
-                                      <div className="flex-1 flex items-center justify-center relative z-10">
-                                        <div className={`relative transition-all duration-700 transform ${selectedAudioTrack ? "scale-110" : "scale-100"}`}>
-                                          <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${selectedAudioTrack?.id?.startsWith("m") ? "from-violet-500 to-purple-600" : "from-blue-500 to-cyan-600"} flex items-center justify-center shadow-[0_0_30px_rgba(139,92,246,0.3)] relative overflow-hidden`}>
-                                            <Music2 className={`w-10 h-10 text-white ${isAudioPlaying ? "animate-bounce" : ""}`} />
-                                            {isAudioPlaying && (
-                                              <div className="absolute inset-0 flex items-center justify-center">
-                                                <div className="w-full h-full border-4 border-white/20 rounded-full animate-[ping_2s_linear_infinite]"></div>
-                                              </div>
-                                            )}
-                                          </div>
+                                      <div className="relative h-20 w-full overflow-hidden">
+                                        <div className="absolute bottom-[-100%] left-[-10%] w-[120%] h-[200%] rounded-full bg-gradient-to-t from-blue-600/40 via-blue-500/10 to-transparent blur-xl"></div>
+                                      </div>
+                                      <div className="space-y-4">
+                                        <div className="flex items-center gap-2">
+                                          <div className="text-sm font-bold text-white tracking-[0.2em]"></div>
+                                        </div>
+                                        <div className="flex justify-between items-end">
+                                          <div className="text-xs font-medium text-white/80 uppercase tracking-widest"></div>
+                                          <div className="text-[10px] font-mono text-white/60"></div>
                                         </div>
                                       </div>
-
-                                      <div className="space-y-1 z-10">
-                                        <div className="text-xs font-bold text-white tracking-widest uppercase truncate">{selectedAudioTrack?.title || "Select Track"}</div>
-                                        <div className="flex justify-between items-center">
-                                          <div className="text-[9px] font-medium text-white/50 uppercase tracking-[0.2em]">{selectedAudioTrack?.id?.startsWith("m") ? "Meditation" : "Psychology"}</div>
-                                          <div className="text-[10px] font-mono text-white/40">{selectedAudioTrack?.duration || "--:--"}</div>
-                                        </div>
-                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="w-full md:w-1/2 flex flex-col bg-white dark:bg-slate-900">
+                                    <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-center relative">
+                                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] opacity-50">Mini Play</div>
                                     </div>
                                     
                                     <div className="flex-1 overflow-y-auto p-4 space-y-4">
