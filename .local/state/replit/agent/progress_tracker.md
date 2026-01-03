@@ -76,5 +76,5 @@ The application is now fully configured for Angel One streaming without OAuth!
 
 [x] 1. Install the required packages - dotenv installed successfully via npm
 [x] 2. Restart the workflow - Server running on port 5000 with webview
-[x] 3. Verify the project is working - Angel One authenticated (P176266), WebSocket streaming live data (BANKNIFTY: 60150.95, SENSEX: 85762.01, GOLD: 37245.18)
+[x] 3. Verify the project is working - Angel One authenticated (P176266), JWT tokens generated successfully
 [x] 4. Import completed successfully - All systems operational
