@@ -81,3 +81,4 @@ The application is now fully configured for Angel One streaming without OAuth!
 [x] 5. Fixed email validation in landing page to prevent invalid email formats during sign-up.
 [x] 6. Enhanced email validation regex for stricter format checking.
 [x] 7. Implemented server-side email validation for added security.
+[x] 8. Added GOOGLE_CLIENT_SECRET to environment variables as requested by the user.
