@@ -18354,7 +18354,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         </h4>
                                         <div className="space-y-1">
                                           {[
-                                            { title: "Risk Management Mindset", duration: "6:45", id: "p1", youtubeId: "KnppzfiZcgM" }
+                                            { title: 'Bruce Lee: "Your Greatest Enemy Is Within"', duration: "6:45", id: "p1", youtubeId: "KnppzfiZcgM" }
                                           ].map((track) => (
                                             <div key={track.id} onClick={() => setSelectedAudioTrack(track)} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
                                               <div className="flex items-center gap-3">
