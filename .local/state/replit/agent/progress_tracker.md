@@ -35,41 +35,6 @@ ANGEL_ONE_API_KEY=your_api_key
 ANGEL_ONE_TOTP_SECRET=your_totp_secret
 ```
 
-### TEST ENDPOINT:
-
-```bash
-curl -X POST http://localhost:5000/api/angelone/auto-login \
-  -H "Content-Type: application/json" \
-  -d '{}'
-```
-
-### RESPONSE:
-
-```json
-{
-  "success": true,
-  "message": "Auto-login successful",
-  "token": "JWT_TOKEN",
-  "refreshToken": "REFRESH_TOKEN", 
-  "feedToken": "FEED_TOKEN",
-  "clientCode": "P176266",
-  "isAutoLogin": true
-}
-```
-
-### ADVANTAGES:
-
-- No OAuth popup
-- No redirect URL blocking  
-- No static IP issues
-- Instant authentication
-- Automatic TOTP generation
-- Uses backend credentials securely
-- Tokens persist in localStorage
-- Falls back gracefully if auto-login fails
-
-The application is now fully configured for Angel One streaming without OAuth!
-
 ---
 
 ## IMPORT SESSION (Jan 3, 2026 - Current)
@@ -81,4 +46,6 @@ The application is now fully configured for Angel One streaming without OAuth!
 [x] 5. Fixed email validation in landing page to prevent invalid email formats during sign-up.
 [x] 6. Enhanced email validation regex for stricter format checking.
 [x] 7. Implemented server-side email validation for added security.
-[x] 8. Added GOOGLE_CLIENT_SECRET to environment variables as requested by the user.
+[x] 8. Added GOOGLE_CLIENT_SECRET to environment variables.
+[x] 9. Fixed Google Auth button by exporting and importing `getRedirectUrl` for correct OAuth flow logging and configuration.
+[x] 10. Confirmed AWS Credentials (AKIA...XDML) are correctly loaded from secrets and DynamoDB is initialized.

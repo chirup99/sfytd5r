@@ -11,7 +11,8 @@ import {
   getCognitoToken,
   initializeCognito,
   cognitoForgotPassword,
-  cognitoConfirmResetPassword
+  cognitoConfirmResetPassword,
+  getRedirectUrl
 } from "@/cognito";
 
 export default function Landing() {
@@ -133,9 +134,12 @@ export default function Landing() {
     setIsGoogleLoading(true);
     try {
       console.log('🔐 Initiating Google OAuth via AWS Cognito...');
+      console.log('   Redirect URI:', getRedirectUrl());
+      console.log('   Cognito Domain:', import.meta.env.VITE_COGNITO_DOMAIN);
       await cognitoSignInWithGoogle();
     } catch (error: any) {
       console.error("Google sign-in error:", error);
+      console.error("Error stack:", error.stack);
       
       if (error.message?.includes('not configured')) {
         toast({

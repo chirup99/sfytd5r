@@ -25,7 +25,7 @@ async function exchangeCodeForSession(): Promise<boolean> {
 
 // Dynamically determine redirect URLs based on current origin
 // This ensures OAuth works from both dev domain and production domain
-const getRedirectUrl = () => {
+export const getRedirectUrl = () => {
   const currentOrigin = window.location.origin;
   const prodDomain = 'https://perala.in';
   
