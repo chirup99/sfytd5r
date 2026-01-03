@@ -836,11 +836,12 @@ function SwipeableCardStack({
                 >
                   <div className="flex items-center gap-2">
                     {isTop && isLoading ? (
-                      ) : isTop && isPlaying ? (
-                        <Pause className="w-4 h-4" />
-                      ) : (
-                        <Play className="w-4 h-4" />
-                      )
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : isTop && isPlaying ? (
+                      <Pause className="w-4 h-4" />
+                    ) : (
+                      <Play className="w-4 h-4" />
+                    )}
                     <span>
                       {isTop && isLoading
                         ? "Generating..."
@@ -848,6 +849,8 @@ function SwipeableCardStack({
                           ? "Pause"
                           : card.buttonText}
                     </span>
+                  </div>
+                </Button>
                   </div>
                 </Button>
               </div>
