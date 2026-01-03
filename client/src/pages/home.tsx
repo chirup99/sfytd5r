@@ -107,83 +107,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  TrendingDown,
-  Activity,
-  Calendar,
-  BarChart3,
-  
-  Pause,
-  RotateCcw,
-  RotateCw,
-  DollarSign,
-  Zap,
-  Sun,
-  Moon,
-  GraduationCap,
-  Download,
-  Mic,
-  MessageCircle,
-  BookOpen,
-  Home as HomeIcon,
-  Search,
-  Code,
-  PenTool,
-  Target,
-  Grid3X3,
-  Send,
-  Sparkles,
-  Users,
-  Upload,
-  Timer,
-  Edit,
-  Check,
-  Mail,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  ChevronUp,
-  Tag,
-  Trash2,
-  AlertTriangle,
-  AlertCircle,
-  Shield,
-  Bot,
-  User,
-  SkipBack,
-  SkipForward,
-  Heart,
-  Lightbulb,
-  Star,
-  FileText,
-  Bell,
-  Briefcase,
-  PieChart,
-  Lock,
-  Trophy,
-  Radio,
-  Eye,
-  EyeOff,
-  Blocks,
-  Hammer,
-  Plus,
-  Share2,
-  Copy,
-  Link2,
-  Facebook,
-  Linkedin,
-  Twitter,
-  Settings,
-  Filter,
-  Radar,
-  RefreshCcw,
-  MoreVertical,
-  ChevronsUpDown,
-  CalendarDays,
-  Brain,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowLeft, Banknote, Clock, ExternalLink, Info, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award, Headset, X, Play, Music2, Pause, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import { AIChatWindow } from "@/components/ai-chat-window";
 import { BrokerImportDialog } from "@/components/broker-import-dialog";
 import { TradeBlockEditor } from "@/components/TradeBlockEditor";
@@ -18345,8 +18269,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         </span>
                                         <Volume2 className="h-3.5 w-3.5 text-slate-400" />
                                       </div>
-                                    </div>
-                                  </div>
                                     </div>
                                   </div>
                                 </div>
