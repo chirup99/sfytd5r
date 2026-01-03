@@ -18298,7 +18298,17 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     <div className="absolute inset-0 opacity-10">
                                       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] rounded-full bg-gradient-to-br from-violet-500 via-transparent to-transparent"></div>
                                     </div>
-                                    <motion.div key={selectedAudioTrack?.id || "none"} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className={`relative w-full aspect-[1.6/1] ${selectedAudioTrack?.id.startsWith("m") ? "bg-violet-900" : selectedAudioTrack?.id.startsWith("p") ? "bg-blue-900" : "bg-black"} rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden`}>
+                                    <motion.div key={selectedAudioTrack?.id || "none"} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className={`relative w-full aspect-[1.6/1] rounded-2xl shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden`}>
+                                      {selectedAudioTrack?.youtubeId && (
+                                        <div className="absolute inset-0 z-0">
+                                          <img 
+                                            src={`https://img.youtube.com/vi/${selectedAudioTrack.youtubeId}/maxresdefault.jpg`} 
+                                            className="w-full h-full object-cover opacity-40 blur-[2px]"
+                                            alt=""
+                                          />
+                                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-slate-900/40"></div>
+                                        </div>
+                                      )}
                                       <div className="flex justify-between items-start">
                                         <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase"></div>
                                         <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider"></div>
