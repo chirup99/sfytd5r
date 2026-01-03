@@ -18318,7 +18318,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                       <div className="space-y-4">
                                         <div className="flex items-center gap-2">
                                           <div className="text-sm font-bold text-white tracking-[0.2em]"></div>
-                                          <div className="absolute bottom-4 right-4 z-10"><Info className="w-4 h-4 text-black" /></div>
+                                          <button onClick={() => selectedAudioTrack?.youtubeId && window.open(`https://www.youtube.com/watch?v=${selectedAudioTrack.youtubeId}`, "_blank")} className="absolute bottom-4 right-4 z-10 hover:scale-110 transition-transform active:scale-95"><Info className="w-4 h-4 text-black" /></button>
                                         </div>
                                         <div className="flex justify-between items-end">
                                           <div className="text-xs font-medium text-white/80 uppercase tracking-widest"></div>
