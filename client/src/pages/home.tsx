@@ -44,7 +44,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAngelOneAutoconnect } from "@/hooks/useAngelOneAutoconnect";
 import { cognitoSignOut, getCognitoToken, sendEmailVerificationCode, confirmEmailVerification, checkEmailVerified } from "@/cognito";
 import { createChart, ColorType, IChartApi, ISeriesApi, CandlestickSeries, LineSeries, HistogramSeries, IPriceLine, createSeriesMarkers } from 'lightweight-charts';
-import { ArrowLeft, Banknote, Clock, ExternalLink, Info, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award, Headset, X, Play, Music2, Pause, SkipBack, SkipForward, Volume2 } from "lucide-react";
+import { ArrowLeft, Award, Banknote, Clock, ExternalLink, Headset, Info, Loader2, LogOut, Music2, Newspaper, Pause, Play, RefreshCw, Save, SkipBack, SkipForward, Sparkles, TrendingUp, Volume2, X } from "lucide-react";
 import { parseBrokerTrades, ParseError } from "@/utils/trade-parser";
 
 // Global window type declaration for audio control
@@ -107,7 +107,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Banknote, Clock, ExternalLink, Info, Loader2, LogOut, Newspaper, RefreshCw, Save, TrendingUp, Award, Headset, X, Play, Music2, Pause, SkipBack, SkipForward, Volume2 } from "lucide-react";
+;
 import { AIChatWindow } from "@/components/ai-chat-window";
 import { BrokerImportDialog } from "@/components/broker-import-dialog";
 import { TradeBlockEditor } from "@/components/TradeBlockEditor";
@@ -3711,7 +3711,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           if (data.success) {
             const userId = data.userId && data.userId !== "undefined" ? data.userId : null;
             const userName = data.userName && data.userName !== "undefined" ? data.userName : null;
-            
+
             if (userId) {
               setUpstoxUserId(userId);
               localStorage.setItem("upstox_user_id", userId);
@@ -3753,7 +3753,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         console.log("✅ [ZERODHA] User Name restored from localStorage");
       }
   }, []);
-
 
   // Fetch Zerodha profile to get both userId and userName - with persistence
 
@@ -3814,14 +3813,14 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       // Check if we already have profile in localStorage
       const savedId = localStorage.getItem('zerodha_client_id');
       const savedName = localStorage.getItem('zerodha_user_name');
-      
+
       if (savedId && savedName && !zerodhaClientId) {
         setZerodhaClientId(savedId);
         setZerodhaUserName(savedName);
         console.log('✅ [ZERODHA] Profile restored from cache');
         return;
       }
-      
+
       // If not in cache or state, fetch it from backend
       if (!zerodhaClientId || !zerodhaUserName) {
         const fetchZerodhaProfile = async () => {
@@ -3858,19 +3857,19 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       const params = new URLSearchParams(window.location.search);
       const zerodhaToken = params.get("zerodha_token");
       console.log('🔷 [ZERODHA] Token in URL:', zerodhaToken ? '✅ FOUND' : '❌ NOT FOUND');
-      
+
       if (zerodhaToken) {
         console.log('✅ [ZERODHA] Token received in URL:', zerodhaToken.substring(0, 20) + '...');
         localStorage.setItem("zerodha_token", zerodhaToken); document.cookie = `zerodha_token=${zerodhaToken}; path=/; SameSite=Lax; Secure`; setZerodhaAccessToken(zerodhaToken); setZerodhaIsConnected(true);
         setZerodhaAccessToken(zerodhaToken);
         setZerodhaIsConnected(true);
-        
+
         // Notify parent window if this is a popup
         if (window.opener) {
           console.log("📡 Sending token to opener:", window.opener.location.origin); window.opener.postMessage({ type: "ZERODHA_TOKEN", token: zerodhaToken }, "*");
           console.log('📡 Sent token to parent window');
         }
-        
+
         // Fetch trades
         setTimeout(() => {
           setZerodhaTradesLoading(true);
@@ -3882,7 +3881,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
               setZerodhaTradesData(data.trades || []);
               setZerodhaTradesDialog(true);
               console.log('✅ Zerodha trades fetched:', data.trades?.length);
-              
+
               // Close popup after trades loaded
               if (window.opener) {
                 setTimeout(() => window.close(), 2000);
@@ -3891,11 +3890,11 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
             .catch(err => console.error("Error fetching Zerodha trades:", err))
             .finally(() => setZerodhaTradesLoading(false));
         }, 300);
-        
+
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     };
-    
+
     handleZerodhaCallback();
   }, []);
 
@@ -3903,32 +3902,32 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       console.log("📡 [MESSAGE] Received message:", event.data.type, event.data);
-      
+
       if (event.data.type === 'ANGELONE_AUTH_SUCCESS' && event.data.token) {
         const token = event.data.token;
         console.log('✅ [ANGELONE] Token received from popup:', token.substring(0, 20) + '...');
-        
+
         localStorage.setItem("angelone_token", token);
         if (event.data.feedToken) localStorage.setItem("angelone_feed_token", event.data.feedToken);
         if (event.data.refreshToken) localStorage.setItem("angelone_refresh_token", event.data.refreshToken);
         if (event.data.clientCode) localStorage.setItem("angelone_client_code", event.data.clientCode);
-        
+
         document.cookie = `angelone_token=${token}; path=/; SameSite=Lax; Secure`;
         setAngelOneAccessToken(token);
         setAngelOneIsConnected(true);
         setShowConnectDialog(false);
-        
+
         console.log('✅ [ANGELONE] Connection established and saved to localStorage');
       } else if (event.data.type === 'ZERODHA_TOKEN' && event.data.token) {
         const token = event.data.token;
         console.log('✅ [ZERODHA] Token received from popup:', token.substring(0, 20) + '...');
-        
+
         localStorage.setItem("zerodha_token", token); document.cookie = `zerodha_token=${token}; path=/; SameSite=Lax; Secure`; setZerodhaAccessToken(token); setZerodhaIsConnected(true);
         setZerodhaAccessToken(token);
         setZerodhaIsConnected(true);
         setShowConnectDialog(false);
         console.log('✅ [ZERODHA] Connection established and saved to localStorage');
-        
+
         // Fetch trades
         setTimeout(() => {
           // Also fetch profile
@@ -3970,7 +3969,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       } else if (event.data.type === 'DHAN_TOKEN' && event.data.token) {
         const token = event.data.token;
         console.log('🔵 [DHAN] Token received from popup:', token.substring(0, 20) + '...');
-        
+
         localStorage.setItem("dhan_token", token);
         localStorage.setItem("dhan_token", token);
         localStorage.setItem("dhan_user_id", "dhan_user");
@@ -3982,7 +3981,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       } else if (event.data.type === 'ANGEL_ONE_TOKEN' && event.data.token) {
         const token = event.data.token;
         console.log('🔶 [ANGEL ONE] Token received from popup:', token.substring(0, 20) + '...');
-        
+
         localStorage.setItem("angel_one_token", token);
         document.cookie = `angel_one_token=${token}; path=/; SameSite=Lax; Secure`;
         setAngelOneAccessToken(token);
@@ -3997,7 +3996,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         alert('Dhan error: ' + event.data.error);
       }
     };
-    
+
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, []);
@@ -4007,29 +4006,29 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       console.log('🔷 Starting Zerodha OAuth flow...');
       const response = await fetch('/api/broker/zerodha/login-url');
       const data = await response.json();
-      
+
       if (data.error) {
         alert('Setup Error:\n' + data.message + '\n\nSteps to fix:\n1. Go to https://developers.kite.trade\n2. Click your app\n3. Find "Redirect URL" and register:\nhttps://YOUR_APP_DOMAIN/api/broker/zerodha/callback\n4. Save and try again');
         return;
       }
-      
+
       const { loginUrl } = data;
       console.log('🔗 Zerodha login URL:', loginUrl);
-      
+
       const popup = window.open(
         loginUrl,
         'zerodha_oauth',
         'width=600,height=800,resizable=yes,scrollbars=yes'
       );
-      
+
       if (!popup) {
         console.warn('❌ Popup blocked, falling back to main window');
         alert('Popup blocked. Please enable popups and try again.');
         return;
       }
-      
+
       console.log('✅ Popup opened, waiting for OAuth callback...');
-      
+
       // Monitor popup closing
       let checkCount = 0;
       const monitorPopup = setInterval(() => {
@@ -4045,7 +4044,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           console.log('⚠️ Zerodha popup timeout');
         }
       }, 1000);
-      
+
     } catch (error) {
       console.error('❌ Zerodha error:', error);
       alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect'));
@@ -4057,28 +4056,28 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       console.log('🔵 Starting Upstox OAuth flow...');
       const response = await fetch('/api/upstox/auth-url');
       const data = await response.json();
-      
+
       if (!data.authUrl) {
         alert('Error: Could not generate Upstox authorization URL');
         return;
       }
-      
+
       console.log('🔗 Upstox auth URL:', data.authUrl);
-      
+
       const popup = window.open(
         data.authUrl,
         'upstox_oauth',
         'width=600,height=800,resizable=yes,scrollbars=yes'
       );
-      
+
       if (!popup) {
         console.warn('❌ Popup blocked, falling back to main window');
         alert('Popup blocked. Please enable popups and try again.');
         return;
       }
-      
+
       console.log('✅ Upstox popup opened, waiting for OAuth callback...');
-      
+
       // Listen for messages from the OAuth callback popup
       const messageListener = (event: MessageEvent) => {
         if (event.data.type === "UPSTOX_AUTH_SUCCESS") {
@@ -4106,7 +4105,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       };
 
       window.addEventListener("message", messageListener);
-      
+
       // Monitor popup closing and cleanup
       let checkCount = 0;
       const monitorPopup = setInterval(() => {
@@ -4124,7 +4123,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           console.log('⚠️ Upstox popup timeout');
         }
       }, 1000);
-      
+
     } catch (error) {
       console.error('❌ Upstox error:', error);
       alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect to Upstox'));
@@ -4156,7 +4155,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       });
 
       console.log('🔵 Upstox logout response:', response.status);
-      
+
       // Clear local storage regardless of API response
       localStorage.removeItem("upstox_token");
       localStorage.removeItem("upstox_user_id");
@@ -4179,15 +4178,15 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   const handleAngelOneConnect = async () => {
     try {
       console.log("🔶 Attempting Angel One auto-login (web scraping)...");
-      
+
       // Try auto-login first (uses backend credentials + TOTP)
       const autoLoginResponse = await fetch("/api/angelone/auto-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" }
       });
-      
+
       const autoLoginData = await autoLoginResponse.json();
-      
+
       if (autoLoginData.success && autoLoginData.token && autoLoginData.feedToken) {
         console.log("✅ [ANGEL ONE] Auto-login successful! Using backend credentials...");
         localStorage.setItem("angel_one_token", autoLoginData.token);
@@ -4199,11 +4198,11 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         toast({ title: "Success", description: `Connected to Angel One (${autoLoginData.clientCode})` });
         return;
       }
-      
+
       console.log("⚠️ Auto-login failed, checking status endpoint...");
       const response = await fetch("/api/angelone/status");
       const data = await response.json();
-      
+
       if (data.isConnected && data.token && data.feedToken) {
         console.log("✅ [ANGEL ONE] Using status endpoint tokens!");
         localStorage.setItem("angel_one_token", data.token);
@@ -4215,31 +4214,31 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         toast({ title: "Success", description: `Connected to Angel One (${data.clientCode || "P176266"})` });
         return;
       }
-      
+
       console.log("⚠️ No tokens available, attempting popup OAuth...");
       const authResponse = await fetch("/api/angelone/auth-url");
       const authData = await authResponse.json();
-      
+
       if (!authData.authUrl) {
         toast({ variant: "destructive", title: "Error", description: "Could not generate authorization URL" });
         return;
       }
-      
+
       console.log("🔗 Angel One auth URL generated");
-      
+
       const popup = window.open(
         authData.authUrl,
         "angel_one_oauth",
         "width=600,height=800,resizable=yes,scrollbars=yes"
       );
-      
+
       if (!popup) {
         toast({ variant: "destructive", title: "Error", description: "Popup blocked. Please enable popups and try again." });
         return;
       }
-      
+
       console.log("✅ Angel One popup opened, waiting for authentication...");
-      
+
       const messageListener = (event: MessageEvent) => {
         if (event.data.type === "ANGELONE_AUTH_SUCCESS") {
           console.log("✅ [ANGEL ONE] Successfully authenticated via popup!");
@@ -4259,9 +4258,9 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           toast({ variant: "destructive", title: "Error", description: event.data.error || "Authentication failed" });
         }
       };
-      
+
       window.addEventListener("message", messageListener);
-      
+
       let checkCount = 0;
       const monitorPopupRef = setInterval(() => {
         checkCount++;
@@ -4278,7 +4277,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           toast({ variant: "destructive", title: "Error", description: "Authentication timeout" });
         }
       }, 100);
-      
+
     } catch (error) {
       console.error("❌ Angel One error:", error);
       toast({ variant: "destructive", title: "Error", description: error instanceof Error ? error.message : "Failed to connect" });
@@ -4290,56 +4289,56 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       console.log('🔶 Starting Angel One OAuth flow...');
       const response = await fetch('/api/angel-one/auth-url');
       const data = await response.json();
-      
+
       if (!data.authUrl) {
         alert('Error: Could not generate Angel One authorization URL');
         return;
       }
-      
+
       console.log('🔗 Angel One auth URL:', data.authUrl);
-      
+
       const popup = window.open(
         data.authUrl,
         'angel_one_oauth',
         'width=600,height=800,resizable=yes,scrollbars=yes'
       );
-      
+
       if (!popup) {
         console.warn('❌ Popup blocked');
         alert('Popup blocked. Please enable popups and try again.');
         return;
       }
-      
+
       console.log('✅ Angel One popup opened, polling for authentication...');
-      
+
       let checkCount = 0;
       const pollAuthStatus = setInterval(async () => {
         checkCount++;
-        
+
         if (popup.closed) {
           clearInterval(pollAuthStatus);
           console.log('⚠️ Angel One popup closed by user');
           return;
         }
-        
+
         try {
           const statusResponse = await fetch('/api/angel-one/status');
           const status = await statusResponse.json();
-          
+
           if (status.authenticated && status.accessToken) {
             console.log('✅ [ANGEL ONE] Authenticated! Token received:', status.accessToken.substring(0, 20) + '...');
             clearInterval(pollAuthStatus);
-            
+
             // STORE TOKEN AND UPDATE STATE
             localStorage.setItem('angel_one_token', status.accessToken);
             localStorage.setItem('angel_one_client_code', status.clientCode || 'P176266');
             document.cookie = `angel_one_token=${status.accessToken}; path=/; max-age=86400`;
-            
+
             setAngelOneAccessToken(status.accessToken);
             setAngelOneIsConnected(true);
-            
+
             console.log('💾 Stored Angel One token in localStorage and cookies');
-            
+
             popup.close();
             setConnectDialogOpen(false);
             return;
@@ -4347,7 +4346,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         } catch (err) {
           console.debug('🔶 [ANGEL ONE] Status polling...');
         }
-        
+
         if (checkCount > 300) {
           clearInterval(pollAuthStatus);
           popup.close();
@@ -4355,7 +4354,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           alert('Angel One login timeout. Please try again.');
         }
       }, 1000);
-      
+
     } catch (error) {
       console.error('❌ Angel One error:', error);
       alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect'));
@@ -4367,29 +4366,29 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       console.log('🔵 Starting Dhan OAuth flow...');
       const response = await fetch('/api/broker/dhan/login-url');
       const data = await response.json();
-      
+
       if (data.error) {
         alert('Setup Error:\n' + data.error);
         return;
       }
-      
+
       const { loginUrl } = data;
       console.log('🔗 Dhan login URL:', loginUrl);
-      
+
       const popup = window.open(
         loginUrl,
         'dhan_oauth',
         'width=600,height=800,resizable=yes,scrollbars=yes'
       );
-      
+
       if (!popup) {
         console.warn('❌ Popup blocked');
         alert('Popup blocked. Please enable popups and try again.');
         return;
       }
-      
+
       console.log('✅ Popup opened, waiting for OAuth callback...');
-      
+
       let checkCount = 0;
       const monitorPopup = setInterval(() => {
         checkCount++;
@@ -4404,7 +4403,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           console.log('⚠️ Dhan popup timeout');
         }
       }, 1000);
-      
+
     } catch (error) {
       console.error('❌ Dhan error:', error);
       alert('Error: ' + (error instanceof Error ? error.message : 'Failed to connect'));
@@ -4424,7 +4423,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       alert('Please connect to Zerodha first');
       return;
     }
-    
+
     setZerodhaTradesLoading(true);
     try {
       const response = await fetch('/api/broker/zerodha/trades', {
@@ -4703,7 +4702,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     }
   };
 
-
   // Load user's saved formats from AWS when user is authenticated
   useEffect(() => {
     const loadUserFormats = async () => {
@@ -4885,7 +4883,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           let endpoint = '';
           let token = '';
           let broker = '';
-          
+
           if (zerodhaAccessToken) {
             endpoint = '/api/broker/zerodha/positions';
             token = zerodhaAccessToken;
@@ -4903,9 +4901,9 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
             token = dhanAccessToken;
             broker = 'Dhan';
           }
-          
+
           if (!endpoint || !token) return;
-          
+
           const res = await fetch(endpoint, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
@@ -4988,7 +4986,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           let endpoint = '';
           let token = '';
           let broker = '';
-          
+
           if (zerodhaAccessToken) {
             endpoint = '/api/broker/zerodha/trades';
             token = zerodhaAccessToken;
@@ -5006,9 +5004,9 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
             token = dhanAccessToken;
             broker = 'Dhan';
           }
-          
+
           if (!endpoint || !token) return;
-          
+
           const res = await fetch(endpoint, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
@@ -5056,13 +5054,13 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           console.error('❌ [BROKER] Failed to fetch funds:', error);
         }
       };
-      
+
       // Fetch funds immediately when dialog opens
       fetchBrokerFunds();
-      
+
       // Set up polling to refresh every 2 seconds while dialog is open
       const pollInterval = setInterval(fetchBrokerFunds, 2000);
-      
+
       // Cleanup: clear interval when dialog closes
       return () => clearInterval(pollInterval);
     }
@@ -5087,7 +5085,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           let endpoint = '';
           let token = '';
           let broker = '';
-          
+
           if (zerodhaAccessToken) {
             endpoint = '/api/broker/zerodha/margins';
             token = zerodhaAccessToken;
@@ -5105,9 +5103,9 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
             token = dhanAccessToken;
             broker = 'Dhan';
           }
-          
+
           if (!endpoint || !token) return;
-          
+
           const response = await fetch(endpoint, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
@@ -5119,13 +5117,13 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           setBrokerFunds(0);
         }
       };
-      
+
       // Fetch funds immediately when dialog opens
       fetchBrokerFunds();
-      
+
       // Set up polling to refresh every 2 seconds while dialog is open
       const pollInterval = setInterval(fetchBrokerFunds, 2000);
-      
+
       // Cleanup: clear interval when dialog closes
       return () => clearInterval(pollInterval);
     }
@@ -5953,13 +5951,11 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
       return;
     }
 
-
     // 🔴 AUTO-SWITCH to personal mode if in demo - record trades immediately in single tap
     if (isDemoMode) {
       console.log("🔄 Auto-switching to personal mode to record trades...");
       setIsDemoMode(false);
     }
-
 
     console.log("📊 Converting paper trades to journal format...");
 
@@ -6042,7 +6038,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     setPersonalHeatmapRevision(prev => prev + 1);
   };
 
-
   // 🔴 NEW: Record all broker orders to journal (same flow as paper trading)
   const recordAllBrokerOrders = () => {
     if (brokerOrders.length === 0) {
@@ -6056,7 +6051,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
     // Filter to only COMPLETE orders (successful orders only)
     const completeOrders = brokerOrders.filter((order: any) => order.status === 'COMPLETE');
-    
+
     if (completeOrders.length === 0) {
       toast({
         title: "No Complete Orders",
@@ -6141,20 +6136,20 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     // Count only COMPLETE orders
     const completeOrders = brokerOrders.filter((order: any) => order.status === 'COMPLETE');
     const completeOrdersCount = completeOrders.length;
-    
+
     // Only auto-trigger if COMPLETE count increased (new success orders added)
     if (completeOrdersCount > previousCompleteOrdersLengthRef.current && completeOrdersCount > 0) {
       console.log(`🤖 [AUTO-TAP] Detected ${completeOrdersCount} COMPLETE orders (was ${previousCompleteOrdersLengthRef.current}), auto-recording only success orders...`);
-      
+
       // Schedule the auto-record for next tick to ensure state is updated
       setTimeout(() => {
         recordAllBrokerOrders();
       }, 500);
     }
-    
+
     // Update the ref with current COMPLETE orders count
     previousCompleteOrdersLengthRef.current = completeOrdersCount;
-    
+
     // Keep tracking total for reference (but don't use for trigger)
     previousBrokerOrdersLengthRef.current = brokerOrders.length;
   }, [brokerOrders]);
@@ -6563,7 +6558,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   // Loading state for heatmap data
   const [isLoadingHeatmapData, setIsLoadingHeatmapData] = useState(false);
 
-
   // ✅ CLEANUP: Remove stale localStorage data on startup to prevent state mismatches
   // This ensures fresh data is always fetched from AWS DynamoDB
   useEffect(() => {
@@ -6636,7 +6630,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     return { points, hasData: true, trend };
   }, [personalTradingDataByDate, demoTradingDataByDate]);
 
-
   const setTradingDataByDate = isDemoMode ? setDemoTradingDataByDate : setPersonalTradingDataByDate;
   const getActiveStorageKey = () => isDemoMode ? "demoTradingDataByDate" : "personalTradingDataByDate";
 
@@ -6691,7 +6684,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
           setTradingDataByDate(personalData);
           setCalendarData(personalData);
-
 
           // Auto-click all available dates to populate heatmap colors - ULTRA FAST
           // This simulates clicking each date to ensure colors appear immediately
@@ -7185,8 +7177,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     }
   }, [selectedWatchlistSymbol, searchResults]);
 
-
-
   // Fetch news for selected watchlist symbol
   useEffect(() => {
     if (selectedWatchlistSymbol && (isWatchlistOpen || searchResults.includes("[CHART:WATCHLIST]"))) {
@@ -7276,7 +7266,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
     return () => clearTimeout(debounceTimer);
   }, [watchlistSearchQuery]);
-
 
   // Fetch company insights when watchlist stock is selected (same logic as main search)
   useEffect(() => {
@@ -7643,7 +7632,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
     });
   };
 
-
   // Map journal search type to exchange segment for filtering (similar to paper trading)
   const getExchangeForJournalSearchType = (type: 'STOCK' | 'COMMODITY' | 'F&O'): string => {
     switch (type) {
@@ -7703,7 +7691,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
   // Mobile carousel state for journal panels (0=chart, 1=image, 2=notes)
   const [mobileJournalPanel, setMobileJournalPanel] = useState(2);
-
 
   // Mobile trade history dropdown state
   const [showMobileTradeHistory, setShowMobileTradeHistory] = useState(false);
@@ -7864,7 +7851,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
   // ✅ INSTANT REFETCH when Angel One token refreshes (next day or new session)
   useEffect(() => {
     if (!selectedJournalSymbol || !angelOneAccessToken || activeTab !== 'journal') return;
-    
+
     console.log(`🔄 [TOKEN-REFRESH] Journal chart refetching with new Angel One token`);
     fetchJournalChartData();
   }, [angelOneAccessToken, selectedJournalSymbol, activeTab, fetchJournalChartData]);
@@ -8734,8 +8721,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
         ema26Series.setData(ema26Data);
         setJournalEmaValues(prev => ({ ...prev, ema26: ema26Data[ema26Data.length - 1]?.value || null }));
       }
-
-
 
       // Fit content but with better zoom to show time scale
       setTimeout(() => {
@@ -12206,7 +12191,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           </h1>
         </div>
 
-
         {/* Main Layout Grid - Left Card Content */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
           {/* Left Section - Stack-based Swipeable Cards */}
@@ -12296,7 +12280,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                     <div className="text-white text-xl font-bold mb-6">
                       TRENDING PODCASTS - {selectedSector === 'FINANCE' ? 'FINANCE' : selectedSector === 'IT' ? 'TECH' : selectedSector === 'COMMODITY' ? 'COMMODITY' : selectedSector === 'GLOBAL' ? 'GLOBAL' : selectedSector === 'BANKS' ? 'BANKING' : selectedSector === 'AUTOMOBILE' ? 'AUTO' : 'FINANCE'}
                     </div>
-
 
                     {/* Main Layout */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -12704,7 +12687,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                         </div>
                       </div>
 
-
                       {/* Health & Wellness Event */}
                       <div className="relative rounded-xl p-4 overflow-hidden bg-gradient-to-br from-sky-400/80 via-blue-500/70 to-cyan-600/80 flex gap-3">
                         {/* Wellness Background */}
@@ -12783,7 +12765,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                           />
                         </div>
                       </div>
-
 
                       {/* Technology Event */}
                       <div className="relative rounded-xl p-4 overflow-hidden bg-gradient-to-br from-purple-500/80 via-violet-600/70 to-indigo-700/80 flex gap-3">
@@ -13294,7 +13275,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                   </div>
                 </div>
 
-
                 {/* Settings & Privacy Panel - Email Verification */}
                 {showSettingsPanel && (
                   <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowSettingsPanel(false)}>
@@ -13514,7 +13494,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                   }`}>
                     <div className="max-w-4xl w-full md:space-y-4">
                       {/* Dynamic Greeting - Hidden on mobile */}
-                    
 
                       {/* Search Input - Hidden on mobile, moves to bottom when results appear */}
                       {!searchResults && (
@@ -14876,11 +14855,8 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                         );
                       }
 
-
-
                                       return renderedContent || processedResults || searchResults;
                                     })()}
-
 
                                   </div>
                                   {/* Disclaimer */}
@@ -15048,7 +15024,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                           </div>
                         </Button>
 
-
                         {/* <Button
                         variant="secondary"
                         className="bg-yellow-600 hover:bg-yellow-700 text-white border-0 h-11 px-4 rounded-full font-medium transition-all duration-200"
@@ -15078,7 +15053,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                           <span>IPO Updates</span>
                         </div>
                       </Button> */}
-
 
                       </div>
 
@@ -15769,7 +15743,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
               </div>
             )}
 
-
             {activeTab === "backtest" && (
               <div className="h-full p-6 space-y-6">
                 <div className="max-w-6xl mx-auto">
@@ -16264,7 +16237,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                       }
                                     </span>
                                   )}
-
 
                                   {/* Next Symbol Button - ONLY in Heatmap Mode */}
                                   {journalChartMode === 'heatmap' && tradedSymbols.length > 1 && (
@@ -18169,7 +18141,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-center relative">
                                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] opacity-50">Mini Play</div>
                                     </div>
-                                    
+
                                     <div className="flex-1 overflow-y-auto p-4 space-y-4">
                                       {/* Meditation Section */}
                                       <div>
@@ -18232,7 +18204,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                             {selectedAudioTrack ? (isAudioPlaying ? "Playing" : "Paused") : "Ready to play"}
                                           </div>
                                         </div>
-                                        
+
                                         {/* Playback Controls */}
                                         <div className="flex items-center gap-2">
                                           <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-violet-500" onClick={() => console.log("Back")}>
@@ -18722,7 +18694,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     </PopoverContent>
                                   </Popover>
                                 </div>
-
 
                                 {/* Top Tags Block with Curved Lines */}
                                 {visibleStats.topTags && topTags.length > 0 && (
@@ -21178,7 +21149,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
 
         <TradingJournalModal open={showJournalInfoModal} onOpenChange={setShowJournalInfoModal} />
 
-
         {/* Paper Trading (Demo Trading) Modal - Minimalist Design */}
         <Dialog open={showPaperTradingModal} onOpenChange={setShowPaperTradingModal}>
           <DialogContent className="w-full h-auto sm:max-w-2xl sm:max-h-[85vh] rounded-none sm:rounded-lg overflow-hidden p-0 bg-white sm:dark:bg-gray-900 hidden sm:flex flex-col">
@@ -22468,7 +22438,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
           </DialogContent>
         </Dialog>
 
-
         {/* Trading Master Coming Soon Modal */}
         <Dialog open={showTradingMasterComingSoon} onOpenChange={setShowTradingMasterComingSoon}>
           <DialogContent className="max-w-md">
@@ -22634,7 +22603,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
             </div>
           </DialogContent>
         </Dialog>
-
 
         {/* Minimalist Floating Pill Navigation - Mobile Only */}
         {activeTab === "journal" && (
@@ -23038,7 +23006,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                     </div>
                   </div>
 
-
                   {/* Action Buttons */}
                   <div className="flex gap-3">
                     {(() => {
@@ -23099,9 +23066,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                       {showMobileTradeHistory ? 'Record' : 'Exit All'}
                     </Button>
                   </div>
-
-
-
 
                   {/* Open Positions View */}
                   {!showMobileTradeHistory && paperPositions.filter(p => p.isOpen).length > 0 && (
@@ -23240,10 +23204,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                       ))}
                     </div>
                   )}
-
-
-
-
 
                   {/* Trade History View */}
                   {showMobileTradeHistory && paperTradeHistory.length > 0 && (
@@ -23794,7 +23754,6 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                 pnl: pnl,
                               }));
 
-                              
   return (
                                 <ResponsiveContainer width="100%" height="100%">
                                   <AreaChart
