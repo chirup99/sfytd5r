@@ -4878,6 +4878,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('🔐 AWS Cognito auth attempt:', { email, hasAuthHeader: !!authHeader });
 
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (email && !emailRegex.test(email)) {
+        console.error('❌ Cognito auth failed: Invalid email format:', email);
+        return res.status(400).json({ message: 'Invalid email format' });
+      }
+
       const claims = await authenticateRequest(authHeader);
       
       if (!claims) {
