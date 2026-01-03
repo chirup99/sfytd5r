@@ -18318,7 +18318,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                       <div className="space-y-4">
                                         <div className="flex items-center gap-2">
                                           <div className="text-sm font-bold text-white tracking-[0.2em]"></div>
-                                          <Info className="w-3 h-3 text-white/40" />
+                                          <div className="absolute bottom-4 right-4 z-10"><Info className="w-4 h-4 text-white/60" /></div>
                                         </div>
                                         <div className="flex justify-between items-end">
                                           <div className="text-xs font-medium text-white/80 uppercase tracking-widest"></div>
