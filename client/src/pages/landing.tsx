@@ -154,6 +154,53 @@ export default function Landing() {
     }
   };
 
+  const [isSignupVerification, setIsSignupVerification] = useState(false);
+
+  const handleSignupVerification = async () => {
+    if (!otp || otp.length < 6) {
+      toast({
+        title: "Invalid Code",
+        description: "Please enter the 6-digit verification code sent to your email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsEmailLoading(true);
+    try {
+      console.log('🔐 Confirming signup for:', email);
+      const response = await fetch('/api/auth/cognito/confirm-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code: otp }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.details || result.message || "Verification failed");
+      }
+
+      toast({
+        title: "Account Verified",
+        description: "Your account has been verified successfully. You can now login.",
+      });
+
+      setIsSignupVerification(false);
+      setIsLogin(true);
+      setOtp("");
+      setPassword("");
+    } catch (error: any) {
+      console.error('❌ Verification error:', error);
+      toast({
+        title: "Verification Failed",
+        description: error.message || "Invalid verification code.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEmailLoading(false);
+    }
+  };
+
   const handleEmailAuth = async () => {
     if (!isLogin && !name) {
       toast({
@@ -203,25 +250,13 @@ export default function Landing() {
         console.log('🔐 Signing up with AWS Cognito...');
         await cognitoSignUp(email, password, name);
         
-        // Auto-confirm the user via backend API
-        console.log('🔐 Auto-confirming user...');
-        try {
-          await fetch('/api/auth/cognito/confirm', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email }),
-          });
-        } catch (confirmError) {
-          console.warn('⚠️ Auto-confirm failed, user may already be confirmed:', confirmError);
-        }
-        
-        console.log('🔐 Auto-signing in after signup...');
-        user = await cognitoSignIn(email, password);
-        
+        setIsSignupVerification(true);
+        setOtp("");
         toast({
-          title: "Account Created",
-          description: "Welcome! Your account has been created successfully.",
+          title: "Verification Required",
+          description: "Please check your email for a verification code.",
         });
+        return;
       }
 
       localStorage.setItem('currentUserId', user.userId);
@@ -259,7 +294,9 @@ export default function Landing() {
       let errorMessage = error.message || "Something went wrong. Please try again.";
       
       if (error.name === 'UserNotConfirmedException') {
-        errorMessage = "Please verify your email before signing in. Check your inbox for a verification link.";
+        errorMessage = "Please verify your email before signing in. Check your inbox for a verification code.";
+        setIsSignupVerification(true);
+        setOtp("");
       } else if (error.name === 'NotAuthorizedException') {
         errorMessage = "Incorrect email or password.";
       } else if (error.name === 'UserNotFoundException') {
@@ -447,7 +484,47 @@ export default function Landing() {
           <p className="text-gray-500 text-sm">AI-powered trading insights.</p>
         </div>
         <div className="w-full max-w-md mx-auto space-y-4">
-          {isForgotPassword ? (
+          {isSignupVerification ? (
+            <>
+              <div className="text-center mb-4">
+                <h3 className="text-xl font-semibold text-white mb-2">Verify Your Account</h3>
+                <p className="text-gray-400 text-sm">Enter the 6-digit code sent to <strong>{email}</strong></p>
+              </div>
+              <div className="space-y-4">
+                <Input
+                  type="text"
+                  placeholder="Enter verification code"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  maxLength={6}
+                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 h-12 rounded-lg text-center text-lg tracking-widest"
+                  data-testid="input-signup-otp"
+                />
+                <Button
+                  onClick={handleSignupVerification}
+                  disabled={otp.length < 6 || isEmailLoading}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-12 rounded-lg disabled:opacity-50"
+                  data-testid="button-verify-signup"
+                >
+                  {isEmailLoading ? "Verifying..." : "Verify & Continue"}
+                  {!isEmailLoading && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => {
+                      setIsSignupVerification(false);
+                      setIsLogin(true);
+                      setOtp("");
+                    }}
+                    className="text-sm text-gray-400 hover:text-gray-300 transition-colors"
+                    data-testid="button-back-to-login-from-verify"
+                  >
+                    Back to Login
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : isForgotPassword ? (
             <>
               <div className="text-center mb-4">
                 <h3 className="text-xl font-semibold text-white mb-2">Reset Password</h3>

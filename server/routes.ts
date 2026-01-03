@@ -4944,18 +4944,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AWS Cognito Auto-Confirm User (for signup without email verification)
-  app.post('/api/auth/cognito/confirm', async (req, res) => {
+  // AWS Cognito Auto-Confirm User - DISABLED to enforce email verification
+  app.post('/api/auth/cognito/confirm-signup', async (req, res) => {
     try {
-      const { email } = req.body;
+      const { email, code } = req.body;
       
-      if (!email) {
-        return res.status(400).json({ message: 'Email is required' });
+      if (!email || !code) {
+        return res.status(400).json({ message: 'Email and verification code are required' });
       }
 
-      console.log('🔐 Auto-confirming Cognito user:', email);
+      console.log('🔐 Confirming Cognito signup for:', email);
 
-      const { CognitoIdentityProviderClient, AdminConfirmSignUpCommand } = await import('@aws-sdk/client-cognito-identity-provider');
+      const { CognitoIdentityProviderClient, ConfirmSignUpCommand } = await import('@aws-sdk/client-cognito-identity-provider');
       
       const cognitoClient = new CognitoIdentityProviderClient({
         region: process.env.AWS_REGION || 'eu-north-1',
@@ -4965,13 +4965,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } : undefined,
       });
 
-      const confirmCommand = new AdminConfirmSignUpCommand({
-        UserPoolId: process.env.AWS_COGNITO_USER_POOL_ID || 'eu-north-1_rXrrnI6cZ',
+      const confirmCommand = new ConfirmSignUpCommand({
+        ClientId: process.env.AWS_COGNITO_APP_CLIENT_ID || '7v1d82v10o358f29p72j9m9f2q',
         Username: email,
+        ConfirmationCode: code,
       });
 
       await cognitoClient.send(confirmCommand);
-      console.log('✅ User auto-confirmed successfully:', email);
+      console.log('✅ User confirmed successfully:', email);
 
       res.json({ 
         success: true, 
@@ -4979,16 +4980,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email 
       });
     } catch (error: any) {
-      // If user is already confirmed, that's fine
-      if (error.name === 'NotAuthorizedException' && error.message?.includes('confirmed')) {
-        console.log('ℹ️ User already confirmed:', req.body.email);
-        return res.json({ success: true, message: 'User already confirmed' });
-      }
-      
       console.error('❌ Cognito confirm error:', error);
-      res.status(500).json({ 
+      res.status(400).json({ 
         message: 'Failed to confirm user',
-        error: error.message 
+        error: error.name,
+        details: error.message 
       });
     }
   });
