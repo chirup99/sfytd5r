@@ -12385,7 +12385,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                     <div className="relative z-10 h-full flex flex-col justify-center items-center text-center">
                       <div className="text-6xl mb-4">📚</div>
                       <div className="text-white text-2xl font-bold">Study</div>
-                      <div className="text-white/60 text-sm mt-2">Learning Materials</div>
+                      <div className="text-black text-sm mt-2">Learning Materials</div>
                     </div>
                   </div>
 
@@ -12395,7 +12395,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                     <div className="relative z-10 h-full flex flex-col justify-center items-center text-center">
                       <div className="text-6xl mb-4">🎓</div>
                       <div className="text-white text-2xl font-bold">Courses</div>
-                      <div className="text-white/60 text-sm mt-2">Training Programs</div>
+                      <div className="text-black text-sm mt-2">Training Programs</div>
                     </div>
                   </div>
 
@@ -12405,7 +12405,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                     <div className="relative z-10 h-full flex flex-col justify-center items-center text-center">
                       <div className="text-6xl mb-4">🔴</div>
                       <div className="text-white text-2xl font-bold">Live</div>
-                      <div className="text-white/60 text-sm mt-2">Live Sessions</div>
+                      <div className="text-black text-sm mt-2">Live Sessions</div>
                     </div>
                   </div>
                 </div>
@@ -12976,7 +12976,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                             <div className="absolute bottom-1 left-1 w-1 h-1 bg-pink-400/60 rounded-full"></div>
                             <div className="relative z-10 text-center">
                               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mb-1">
-                                <Zap className="w-4 h-4 text-white/60" />
+                                <Zap className="w-4 h-4 text-black" />
                               </div>
                               <div className="text-white/70 text-[8px] font-medium">TECH</div>
                             </div>
@@ -18309,7 +18309,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         </div>
                                       )}
                                       <div className="flex justify-between items-start">
-                                        <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase"></div>
+                                        <div className="text-[10px] font-medium tracking-widest text-black uppercase"></div>
                                         <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider"></div>
                                       </div>
                                       <div className="relative h-20 w-full overflow-hidden">
@@ -18318,11 +18318,11 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                       <div className="space-y-4">
                                         <div className="flex items-center gap-2">
                                           <div className="text-sm font-bold text-white tracking-[0.2em]"></div>
-                                          <div className="absolute bottom-4 right-4 z-10"><Info className="w-4 h-4 text-white/60" /></div>
+                                          <div className="absolute bottom-4 right-4 z-10"><Info className="w-4 h-4 text-black" /></div>
                                         </div>
                                         <div className="flex justify-between items-end">
                                           <div className="text-xs font-medium text-white/80 uppercase tracking-widest"></div>
-                                          <div className="text-[10px] font-mono text-white/60"></div>
+                                          <div className="text-[10px] font-mono text-black"></div>
                                         </div>
                                       </div>
                                     </motion.div>
@@ -18903,7 +18903,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           onClick={() => setActiveTagHighlight(activeTagHighlight?.tag === tag ? null : { tag, dates: tagDates[tag] || [] })}
                                           data-testid={`stat-toptag-${tag}`}
                                         >
-                                          {tag} <span className="text-white/60">({count})</span>
+                                          {tag} <span className="text-black">({count})</span>
                                         </button>
                                       ))}
                                     </div>
