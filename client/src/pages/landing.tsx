@@ -182,18 +182,40 @@ export default function Landing() {
 
       toast({
         title: "Account Verified",
-        description: "Your account has been verified successfully. You can now login.",
+        description: "Your account has been verified successfully.",
       });
 
-      setIsSignupVerification(false);
-      setIsLogin(true);
-      setOtp("");
-      setPassword("");
+      console.log('🔐 Auto-signing in after verification...');
+      const user = await cognitoSignIn(email, password);
+
+      localStorage.setItem('currentUserId', user.userId);
+      localStorage.setItem('currentUserEmail', user.email);
+      localStorage.setItem('currentUserName', user.name);
+
+      const token = await getCognitoToken();
+      if (token) {
+        try {
+          await fetch('/api/auth/cognito', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ name: user.name, email: user.email }),
+            signal: AbortSignal.timeout(8000)
+          });
+        } catch (fetchError) {
+          console.warn('⚠️ Backend sync failed, but Cognito Auth succeeded. Continuing...', fetchError);
+        }
+      }
+
+      console.log('✅ Auto-login successful, redirecting to app...');
+      window.location.href = "/";
     } catch (error: any) {
-      console.error('❌ Verification error:', error);
+      console.error('❌ Verification/Auto-login error:', error);
       toast({
         title: "Verification Failed",
-        description: error.message || "Invalid verification code.",
+        description: error.message || "Invalid verification code or login failed.",
         variant: "destructive",
       });
     } finally {
