@@ -18304,7 +18304,10 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                           <img 
                                             src={`https://img.youtube.com/vi/${selectedAudioTrack.youtubeId}/maxresdefault.jpg`} 
                                             className="w-full h-full object-cover"
-                                            alt=""
+                                          />
+                                          <div className="absolute bottom-3 right-3 z-10 w-6 h-6 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 shadow-lg">
+                                            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-red-600" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                          </div>
                                           />
                                         </div>
                                       )}
