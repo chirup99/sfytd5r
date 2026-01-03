@@ -18420,7 +18420,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                             {selectedAudioTrack ? new Date(currentTime * 1000).toISOString().substr(14, 5) : "0:00"}
                                           </span>
                                           <span className="text-[8px] font-mono text-slate-400">
-                                            {selectedAudioTrack ? selectedAudioTrack.duration : "0:00"}
+                                            {selectedAudioTrack ? (duration > 0 ? new Date(duration * 1000).toISOString().substr(14, 5) : selectedAudioTrack.duration) : "0:00"}
                                           </span>
                                         </div>
                                       </div>
