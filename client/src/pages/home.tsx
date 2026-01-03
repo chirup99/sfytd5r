@@ -1928,6 +1928,8 @@ export default function Home() {
   const [isViewOnlyMode, setIsViewOnlyMode] = useState(false);
   const [selectedAudioTrack, setSelectedAudioTrack] = useState<{title: string, duration: string, id: string, youtubeId: string} | null>(null);
   const [audioProgress, setAudioProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const youtubePlayerRef = useRef<any>(null);
 
@@ -1967,6 +1969,18 @@ export default function Home() {
           },
           events: {
             onReady: (event: any) => {
+              setDuration(event.target.getDuration());
+              const interval = setInterval(() => {
+                if (youtubePlayerRef.current && youtubePlayerRef.current.getCurrentTime) {
+                  const time = youtubePlayerRef.current.getCurrentTime();
+                  setCurrentTime(time);
+                  if (youtubePlayerRef.current.getDuration) {
+                    const dur = youtubePlayerRef.current.getDuration();
+                    setDuration(dur);
+                    setAudioProgress((time / dur) * 100);
+                  }
+                }
+              }, 1000);
               console.log("🎵 YouTube Audio Ready");
               event.target.playVideo();
               setIsAudioPlaying(true);
@@ -18398,12 +18412,12 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         <div className="relative w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                           <div 
                                             className="absolute top-0 left-0 h-full bg-gradient-to-r from-violet-500 to-purple-600 transition-all duration-300"
-                                            style={{ width: `${selectedAudioTrack ? (isAudioPlaying ? 45 : 35) : 0}%` }}
+                                            style={{ width: `${selectedAudioTrack ? audioProgress : 0}%` }}
                                           ></div>
                                         </div>
                                         <div className="flex justify-between mt-1">
                                           <span className="text-[8px] font-mono text-slate-400">
-                                            {selectedAudioTrack ? (isAudioPlaying ? "1:45" : "1:15") : "0:00"}
+                                            {selectedAudioTrack ? new Date(currentTime * 1000).toISOString().substr(14, 5) : "0:00"}
                                           </span>
                                           <span className="text-[8px] font-mono text-slate-400">
                                             {selectedAudioTrack ? selectedAudioTrack.duration : "0:00"}
