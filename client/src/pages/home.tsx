@@ -1926,9 +1926,71 @@ export default function Home() {
   const [authInitialized, setAuthInitialized] = useState(false);
   // View-only mode for unauthenticated users - they can view but not interact with protected features
   const [isViewOnlyMode, setIsViewOnlyMode] = useState(false);
-  const [selectedAudioTrack, setSelectedAudioTrack] = useState<{title: string, duration: string} | null>(null);
+  const [selectedAudioTrack, setSelectedAudioTrack] = useState<{title: string, duration: string, id: string, youtubeId: string} | null>(null);
   const [audioProgress, setAudioProgress] = useState(0);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const youtubePlayerRef = useRef<any>(null);
+
+  useEffect(() => {
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName("script")[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    (window as any).onYouTubeIframeAPIReady = () => {
+      console.log("📺 YouTube IFrame API Ready");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (selectedAudioTrack?.youtubeId) {
+      if (youtubePlayerRef.current) {
+        youtubePlayerRef.current.destroy();
+      }
+
+      const playerContainer = document.getElementById("youtube-audio-player");
+      if (playerContainer) {
+        youtubePlayerRef.current = new (window as any).YT.Player("youtube-audio-player", {
+          height: "0",
+          width: "0",
+          videoId: selectedAudioTrack.youtubeId,
+          playerVars: {
+            autoplay: 1,
+            controls: 0,
+            showinfo: 0,
+            modestbranding: 1,
+            loop: 1,
+            fs: 0,
+            cc_load_policy: 0,
+            iv_load_policy: 3,
+            autohide: 0
+          },
+          events: {
+            onReady: (event: any) => {
+              console.log("🎵 YouTube Audio Ready");
+              event.target.playVideo();
+              setIsAudioPlaying(true);
+            },
+            onStateChange: (event: any) => {
+              if (event.data === (window as any).YT.PlayerState.ENDED) {
+                event.target.playVideo();
+              }
+            }
+          }
+        });
+      }
+    }
+  }, [selectedAudioTrack]);
+
+  useEffect(() => {
+    if (youtubePlayerRef.current) {
+      if (isAudioPlaying) {
+        youtubePlayerRef.current.playVideo();
+      } else {
+        youtubePlayerRef.current.pauseVideo();
+      }
+    }
+  }, [isAudioPlaying]);
 
   // Get current user data from AWS DynamoDB
   const { currentUser } = useCurrentUser();
@@ -18255,7 +18317,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         </h4>
                                         <div className="space-y-1">
                                           {[
-                                            { title: "Detachment Breathing", duration: "3:20", id: "m1" }
+                                            { title: "Detachment Breathing", duration: "3:20", id: "m1", youtubeId: "S-69i8p8I8I" }
                                           ].map((track) => (
                                             <div key={track.id} onClick={() => setSelectedAudioTrack(track)} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
                                               <div className="flex items-center gap-3">
@@ -18278,7 +18340,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                         </h4>
                                         <div className="space-y-1">
                                           {[
-                                            { title: "Risk Management Mindset", duration: "6:45", id: "p1" }
+                                            { title: "Risk Management Mindset", duration: "6:45", id: "p1", youtubeId: "O0m1_zG_i4I" }
                                           ].map((track) => (
                                             <div key={track.id} onClick={() => setSelectedAudioTrack(track)} className="group flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
                                               <div className="flex items-center gap-3">
@@ -18307,6 +18369,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                             </div>
                                             <div className="text-[9px] text-slate-500 uppercase tracking-tighter">
                                               {selectedAudioTrack ? `Playing • ${selectedAudioTrack.duration}` : "Ready to play"}
+                                            <div id="youtube-audio-player" className="hidden"></div>
                                             </div>
                                           </div>
                                         </div>
