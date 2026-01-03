@@ -1927,6 +1927,7 @@ export default function Home() {
   // View-only mode for unauthenticated users - they can view but not interact with protected features
   const [isViewOnlyMode, setIsViewOnlyMode] = useState(false);
   const [selectedAudioTrack, setSelectedAudioTrack] = useState<{title: string, duration: string} | null>(null);
+  const [audioProgress, setAudioProgress] = useState(0);
 
   // Get current user data from AWS DynamoDB
   const { currentUser } = useCurrentUser();
@@ -18293,16 +18294,36 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     </div>
 
                                     {/* Footer / Now Playing Stub */}
-                                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                                      <div className={`w-8 h-8 rounded bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg ${selectedAudioTrack ? "animate-none" : "animate-pulse"}`}>
-                                        <Music2 className="w-4 h-4 text-white" />
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <div className="text-[10px] font-bold text-slate-900 dark:text-slate-100 truncate">
-                                          {selectedAudioTrack ? selectedAudioTrack.title : "Select a session"}
+                                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                                      <div className="flex items-center gap-3">
+                                        <div className={`w-8 h-8 rounded bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg ${selectedAudioTrack ? "animate-none" : "animate-pulse"}`}>
+                                          <Music2 className="w-4 h-4 text-white" />
                                         </div>
-                                        <div className="text-[9px] text-slate-500 uppercase tracking-tighter">
-                                          {selectedAudioTrack ? `Playing • ${selectedAudioTrack.duration}` : "Ready to play"}
+                                        <div className="flex-1 min-w-0">
+                                          <div className="text-[10px] font-bold text-slate-900 dark:text-slate-100 truncate">
+                                            {selectedAudioTrack ? selectedAudioTrack.title : "Select a session"}
+                                          </div>
+                                          <div className="text-[9px] text-slate-500 uppercase tracking-tighter">
+                                            {selectedAudioTrack ? `Playing • ${selectedAudioTrack.duration}` : "Ready to play"}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Audio Progress Slider */}
+                                      <div className="px-1">
+                                        <div className="relative w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                          <div 
+                                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-violet-500 to-purple-600 transition-all duration-300"
+                                            style={{ width: `${selectedAudioTrack ? audioProgress || 35 : 0}%` }}
+                                          ></div>
+                                        </div>
+                                        <div className="flex justify-between mt-1">
+                                          <span className="text-[8px] font-mono text-slate-400">
+                                            {selectedAudioTrack ? "1:15" : "0:00"}
+                                          </span>
+                                          <span className="text-[8px] font-mono text-slate-400">
+                                            {selectedAudioTrack ? selectedAudioTrack.duration : "0:00"}
+                                          </span>
                                         </div>
                                       </div>
                                     </div>
