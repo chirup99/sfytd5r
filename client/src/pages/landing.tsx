@@ -187,11 +187,11 @@ export default function Landing() {
 
       // Now automatically sign the user in since we have the password and email from state
       console.log('🔐 Signing in after verification...');
-      const user = await cognitoSignIn(email, password);
+      const authUser = await cognitoSignIn(email, password);
       
-      localStorage.setItem('currentUserId', user.userId);
-      localStorage.setItem('currentUserEmail', user.email);
-      localStorage.setItem('currentUserName', user.name);
+      localStorage.setItem('currentUserId', authUser.userId);
+      localStorage.setItem('currentUserEmail', authUser.email);
+      localStorage.setItem('currentUserName', authUser.name);
 
       const token = await getCognitoToken();
       if (token) {
@@ -202,7 +202,7 @@ export default function Landing() {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ name: user.name, email: user.email }),
+            body: JSON.stringify({ name: authUser.name, email: authUser.email }),
           });
         } catch (err) {
           console.warn('Backend sync failed, continuing...', err);
