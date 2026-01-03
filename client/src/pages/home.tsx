@@ -18217,64 +18217,25 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                               </DialogTrigger>
                               <DialogContent className="max-w-[700px] p-0 overflow-hidden bg-white dark:bg-slate-900 border-none rounded-xl shadow-2xl">
                                 <div className="flex flex-col md:flex-row h-full min-h-[350px]">
-
-
-
-                                    <div className="relative w-full aspect-[1.6/1] perspective-1000"> 
-                                      <div className={`relative w-full h-full transition-all duration-700 preserve-3d ${selectedAudioTrack?.id.startsWith("m") ? "rotate-y-180" : selectedAudioTrack?.id.startsWith("p") ? "rotate-y-n180" : ""}`}> 
-                                        {/* Default Card (Front) */}
-                                        <div className="absolute inset-0 w-full h-full bg-black rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden backface-hidden"> 
-                                          <div className="flex justify-between items-start"> 
-                                            <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase">Session Inactive</div> 
-                                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ready</div> 
-                                          </div> 
-                                          <div className="relative h-20 w-full overflow-hidden"> 
-                                            <div className="absolute bottom-[-100%] left-[-10%] w-[120%] h-[200%] rounded-full bg-gradient-to-t from-slate-600/20 via-slate-500/5 to-transparent blur-xl"></div> 
-                                          </div> 
-                                          <div className="space-y-4"> 
-                                            <div className="flex items-center gap-2"> 
-                                              <div className="text-sm font-bold text-white/40 tracking-[0.2em]">**** **** **** ****</div> 
-                                            </div> 
-                                            <div className="flex justify-between items-end"> 
-                                              <div className="text-xs font-medium text-white/20 uppercase tracking-widest">Select a Session</div> 
-                                              <div className="text-[10px] font-mono text-white/20">--/--</div> 
-                                            </div> 
-                                          </div> 
-                                        </div> 
-
-                                        {/* Meditation Card (Back) */}
-                                        <div className="absolute inset-0 w-full h-full bg-violet-900 rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden rotate-y-180 backface-hidden"> 
-                                          <div className="flex justify-between items-start"> 
-                                            <div className="text-[10px] font-bold text-violet-300 uppercase tracking-widest">Meditation Session</div> 
-                                            <Play className="w-4 h-4 text-violet-300" /> 
-                                          </div> 
-                                          <div className="flex-1 flex flex-col justify-center items-center text-center"> 
-                                            <div className="text-lg font-bold text-white mb-1">{selectedAudioTrack?.title}</div> 
-                                            <div className="text-[10px] text-violet-200 uppercase tracking-tighter">Focus & Presence</div> 
-                                          </div> 
-                                          <div className="flex justify-between items-end"> 
-                                            <div className="text-[10px] font-mono text-violet-300/60">{selectedAudioTrack?.duration}</div> 
-                                            <Music2 className="w-4 h-4 text-violet-300/40" /> 
-                                          </div> 
-                                        </div> 
-
-                                        {/* Psychology Card (Back Alternate) */}
-                                        <div className="absolute inset-0 w-full h-full bg-blue-900 rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden rotate-y-n180 backface-hidden"> 
-                                          <div className="flex justify-between items-start"> 
-                                            <div className="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Psychology Insight</div> 
-                                            <Brain className="w-4 h-4 text-blue-300" /> 
-                                          </div> 
-                                          <div className="flex-1 flex flex-col justify-center items-center text-center"> 
-                                            <div className="text-lg font-bold text-white mb-1">{selectedAudioTrack?.title}</div> 
-                                            <div className="text-[10px] text-blue-200 uppercase tracking-tighter">Market Mindset</div> 
-                                          </div> 
-                                          <div className="flex justify-between items-end"> 
-                                            <div className="text-[10px] font-mono text-blue-300/60">{selectedAudioTrack?.duration}</div> 
-                                            <Music2 className="w-4 h-4 text-blue-300/40" /> 
-                                          </div> 
-                                        </div> 
-                                      </div> 
+                                  {/* Left Side: Card Display */}
+                                  <div className="w-full md:w-1/2 p-8 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden border-r border-slate-200 dark:border-slate-700">
+                                    <div className="absolute inset-0 opacity-10">
+                                      <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] rounded-full bg-gradient-to-br from-violet-500 via-transparent to-transparent"></div>
                                     </div>
+                                    <div className={`relative w-full aspect-[1.6/1] ${selectedAudioTrack?.id.startsWith("m") ? "bg-violet-900" : selectedAudioTrack?.id.startsWith("p") ? "bg-blue-900" : "bg-black"} rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden`}>
+                                      <div className="flex justify-between items-start">
+                                        <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase"></div>
+                                        <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider"></div>
+                                      </div>
+                                      <div className="relative h-20 w-full overflow-hidden">
+                                        <div className="absolute bottom-[-100%] left-[-10%] w-[120%] h-[200%] rounded-full bg-gradient-to-t from-blue-600/40 via-blue-500/10 to-transparent blur-xl"></div>
+                                      </div>
+                                      <div className="space-y-4">
+                                        <div className="flex items-center gap-2">
+                                          <div className="text-sm font-bold text-white tracking-[0.2em]"></div>
+                                        </div>
+                                        <div className="flex justify-between items-end">
+                                          <div className="text-xs font-medium text-white/80 uppercase tracking-widest"></div>
                                           <div className="text-[10px] font-mono text-white/60"></div>
                                         </div>
                                       </div>
