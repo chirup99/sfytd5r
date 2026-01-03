@@ -18222,7 +18222,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                     <div className="absolute inset-0 opacity-10">
                                       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] rounded-full bg-gradient-to-br from-violet-500 via-transparent to-transparent"></div>
                                     </div>
-                                    <div className="relative w-full aspect-[1.6/1] bg-black rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden">
+                                    <div className={`relative w-full aspect-[1.6/1] ${selectedAudioTrack?.id.startsWith("m") ? "bg-violet-900" : selectedAudioTrack?.id.startsWith("p") ? "bg-blue-900" : "bg-black"} rounded-2xl p-6 shadow-2xl flex flex-col justify-between border border-white/10 overflow-hidden`}>
                                       <div className="flex justify-between items-start">
                                         <div className="text-[10px] font-medium tracking-widest text-white/60 uppercase"></div>
                                         <div className="text-[10px] font-bold text-green-400 uppercase tracking-wider"></div>
