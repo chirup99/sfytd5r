@@ -1,7 +1,9 @@
 import YahooFinance from 'yahoo-finance2';
+import memoizee from 'memoizee';
 
 // Initialize Yahoo Finance v3 instance
-const yahooFinance = new YahooFinance();
+// Using suppressNotices to keep logs clean
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
 export interface MarketIndex {
   symbol: string;
@@ -67,70 +69,77 @@ async function fetchFromYahooFinance(
     return null;
 
   } catch (error) {
-    console.error(`❌ Error fetching ${regionName}: ${error instanceof Error ? error.message : String(error)}`);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error(`❌ Error fetching ${regionName}: ${errorMsg}`);
+    
+    // If we hit 429, we should propagate it up so we know to rely on cache
+    if (errorMsg.includes('429')) {
+      throw error;
+    }
     return null;
   }
 }
 
 /**
- * Fetches real market data from Yahoo Finance
+ * Core fetching logic with parallel requests
  */
-export async function getMarketIndices(): Promise<Record<string, MarketIndex>> {
-  console.log('🌍 Fetching real-time market data from Yahoo Finance...');
+async function performMarketIndicesFetch(): Promise<Record<string, MarketIndex>> {
+  console.log('🌍 Executing fresh parallel fetch from Yahoo Finance...');
   
   const results: Record<string, MarketIndex> = {};
+  const fetchPromises = Object.entries(YAHOO_FINANCE_INDICES).map(([regionName, symbol]) =>
+    fetchFromYahooFinance(regionName, symbol)
+  );
+
+  const fetchedData = await Promise.allSettled(fetchPromises);
   
-  // Try to fetch real data first
-  try {
-    const fetchPromises = Object.entries(YAHOO_FINANCE_INDICES).map(([regionName, symbol]) =>
-      fetchFromYahooFinance(regionName, symbol)
-    );
-
-    const fetchedData = await Promise.allSettled(fetchPromises);
-    
-    let successCount = 0;
-    fetchedData.forEach((result) => {
-      if (result.status === 'fulfilled' && result.value) {
-        results[result.value.regionName] = result.value;
-        successCount++;
+  let successCount = 0;
+  fetchedData.forEach((result) => {
+    if (result.status === 'fulfilled' && result.value) {
+      results[result.value.regionName] = result.value;
+      successCount++;
+    } else if (result.status === 'rejected') {
+      const reason = result.reason instanceof Error ? result.reason.message : String(result.reason);
+      console.error('❌ Promise rejected during fetch:', reason);
+      // If it's a 429, we fail the whole batch to avoid partial/bad data in cache
+      if (reason.includes('429')) {
+        throw result.reason;
       }
-    });
-
-    console.log(`📊 Successfully fetched ${successCount}/${Object.keys(YAHOO_FINANCE_INDICES).length} indices from Yahoo Finance`);
-    
-    if (successCount > 0) {
-      return results;
     }
-  } catch (error) {
-    console.error('❌ Error in getMarketIndices:', error);
-  }
-
-  // Fallback to mock data if real data fails (e.g. 429 Too Many Requests)
-  console.log('⚠️ Using mock data for market indices due to API failure');
-  Object.entries(YAHOO_FINANCE_INDICES).forEach(([regionName, symbol]) => {
-    // Generate some reasonable mock data
-    const mockChange = (Math.random() * 2 - 0.5); // -0.5% to +1.5%
-    results[regionName] = {
-      symbol,
-      regionName,
-      price: regionName === 'INDIA' ? 24500 : 5800,
-      change: mockChange * 100,
-      changePercent: mockChange,
-      isUp: mockChange >= 0,
-      marketTime: new Date().toISOString(),
-      isMarketOpen: true
-    };
   });
+
+  if (successCount === 0) {
+    throw new Error('Failed to fetch any market data from Yahoo Finance');
+  }
 
   return results;
 }
 
 /**
- * Gets market indices - fetches fresh data (NO FALLBACK)
+ * Memoized version of the fetch function to prevent 429 errors
+ * Cache for 5 minutes (300000ms)
+ * This is the proper way to handle rate limits: fetch once, share result
+ */
+const getMemoizedMarketIndices = memoizee(performMarketIndicesFetch, {
+  promise: true,
+  maxAge: 300000, // 5 minutes
+  preFetch: true
+});
+
+/**
+ * Gets market indices - using server-side caching to respect API limits
  */
 export async function getCachedMarketIndices(): Promise<Record<string, MarketIndex>> {
-  console.log('🌐 Fetching fresh market indices from Yahoo Finance...');
-  const data = await getMarketIndices();
-  console.log(`✅ Real market data retrieved successfully`);
-  return data;
+  try {
+    console.log('🌐 Requesting market indices (respecting rate limits via cache)...');
+    return await getMemoizedMarketIndices();
+  } catch (error) {
+    console.error('❌ Error in getCachedMarketIndices:', error);
+    
+    // If we have a massive failure, we should handle it gracefully
+    // But since the user asked to NOT use mock data, we will propagate the error
+    // and let the system handle it at the route level.
+    throw error;
+  }
 }
+
