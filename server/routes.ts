@@ -239,6 +239,30 @@ let candleProgressionManager: any = null;
 // REMOVED: Backup data service to reduce Firebase storage costs
 // const backupDataService = createBackupDataService();
 
+import memoizee from "memoizee";
+
+// Create cached versions of external data fetchers to prevent 429 errors
+const cachedGoogleFinanceData = memoizee(fetchGoogleFinanceData, { 
+  promise: true, 
+  maxAge: 30000, 
+  preFetch: 0.2
+});
+
+const cachedNSEOfficialData = memoizee(fetchNSEOfficialData, { 
+  promise: true, 
+  maxAge: 30000 
+});
+
+const cachedRSIValue = memoizee(calculateRSI, { 
+  promise: true, 
+  maxAge: 60000 
+});
+
+const cachedEMA50Value = memoizee(calculateEMA50, { 
+  promise: true, 
+  maxAge: 60000 
+});
+
 // Safe activity logging wrapper - silently fails if Firebase is unavailable
 async function safeAddActivityLog(log: { type: string; message: string }): Promise<void> {
   try {
@@ -309,8 +333,8 @@ async function getStockFundamentalData(symbol: string) {
       };
 
       // Add RSI and EMA 50 calculation for enhanced analysis
-      const rsiValue = await calculateRSI(symbol);
-      const ema50Value = await calculateEMA50(symbol);
+      const rsiValue = await cachedRSIValue(symbol);
+      const ema50Value = await cachedEMA50Value(symbol);
       enhancedData.technicalIndicators = {
         rsi: rsiValue,
         ema50: ema50Value
@@ -326,8 +350,8 @@ async function getStockFundamentalData(symbol: string) {
     // Fallback: Try other sources if primary sources fail
     console.log(`⚠️ Primary sources unavailable for ${symbol}, trying backup sources...`);
 
-    // Try Google Finance for comprehensive data
-    const googleFinanceData = await fetchGoogleFinanceData(symbol);
+    // Try Google Finance for comprehensive data (using cache)
+    const googleFinanceData = await cachedGoogleFinanceData(symbol);
     if (googleFinanceData) {
       console.log(`✅ Google Finance backup data fetched for ${symbol}`);
 
@@ -361,8 +385,8 @@ async function getStockFundamentalData(symbol: string) {
       }
 
       // Add technical indicators
-      const rsiValue = await calculateRSI(symbol);
-      const ema50Value = await calculateEMA50(symbol);
+      const rsiValue = await cachedRSIValue(symbol);
+      const ema50Value = await cachedEMA50Value(symbol);
       enhancedBackupData.technicalIndicators = {
         rsi: rsiValue,
         ema50: ema50Value
@@ -375,8 +399,8 @@ async function getStockFundamentalData(symbol: string) {
       return enhancedBackupData;
     }
 
-    // Try NSE official website for authentic Indian market data
-    const nseOfficialData = await fetchNSEOfficialData(symbol);
+    // Try NSE official website for authentic Indian market data (using cache)
+    const nseOfficialData = await cachedNSEOfficialData(symbol);
     if (nseOfficialData) {
       console.log(`✅ NSE Official backup data fetched for ${symbol}`);
 
@@ -410,8 +434,8 @@ async function getStockFundamentalData(symbol: string) {
       }
 
       // Add technical indicators
-      const rsiValue = await calculateRSI(symbol);
-      const ema50Value = await calculateEMA50(symbol);
+      const rsiValue = await cachedRSIValue(symbol);
+      const ema50Value = await cachedEMA50Value(symbol);
       enhancedNSEData.technicalIndicators = {
         rsi: rsiValue,
         ema50: ema50Value
@@ -455,8 +479,8 @@ async function getStockFundamentalData(symbol: string) {
       }
 
       // Add technical indicators
-      const rsiValue = await calculateRSI(symbol);
-      const ema50Value = await calculateEMA50(symbol);
+      const rsiValue = await cachedRSIValue(symbol);
+      const ema50Value = await cachedEMA50Value(symbol);
       enhancedMoneyControlData.technicalIndicators = {
         rsi: rsiValue,
         ema50: ema50Value
@@ -471,8 +495,8 @@ async function getStockFundamentalData(symbol: string) {
 
     if (curatedData) {
       // Add technical indicators to curated data
-      const rsiValue = await calculateRSI(symbol);
-      const ema50Value = await calculateEMA50(symbol);
+      const rsiValue = await cachedRSIValue(symbol);
+      const ema50Value = await cachedEMA50Value(symbol);
       curatedData.technicalIndicators = {
         rsi: rsiValue,
         ema50: ema50Value
