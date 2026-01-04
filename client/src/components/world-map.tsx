@@ -151,10 +151,15 @@ export function WorldMap() {
               <span className="text-gray-600 text-[10px] tracking-wide">
                 {region.name}
               </span>
-              {market && market.change !== undefined && (
+              {market && market.change !== undefined && market.change !== 0 && (
                 <span className="text-[9px]" style={{ color }}>
-                  {market.isUp ? "+" : ""}
+                  {market.change > 0 ? "+" : ""}
                   {market.change.toFixed(2)}%
+                </span>
+              )}
+              {(!market || market.change === 0) && (
+                <span className="text-[9px] text-gray-400">
+                  Offline
                 </span>
               )}
             </div>

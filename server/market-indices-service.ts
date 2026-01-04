@@ -12,24 +12,21 @@ export interface MarketIndex {
   isMarketOpen: boolean;
 }
 
-// MSN / Bing Finance Internal Security IDs for Global Indices
+// MSN Standard IDs for Global Indices (More stable than internal security IDs)
 const MSN_INDICES: Record<string, string> = {
-  'USA': 'a1vabm',        // S&P 500
-  'CANADA': 'a1xhfx',     // S&P/TSX Composite
-  'INDIA': 'a1w788',      // Nifty 50
-  'TOKYO': 'a1xe0v',      // Nikkei 225
-  'HONG KONG': 'a1x9on',  // Hang Seng
+  'USA': '126.1.!SPX',        // S&P 500
+  'CANADA': '134.1.!GSPTSE',   // S&P/TSX Composite
+  'INDIA': '155.1.!NSEI',      // Nifty 50
+  'TOKYO': '153.1.!N225',      // Nikkei 225
+  'HONG KONG': '151.1.!HSI',   // Hang Seng
 };
 
 async function fetchFromMSN(regionName: string, secId: string): Promise<MarketIndex | null> {
   try {
-    // Using MSN's public-facing endpoint for quotes
-    const url = `https://finance-services.msn.com/Market.svc/ChartDataV2?callback=cb&ocid=finance-utils-peregrine&cm=en-in&it=Stocks&ids=${secId}&type=point&wrap=false`;
+    // Standard MSN quote API with explicit market type for indices
+    const url = `https://assets.msn.com/service/finance/quotes/getquotes?apikey=0Q67sPRZSO02i9AFYvMra&ocid=finance-utils-peregrine&cm=en-in&it=Stocks&ids=${secId}`;
     
-    // Alternative reliable endpoint for real-time quotes
-    const quoteUrl = `https://assets.msn.com/service/finance/quotes/getquotes?apikey=0Q67sPRZSO02i9AFYvMra&activityId=1&ocid=finance-utils-peregrine&cm=en-in&it=Stocks&ids=${secId}`;
-
-    const response = await axios.get(quoteUrl, {
+    const response = await axios.get(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'application/json',
@@ -39,17 +36,51 @@ async function fetchFromMSN(regionName: string, secId: string): Promise<MarketIn
       timeout: 10000
     });
 
-    // Handle both array and object responses from MSN
-    const data = Array.isArray(response.data) ? response.data[0] : response.data?.responses?.[0]?.value?.[0];
+    // Extract data from standard MSN responses (usually response.data[0] or response.data.responses[0].value[0])
+    let data;
+    if (Array.isArray(response.data)) {
+      data = response.data[0];
+    } else if (response.data?.responses?.[0]?.value?.[0]) {
+      data = response.data.responses[0].value[0];
+    } else if (response.data?.value?.[0]) {
+      data = response.data.value[0];
+    }
     
-    if (!data || data.price === undefined) {
-      console.warn(`⚠️ MSN returned incomplete data for ${regionName} (${secId}) - status: ${response.status}`);
+    if (!data) {
+      console.warn(`⚠️ MSN returned empty response for ${regionName} (${secId})`);
       return null;
     }
 
-    const price = parseFloat(data.price) || 0;
-    const change = parseFloat(data.priceChange) || 0;
-    const changePercent = parseFloat(data.priceChangePercent) || 0;
+    const price = parseFloat(data.price || data.last || data.lastPrice || data.lp) || 0;
+    const change = parseFloat(data.priceChange || data.change || data.chg || data.c) || 0;
+    const changePercent = parseFloat(data.priceChangePercent || data.percentChange || data.pChg || data.cp) || 0;
+
+    if (price === 0 && changePercent === 0) {
+      console.warn(`⚠️ MSN returned zero values for ${regionName} (${secId})`);
+      return null;
+    }
+
+    return {
+      symbol: data.symbol || secId,
+      regionName,
+      price,
+      change,
+      changePercent,
+      isUp: change >= 0,
+      marketTime: data.lastUpdate || new Date().toISOString(),
+      isMarketOpen: data.marketState === 'Open' || data.marketState === 'Regular' || data.marketState === 'Trading',
+    };
+  } catch (error: any) {
+    console.error(`❌ MSN Error for ${regionName} (${secId}):`, error.message);
+    return null;
+  }
+}
+
+    if (price === 0 && changePercent === 0) {
+      console.warn(`⚠️ MSN returned zero values for ${regionName} (${secId}) - likely invalid parsing`);
+      console.log('DEBUG MSN Data keys:', Object.keys(data));
+      return null;
+    }
 
     return {
       symbol: data.symbol || secId,
@@ -80,32 +111,19 @@ const performFetch = async (): Promise<Record<string, MarketIndex>> => {
   
   await Promise.all(promises);
   
-  // High-quality Fallbacks - only used if MSN is completely unreachable
-  const fallbackBase: Record<string, any> = {
-    'USA': { price: 5850.25, changePercent: 0.21 },
-    'CANADA': { price: 25412.30, changePercent: -0.18 },
-    'INDIA': { price: 24320.15, changePercent: 0.65 },
-    'TOKYO': { price: 38210.45, changePercent: -0.55 },
-    'HONG KONG': { price: 19540.80, changePercent: 0.44 },
-  };
-
-  // Merge results with fallbacks ensuring no gaps
+  // No Fallbacks - strictly MSN per user request
+  // If MSN fails, the frontend will show zero/loading instead of "fake" data
   for (const region of Object.keys(MSN_INDICES)) {
     if (!results[region]) {
-      const fb = fallbackBase[region];
-      const jitter = (Math.random() - 0.5) * 0.02; // Tiny +/- 0.01% jitter
-      const finalPercent = fb.changePercent + jitter;
-      const finalPrice = fb.price * (1 + jitter / 100);
-      
       results[region] = {
         symbol: region,
         regionName: region,
-        price: finalPrice,
-        change: (finalPrice * finalPercent) / 100,
-        changePercent: finalPercent,
-        isUp: finalPercent >= 0,
+        price: 0,
+        change: 0,
+        changePercent: 0,
+        isUp: true,
         marketTime: new Date().toISOString(),
-        isMarketOpen: true
+        isMarketOpen: false
       };
     }
   }
