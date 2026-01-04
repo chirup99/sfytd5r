@@ -5251,31 +5251,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Market Indices Route - Real-time stock market data
+  // Market Indices Route - Real-time stock market data from MSN
   app.get('/api/market-indices', async (req, res) => {
     try {
-      console.log('🔍 Market indices API called');
+      console.log('🔍 Market indices API called (MSN-only)');
       const { getMarketIndices } = await import('./market-indices-service');
-      console.log('✅ Market indices service imported successfully');
       const marketData = await getMarketIndices();
-      console.log('📊 Market data received:', Object.keys(marketData).length, 'regions');
-
+      
       // Transform to match frontend format
       const response: Record<string, { isUp: boolean; change: number }> = {};
 
       Object.entries(marketData).forEach(([regionName, data]) => {
-        console.log(`   ${regionName}: ${data.changePercent}% (${data.isUp ? 'UP' : 'DOWN'})`);
         response[regionName] = {
           isUp: data.isUp,
           change: data.changePercent
         };
       });
 
-      console.log('✅ Sending response to client');
       res.json(response);
     } catch (error) {
       console.error('❌ Error fetching market indices:', error);
-      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
       res.status(500).json({ message: 'Failed to fetch market data' });
     }
   });

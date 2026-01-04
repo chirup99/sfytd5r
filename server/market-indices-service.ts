@@ -80,7 +80,7 @@ const performFetch = async (): Promise<Record<string, MarketIndex>> => {
   
   await Promise.all(promises);
   
-  // High-quality Fallbacks for production launch stability
+  // High-quality Fallbacks - only used if MSN is completely unreachable
   const fallbackBase: Record<string, any> = {
     'USA': { price: 5850.25, changePercent: 0.21 },
     'CANADA': { price: 25412.30, changePercent: -0.18 },
