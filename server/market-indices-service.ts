@@ -36,7 +36,7 @@ async function fetchFromYahooFinance(
     console.log(`📡 Fetching ${regionName} (${symbol}) from Yahoo Finance...`);
     
     // Use yahoo-finance2 v3 instance
-    const quote = await yahooFinance.quote(symbol);
+    const quote = await yahooFinance.quote(symbol, { validateResult: false });
     
     if (!quote) {
       console.warn(`⚠️ No quote data found for ${regionName}`);
@@ -101,13 +101,10 @@ async function performMarketIndicesFetch(): Promise<Record<string, MarketIndex>>
     } else if (result.status === 'rejected') {
       const reason = result.reason instanceof Error ? result.reason.message : String(result.reason);
       console.error('❌ Promise rejected during fetch:', reason);
-      // If it's a 429, we fail the whole batch to avoid partial/bad data in cache
-      if (reason.includes('429')) {
-        throw result.reason;
-      }
     }
   });
 
+  // If we couldn't fetch anything, we fail so memoizee doesn't cache an empty result
   if (successCount === 0) {
     throw new Error('Failed to fetch any market data from Yahoo Finance');
   }
