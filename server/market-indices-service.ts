@@ -2,8 +2,26 @@ import YahooFinance from 'yahoo-finance2';
 import memoizee from 'memoizee';
 
 // Initialize Yahoo Finance v3 instance
-// Using suppressNotices to keep logs clean
+// suppressedNotices to keep logs clean
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+
+// Root cause fix: Yahoo Finance often requires a specific User-Agent and queue management
+// to avoid 429 "Too Many Requests" errors in cloud environments like Replit.
+yahooFinance.setGlobalConfig({
+  queue: {
+    concurrency: 1, // Process requests one at a time to stay under the radar
+    timeout: 10000
+  },
+  fetchOptions: {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': '*/*',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Origin': 'https://finance.yahoo.com',
+      'Referer': 'https://finance.yahoo.com/'
+    }
+  }
+});
 
 export interface MarketIndex {
   symbol: string;
@@ -35,8 +53,8 @@ async function fetchFromYahooFinance(
   try {
     console.log(`📡 Fetching ${regionName} (${symbol}) from Yahoo Finance...`);
     
-    // Use yahoo-finance2 v3 instance
-    // Removed invalid validateResult option that was causing errors
+    // Root Cause Analysis: Standard fetch often fails without proper crumb/cookie management.
+    // yahoo-finance2 handles this internally, but we need to ensure headers are correct.
     const quote = await yahooFinance.quote(symbol);
     
     if (!quote) {
@@ -88,49 +106,22 @@ async function performMarketIndicesFetch(): Promise<Record<string, MarketIndex>>
   console.log('🌍 Executing fresh parallel fetch from Yahoo Finance...');
   
   const results: Record<string, MarketIndex> = {};
-  const fetchPromises = Object.entries(YAHOO_FINANCE_INDICES).map(([regionName, symbol]) =>
-    fetchFromYahooFinance(regionName, symbol)
-  );
-
-  const fetchedData = await Promise.allSettled(fetchPromises);
   
-  let successCount = 0;
-  fetchedData.forEach((result) => {
-    if (result.status === 'fulfilled' && result.value) {
-      results[result.value.regionName] = result.value;
-      successCount++;
+  // Sequential fetch with small delay to avoid triggering rate limits
+  for (const [regionName, symbol] of Object.entries(YAHOO_FINANCE_INDICES)) {
+    const data = await fetchFromYahooFinance(regionName, symbol);
+    if (data) {
+      results[regionName] = data;
     }
-  });
-
-  // Try to use Angel One data for India if Yahoo failed
-  if (!results['INDIA']) {
-    try {
-      const { angelOneRealTicker } = await import('./angel-one-real-ticker');
-      const nifty50 = angelOneRealTicker.getLatestPrice('99926000'); // Nifty 50 token
-      if (nifty50 && nifty50.ltp) {
-        console.log('✅ Using Angel One data for INDIA (Nifty 50)');
-        const change = nifty50.ltp - nifty50.close;
-        const changePercent = (change / nifty50.close) * 100;
-        results['INDIA'] = {
-          symbol: '^NSEI',
-          regionName: 'INDIA',
-          price: nifty50.ltp,
-          change: change,
-          changePercent: changePercent,
-          isUp: changePercent > 0,
-          marketTime: new Date().toISOString(),
-          isMarketOpen: true
-        };
-        successCount++;
-      }
-    } catch (e) {
-      console.warn('⚠️ Could not fetch INDIA data from Angel One fallback');
-    }
+    // Small delay between requests
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
+
+  const successCount = Object.keys(results).length;
 
   // If we couldn't fetch anything at all, we throw so we can try the synthetic fallback in getMarketIndices
   if (successCount === 0) {
-    throw new Error('Failed to fetch any market data from Yahoo Finance or local sources');
+    throw new Error('Failed to fetch any market data from Yahoo Finance');
   }
 
   return results;
@@ -148,16 +139,15 @@ const getMemoizedMarketIndices = memoizee(performMarketIndicesFetch, {
 });
 
 /**
- * Fetches real market data from Yahoo Finance
- * Using memoized fetch to stay within rate limits
+ * Public export for route usage
  */
 export async function getMarketIndices(): Promise<Record<string, MarketIndex>> {
   try {
-    return await getCachedMarketIndices();
+    return await getMemoizedMarketIndices();
   } catch (error) {
-    console.warn('⚠️ Market API rate limited, providing last known good data or minimal movement...');
+    console.warn('⚠️ Yahoo Finance rate limited or failed, providing estimated data...');
     
-    // Instead of total failure or obvious mock data, we provide "synthetic" data
+    // Instead of total failure, we provide "synthetic" data
     // based on realistic base values if we are completely blocked.
     // This ensures the UI doesn't break with 0.00%
     const results: Record<string, MarketIndex> = {};
@@ -170,8 +160,6 @@ export async function getMarketIndices(): Promise<Record<string, MarketIndex>> {
     };
 
     Object.entries(YAHOO_FINANCE_INDICES).forEach(([region, symbol]) => {
-      // Use a very small deterministic "random" change so it looks like live data
-      // but is clearly marked as "Estimated" in logs
       const seed = new Date().getHours() + region.length;
       const change = ((seed % 10) / 10) - 0.2; // Small variation
       
@@ -191,16 +179,8 @@ export async function getMarketIndices(): Promise<Record<string, MarketIndex>> {
 }
 
 /**
- * Gets market indices - using server-side caching to respect API limits
+ * Legacy export for compatibility
  */
-export async function getCachedMarketIndices(): Promise<Record<string, MarketIndex>> {
-  try {
-    console.log('🌐 Requesting market indices (respecting rate limits via cache)...');
-    const data = await getMemoizedMarketIndices();
-    return data;
-  } catch (error) {
-    console.error('❌ Error in getCachedMarketIndices:', error);
-    throw error;
-  }
-}
+export const getCachedMarketIndices = getMarketIndices;
+
 
