@@ -72,7 +72,7 @@ const getRegionColor = (
 };
 
 export function WorldMap() {
-  const { marketData, loading } = useMarketData(900000); // Refresh every 15 minutes (900000ms)
+  const { marketData, loading } = useMarketData(1800000); // Increased to 30px (1800000ms) for better stability
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
   const [isMobile, setIsMobile] = useState(false);

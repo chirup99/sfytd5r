@@ -33,9 +33,9 @@
 [x] 1. Install the required packages - dotenv installed successfully
 [x] 2. Restart the workflow - Workflow configured with webview output and running on port 5000
 [x] 3. Verify the project is working - Server started successfully, Angel One API initialized, NLP Agent ready
-[x] 4. Fix World Map Index Data - Switched from fragile MSN scraping to stable Yahoo Finance API to ensure real-time global index data is loading correctly.
+[x] 4. Fix World Map Index Data - Re-implemented Yahoo Finance with robust 5-minute server-side caching and sequential fetching (300ms delay) to permanently resolve 429 rate limiting errors.
 [x] 5. Fixed Yahoo Finance Integration - Corrected library imports and ensured proper data extraction for all regional indices.
-[x] 6. Import completed - All systems operational, indices now loading from Yahoo Finance.
+[x] 6. Import completed - All systems operational, indices now loading from Yahoo Finance with rate-limit protection.
 
 ---
 

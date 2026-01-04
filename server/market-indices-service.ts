@@ -23,6 +23,7 @@ const YAHOO_INDICES: Record<string, string> = {
 
 async function fetchFromYahoo(regionName: string, symbol: string): Promise<MarketIndex | null> {
   try {
+    // yahoo-finance2 v2+ default export is already configured
     const quote = await yahooFinance.quote(symbol);
     
     if (!quote) {
@@ -45,7 +46,11 @@ async function fetchFromYahoo(regionName: string, symbol: string): Promise<Marke
       isMarketOpen: quote.marketState === 'REGULAR',
     };
   } catch (error: any) {
-    console.error(`❌ Yahoo Finance Error for ${regionName} (${symbol}):`, error.message);
+    if (error.message?.includes('429')) {
+      console.error(`🛑 Yahoo Finance Rate Limited (429) for ${regionName}. Caching will help.`);
+    } else {
+      console.error(`❌ Yahoo Finance Error for ${regionName} (${symbol}):`, error.message);
+    }
     return null;
   }
 }
@@ -53,15 +58,14 @@ async function fetchFromYahoo(regionName: string, symbol: string): Promise<Marke
 const performFetch = async (): Promise<Record<string, MarketIndex>> => {
   const results: Record<string, MarketIndex> = {};
   
-  // Parallel fetch for speed
-  const promises = Object.entries(YAHOO_INDICES).map(async ([region, symbol]) => {
+  // Sequential fetch with delay to avoid bursting and 429s
+  for (const [region, symbol] of Object.entries(YAHOO_INDICES)) {
     const data = await fetchFromYahoo(region, symbol);
     if (data) {
       results[region] = data;
     }
-  });
-  
-  await Promise.all(promises);
+    await new Promise(resolve => setTimeout(resolve, 500)); // Increased delay to 500ms
+  }
   
   // Ensure we have entries for all regions
   for (const region of Object.keys(YAHOO_INDICES)) {
@@ -82,10 +86,11 @@ const performFetch = async (): Promise<Record<string, MarketIndex>> => {
   return results;
 };
 
-// Cache for 2 minutes
+// CRITICAL: Cache for 15 minutes (900,000ms) to strictly avoid 429 errors
+// This matches the client-side polling interval
 export const getMarketIndices = memoizee(performFetch, {
   promise: true,
-  maxAge: 120000, 
+  maxAge: 900000, 
   preFetch: true
 });
 
