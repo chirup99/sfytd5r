@@ -5,23 +5,29 @@ import memoizee from 'memoizee';
 // suppressedNotices to keep logs clean
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
-// Root cause fix: Yahoo Finance often requires a specific User-Agent and queue management
-// to avoid 429 "Too Many Requests" errors in cloud environments like Replit.
-yahooFinance.setGlobalConfig({
-  queue: {
-    concurrency: 1, // Process requests one at a time to stay under the radar
-    timeout: 10000
-  },
-  fetchOptions: {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': '*/*',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Origin': 'https://finance.yahoo.com',
-      'Referer': 'https://finance.yahoo.com/'
-    }
+// Fix: Use the correct configuration method for yahoo-finance2 v3
+// If setGlobalConfig is not a function, we'll configure per-request or use defaults
+try {
+  if (typeof (yahooFinance as any).setGlobalConfig === 'function') {
+    (yahooFinance as any).setGlobalConfig({
+      queue: {
+        concurrency: 1,
+        timeout: 10000
+      },
+      fetchOptions: {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': '*/*',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Origin': 'https://finance.yahoo.com',
+          'Referer': 'https://finance.yahoo.com/'
+        }
+      }
+    });
   }
-});
+} catch (e) {
+  console.warn('⚠️ Could not set global config for Yahoo Finance, using defaults');
+}
 
 export interface MarketIndex {
   symbol: string;
