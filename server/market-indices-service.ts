@@ -93,6 +93,7 @@ async function fetchFromYahooFinance(
     
     // If we hit 429, we should propagate it up so we know to rely on cache
     if (errorMsg.includes('429')) {
+      console.error(`🚨 Yahoo Finance Rate Limit (429) hit for ${regionName}. Cache will be served.`);
       throw error;
     }
     return null;
