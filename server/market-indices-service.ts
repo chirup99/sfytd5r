@@ -23,24 +23,27 @@ const MSN_INDICES: Record<string, string> = {
 
 async function fetchFromMSN(regionName: string, secId: string): Promise<MarketIndex | null> {
   try {
-    // MSN Finance internal data API
-    // Using en-in market context which is reliable for global indices
-    const url = `https://assets.msn.com/service/finance/quotes/getquotes?apikey=0Q67sPRZSO02i9AFYvMra&activityId=1&ocid=finance-utils-peregrine&cm=en-in&it=Stocks&ids=${secId}`;
+    // Using MSN's public-facing endpoint for quotes
+    const url = `https://finance-services.msn.com/Market.svc/ChartDataV2?callback=cb&ocid=finance-utils-peregrine&cm=en-in&it=Stocks&ids=${secId}&type=point&wrap=false`;
     
-    const response = await axios.get(url, {
+    // Alternative reliable endpoint for real-time quotes
+    const quoteUrl = `https://assets.msn.com/service/finance/quotes/getquotes?apikey=0Q67sPRZSO02i9AFYvMra&activityId=1&ocid=finance-utils-peregrine&cm=en-in&it=Stocks&ids=${secId}`;
+
+    const response = await axios.get(quoteUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'application/json',
-        'Referer': 'https://www.msn.com/',
+        'Referer': 'https://www.msn.com/en-in/finance/markets/indices',
         'Origin': 'https://www.msn.com'
       },
       timeout: 10000
     });
 
-    const data = response.data?.[0];
+    // Handle both array and object responses from MSN
+    const data = Array.isArray(response.data) ? response.data[0] : response.data?.responses?.[0]?.value?.[0];
     
     if (!data || data.price === undefined) {
-      console.warn(`⚠️ MSN returned incomplete data for ${regionName} (${secId})`);
+      console.warn(`⚠️ MSN returned incomplete data for ${regionName} (${secId}) - status: ${response.status}`);
       return null;
     }
 
