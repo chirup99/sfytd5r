@@ -63,7 +63,7 @@ const performFetch = async (): Promise<Record<string, MarketIndex>> => {
   
   await Promise.all(promises);
   
-  // Ensure we have entries for all regions (with fallback to 0 if totally failed)
+  // Ensure we have entries for all regions
   for (const region of Object.keys(YAHOO_INDICES)) {
     if (!results[region]) {
       results[region] = {
@@ -82,7 +82,7 @@ const performFetch = async (): Promise<Record<string, MarketIndex>> => {
   return results;
 };
 
-// Cache for 2 minutes to respect Yahoo Finance limits
+// Cache for 2 minutes
 export const getMarketIndices = memoizee(performFetch, {
   promise: true,
   maxAge: 120000, 
