@@ -5231,9 +5231,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/market-indices', async (req, res) => {
     try {
       console.log('🔍 Market indices API called');
-      const { getCachedMarketIndices } = await import('./market-indices-service');
+      const { getMarketIndices } = await import('./market-indices-service');
       console.log('✅ Market indices service imported successfully');
-      const marketData = await getCachedMarketIndices();
+      const marketData = await getMarketIndices();
       console.log('📊 Market data received:', Object.keys(marketData).length, 'regions');
 
       // Transform to match frontend format
