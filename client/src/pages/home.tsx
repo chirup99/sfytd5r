@@ -18439,12 +18439,12 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                           </div>
                           <div className="flex items-center gap-1">
                             <span className="text-[10px] text-gray-600 dark:text-gray-400">
-                              {isDemoMode ? "Preview" : "Personal"}
+                              {isDemoMode ? "Demo" : "Personal"}
                             </span>
                             <Switch
                               checked={isDemoMode}
                               onCheckedChange={(checked) => {
-                                console.log(`🔄 Demo mode toggle: ${checked ? 'ON (Preview)' : 'OFF (Personal)'}`);
+                                console.log(`🔄 Demo mode toggle: ${checked ? 'ON (Demo)' : 'OFF (Personal)'}`);
                                 setHasManuallyToggledMode(true);
                                 localStorage.setItem("hasManuallyToggledMode", "true");
                                 setIsDemoMode(checked);
@@ -18454,7 +18454,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                                 setTradingImages([]);
                                 setTradingDataByDate({});
                                 setPersonalHeatmapRevision(prev => prev + 1);
-                                console.log(`✅ Switched to ${checked ? 'Preview' : 'Personal'} mode - CLEARED cache, heatmap fetching fresh AWS data...`);
+                                console.log(`✅ Switched to ${checked ? 'Demo' : 'Personal'} mode - CLEARED cache, heatmap fetching fresh AWS data...`);
                               }}
                               data-testid="switch-demo-mode"
                               className="scale-75"
@@ -20974,7 +20974,7 @@ const [zerodhaTradesDialog, setZerodhaTradesDialog] = useState(false);
                   ) : (
                     <>
                       <div className="text-xs font-medium text-muted-foreground mb-2">
-                        Live Preview - How Your First Trade Will Import:
+                        Live Demo - How Your First Trade Will Import:
                       </div>
                       <div className="bg-background rounded border overflow-hidden">
                         <table className="w-full font-mono text-xs">
