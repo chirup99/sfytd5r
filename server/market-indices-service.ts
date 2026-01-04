@@ -36,7 +36,7 @@ async function fetchFromMSN(regionName: string, secId: string): Promise<MarketIn
       timeout: 10000
     });
 
-    // Extract data from standard MSN responses (usually response.data[0] or response.data.responses[0].value[0])
+    // Extract data from standard MSN responses
     let data;
     if (Array.isArray(response.data)) {
       data = response.data[0];
@@ -76,28 +76,6 @@ async function fetchFromMSN(regionName: string, secId: string): Promise<MarketIn
   }
 }
 
-    if (price === 0 && changePercent === 0) {
-      console.warn(`⚠️ MSN returned zero values for ${regionName} (${secId}) - likely invalid parsing`);
-      console.log('DEBUG MSN Data keys:', Object.keys(data));
-      return null;
-    }
-
-    return {
-      symbol: data.symbol || secId,
-      regionName,
-      price,
-      change,
-      changePercent,
-      isUp: change >= 0,
-      marketTime: data.lastUpdate || new Date().toISOString(),
-      isMarketOpen: data.marketState === 'Open' || data.marketState === 'Regular' || data.marketState === 'Trading',
-    };
-  } catch (error: any) {
-    console.error(`❌ MSN Error for ${regionName} (${secId}):`, error.message);
-    return null;
-  }
-}
-
 const performFetch = async (): Promise<Record<string, MarketIndex>> => {
   const results: Record<string, MarketIndex> = {};
   
@@ -111,8 +89,7 @@ const performFetch = async (): Promise<Record<string, MarketIndex>> => {
   
   await Promise.all(promises);
   
-  // No Fallbacks - strictly MSN per user request
-  // If MSN fails, the frontend will show zero/loading instead of "fake" data
+  // Ensure we have entries for all regions
   for (const region of Object.keys(MSN_INDICES)) {
     if (!results[region]) {
       results[region] = {
