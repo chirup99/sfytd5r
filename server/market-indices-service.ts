@@ -55,19 +55,20 @@ async function fetchFromYahoo(regionName: string, symbol: string): Promise<Marke
   }
 }
 
+// CRITICAL: Cache for 1 hour (3,600,000ms) to strictly avoid 429 errors
+// Sequential fetch with generous 2-second delay to avoid bursting
 const performFetch = async (): Promise<Record<string, MarketIndex>> => {
   const results: Record<string, MarketIndex> = {};
   
-  // Sequential fetch with delay to avoid bursting and 429s
   for (const [region, symbol] of Object.entries(YAHOO_INDICES)) {
     const data = await fetchFromYahoo(region, symbol);
     if (data) {
       results[region] = data;
     }
-    await new Promise(resolve => setTimeout(resolve, 500)); // Increased delay to 500ms
+    // Very conservative delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
   }
   
-  // Ensure we have entries for all regions
   for (const region of Object.keys(YAHOO_INDICES)) {
     if (!results[region]) {
       results[region] = {
@@ -86,11 +87,11 @@ const performFetch = async (): Promise<Record<string, MarketIndex>> => {
   return results;
 };
 
-// CRITICAL: Cache for 15 minutes (900,000ms) to strictly avoid 429 errors
-// This matches the client-side polling interval
+// CRITICAL: Cache for 1 hour (3,600,000ms) to strictly avoid 429 errors
+// This is extremely safe and will prevent rate limiting.
 export const getMarketIndices = memoizee(performFetch, {
   promise: true,
-  maxAge: 900000, 
+  maxAge: 3600000, 
   preFetch: true
 });
 
